@@ -13,6 +13,11 @@
 // => need to improve the api
 static const size_t WORD_SIZE_IN_BYTES = 4;
 
+// The default maximum for the number of words in a register.
+// This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
+// memory is requested.
+static const size_t DEFAULT_MAX_WORDS = 0x10000;
+
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
   : QMainWindow(parent, flags), _currentDeviceListItem(NULL)
 {
@@ -38,10 +43,10 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.writeButton, SIGNAL(clicked()),
 	  this, SLOT(write()));
 
-  connect(_hardMonForm.actionAboutQtHardMon, SIGNAL(triggered()),
+  connect(_hardMonForm.aboutQtHardMonAction, SIGNAL(triggered()),
 	  this, SLOT(aboutQtHardMon()));
 
-  connect(_hardMonForm.actionAboutQt, SIGNAL(triggered()),
+  connect(_hardMonForm.aboutQtAction, SIGNAL(triggered()),
 	  this, SLOT(aboutQt()));
 
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
@@ -50,10 +55,13 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
 
   // The following widgets are diabled because they are not implemented yet
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
-  _hardMonForm.readAlwaysCheckBox->setEnabled(false);
+  _hardMonForm.continuousReadCheckBox->setEnabled(false);
+  _hardMonForm.readAfterWriteCheckBox->setEnabled(false);
   _hardMonForm.plotButton->setEnabled(false);
-  _hardMonForm.actionSave->setEnabled(false);
-  _hardMonForm.actionRead->setEnabled(false);
+  _hardMonForm.writeToFileButton->setEnabled(false);
+  _hardMonForm.readFromFileButton->setEnabled(false);
+  _hardMonForm.readConfigAction->setEnabled(false);
+  _hardMonForm.writeConfigAction->setEnabled(false);
 }
 
 QtHardMon::~QtHardMon()
@@ -72,7 +80,7 @@ void  QtHardMon::loadBoards()
   QString dmapFileName = QFileDialog::getOpenFileName(this,
 						      tr("Open DeviceMap file"), 
 						      ".", 
-						      tr("DeviceMap files (*.dmap"));
+						      tr("DeviceMap files (*.dmap) (*.dmap);; All files (*) (*)"));
   try{
     filesParser.parse_file(dmapFileName.toStdString());
   }
@@ -99,7 +107,9 @@ void  QtHardMon::loadBoards()
 							       _hardMonForm.deviceListWidget) );
   }
 
-  _hardMonForm.deviceListWidget->setCurrentRow(0);
+  // on user request: do not automatically load the first device. This might be not accessible and
+  // immediately gives an error message.
+  //_hardMonForm.deviceListWidget->setCurrentRow(0);
 }
 
 void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */)
@@ -213,6 +223,10 @@ void QtHardMon::read()
     return;
   }
 
+  // In order to fill all following rows with -1 in case of a read error, but not try to do any
+  // further read attempts, we introduce a status variable.
+  bool readError=false;
+
   for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
     int registerContent = -1;
@@ -220,7 +234,7 @@ void QtHardMon::read()
     // Try reading from the file, but only when it's open.
     // This avoids provoking exceptions in the "normal" data flow if a device could not be opened.
     // One might want to browse the registers for theis size on an unopened device, e.g.
-    if ( _mtcaDevice.isOpen() )
+    if ( _mtcaDevice.isOpen() && !readError)
     {
       // try to read from the device. If this fails this really is a problem.
       try
@@ -239,6 +253,8 @@ void QtHardMon::read()
 	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
 	    messageBox.exec();
 
+	    // Turn on the read error flag. No further read attempts on this register.
+	    readError=true;
       }
     }
     

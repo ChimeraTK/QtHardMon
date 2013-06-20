@@ -33,8 +33,9 @@ class QtHardMon: public QMainWindow
 
  private:
   
-  Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets 
-  devPCIE _mtcaDevice; //< The instance of the device which is being accessed
+  Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.
+  devPCIE _mtcaDevice; //< The instance of the device which is being accessed.
+  size_t _maxWords; //< The maximum number of words displayed in the values list.
 
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */

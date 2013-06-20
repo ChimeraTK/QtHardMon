@@ -246,6 +246,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
+           </property>
            <property name="rowCount">
             <number>4</number>
            </property>
@@ -254,6 +257,9 @@
            </property>
            <attribute name="horizontalHeaderVisible">
             <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>20</number>
            </attribute>
            <attribute name="verticalHeaderHighlightSections">
             <bool>false</bool>
@@ -279,9 +285,16 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_8">
          <item>
-          <widget class="QCheckBox" name="readAlwaysCheckBox">
+          <widget class="QCheckBox" name="continuousReadCheckBox">
            <property name="text">
-            <string>Read always</string>
+            <string>Continuous read (250 ms)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="readAfterWriteCheckBox">
+           <property name="text">
+            <string>Read after write</string>
            </property>
           </widget>
          </item>
@@ -319,6 +332,20 @@
           <widget class="QPushButton" name="plotButton">
            <property name="text">
             <string>Plot</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="writeToFileButton">
+           <property name="text">
+            <string>Write to file</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="readFromFileButton">
+           <property name="text">
+            <string>Read from file</string>
            </property>
           </widget>
          </item>
@@ -361,41 +388,48 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="fileMenu">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionRead"/>
-    <addaction name="actionSave"/>
+    <addaction name="readConfigAction"/>
+    <addaction name="writeConfigAction"/>
    </widget>
-   <widget class="QMenu" name="menuPlugins">
+   <widget class="QMenu" name="pluginsMenu">
     <property name="title">
      <string>Plugins</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuHelp">
+   <widget class="QMenu" name="helpMenu">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAboutQtHardMon"/>
-    <addaction name="actionAboutQt"/>
+    <addaction name="aboutQtHardMonAction"/>
+    <addaction name="aboutQtAction"/>
    </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuPlugins"/>
-   <addaction name="menuHelp"/>
+   <widget class="QMenu" name="settingsMenu">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="preferencesAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="pluginsMenu"/>
+   <addaction name="settingsMenu"/>
+   <addaction name="helpMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionRead">
+  <action name="readConfigAction">
    <property name="text">
-    <string>Read</string>
+    <string>Read config</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="writeConfigAction">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>Write config</string>
    </property>
   </action>
   <action name="actionExport">
@@ -403,14 +437,19 @@
     <string>Export</string>
    </property>
   </action>
-  <action name="actionAboutQtHardMon">
+  <action name="aboutQtHardMonAction">
    <property name="text">
     <string>About QtHardMon</string>
    </property>
   </action>
-  <action name="actionAboutQt">
+  <action name="aboutQtAction">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="preferencesAction">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>
