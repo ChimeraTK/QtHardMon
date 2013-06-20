@@ -19,12 +19,12 @@ class QtHardMon: public QMainWindow
  private slots:
   /*  void readFromFile();
   void saveToFile();
-  void exportToFile();
-  void read();//< Read register from device.
-  void write();//< Read register to device.
   void plot();//< Plot the register content in a separate window.
   */
+  void read();//< Read register from device.
+  void write();//< Read register to device.
   void loadBoards();
+
   void deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */);
   void registerSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousRegisterItem */);
 

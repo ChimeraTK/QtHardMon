@@ -8,6 +8,10 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
 
+// FIXME: how to solve the problem of the word size? Should come from pci express. 
+// => need to improve the api
+static const size_t WORD_SIZE_IN_BYTES = 4;
+
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
   : QMainWindow(parent, flags), _currentDeviceListItem(NULL)
 {
@@ -27,8 +31,15 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
 					       
+  connect(_hardMonForm.readButton, SIGNAL(clicked()),
+	  this, SLOT(read()));
+
+  connect(_hardMonForm.writeButton, SIGNAL(clicked()),
+	  this, SLOT(write()));
 
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
+  _hardMonForm.readAlwaysCheckBox->setEnabled(false);
+  _hardMonForm.plotButton->setEnabled(false);
 }
 
 QtHardMon::~QtHardMon()
@@ -171,7 +182,15 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   // remember that this register has been selected
   _currentDeviceListItem->setLastSelectedRegisterRow(  _hardMonForm.registerListWidget->currentRow() );
 
- _hardMonForm.valuesTableWidget->setRowCount( registerListItem->getRegisterMapElement().reg_elem_nr );
+  _hardMonForm.valuesTableWidget->setRowCount( registerListItem->getRegisterMapElement().reg_elem_nr );
+  read();
+}
+
+void QtHardMon::read()
+{
+  RegisterListItem * registerListItem =
+    static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
+
   for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
     int registerContent = -1;
@@ -184,7 +203,7 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
       // try to read from the device. If this fails this really is a problem.
       try
       {
-	_mtcaDevice.readReg( registerListItem->getRegisterMapElement().reg_address,
+	_mtcaDevice.readReg( registerListItem->getRegisterMapElement().reg_address + row*WORD_SIZE_IN_BYTES,
 			     &registerContent,
 			     registerListItem->getRegisterMapElement().reg_bar );
       }
@@ -192,7 +211,7 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
       {
 	// the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
 	    QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
-			   QString("Error reading device ")+ 
+			   QString("Error reading from device ")+ 
 			   _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
 			   QMessageBox::Ok, this);
 	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
@@ -204,10 +223,48 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
     // int and a proper editor (spin box) is used when editing in the GUI.
     QTableWidgetItem * dataItem =  new QTableWidgetItem();
-    dataItem->setData( 0, QVariant( registerContent ) );
-    //_hardMonForm.valuesTableWidget-> setItem(row, 0, new QTableWidgetItem(tr("%1").arg(-1)));
-    _hardMonForm.valuesTableWidget-> setItem(row, 0, dataItem );
+    dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
+    _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
   }
+ 
+}
+
+void QtHardMon::write()
+{
+  RegisterListItem * registerListItem =
+    static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
+
+  for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
+  {
+    int registerContent =  _hardMonForm.valuesTableWidget->item(row,0)->data(0 /*default role*/).toInt();
+
+    // Try writing to the file only when it's open.
+    // This should only be callable if the device could be opened, but zou never know.
+    if ( _mtcaDevice.isOpen() )
+    {
+      // try to write to the device. If this fails this really is a problem.
+      try
+      {
+	_mtcaDevice.writeReg( registerListItem->getRegisterMapElement().reg_address + row*WORD_SIZE_IN_BYTES,
+			      registerContent,
+			      registerListItem->getRegisterMapElement().reg_bar );
+      }
+      catch(exDevPCIE & e)
+      {
+	// the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
+	    QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
+			   QString("Error writing to device ")+ 
+			   _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
+			   QMessageBox::Ok, this);
+	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+	    messageBox.exec();
+
+      }//catch
+
+    }//if isOpen
+
+  }// for row
+ 
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
