@@ -174,6 +174,7 @@ class QtHardMon: public QMainWindow
   // with the ifdef
 #if(USE_QWT)
   QwtPlot *_qwtPlot; //< The instance of the qwt plot
+  QDockWidget * _plotDock; //< The docable plot window
 #endif
 
 };

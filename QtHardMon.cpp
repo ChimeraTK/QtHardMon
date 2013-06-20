@@ -8,6 +8,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QDockWidget>
 
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
@@ -17,6 +18,7 @@
 // FIXME: move to a separate file to avoid the ugly ifdefs
 #if(USE_QWT)
 #include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 #endif
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
@@ -93,9 +95,22 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   // The following widgets are diabled because they are not implemented yet
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
   _hardMonForm.continuousReadCheckBox->setEnabled(false);
-  _hardMonForm.plotButton->setEnabled(false);
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
+
+
+#if(USE_QWT)
+  _plotDock = new QDockWidget(tr("QtHadMon Plot"), this);
+  addDockWidget(Qt::BottomDockWidgetArea, _plotDock);
+  _hardMonForm.settingsMenu->addAction(_plotDock->toggleViewAction());
+
+  connect(_hardMonForm.plotButton, SIGNAL(clicked()),
+	  this, SLOT(plot()));
+
+#else
+  _hardMonForm.plotButton->setEnabled(false);
+#endif
+
 }
 
 QtHardMon::~QtHardMon()
@@ -717,6 +732,54 @@ void QtHardMon::writeConfig(QString const & fileName)
 
 void QtHardMon::plot()
 {
+#if(USE_QWT)
+  QVector<QPointF> samples;
+
+  //FIXME: use a data vector here. This also overcomes the truncation limitation (wanted?)
+  //Use the minimum of rowCount and maxWords. for truncated lists the last entry is invalid
+  for (int row = 0; row < std::min(_hardMonForm.valuesTableWidget->rowCount(), static_cast<int>(_maxWords)); ++row)
+  {
+    QTableWidgetItem *tableWidgetItem = _hardMonForm.valuesTableWidget->item(row,0); // always column 0
+    if (!tableWidgetItem)
+    {
+      // strange, this should not happen. print a warning message end stop plotting
+      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"), QString("Value in row ")
+			    +QString::number(row) + " does not exist.");
+      return;
+    }
+
+    bool conversionOk;
+    // The 0 in data(0) is the policy.
+    int value = tableWidgetItem->data(0).toInt(&conversionOk);
+    
+    if (!conversionOk)
+    {
+      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"),
+			    QString("Value in row ")+QString::number(row) + " is invalid.");
+      return;
+    }
+
+    samples.push_back(QPoint(row, value));
+  }
+  
+  QwtPointSeriesData* myData = new QwtPointSeriesData;
+  myData->setSamples(samples);
+ 
+  QwtPlotCurve *curve1 = new QwtPlotCurve("Curve 1");
+
+  // at this point the curve takes ownership of the data object
+  curve1->setData(myData);
+
+  // replace the current plot.
+  delete _qwtPlot;
+  _qwtPlot = new QwtPlot(_plotDock); 
+  _plotDock->setWidget(_qwtPlot);
+ 
+  // at this point the curve is attached to the plot, which will delete it when it goes out of scope
+  curve1->attach(_qwtPlot);
+ 
+  _qwtPlot->replot();
+#endif // USE_QWT
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
