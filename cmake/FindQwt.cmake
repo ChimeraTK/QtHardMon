@@ -23,13 +23,19 @@ ELSE(Qwt_INCLUDE_DIRS)
 
   FIND_PATH(QWT_INCLUDE_DIR qwt.h 
     /usr/include/qwt
+    /usr/include/qwt6
     /usr/local/include/qwt
+    /usr/local/include/qwt6
     /sw/include/qwt
+    /sw/include/qwt6
     )
-  FIND_LIBRARY(QWT_LIBRARY qwt 
+  FIND_LIBRARY(QWT_LIBRARY qwt
     /usr/lib
+    /usr/lib64
     /usr/local/lib
+    /usr/local/lib64
     /sw/lib
+    /sw/lib64
     )
 
 ENDIF(Qwt_INCLUDE_DIRS)
