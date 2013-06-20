@@ -453,6 +453,12 @@ void QtHardMon::loadConfig()
     return;
   }
 
+  loadConfig(configFileName);
+}
+
+void QtHardMon::loadConfig(QString const & configFileName)
+{
+
   ConfigFileReaderWriter configReader;
   try{
     // even the constructor can throw when opening and reading a file

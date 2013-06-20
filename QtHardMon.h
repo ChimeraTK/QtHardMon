@@ -16,6 +16,11 @@ class QtHardMon: public QMainWindow
   QtHardMon(QWidget * parent = 0, Qt::WindowFlags flags = 0);
   ~QtHardMon();
 
+ public:
+  /** The function which actually performs the loading of the config file.
+   */
+  void loadConfig(QString const & configFileName);
+
   // slots for internal use in this class. We do not provide a widget to be used inside another widget.
  private slots:
   /*  void readFromFile();
@@ -34,7 +39,8 @@ class QtHardMon: public QMainWindow
 
   void preferences(); //< Show the preferences dialog and set the according variables
 
-  /** Load config from a file.
+  /** Load config from a file. This slot calls a file dialog and then accesses
+   *  loadConfig(QString const & filename).
    */
   void loadConfig();
 
