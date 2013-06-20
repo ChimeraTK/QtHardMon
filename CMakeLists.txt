@@ -2,7 +2,10 @@ PROJECT(QtHardMon)
 cmake_minimum_required(VERSION 2.8)
 
 FIND_PACKAGE(Qt4 REQUIRED)
-FIND_PACKAGE(MtcaMappedDevice 0.0 REQUIRED)
+FIND_PACKAGE(MtcaMappedDevice 00.01 REQUIRED)
+
+#turn on the rpath so libMtcaMappedDevice.so is found
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 INCLUDE_DIRECTORIES( ${MtcaMappedDevice_INCLUDE_DIRS} )
 
