@@ -119,3 +119,8 @@ bool PlotWindow::plotAfterReadIsChecked()
   return _plotWindowForm.plotAfterReadCheckBox->isChecked();
 }
 
+void PlotWindow::setPlotAfterRead(bool checked)
+{
+  return _plotWindowForm.plotAfterReadCheckBox->setChecked(checked);
+}
+

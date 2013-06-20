@@ -35,6 +35,10 @@ public slots:
   /** Slot which performs the actual plotting.
    */
   void plot();
+
+  /** Set the check mark of the plotAfterRead check box
+   */
+  void setPlotAfterRead(bool checked=true);
   
  signals:
   /** A signal which is emitted when the window is closed.

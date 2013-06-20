@@ -31,6 +31,8 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define MAX_WORDS_STRING "maxWords"
 #define READ_AFTER_WRITE_STRING "readAfterWrite"
 #define HEX_VALUES_STRING "hexValues"
+#define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
+#define PLOT_AFTER_READ_STRING "plotAfterRead"
 
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
@@ -561,6 +563,14 @@ void QtHardMon::loadConfig(QString const & configFileName)
 						 _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0);
   _hardMonForm.hexValuesCheckBox->setChecked( hexValuesFlag );
 
+  int showPlotWindowFlag =  configReader.getValue(SHOW_PLOT_WINDOW_STRING,
+						 _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0);
+  _hardMonForm.showPlotWindowCheckBox->setChecked( showPlotWindowFlag );
+
+  int plotAfterReadFlag =  configReader.getValue(PLOT_AFTER_READ_STRING,
+						 _plotWindow->plotAfterReadIsChecked() ? 1 : 0);
+   _plotWindow->setPlotAfterRead( plotAfterReadFlag );
+
     
   // now read the mapping file, device and register. If anything goes wrong we can just exit the function because
   // all other variables have already been processed.
@@ -705,6 +715,8 @@ void QtHardMon::writeConfig(QString const & fileName)
   configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
+  configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
+  configWriter.setValue(PLOT_AFTER_READ_STRING, _plotWindow->plotAfterReadIsChecked() ? 1 : 0 );
 
   // this 
    try{
