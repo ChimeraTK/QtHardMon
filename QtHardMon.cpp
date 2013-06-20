@@ -470,10 +470,13 @@ void QtHardMon::loadConfig()
      return;
    }
 
+  // At this point we considder the config file as successfully loaded, even though it might not contain any
+  // valid parameters. But we store the file name.
+  _configFileName = configFileName;
+
   // show message box with parse errors, but just continue normally
   if (!configReader.getBadLines().isEmpty() )
   {
-    std::cout << "nBadLines = " << configReader.getBadLines().size() << std::endl;
 //    if (configReader.getBadLines().begin() != configReader.getBadLines().end() )
 //      {
 //	std::cout << "begin and end are different" << std::endl;
@@ -490,8 +493,6 @@ void QtHardMon::loadConfig()
      for (QStringList::const_iterator badLinesIter = configReader.getBadLines().begin();
 	  badLinesIter != configReader.getBadLines().end(); ++badLinesIter)
      {
-       std::cout << "appending "<< std::flush;
-       std::cout<< badLinesIter->toStdString() << std::endl;
        infoText += *badLinesIter;
        infoText += "\n";
      }
@@ -547,20 +548,15 @@ void QtHardMon::loadConfig()
     return;
   }
 
-  std::cout << "dmap loaded. checking for currentDeviceString "<< std::endl;
-
   // search for the device string 
   std::string currentDeviceString = configReader.getValue(CURRENT_DEVICE_STRING, std::string());
 
   if (currentDeviceString.empty())
   {
-    std::cout << "jooh, currentDeviceString is empty"<<std::endl;
     // no device specified, noting left to do
     return;
   }
   
-  std::cout << "currentDeviceString is not empty but \""<< currentDeviceString <<"\""<< std::endl;
-
   // try to find the device in the list
   QList<QListWidgetItem *> matchingDevices = _hardMonForm.deviceListWidget->findItems(currentDeviceString.c_str(),
 										      Qt::MatchExactly);
@@ -654,7 +650,6 @@ void QtHardMon::saveConfigAs()
 
 void QtHardMon::writeConfig(QString const & fileName)
 {
-  std::cout << "this is writeConfigAs(" <<fileName.toStdString()<< ")"<< std::endl;
   ConfigFileReaderWriter configWriter;
   
   // set the variables we want do write to file
