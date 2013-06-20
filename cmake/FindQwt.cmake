@@ -4,7 +4,7 @@
 #
 # QWT_INCLUDE_DIR  = where qwt.h can be found
 # QWT_LIBRARY      = the library to link against qwt
-# FOUND_QWT        = set to true after finding the library
+# QWT_FOUND        = set to true after finding the library
 #
 
 INCLUDE(${CMAKE_ROOT}/Modules/FindOpenGL.cmake)
@@ -34,15 +34,17 @@ ELSE(Qwt_INCLUDE_DIRS)
 
 ENDIF(Qwt_INCLUDE_DIRS)
 
+message("QWT_INCLUDE_DIR is \"${QWT_INCLUDE_DIR}\", QWT_LIBRARY is \"${QWT_LIBRARY}\"")
+
 IF(QWT_INCLUDE_DIR AND QWT_LIBRARY) 
-  SET(FOUND_QWT 1 CACHE BOOL "Found qwt library")
+  SET(QWT_FOUND 1 CACHE BOOL "Found qwt library")
 ELSE(QWT_INCLUDE_DIR AND QWT_LIBRARY) 
-  SET(FOUND_QWT 0 CACHE BOOL "Not found qwt library")
+  SET(QWT_FOUND 0 CACHE BOOL "Qwt library not found")
 ENDIF(QWT_INCLUDE_DIR AND QWT_LIBRARY) 
 
 MARK_AS_ADVANCED(
   QWT_INCLUDE_DIR
   QWT_LIBRARY
-  FOUND_QWT
+  QWT_FOUND
   )
 

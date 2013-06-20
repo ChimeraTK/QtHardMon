@@ -8,6 +8,8 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
 
+class QwtPlot;
+
 class QtHardMon: public QMainWindow
 {
  Q_OBJECT
@@ -25,8 +27,9 @@ class QtHardMon: public QMainWindow
  private slots:
   /*  void readFromFile();
   void saveToFile();
-  void plot();//< Plot the register content in a separate window.
   */
+  void plot();//< Plot the register content in a separate window.
+
   void read();//< Read register from device.
   void write();//< Read register to device.
   void loadBoards();
@@ -61,6 +64,10 @@ class QtHardMon: public QMainWindow
   int _maxWords; //< The maximum number of words displayed in the values list.
   QString _dmapFileName; //< The file name of the last opened dmap file
   QString _configFileName; //< Name of the config file (last saved or read)
+
+#if(USE_QWT)
+  QwtPlot *_qwtPlot; //< The instance of the qwt plot
+#endif
 
   /** Write the config to the given file name.
    */

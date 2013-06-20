@@ -13,6 +13,12 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
 
+// the plotting library is optional
+// FIXME: move to a separate file to avoid the ugly ifdefs
+#if(USE_QWT)
+#include <qwt_plot.h>
+#endif
+
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
 // => need to improve the api
 static const size_t WORD_SIZE_IN_BYTES = 4;
@@ -34,6 +40,11 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
   : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _currentDeviceListItem(NULL)
+//extend the initialiser list for the qwt dependent variables. They are optional
+#if(USE_QWT)
+  , _qwtPlot(NULL)
+#endif
+
 {
   _hardMonForm.setupUi(this);
 
@@ -89,6 +100,9 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
 
 QtHardMon::~QtHardMon()
 {
+#if(USE_QWT)
+  delete _qwtPlot;
+#endif
 }
 
 void  QtHardMon::loadBoards()
@@ -699,6 +713,10 @@ void QtHardMon::writeConfig(QString const & fileName)
      // rethrow the exception so the calling code knows that writing failed. 
      throw;
    }   
+}
+
+void QtHardMon::plot()
+{
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
