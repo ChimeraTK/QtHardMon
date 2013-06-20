@@ -62,7 +62,6 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   // The following widgets are diabled because they are not implemented yet
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
   _hardMonForm.continuousReadCheckBox->setEnabled(false);
-  _hardMonForm.readAfterWriteCheckBox->setEnabled(false);
   _hardMonForm.plotButton->setEnabled(false);
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
@@ -336,7 +335,12 @@ void QtHardMon::write()
     }//if isOpen
 
   }// for row
- 
+
+  if (  _hardMonForm.readAfterWriteCheckBox->isChecked() )
+  {
+    read();
+  }
+
 }
 
 void QtHardMon::preferences()
