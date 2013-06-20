@@ -88,6 +88,12 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.saveConfigAsAction, SIGNAL(triggered()),
 	  this, SLOT(saveConfigAs()));
 
+  connect(_hardMonForm.loadBoardsAction, SIGNAL(triggered()),
+	  this, SLOT(loadBoards()));
+
+  connect(_hardMonForm.quitAction, SIGNAL(triggered()),
+	  this, SLOT(close()));
+
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
   _hardMonForm.operationsGroupBox->setEnabled(false);
   _hardMonForm.optionsGroupBox->setEnabled(false);

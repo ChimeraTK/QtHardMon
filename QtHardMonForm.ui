@@ -395,6 +395,10 @@
     <addaction name="loadConfigAction"/>
     <addaction name="saveConfigAction"/>
     <addaction name="saveConfigAsAction"/>
+    <addaction name="separator"/>
+    <addaction name="loadBoardsAction"/>
+    <addaction name="separator"/>
+    <addaction name="quitAction"/>
    </widget>
    <widget class="QMenu" name="pluginsMenu">
     <property name="title">
@@ -456,6 +460,16 @@
   <action name="saveConfigAsAction">
    <property name="text">
     <string>Save config as</string>
+   </property>
+  </action>
+  <action name="loadBoardsAction">
+   <property name="text">
+    <string>Load boards</string>
+   </property>
+  </action>
+  <action name="quitAction">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>
