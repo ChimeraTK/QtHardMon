@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 00)
 set(${PROJECT_NAME}_MINOR_VERSION 03)
-set(${PROJECT_NAME}_PATCH_VERSION 00)
+set(${PROJECT_NAME}_PATCH_VERSION 01)
 set(${PROJECT_NAME}_VERSION
   ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION})
 set(${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION})
@@ -12,8 +12,12 @@ SET(CMAKE_BUILD_TYPE "Debug")
 #only turn this on for testing. Qt causes WAY too many warning.
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -Weffc++ -ansi -pedantic -Wuninitialized")
 
+#needed for findQwt
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
+
 FIND_PACKAGE(Qt4 REQUIRED)
 FIND_PACKAGE(MtcaMappedDevice 00.02.01 REQUIRED)
+FIND_PACKAGE(Qwt)
 
 #turn on the rpath so libMtcaMappedDevice.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -46,6 +50,18 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
   ${${PROJECT_NAME}_FORMS_HEADERS} 
   ${${PROJECT_NAME}_RESOURCES_RCC})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES} ${MtcaMappedDevice_LIBRARIES})
+
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  add_custom_target(doc ALL
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating API documentation with Doxygen" VERBATIM
+    )
+  install(DIRECTORY ${CMAKE_BINARY_DIR}/doc DESTINATION .)
+endif(DOXYGEN_FOUND)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
