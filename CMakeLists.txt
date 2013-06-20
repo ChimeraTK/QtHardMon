@@ -13,7 +13,7 @@ SET(CMAKE_BUILD_TYPE "Debug")
 #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -Weffc++ -ansi -pedantic -Wuninitialized")
 
 FIND_PACKAGE(Qt4 REQUIRED)
-FIND_PACKAGE(MtcaMappedDevice 00.02 REQUIRED)
+FIND_PACKAGE(MtcaMappedDevice 00.02.01 REQUIRED)
 
 #turn on the rpath so libMtcaMappedDevice.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -26,7 +26,7 @@ message("status: MtcaMappedDevice_INCLUDE_DIRS ${MtcaMappedDevice_INCLUDE_DIRS}"
 message("status: MtcaMappedDevice_LIBRARIES ${MtcaMappedDevice_LIBRARIES}")
 message("status: MtcaMappedDevice_VERSION ${MtcaMappedDevice_VERSION}")
 
-SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp)
+SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp)
 SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}.h)
 SET(${PROJECT_NAME}_FORMS ${PROJECT_NAME}Form.ui PreferencesForm.ui)
 SET(${PROJECT_NAME}_RESOURCES ${PROJECT_NAME}.qrc)

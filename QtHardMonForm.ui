@@ -392,8 +392,9 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="readConfigAction"/>
-    <addaction name="writeConfigAction"/>
+    <addaction name="loadConfigAction"/>
+    <addaction name="saveConfigAction"/>
+    <addaction name="saveConfigAsAction"/>
    </widget>
    <widget class="QMenu" name="pluginsMenu">
     <property name="title">
@@ -419,17 +420,17 @@
    <addaction name="helpMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="readConfigAction">
+  <action name="loadConfigAction">
    <property name="text">
-    <string>Read config</string>
+    <string>Load config</string>
    </property>
   </action>
-  <action name="writeConfigAction">
+  <action name="saveConfigAction">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Write config</string>
+    <string>Save config</string>
    </property>
   </action>
   <action name="actionExport">
@@ -450,6 +451,11 @@
   <action name="preferencesAction">
    <property name="text">
     <string>Preferences</string>
+   </property>
+  </action>
+  <action name="saveConfigAsAction">
+   <property name="text">
+    <string>Save config as</string>
    </property>
   </action>
  </widget>

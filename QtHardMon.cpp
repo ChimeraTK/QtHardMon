@@ -1,6 +1,7 @@
 #include "QtHardMon.h"
 #include "QtHardMonVersion.h"
 #include "ui_PreferencesForm.h"
+#include "ConfigFileReaderWriter.h"
 
 #include <iostream>
 #include <limits>
@@ -21,8 +22,18 @@ static const size_t WORD_SIZE_IN_BYTES = 4;
 // memory is requested.
 static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
+// Some variables to avoid duplication and possible inconsistencies in the code.
+// These strings are used in the config file
+#define DMAP_FILE_STRING "dmapFile"
+#define CURRENT_DEVICE_STRING "currentDevice"
+#define CURRENT_REGISTER_ROW_STRING "currentRegisterRow"
+#define MAX_WORDS_STRING "maxWords"
+#define READ_AFTER_WRITE_STRING "readAfterWrite"
+#define HEX_VALUES_STRING "hexValues"
+
+
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _currentDeviceListItem(NULL), _maxWords( DEFAULT_MAX_WORDS )
+  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _currentDeviceListItem(NULL)
 {
   _hardMonForm.setupUi(this);
 
@@ -55,6 +66,15 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.preferencesAction, SIGNAL(triggered()),
 	  this, SLOT(preferences()));
 
+  connect(_hardMonForm.loadConfigAction, SIGNAL(triggered()),
+	  this, SLOT(loadConfig()));
+
+  connect(_hardMonForm.saveConfigAction, SIGNAL(triggered()),
+	  this, SLOT(saveConfig()));
+
+  connect(_hardMonForm.saveConfigAsAction, SIGNAL(triggered()),
+	  this, SLOT(saveConfigAs()));
+
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
   _hardMonForm.operationsGroupBox->setEnabled(false);
   _hardMonForm.optionsGroupBox->setEnabled(false);
@@ -65,8 +85,6 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   _hardMonForm.plotButton->setEnabled(false);
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
-  _hardMonForm.readConfigAction->setEnabled(false);
-  _hardMonForm.writeConfigAction->setEnabled(false);
 }
 
 QtHardMon::~QtHardMon()
@@ -77,13 +95,27 @@ void  QtHardMon::loadBoards()
 {
   //  QMessageBox messageBox;
 
-  dmapFilesParser filesParser;  
-
   // fixme: remember last folder, ideally even after closing the HardMon
   QString dmapFileName = QFileDialog::getOpenFileName(this,
 						      tr("Open DeviceMap file"), 
 						      ".", 
 						      tr("DeviceMap files (*.dmap) (*.dmap);; All files (*) (*)"));
+
+  if (dmapFileName.isEmpty())
+  {
+    // No file name selected, just quit.
+    return;
+  }
+
+  // the return value is intentionally ignored. Cast to void to suppress compiler warnings.
+  // (I use c-type because it's shorter syntax and does not matter here).
+  (void) loadDmapFile(dmapFileName);
+}
+
+bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
+{
+
+  dmapFilesParser filesParser;  
 
   try{
     filesParser.parse_file(dmapFileName.toStdString());
@@ -96,10 +128,18 @@ void  QtHardMon::loadBoards()
     messageBox.exec();
     
     // We just return after displaying the message and leave the deviceList as it was.
-    return;
+    return false;
   }
 
+  // store the dmap file name for further usage. The variable with the underscore is the class wide variable.
+  _dmapFileName = dmapFileName;
+
+  // clear the device list and the device specific info 
   _hardMonForm.deviceListWidget->clear();
+
+  // Set the keyboard focus away from the deviceListWidget. This would trigger the deviceSelected 
+  // on the first entry, which we don't want. The focus is set to the registerListWidget.
+  _hardMonForm.registerListWidget->setFocus(Qt::OtherFocusReason);
 
   for (dmapFilesParser::iterator deviceIter = filesParser.begin();
        deviceIter != filesParser.end(); ++deviceIter)
@@ -111,6 +151,7 @@ void  QtHardMon::loadBoards()
 							       _hardMonForm.deviceListWidget) );
   }
 
+  return true;
   // on user request: do not automatically load the first device. This might be not accessible and
   // immediately gives an error message.
   //_hardMonForm.deviceListWidget->setCurrentRow(0);
@@ -119,15 +160,21 @@ void  QtHardMon::loadBoards()
 void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */)
 {
   // When the deviceListWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
-  // We have to catch this here and just do nothing.
+  // We have to catch this here and return. Before returning we clear the device specific display info,
+  // close the device and empty the register list.
   if (!deviceItem )
   {
-      return;
+    _hardMonForm.deviceNameDisplay->setText( "" );
+    _hardMonForm.deviceFileDisplay->setText( "" );
+    _hardMonForm.mapFileDisplay->setText( "" );
+    closeDevice();
+    _hardMonForm.registerListWidget->clear();
+    return;
   }
 
   //std::cout << "Device " << deviceItem->text().toStdString() << " selected." << std::endl;
 
-  // the deviceItem actually is a DeviceListItemType. As this is a private slot it is save to assume this
+  // the deviceItem actually is a DeviceListItemType. As this is a private slot it is safe to assume this
   // and use a static cast.
   DeviceListItem * deviceListItem = static_cast<DeviceListItem *>(deviceItem);  
   _currentDeviceListItem = deviceListItem;
@@ -148,8 +195,8 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 								   _hardMonForm.registerListWidget ) );
   }
 
-  //close the previous device
-  _mtcaDevice.closeDev();
+  //close the previous device. This also disables the relevant GUI elements
+  closeDevice();
   
   //try to open a new device. If this fails disable the buttons and the registerValues
   try
@@ -165,11 +212,6 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
     messageBox.exec();
     
-    // We diable the buttons and registerValues and return.
-    _hardMonForm.valuesTableWidget->setEnabled(false);
-    _hardMonForm.operationsGroupBox->setEnabled(false);
-    _hardMonForm.optionsGroupBox->setEnabled(false);
-
     // we cannot exit here because the last selected row still has to be restored
     //return;    
   }
@@ -185,18 +227,34 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   _hardMonForm.registerListWidget->setCurrentRow( deviceListItem->getLastSelectedRegisterRow() );
 }
 
+void QtHardMon::closeDevice()
+{
+   _mtcaDevice.closeDev();
+   _hardMonForm.valuesTableWidget->setEnabled(false);
+   _hardMonForm.operationsGroupBox->setEnabled(false);
+   _hardMonForm.optionsGroupBox->setEnabled(false);
+}
+
 void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */)
 {
   // When the registerListWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
-  // We have to catch this here and just do nothing.
+  // We have to catch this here and return.
+  // Before returning we have to clear the register specific display info and the values list.
   if (!registerItem )
   {
-      return;
+    _hardMonForm.registerNameDisplay->setText("");
+    _hardMonForm.registerBarDisplay->setText("");
+    _hardMonForm.registerNElementsDisplay->setText("");
+    _hardMonForm.registerAddressDisplay->setText("");
+    _hardMonForm.registerSizeDisplay->setText("");
+    _hardMonForm.valuesTableWidget->clear();
+    
+    return;
   }
 
   //std::cout << "Register " << registerItem->text().toStdString() << " selected." << std::endl;
 
-  // the registerItem actually is a RegisterListItemType. As this is a private slot it is save to assume this
+  // the registerItem actually is a RegisterListItemType. As this is a private slot it is safe to assume this
   // and use a static cast.
   RegisterListItem * registerListItem = static_cast<RegisterListItem *>(registerItem);  
   
@@ -379,6 +437,267 @@ void QtHardMon::aboutQtHardMon()
 void QtHardMon::aboutQt()
 {
   QMessageBox::aboutQt(this, "About Qt");
+}
+
+void QtHardMon::loadConfig()
+{
+  // the local, temporary variable, without underscore
+  QString configFileName = QFileDialog::getOpenFileName(this,
+							tr("Open DeviceMap file"), 
+							".",
+							tr("HardMon config files (*.cfg) (*.cfg);; All files (*) (*)"));
+
+  if (configFileName.isEmpty())
+  {
+    // No file name selected, just quit.
+    return;
+  }
+
+  ConfigFileReaderWriter configReader;
+  try{
+    // even the constructor can throw when opening and reading a file
+    configReader.read(configFileName.toStdString());
+  }
+  catch( std::ifstream::failure & e)
+   {
+     QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
+			    QString("Could not read config file ")+ 
+			    configFileName+".",
+			    QMessageBox::Ok, this);
+     messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+     messageBox.exec();
+
+     return;
+   }
+
+  // show message box with parse errors, but just continue normally
+  if (!configReader.getBadLines().isEmpty() )
+  {
+    std::cout << "nBadLines = " << configReader.getBadLines().size() << std::endl;
+//    if (configReader.getBadLines().begin() != configReader.getBadLines().end() )
+//      {
+//	std::cout << "begin and end are different" << std::endl;
+//      }
+//    else
+//      {
+//	std::cout << "begin and end are the same" << std::endl;
+//      }
+     QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
+			    QString("The following lines from the config file ")+
+			    configFileName+" are invalid and will be ignored. Please fix your config file.\n",
+			    QMessageBox::Ok, this);
+     QString infoText;
+     for (QStringList::const_iterator badLinesIter = configReader.getBadLines().begin();
+	  badLinesIter != configReader.getBadLines().end(); ++badLinesIter)
+     {
+       std::cout << "appending "<< std::flush;
+       std::cout<< badLinesIter->toStdString() << std::endl;
+       infoText += *badLinesIter;
+       infoText += "\n";
+     }
+     
+     messageBox.setInformativeText(infoText);
+     messageBox.exec();    
+  }
+
+
+  // first handle all settings that do not depend on opening a device map
+
+  // store in a local variable for now
+  int maxWords = configReader.getValue(MAX_WORDS_STRING, _maxWords);
+  // check for validity. Minimum reasonable value is 1.
+  if (maxWords >=1)
+  {
+     //only after checking set the class wide maxWords variable
+     _maxWords = maxWords;
+     // Update the register, so the length of the valuesList is adapted.
+     //If another register is loaded from the config this might be repeated.
+     //But for an easier logic we take this little overhead.
+     registerSelected(_hardMonForm.registerListWidget->currentItem(),
+		      _hardMonForm.registerListWidget->currentItem());
+  }
+  else
+  {
+    QMessageBox::warning(this,  tr("QtHardMon: Warning"), QString("Read invalid maxWords from config file."));
+  }
+  
+  int readAfterWriteFlag = configReader.getValue(READ_AFTER_WRITE_STRING, 
+						 _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0);
+  // we use the implicit conversion 0=false, everyting else is true
+  _hardMonForm.readAfterWriteCheckBox->setChecked( readAfterWriteFlag );
+
+  int hexValuesFlag =  configReader.getValue(HEX_VALUES_STRING,
+						 _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0);
+  _hardMonForm.hexValuesCheckBox->setChecked( hexValuesFlag );
+
+    
+  // now read the mapping file, device and register. If anything goes wrong we can just exit the function because
+  // all other variables have already been processed.
+  std::string dmapFileString = configReader.getValue(DMAP_FILE_STRING, std::string());
+
+  if (dmapFileString.empty())
+  {
+    // no dmap file. Just return, also loading device and register does not make sense without dmap
+    return;
+  }
+
+  if (!loadDmapFile(dmapFileString.c_str()) )
+  {
+    // Just return, also loading device and register does not make sense without dmap
+    return;
+  }
+
+  std::cout << "dmap loaded. checking for currentDeviceString "<< std::endl;
+
+  // search for the device string 
+  std::string currentDeviceString = configReader.getValue(CURRENT_DEVICE_STRING, std::string());
+
+  if (currentDeviceString.empty())
+  {
+    std::cout << "jooh, currentDeviceString is empty"<<std::endl;
+    // no device specified, noting left to do
+    return;
+  }
+  
+  std::cout << "currentDeviceString is not empty but \""<< currentDeviceString <<"\""<< std::endl;
+
+  // try to find the device in the list
+  QList<QListWidgetItem *> matchingDevices = _hardMonForm.deviceListWidget->findItems(currentDeviceString.c_str(),
+										      Qt::MatchExactly);
+
+  if (matchingDevices.isEmpty())
+  {
+    // the item should have been there, give a warning
+    QMessageBox::warning(this, tr("QtHardMon: Warning"), QString("Device ") + currentDeviceString.c_str()
+			 + " is not in the dmap file.");
+    return;
+  }
+
+  // It's safe to call static_cast because the deviceListWidget is controlled by this application.
+  // We know that it is a deviceListItem, no nynamic checking needed.
+  // We also know that matchingDevices.begin() is valid because the list is not empty.
+  // In case there is more than one entry with the same name we just pick the first one.
+  DeviceListItem * deviceListItem = static_cast< DeviceListItem *>(*matchingDevices.begin());
+
+  //Before selecting the device we try to read and set the correct register
+  int currentRegisterRow =  configReader.getValue(CURRENT_REGISTER_ROW_STRING, -1);
+  
+  // We just ignore negative values. The user can use this undocumented "feature" to comment out
+  // the entry (although using a comment line is preferred).
+  if (currentRegisterRow > 0)
+  {
+    // check that the requested row is not too large
+    if (currentRegisterRow >= deviceListItem->getRegisterMapPointer()->getMapFileSize())
+    {
+      QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
+			     QString("currentRegisterRow=") + QString::number(currentRegisterRow)
+			     + " is too large for device "+  currentDeviceString.c_str() +".",
+			     QMessageBox::Ok, this);
+      messageBox.setInformativeText( QString("Mapping file ") + 
+				     deviceListItem->getDeviceMapElement().map_file_name.c_str() + 
+				    " only has " +
+				     QString::number( deviceListItem->getRegisterMapPointer()->getMapFileSize() )+
+				     " entries." );
+      messageBox.exec();
+    }
+    else
+    {
+      // currentRegisterRow is ok, set it in the device list item
+      deviceListItem->setLastSelectedRegisterRow(currentRegisterRow);
+    }
+  }
+
+  // now we are ready to select the device
+  _hardMonForm.deviceListWidget->setCurrentItem(deviceListItem);
+
+}
+
+void QtHardMon::saveConfig()
+{
+  if (_configFileName.isEmpty())
+  {
+    saveConfigAs();
+  }
+  else
+  {
+    writeConfig(_configFileName);
+  }
+}
+
+void QtHardMon::saveConfigAs()
+{
+  // the local, temporary variable, without underscore
+  QString configFileName = QFileDialog::getSaveFileName(this,
+							tr("Open DeviceMap file"), 
+							".",
+							tr("HardMon config files (*.cfg) (*.cfg);; All files (*) (*)"));
+
+  if (configFileName.isEmpty())
+  {
+    // No file name selected, just quit.
+    return;
+  }
+  
+  // The file name seems valid. Now try to write it and store the name in the class wide variable if successful.
+  try{
+    writeConfig(configFileName);
+  }
+  catch( std::ifstream::failure & e)
+  {
+    // a message box with the error warning has already been displayed. Nothing more to do but quit.
+    return;
+  }
+
+  // only store the file name upon successful writing (to the class wide variable with the unterscore)
+  _configFileName = configFileName;
+}
+
+void QtHardMon::writeConfig(QString const & fileName)
+{
+  std::cout << "this is writeConfigAs(" <<fileName.toStdString()<< ")"<< std::endl;
+  ConfigFileReaderWriter configWriter;
+  
+  // set the variables we want do write to file
+
+  // only write the file name when it's not empty, otherwise we get an invalid line
+  if( ! _dmapFileName.isEmpty() )
+  {
+    configWriter.setValue(DMAP_FILE_STRING, _dmapFileName.toStdString());
+  }
+
+  // The device list widget only contains deviceListItems, so it's safe to use a static cast here.
+  DeviceListItem * deviceListItem =  static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->currentItem() );
+
+     // the device list might be emtpy, or there is no current item (?, is this possibe?) 
+     
+  if (deviceListItem)
+  {
+    configWriter.setValue( CURRENT_DEVICE_STRING, deviceListItem->getDeviceMapElement().dev_name );
+    // writing a register without item does not make sense, so we keep it in the if block
+    configWriter.setValue(CURRENT_REGISTER_ROW_STRING, _hardMonForm.registerListWidget->currentRow());
+  }
+  
+  configWriter.setValue(MAX_WORDS_STRING, _maxWords);
+  configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
+  configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
+
+  // this 
+   try{
+     configWriter.write(fileName.toStdString());
+   }
+   // we catch a write failure here to show a message box, but rethrow the exception
+   catch( std::ifstream::failure & e)
+   {
+     QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
+			    QString("Could not write config file ")+ 
+			    fileName+".",
+			    QMessageBox::Ok, this);
+     messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+     messageBox.exec();
+
+     // rethrow the exception so the calling code knows that writing failed. 
+     throw;
+   }   
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy

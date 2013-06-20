@@ -3,6 +3,7 @@
 
 #include "ui_QtHardMonForm.h"
 #include <QIcon>
+#include <QDir>
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
@@ -33,11 +34,40 @@ class QtHardMon: public QMainWindow
 
   void preferences(); //< Show the preferences dialog and set the according variables
 
+  /** Load config from a file.
+   */
+  void loadConfig();
+
+  /** Save the config to the same file. If no config was loaded or previously saved, saveConfigAs is called.
+   */
+  void saveConfig();
+
+  /** Open a file dialog to query the config file name and save the config.
+   */
+  void saveConfigAs();
+
  private:
   
   Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.
   devPCIE _mtcaDevice; //< The instance of the device which is being accessed.
-  size_t _maxWords; //< The maximum number of words displayed in the values list.
+
+  // maxWords is int so -1 can be used as invalid 
+  int _maxWords; //< The maximum number of words displayed in the values list.
+  QString _dmapFileName; //< The file name of the last opened dmap file
+  QString _configFileName; //< Name of the config file (last saved or read)
+
+  /** Write the config to the given file name.
+   */
+  void writeConfig(QString const & fileName);
+
+  /** Load a dmap file and return whether loading was successful. The return value can safely be ignored
+   *  if the information is not required in the programme flow.
+   */
+  bool loadDmapFile(QString const & dmapFileName);
+
+  /** Close the device and disable the access buttons.
+   */
+  void closeDevice();
 
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */
@@ -59,7 +89,7 @@ class QtHardMon: public QMainWindow
       /* No copy constructor, the default is fine. */
       //DeviceListItem ( const DeviceListItem & other );
 
-      /** No assignment operator, the default is fine. */
+      /* No assignment operator, the default is fine. */
       //DeviceListItem & operator=( const DeviceListItem & other );
       
       /** The destructor. Currently does nothing because the members go out of scope automatically. */
