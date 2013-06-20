@@ -14,13 +14,6 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
 
-// the plotting library is optional
-// FIXME: move to a separate file to avoid the ugly ifdefs
-#if(USE_QWT)
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-#endif
-
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
 // => need to improve the api
 static const size_t WORD_SIZE_IN_BYTES = 4;
@@ -42,11 +35,6 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
   : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _currentDeviceListItem(NULL)
-//extend the initialiser list for the qwt dependent variables. They are optional
-#if(USE_QWT)
-  , _qwtPlot(NULL)
-#endif
-
 {
   _hardMonForm.setupUi(this);
 
@@ -104,33 +92,27 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
 
+  _plotWindow = new PlotWindow(this);
 
-#if(USE_QWT)
-  _plotDock = new QDockWidget(tr("QtHadMon Plot"), this);
-  addDockWidget(Qt::BottomDockWidgetArea, _plotDock);
-  _hardMonForm.settingsMenu->addAction(_plotDock->toggleViewAction());
+  connect(_hardMonForm.showPlotWindowCheckBox, SIGNAL(stateChanged(int)),
+	  this, SLOT(showPlotWindow(int)));
 
-  connect(_hardMonForm.plotButton, SIGNAL(clicked()),
-	  this, SLOT(plot()));
+  connect(_plotWindow, SIGNAL(plotWindowClosed()),
+	  this, SLOT(unckeckShowPlotWindow()));
 
-#else
-  _hardMonForm.plotButton->setEnabled(false);
-#endif
-
+  // also the plot window dfunctions are only enabled when a device is opened.
+   _plotWindow->setEnabled(false);
 }
 
 QtHardMon::~QtHardMon()
 {
-#if(USE_QWT)
-  delete _qwtPlot;
-#endif
+  // As the plot window has NULL as parent, we have to delete it here.
+  delete  _plotWindow;
 }
 
 void  QtHardMon::loadBoards()
 {
-  //  QMessageBox messageBox;
-
-  // fixme: remember last folder, ideally even after closing the HardMon
+  // Show a file dialog to select the dmap file.
   QString dmapFileName = QFileDialog::getOpenFileName(this,
 						      tr("Open DeviceMap file"), 
 						      ".", 
@@ -142,7 +124,7 @@ void  QtHardMon::loadBoards()
     return;
   }
 
-  // the return value is intentionally ignored. Cast to void to suppress compiler warnings.
+  // The return value is intentionally ignored. Cast to void to suppress compiler warnings.
   // (I use c-type because it's shorter syntax and does not matter here).
   (void) loadDmapFile(dmapFileName);
 }
@@ -257,6 +239,7 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     _hardMonForm.valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
     _hardMonForm.optionsGroupBox->setEnabled(true);
+    _plotWindow->setEnabled(true);
   }
 
   _hardMonForm.registerListWidget->setCurrentRow( deviceListItem->getLastSelectedRegisterRow() );
@@ -268,6 +251,7 @@ void QtHardMon::closeDevice()
    _hardMonForm.valuesTableWidget->setEnabled(false);
    _hardMonForm.operationsGroupBox->setEnabled(false);
    _hardMonForm.optionsGroupBox->setEnabled(false);
+   _plotWindow->setEnabled(false);
 }
 
 void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */)
@@ -379,6 +363,11 @@ void QtHardMon::read()
 
   }// for row
  
+  // check if plotting after reading is requested
+  if (_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked())
+  {
+    _plotWindow->plot();
+  }
 }
 
 void QtHardMon::write()
@@ -736,57 +725,75 @@ void QtHardMon::writeConfig(QString const & fileName)
    }   
 }
 
-void QtHardMon::plot()
+void QtHardMon::showPlotWindow(int checkState)
 {
-#if(USE_QWT)
-  QVector<QPointF> samples;
-
-  //FIXME: use a data vector here. This also overcomes the truncation limitation (wanted?)
-  //Use the minimum of rowCount and maxWords. for truncated lists the last entry is invalid
-  for (int row = 0; row < std::min(_hardMonForm.valuesTableWidget->rowCount(), static_cast<int>(_maxWords)); ++row)
+  if (checkState ==Qt::Unchecked)
   {
-    QTableWidgetItem *tableWidgetItem = _hardMonForm.valuesTableWidget->item(row,0); // always column 0
-    if (!tableWidgetItem)
-    {
-      // strange, this should not happen. print a warning message end stop plotting
-      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"), QString("Value in row ")
-			    +QString::number(row) + " does not exist.");
-      return;
-    }
-
-    bool conversionOk;
-    // The 0 in data(0) is the policy.
-    int value = tableWidgetItem->data(0).toInt(&conversionOk);
-    
-    if (!conversionOk)
-    {
-      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"),
-			    QString("Value in row ")+QString::number(row) + " is invalid.");
-      return;
-    }
-
-    samples.push_back(QPoint(row, value));
+    _plotWindow->setVisible(false);
   }
-  
-  QwtPointSeriesData* myData = new QwtPointSeriesData;
-  myData->setSamples(samples);
- 
-  QwtPlotCurve *curve1 = new QwtPlotCurve("Curve 1");
-
-  // at this point the curve takes ownership of the data object
-  curve1->setData(myData);
-
-  // replace the current plot.
-  delete _qwtPlot;
-  _qwtPlot = new QwtPlot(_plotDock); 
-  _plotDock->setWidget(_qwtPlot);
- 
-  // at this point the curve is attached to the plot, which will delete it when it goes out of scope
-  curve1->attach(_qwtPlot);
- 
-  _qwtPlot->replot();
-#endif // USE_QWT
+  else
+  {
+    _plotWindow->setVisible(true);    
+  }
 }
+
+void QtHardMon::unckeckShowPlotWindow()
+{
+  // the plot window just closed. Uncheck the showPlotWindow check box
+  _hardMonForm.showPlotWindowCheckBox->setChecked(false);
+}
+
+//void QtHardMon::plot()
+//{
+//#if(USE_QWT)
+//  QVector<QPointF> samples;
+//
+//  //FIXME: use a data vector here. This also overcomes the truncation limitation (wanted?)
+//  //Use the minimum of rowCount and maxWords. for truncated lists the last entry is invalid
+//  for (int row = 0; row < std::min(_hardMonForm.valuesTableWidget->rowCount(), static_cast<int>(_maxWords)); ++row)
+//  {
+//    QTableWidgetItem *tableWidgetItem = _hardMonForm.valuesTableWidget->item(row,0); // always column 0
+//    if (!tableWidgetItem)
+//    {
+//      // strange, this should not happen. print a warning message end stop plotting
+//      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"), QString("Value in row ")
+//			    +QString::number(row) + " does not exist.");
+//      return;
+//    }
+//
+//    bool conversionOk;
+//    // The 0 in data(0) is the policy.
+//    int value = tableWidgetItem->data(0).toInt(&conversionOk);
+//    
+//    if (!conversionOk)
+//    {
+//      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"),
+//			    QString("Value in row ")+QString::number(row) + " is invalid.");
+//      return;
+//    }
+//
+//    samples.push_back(QPoint(row, value));
+//  }
+//  
+//  QwtPointSeriesData* myData = new QwtPointSeriesData;
+//  myData->setSamples(samples);
+// 
+//  QwtPlotCurve *curve1 = new QwtPlotCurve("Curve 1");
+//
+//  // at this point the curve takes ownership of the data object
+//  curve1->setData(myData);
+//
+//  // replace the current plot.
+//  delete _qwtPlot;
+//  _qwtPlot = new QwtPlot(_plotDock); 
+//  _plotDock->setWidget(_qwtPlot);
+// 
+//  // at this point the curve is attached to the plot, which will delete it when it goes out of scope
+//  curve1->attach(_qwtPlot);
+// 
+//  _qwtPlot->replot();
+//#endif // USE_QWT
+//}
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members

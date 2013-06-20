@@ -2,13 +2,13 @@
 #define QT_HARD_MON
 
 #include "ui_QtHardMonForm.h"
+#include "PlotWindow.h"
 #include <QIcon>
 #include <QDir>
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
 
-class QwtPlot;
 
 /** The QtHadMon class which implements all the GUI functionality.
  */
@@ -22,7 +22,6 @@ class QtHardMon: public QMainWindow
   /* The destructor. Need not be virtual because we have no virtual functions */
   ~QtHardMon();
 
- public:
   /** The function which actually performs the loading of the config file.
    */
   void loadConfig(QString const & configFileName);
@@ -32,7 +31,9 @@ class QtHardMon: public QMainWindow
   /*  void readFromFile();
   void saveToFile();
   */
-  void plot();//< Plot the register content in a separate window.
+  void showPlotWindow(int checkState);//< Slot to toggle the plot window visibility. Needs to be int because the sender slot is int.
+
+  void unckeckShowPlotWindow();//< Slot with void argument to uncheck the check box.
 
   void read();//< Read register from device.
   void write();//< Read register to device.
@@ -170,12 +171,13 @@ class QtHardMon: public QMainWindow
 
   DeviceListItem * _currentDeviceListItem; //< Pointer to the currently selected deviceListItem
 
-  // we keep this package dependent variable at the end to simpily the constructor initialiser list syntax
-  // with the ifdef
-#if(USE_QWT)
-  QwtPlot *_qwtPlot; //< The instance of the qwt plot
-  QDockWidget * _plotDock; //< The docable plot window
-#endif
+  PlotWindow * _plotWindow; //< The plot window
+
+  // The plot window is allowed to access the internal varaibles (mutex and register content) for plotting.
+  // We allow this for performance reasons: A thread-safe getter for the data members would require one further
+  // copying of the data, a plot function in the plot window class, which is called with a reference of the data 
+  // pointer, would require unnecessarily long locking of the mutex.
+  friend class PlotWindow;
 
 };
 

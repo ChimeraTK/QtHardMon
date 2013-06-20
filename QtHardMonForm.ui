@@ -305,6 +305,13 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="showPlotWindowCheckBox">
+           <property name="text">
+            <string>Show plot window</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -325,13 +332,6 @@
           <widget class="QPushButton" name="writeButton">
            <property name="text">
             <string>Write</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="plotButton">
-           <property name="text">
-            <string>Plot</string>
            </property>
           </widget>
          </item>
