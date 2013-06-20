@@ -44,6 +44,11 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.actionAboutQt, SIGNAL(triggered()),
 	  this, SLOT(aboutQt()));
 
+  // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
+  _hardMonForm.operationsGroupBox->setEnabled(false);
+  _hardMonForm.optionsGroupBox->setEnabled(false);
+
+  // The following widgets are diabled because they are not implemented yet
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
   _hardMonForm.readAlwaysCheckBox->setEnabled(false);
   _hardMonForm.plotButton->setEnabled(false);
@@ -202,6 +207,12 @@ void QtHardMon::read()
   RegisterListItem * registerListItem =
     static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
 
+  if (!registerListItem)
+  {
+    QMessageBox::warning(this, "QtHardMon read error", "No current register. Check your mapping file.");
+    return;
+  }
+
   for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
     int registerContent = -1;
@@ -244,6 +255,12 @@ void QtHardMon::write()
 {
   RegisterListItem * registerListItem =
     static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
+
+  if (!registerListItem)
+  {
+    QMessageBox::warning(this, "QtHardMon read error", "No current register. Check your mapping file.");
+    return;
+  }
 
   for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
