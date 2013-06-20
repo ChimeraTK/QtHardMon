@@ -31,6 +31,8 @@ class QtHardMon: public QMainWindow
   void aboutQtHardMon(); //< Show the aboutQtHardMon
   void aboutQt(); //< Show the aboutQt dialog
 
+  void preferences(); //< Show the preferences dialog and set the according variables
+
  private:
   
   Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.

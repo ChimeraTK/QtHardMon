@@ -1,6 +1,9 @@
 #include "QtHardMon.h"
 #include "QtHardMonVersion.h"
+#include "ui_PreferencesForm.h"
+
 #include <iostream>
+#include <limits>
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -19,7 +22,7 @@ static const size_t WORD_SIZE_IN_BYTES = 4;
 static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _currentDeviceListItem(NULL)
+  : QMainWindow(parent, flags), _currentDeviceListItem(NULL), _maxWords( DEFAULT_MAX_WORDS )
 {
   _hardMonForm.setupUi(this);
 
@@ -49,6 +52,9 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.aboutQtAction, SIGNAL(triggered()),
 	  this, SLOT(aboutQt()));
 
+  connect(_hardMonForm.preferencesAction, SIGNAL(triggered()),
+	  this, SLOT(preferences()));
+
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
   _hardMonForm.operationsGroupBox->setEnabled(false);
   _hardMonForm.optionsGroupBox->setEnabled(false);
@@ -72,15 +78,14 @@ void  QtHardMon::loadBoards()
 {
   //  QMessageBox messageBox;
 
-  dmapFilesParser filesParser;
-
-  
+  dmapFilesParser filesParser;  
 
   // fixme: remember last folder, ideally even after closing the HardMon
   QString dmapFileName = QFileDialog::getOpenFileName(this,
 						      tr("Open DeviceMap file"), 
 						      ".", 
 						      tr("DeviceMap files (*.dmap) (*.dmap);; All files (*) (*)"));
+
   try{
     filesParser.parse_file(dmapFileName.toStdString());
   }
@@ -208,7 +213,12 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   // remember that this register has been selected
   _currentDeviceListItem->setLastSelectedRegisterRow(  _hardMonForm.registerListWidget->currentRow() );
 
-  _hardMonForm.valuesTableWidget->setRowCount( registerListItem->getRegisterMapElement().reg_elem_nr );
+  // if the register is too large not all words are displayed.
+  // Set the size of the list to maxWords + 1, so the last line can show "truncated"
+  int nRows = ( registerListItem->getRegisterMapElement().reg_elem_nr >  _maxWords ? 
+		   _maxWords + 1 :  registerListItem->getRegisterMapElement().reg_elem_nr );
+
+  _hardMonForm.valuesTableWidget->setRowCount( nRows );
   read();
 }
 
@@ -261,9 +271,21 @@ void QtHardMon::read()
     // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
     // int and a proper editor (spin box) is used when editing in the GUI.
     QTableWidgetItem * dataItem =  new QTableWidgetItem();
+
+    if (row == _maxWords)
+    { // The register is too large to display. Show that it is truncated and stop reading
+      dataItem->setText("truncated");
+      // turn off the editable and selectable flags for the "truncated" entry
+      dataItem->setFlags( dataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
+      dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
+      _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
+      break;
+    }
+
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
-  }
+
+  }// for row
  
 }
 
@@ -280,6 +302,12 @@ void QtHardMon::write()
 
   for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
+    // if the register is too large only write the valid entries from the display list.
+    if (row == _maxWords)
+    {
+      break;
+    }
+
     int registerContent =  _hardMonForm.valuesTableWidget->item(row,0)->data(0 /*default role*/).toInt();
 
     // Try writing to the file only when it's open.
@@ -309,6 +337,34 @@ void QtHardMon::write()
 
   }// for row
  
+}
+
+void QtHardMon::preferences()
+{
+  // create a preferences dialog and set the correct warning message with contains the default number for maxWords.
+  QDialog preferencesDialog;
+  Ui::PreferencesDialogForm preferencesDialogForm;
+  preferencesDialogForm.setupUi(&preferencesDialog);
+  preferencesDialogForm.maxWordsWarningLabel->setText(QString("WARNING:")+
+						      " Setting this value too high can exhaust your memory, "+
+						      "which will lead to a segmentation fault. Default value is "+
+						      QString::number(DEFAULT_MAX_WORDS));
+
+  // set up the current value of maxWords
+  preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
+  preferencesDialogForm.maxWordsSpinBox->setValue( _maxWords );
+
+  int dialogResult = preferencesDialog.exec();
+
+  // only set the values if ok has been pressed
+  if (dialogResult == QDialog::Accepted )
+  {
+    _maxWords =  preferencesDialogForm.maxWordsSpinBox->value();
+    // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
+    // from the device
+    registerSelected(_hardMonForm.registerListWidget->currentItem(),_hardMonForm.registerListWidget->currentItem());
+  }
+  
 }
 
 void QtHardMon::aboutQtHardMon()
