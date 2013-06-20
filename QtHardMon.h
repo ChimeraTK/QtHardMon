@@ -28,6 +28,9 @@ class QtHardMon: public QMainWindow
   void deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */);
   void registerSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousRegisterItem */);
 
+  void aboutQtHardMon(); //< Show the aboutQtHardMon
+  void aboutQt(); //< Show the aboutQt dialog
+
  private:
   
   Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets 

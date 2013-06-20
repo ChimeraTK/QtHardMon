@@ -1,0 +1,6 @@
+#ifndef QT_HARD_MON_VERSION_H
+#define QT_HARD_MON_VERSION_H
+
+#define QT_HARD_MON_VERSION "@QtHardMon_VERSION@"
+
+#endif // QT_HARD_MON_VERSION_H

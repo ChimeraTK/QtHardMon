@@ -1,4 +1,5 @@
 #include "QtHardMon.h"
+#include "QtHardMonVersion.h"
 #include <iostream>
 
 #include <QMessageBox>
@@ -37,9 +38,17 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.writeButton, SIGNAL(clicked()),
 	  this, SLOT(write()));
 
+  connect(_hardMonForm.actionAboutQtHardMon, SIGNAL(triggered()),
+	  this, SLOT(aboutQtHardMon()));
+
+  connect(_hardMonForm.actionAboutQt, SIGNAL(triggered()),
+	  this, SLOT(aboutQt()));
+
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
   _hardMonForm.readAlwaysCheckBox->setEnabled(false);
   _hardMonForm.plotButton->setEnabled(false);
+  _hardMonForm.actionSave->setEnabled(false);
+  _hardMonForm.actionRead->setEnabled(false);
 }
 
 QtHardMon::~QtHardMon()
@@ -51,6 +60,8 @@ void  QtHardMon::loadBoards()
   //  QMessageBox messageBox;
 
   dmapFilesParser filesParser;
+
+  
 
   // fixme: remember last folder, ideally even after closing the HardMon
   QString dmapFileName = QFileDialog::getOpenFileName(this,
@@ -265,6 +276,16 @@ void QtHardMon::write()
 
   }// for row
  
+}
+
+void QtHardMon::aboutQtHardMon()
+{
+  QMessageBox::about(this, "About QtHardMon", QString("QtHardMon Version ")+QT_HARD_MON_VERSION);
+}
+
+void QtHardMon::aboutQt()
+{
+  QMessageBox::aboutQt(this, "About Qt");
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
