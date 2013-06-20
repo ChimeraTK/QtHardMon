@@ -308,7 +308,7 @@ void QtHardMon::read()
   // further read attempts, we introduce a status variable.
   bool readError=false;
 
-  for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
+  for (unsigned int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
     int registerContent = -1;
 
@@ -371,7 +371,7 @@ void QtHardMon::write()
     return;
   }
 
-  for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
+  for (unsigned int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
   {
     // if the register is too large only write the valid entries from the display list.
     if (row == _maxWords)
@@ -525,12 +525,12 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // first handle all settings that do not depend on opening a device map
 
   // store in a local variable for now
-  int maxWords = configReader.getValue(MAX_WORDS_STRING, _maxWords);
+  int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
   // check for validity. Minimum reasonable value is 1.
   if (maxWords >=1)
   {
      //only after checking set the class wide maxWords variable
-     _maxWords = maxWords;
+    _maxWords = static_cast<unsigned int>(maxWords);
      // Update the register, so the length of the valuesList is adapted.
      //If another register is loaded from the config this might be repeated.
      //But for an easier logic we take this little overhead.
@@ -603,7 +603,7 @@ void QtHardMon::loadConfig(QString const & configFileName)
   if (currentRegisterRow > 0)
   {
     // check that the requested row is not too large
-    if (currentRegisterRow >= deviceListItem->getRegisterMapPointer()->getMapFileSize())
+    if (static_cast<unsigned int>(currentRegisterRow) >= deviceListItem->getRegisterMapPointer()->getMapFileSize())
     {
       QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
 			     QString("currentRegisterRow=") + QString::number(currentRegisterRow)
@@ -692,7 +692,7 @@ void QtHardMon::writeConfig(QString const & fileName)
     configWriter.setValue(CURRENT_REGISTER_ROW_STRING, _hardMonForm.registerListWidget->currentRow());
   }
   
-  configWriter.setValue(MAX_WORDS_STRING, _maxWords);
+  configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
 

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QStringList>
 
+/** Reader and writer class for config files. This class does the actual parsing and syntax checking. */
 class ConfigFileReaderWriter
 {
  public:
@@ -27,8 +28,16 @@ class ConfigFileReaderWriter
   /** Write the config to a file. Will throw std::ifstream::failure if not successful. */
   void write( std::string const & fileName ) const;   
 
+  /** Get a value by variabe name. The template function works for int, double and string.
+   *  In case the variable name is not in the current config (usually read from a file) the
+   *  default value is returned.
+   */
   template <class T> T getValue(std::string const & variableName, T const & defaultValue) const;
 
+  /** Set a value by variabe name. The template function works for int, double and string.
+   *  This adds (or replaces) the variable in the internal maps, so the variable will be 
+   *  written to file or can be read back by getValue().
+   */
   template <class T> void setValue(std::string const & variableName, T const & value);
 
   /** In case there are bad line during parsing, these can be accessed from a list after parsing. */
@@ -41,7 +50,7 @@ class ConfigFileReaderWriter
   std::map< std::string, double>  const & getDoubleValues() const {return _doubleValues;}
 
   /** Return a map with all the string variables (name and value) */
-  std::map< std::string, std::string> const & getStringValues() const {_stringValues;}
+  std::map< std::string, std::string> const & getStringValues() const {return _stringValues;}
 
 
  private:

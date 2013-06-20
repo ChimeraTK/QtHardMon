@@ -10,12 +10,16 @@
 
 class QwtPlot;
 
+/** The QtHadMon class which implements all the GUI functionality.
+ */
 class QtHardMon: public QMainWindow
 {
  Q_OBJECT
 
  public:
+  /** The constructor */
   QtHardMon(QWidget * parent = 0, Qt::WindowFlags flags = 0);
+  /* The destructor. Need not be virtual because we have no virtual functions */
   ~QtHardMon();
 
  public:
@@ -59,15 +63,9 @@ class QtHardMon: public QMainWindow
   
   Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.
   devPCIE _mtcaDevice; //< The instance of the device which is being accessed.
-
-  // maxWords is int so -1 can be used as invalid 
-  int _maxWords; //< The maximum number of words displayed in the values list.
+  unsigned int _maxWords; //< The maximum number of words displayed in the values list.
   QString _dmapFileName; //< The file name of the last opened dmap file
   QString _configFileName; //< Name of the config file (last saved or read)
-
-#if(USE_QWT)
-  QwtPlot *_qwtPlot; //< The instance of the qwt plot
-#endif
 
   /** Write the config to the given file name.
    */
@@ -171,6 +169,12 @@ class QtHardMon: public QMainWindow
   };
 
   DeviceListItem * _currentDeviceListItem; //< Pointer to the currently selected deviceListItem
+
+  // we keep this package dependent variable at the end to simpily the constructor initialiser list syntax
+  // with the ifdef
+#if(USE_QWT)
+  QwtPlot *_qwtPlot; //< The instance of the qwt plot
+#endif
 
 };
 
