@@ -1,6 +1,6 @@
  <!DOCTYPE RCC><RCC version="1.0">
  <qresource>
-     <file>MTCA4U_DESY_colors_lowRes.png</file>
-     <file>MTCA4U_by_DESY_lowRes.png</file>
+     <file>DESY_logo.png</file>
+     <file>DESY_logo_nofade.png</file>
  </qresource>
  </RCC>

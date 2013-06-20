@@ -5,6 +5,7 @@
 #include <QIcon>
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
+#include <MtcaMappedDevice/devPCIE.h>
 
 class QtHardMon: public QMainWindow
 {
@@ -24,11 +25,13 @@ class QtHardMon: public QMainWindow
   void plot();//< Plot the register content in a separate window.
   */
   void loadBoards();
-  void deviceSelected(QListWidgetItem * deviceItem);
+  void deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */);
+  void registerSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousRegisterItem */);
 
  private:
   
-  Ui::QtHardMonForm hardMonForm;
+  Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets 
+  devPCIE _mtcaDevice; //< The instance of the device which is being accessed
 
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */
@@ -57,19 +60,27 @@ class QtHardMon: public QMainWindow
       virtual ~DeviceListItem();
       
       /** Returns a reference to the deviceMapElement, i.e. the device information. */
-      dmapFile::dmapElem const & getDeviceMapElement();
+      dmapFile::dmapElem const & getDeviceMapElement() const;
       
       /** Returns a reference to the RegisterMapPointer (aka ptrmapFile) of this device. */
-      ptrmapFile const & getRegisterMapPointer();
+      ptrmapFile const & getRegisterMapPointer() const;
       
       /** The type of DeviceListItemType.  It's a user type because it is larger than QListWidgetItem::UserType.
        */
       static const int DeviceListItemType = QListWidgetItem::UserType + 1;
 
+      /** Get the row of the last register which had been selected.
+       */
+      int getLastSelectedRegisterRow() const;
+
+      /** Set the row of the last register which had been selected.
+       */
+      void setLastSelectedRegisterRow(int row);
+
     private:
       dmapFile::dmapElem _deviceMapElement; //< The instance of the DeviceMapElement
       ptrmapFile _registerMapPointer; //< The instance of the RegisterMapPointer
-      
+      int _lastSelectedRegisterRow; //< The last selected register before the item was deselected
   };
 
   /** A helper class to store listWidgetItems which also contain the mapElem information.
@@ -100,7 +111,7 @@ class QtHardMon: public QMainWindow
       virtual ~RegisterListItem();
       
       /** Returns a reference to the registerMapElement, i.e. the register information. */
-      mapFile::mapElem const & getRegisterMapElement();
+      mapFile::mapElem const & getRegisterMapElement() const;
       
       /** The type of RegisterListItemType.  It's a user type because it is larger than QListWidgetItem::UserType.
        */
@@ -108,8 +119,9 @@ class QtHardMon: public QMainWindow
 
     private:
       mapFile::mapElem _registerMapElement; //< The instance of the RegisterMapElement
-      
   };
+
+  DeviceListItem * _currentDeviceListItem; //< Pointer to the currently selected deviceListItem
 
 };
 

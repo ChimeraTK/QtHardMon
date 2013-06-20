@@ -1,6 +1,8 @@
 PROJECT(QtHardMon)
 cmake_minimum_required(VERSION 2.8)
 
+SET(CMAKE_BUILD_TYPE "Debug")
+
 FIND_PACKAGE(Qt4 REQUIRED)
 FIND_PACKAGE(MtcaMappedDevice 00.01 REQUIRED)
 

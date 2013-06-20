@@ -60,7 +60,7 @@
          <item>
           <widget class="QLabel" name="deviceFileLabel">
            <property name="text">
-            <string>Register bar</string>
+            <string>Device file</string>
            </property>
           </widget>
          </item>
@@ -339,7 +339,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="mtca4uLabel">
+       <widget class="QLabel" name="logoLabel">
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>
         </property>

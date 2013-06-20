@@ -6,24 +6,29 @@
 
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
+#include <MtcaMappedDevice/exDevPCIE.h>
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags)
+  : QMainWindow(parent, flags), _currentDeviceListItem(NULL)
 {
-  hardMonForm.setupUi(this);
+  _hardMonForm.setupUi(this);
 
   setWindowTitle("QtHardMon");
-  setWindowIcon(  QIcon(":/MTCA4U_DESY_colors_lowRes.png") );
-  hardMonForm.mtca4uLabel->setPixmap( QPixmap(":/MTCA4U_by_DESY_lowRes.png") );
+  setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
+  _hardMonForm.logoLabel->setPixmap( QPixmap(":/DESY_logo.png") );
   
 
-  connect(hardMonForm.deviceListWidget, SIGNAL(itemActivated(QListWidgetItem *)), 
-	  this, SLOT( deviceSelected(QListWidgetItem * ) ) );
+  connect(_hardMonForm.deviceListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
+	  this, SLOT( deviceSelected(QListWidgetItem *, QListWidgetItem *) ) );
 
-  connect(hardMonForm.loadBoardsButton, SIGNAL(clicked()),
+  connect(_hardMonForm.registerListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
+	  this, SLOT( registerSelected(QListWidgetItem *, QListWidgetItem *) ) );
+
+  connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
 					       
 
+  _hardMonForm.hexValuesCheckBox->setEnabled(false);
 }
 
 QtHardMon::~QtHardMon()
@@ -55,38 +60,154 @@ void  QtHardMon::loadBoards()
     return;
   }
 
-  hardMonForm.deviceListWidget->clear();
+  _hardMonForm.deviceListWidget->clear();
 
   for (dmapFilesParser::iterator deviceIter = filesParser.begin();
        deviceIter != filesParser.end(); ++deviceIter)
   {
     
     // fixme: Issue in libdevMap: why is the iterator on a pair?
-    hardMonForm.deviceListWidget->addItem( new DeviceListItem( (*deviceIter).first, (*deviceIter).second, 
+    _hardMonForm.deviceListWidget->addItem( new DeviceListItem( (*deviceIter).first, (*deviceIter).second, 
 							       (*deviceIter).first.dev_name.c_str(),
-							       hardMonForm.deviceListWidget) );
+							       _hardMonForm.deviceListWidget) );
   }
 
+  _hardMonForm.deviceListWidget->setCurrentRow(0);
 }
 
-void QtHardMon::deviceSelected(QListWidgetItem * deviceItem)
+void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */)
 {
-  std::cout << "Device " << deviceItem->text().toStdString() << " selected." << std::endl;
+  // When the deviceListWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
+  // We have to catch this here and just do nothing.
+  if (!deviceItem )
+  {
+      return;
+  }
+
+  //std::cout << "Device " << deviceItem->text().toStdString() << " selected." << std::endl;
 
   // the deviceItem actually is a DeviceListItemType. As this is a private slot it is save to assume this
   // and use a static cast.
   DeviceListItem * deviceListItem = static_cast<DeviceListItem *>(deviceItem);  
-  
+  _currentDeviceListItem = deviceListItem;
+
+  _hardMonForm.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().dev_name.c_str() );
+  _hardMonForm.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().dev_file.c_str() );
+  _hardMonForm.mapFileDisplay->setText( deviceListItem->getDeviceMapElement().map_file_name.c_str() );
+
+  _hardMonForm.registerListWidget->clear();
+   
   // get the registerMap and fill the RegisterListWidget
   //  ptrmapFile const & rmp = 
   for (mapFile::const_iterator registerIter = deviceListItem->getRegisterMapPointer()->begin(); 
        registerIter != deviceListItem->getRegisterMapPointer()->end(); ++registerIter)
   {
-    std::cout << *registerIter << std::endl;
-    hardMonForm.registerListWidget->addItem( new RegisterListItem( *registerIter, registerIter->reg_name.c_str(),  
-								   hardMonForm.registerListWidget ) );
+    //std::cout << *registerIter << std::endl;
+    _hardMonForm.registerListWidget->addItem( new RegisterListItem( *registerIter, registerIter->reg_name.c_str(),  
+								   _hardMonForm.registerListWidget ) );
   }
 
+  //close the previous device
+  _mtcaDevice.closeDev();
+  
+  //try to open a new device. If this fails disable the buttons and the registerValues
+  try
+  {
+    _mtcaDevice.openDev(  deviceListItem->getDeviceMapElement().dev_file );
+  }
+  catch(exDevPCIE & e)
+  {
+    QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
+			   QString("Could not open the device ")+ 
+			   deviceListItem->getDeviceMapElement().dev_file.c_str()+".",
+			   QMessageBox::Ok, this);
+    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+    messageBox.exec();
+    
+    // We diable the buttons and registerValues and return.
+    _hardMonForm.valuesTableWidget->setEnabled(false);
+    _hardMonForm.operationsGroupBox->setEnabled(false);
+    _hardMonForm.optionsGroupBox->setEnabled(false);
+
+    // we cannot exit here because the last selected row still has to be restored
+    //return;    
+  }
+
+  // enable all of the GUI in case it was deactivated before
+  if ( _mtcaDevice.isOpen())
+  {
+    _hardMonForm.valuesTableWidget->setEnabled(true);
+    _hardMonForm.operationsGroupBox->setEnabled(true);
+    _hardMonForm.optionsGroupBox->setEnabled(true);
+  }
+
+  _hardMonForm.registerListWidget->setCurrentRow( deviceListItem->getLastSelectedRegisterRow() );
+}
+
+void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */)
+{
+  // When the registerListWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
+  // We have to catch this here and just do nothing.
+  if (!registerItem )
+  {
+      return;
+  }
+
+  //std::cout << "Register " << registerItem->text().toStdString() << " selected." << std::endl;
+
+  // the registerItem actually is a RegisterListItemType. As this is a private slot it is save to assume this
+  // and use a static cast.
+  RegisterListItem * registerListItem = static_cast<RegisterListItem *>(registerItem);  
+  
+  _hardMonForm.registerNameDisplay->setText(    registerListItem->getRegisterMapElement().reg_name.c_str() );
+  _hardMonForm.registerBarDisplay->setText( QString::number( registerListItem->getRegisterMapElement().reg_bar ));
+  _hardMonForm.registerNElementsDisplay->setText(  
+				  QString::number( registerListItem->getRegisterMapElement().reg_elem_nr ));
+  _hardMonForm.registerAddressDisplay->setText(  
+				  QString::number( registerListItem->getRegisterMapElement().reg_address ));
+  _hardMonForm.registerSizeDisplay->setText(  
+				  QString::number( registerListItem->getRegisterMapElement().reg_size ));
+
+  // remember that this register has been selected
+  _currentDeviceListItem->setLastSelectedRegisterRow(  _hardMonForm.registerListWidget->currentRow() );
+
+ _hardMonForm.valuesTableWidget->setRowCount( registerListItem->getRegisterMapElement().reg_elem_nr );
+  for (int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
+  {
+    int registerContent = -1;
+
+    // Try reading from the file, but only when it's open.
+    // This avoids provoking exceptions in the "normal" data flow if a device could not be opened.
+    // One might want to browse the registers for theis size on an unopened device, e.g.
+    if ( _mtcaDevice.isOpen() )
+    {
+      // try to read from the device. If this fails this really is a problem.
+      try
+      {
+	_mtcaDevice.readReg( registerListItem->getRegisterMapElement().reg_address,
+			     &registerContent,
+			     registerListItem->getRegisterMapElement().reg_bar );
+      }
+      catch(exDevPCIE & e)
+      {
+	// the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
+	    QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
+			   QString("Error reading device ")+ 
+			   _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
+			   QMessageBox::Ok, this);
+	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+	    messageBox.exec();
+
+      }
+    }
+    
+    // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
+    // int and a proper editor (spin box) is used when editing in the GUI.
+    QTableWidgetItem * dataItem =  new QTableWidgetItem();
+    dataItem->setData( 0, QVariant( registerContent ) );
+    //_hardMonForm.valuesTableWidget-> setItem(row, 0, new QTableWidgetItem(tr("%1").arg(-1)));
+    _hardMonForm.valuesTableWidget-> setItem(row, 0, dataItem );
+  }
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
@@ -95,21 +216,23 @@ QtHardMon::DeviceListItem::DeviceListItem( dmapFile::dmapElem const & device_map
 					   ptrmapFile const & register_map_pointer,
 					   QListWidget * parent )
   : QListWidgetItem(parent, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-                                                 _registerMapPointer( register_map_pointer )
+    _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
+  
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( dmapFile::dmapElem const & device_map_emlement, 
 					   ptrmapFile const & register_map_pointer,
 					   const QString & text, QListWidget * parent )
   : QListWidgetItem(text, parent, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-	                                               _registerMapPointer( register_map_pointer )
+    _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( dmapFile::dmapElem const & device_map_emlement, 
 					   ptrmapFile const & register_map_pointer,
 					   const QIcon & icon, const QString & text, QListWidget * parent )
   : QListWidgetItem(icon, text, parent, DeviceListItemType),
-    _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer )
+    _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer ),
+    _lastSelectedRegisterRow(0)
 {}
 
 // non need to implement this. It is excactly what the default does.
@@ -130,14 +253,24 @@ QtHardMon::DeviceListItem::~DeviceListItem(){}
 //  _registerMapPointer=other._registerMapPointer;
 //}
 
- dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement()
+ dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
 }
 
-ptrmapFile const & QtHardMon::DeviceListItem::getRegisterMapPointer()
+ptrmapFile const & QtHardMon::DeviceListItem::getRegisterMapPointer() const
 {
   return _registerMapPointer;
+}
+
+int QtHardMon::DeviceListItem::getLastSelectedRegisterRow() const
+{
+  return _lastSelectedRegisterRow;
+}
+
+void QtHardMon::DeviceListItem::setLastSelectedRegisterRow(int row)
+{
+  _lastSelectedRegisterRow = row;
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
@@ -174,7 +307,7 @@ QtHardMon::RegisterListItem::~RegisterListItem(){}
 //  _registerMapElement=other._registerMapElement;
 //}
 
- mapFile::mapElem const & QtHardMon::RegisterListItem::getRegisterMapElement()
+ mapFile::mapElem const & QtHardMon::RegisterListItem::getRegisterMapElement() const
 {
   return _registerMapElement;
 }
