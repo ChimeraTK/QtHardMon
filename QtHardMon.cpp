@@ -33,7 +33,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define HEX_VALUES_STRING "hexValues"
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
 #define PLOT_AFTER_READ_STRING "plotAfterRead"
-
+#define REGISTER_EXTENSION_STRING "_REGISTER"
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
   : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _currentDeviceListItem(NULL)
@@ -588,6 +588,46 @@ void QtHardMon::loadConfig(QString const & configFileName)
     return;
   }
 
+  //loop all devices and try to determine the last used register
+  for (int deviceRow = 0; deviceRow < _hardMonForm.deviceListWidget->count(); ++deviceRow)
+  {
+    DeviceListItem * deviceListItem =  
+      static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
+    
+    std::string deviceRegisterString = deviceListItem->getDeviceMapElement().dev_name + REGISTER_EXTENSION_STRING;
+
+    // we put 0 as default, which should be a safe value because that is set already
+    int registerRow = configReader.getValue(deviceRegisterString, 0);
+
+    // We just ignore negative values. The user can use this undocumented "feature" to comment out
+    // the entry (although using a comment line is preferred).
+    if (registerRow > 0)
+    {
+      // check that the requested row is not too large
+      if (static_cast<unsigned int>(registerRow) >= deviceListItem->getRegisterMapPointer()->getMapFileSize())
+      {
+	QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
+			       QString(deviceRegisterString.c_str()) + " = "
+			       + QString::number(registerRow)
+			       + " is too large for device "+
+			       deviceListItem->getDeviceMapElement().dev_name.c_str() +".",
+			       QMessageBox::Ok, this);
+	messageBox.setInformativeText( QString("Mapping file ") + 
+				       deviceListItem->getDeviceMapElement().map_file_name.c_str() + 
+				       " only has " +
+				       QString::number( deviceListItem->getRegisterMapPointer()->getMapFileSize() )+
+				       " entries." );
+	messageBox.exec();
+      }
+      else
+      {
+	// currentRegisterRow is ok, set it in the device list item
+	deviceListItem->setLastSelectedRegisterRow(registerRow);
+      }
+    }// if (registerRow > 0)
+  }// for deviceRow
+  
+
   // search for the device string 
   std::string currentDeviceString = configReader.getValue(CURRENT_DEVICE_STRING, std::string());
 
@@ -615,6 +655,7 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // In case there is more than one entry with the same name we just pick the first one.
   DeviceListItem * deviceListItem = static_cast< DeviceListItem *>(*matchingDevices.begin());
 
+  //START_OBSOLETE: reading the CURRENT_REGISTER_ROW_STRING is only kept for backward compatibility
   //Before selecting the device we try to read and set the correct register
   int currentRegisterRow =  configReader.getValue(CURRENT_REGISTER_ROW_STRING, -1);
   
@@ -642,6 +683,7 @@ void QtHardMon::loadConfig(QString const & configFileName)
       deviceListItem->setLastSelectedRegisterRow(currentRegisterRow);
     }
   }
+  //END_OBSOLOETE
 
   // now we are ready to select the device
   _hardMonForm.deviceListWidget->setCurrentItem(deviceListItem);
@@ -709,9 +751,19 @@ void QtHardMon::writeConfig(QString const & fileName)
   {
     configWriter.setValue( CURRENT_DEVICE_STRING, deviceListItem->getDeviceMapElement().dev_name );
     // writing a register without item does not make sense, so we keep it in the if block
-    configWriter.setValue(CURRENT_REGISTER_ROW_STRING, _hardMonForm.registerListWidget->currentRow());
+    //    configWriter.setValue(CURRENT_REGISTER_ROW_STRING, _hardMonForm.registerListWidget->currentRow());
   }
   
+  // add a value to store the last register for each device
+  for (int deviceRow = 0; deviceRow < _hardMonForm.deviceListWidget->count(); ++deviceRow)
+  {
+    DeviceListItem * deviceListItem =  
+      static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
+    
+    std::string deviceRegisterString = deviceListItem->getDeviceMapElement().dev_name + REGISTER_EXTENSION_STRING;
+    configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterRow());
+  }
+
   configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
