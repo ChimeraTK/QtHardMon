@@ -1,0 +1,36 @@
+Source: qthardmon
+Priority: extra
+Maintainer: Martin Killenberg <martin.killenberg@desy.de>
+Build-Depends: debhelper (>= 8.0.0), cmake (>= 2.8), libqt4-dev (>= 4:4.6.2), dev-mtcamappeddevice (>=00.03.01)
+Standards-Version: 3.9.2
+#Section: libs #fixme: which section to use?
+#Homepage: <insert the upstream URL, if relevant>
+
+#No devel package for the time being. This is not a library but a GUI.
+#We might need this later to provide Matlab binding (directly use the 
+#QtHardMon inside Matlab instead of having two implementations of a GUI).
+#Package: dev-qthardmon
+#Section: libdevel
+#Architecture: any
+#Depends: qthardmon (= ${binary:Version})
+#Description: Header and cmake files for MTCA4U QtHardMon.
+# The files you need to compile against MTCA4U QtHardMon.
+
+Package: qthardmon-empty
+#Section: libdevel
+Architecture: all
+Depends: qthardmon (= ${binary:Version})
+Description: Empty package to trick dpkg-buildpackage.
+ I use this package so the qthardmon.install works. This somehow is only
+ the case if at least two packages are build. Just ignore it.
+
+Package: qthardmon
+#Section: libs #fixme: which section to use?
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: MTCA4U QtHardMon provides a GUI to access MTCA.4 devices.
+ MTCA4U is a software package which provides divers, a C++ API and tools for
+ hardware monitoring on MicroTCA.4 crates. QtHardMon is a GUI which provides
+ access to the registers on the board (display and modify). It also
+ includes simple plotting functionality.
+  
