@@ -1,8 +1,8 @@
 Source: qthardmon
 Priority: extra
 Maintainer: Martin Killenberg <martin.killenberg@desy.de>
-Build-Depends: debhelper (>= 8.0.0), cmake (>= 2.8), libqt4-dev (>= 4:4.6.2), dev-mtcamappeddevice (>=00.03.01)
-Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 7), cmake (>= 2.8), libqt4-dev (>= 4:4.6.2), dev-mtcamappeddevice (>=00.03.01)
+Standards-Version: 3.8.3
 #Section: libs #fixme: which section to use?
 #Homepage: <insert the upstream URL, if relevant>
 
