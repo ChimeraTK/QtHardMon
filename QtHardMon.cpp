@@ -51,6 +51,9 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.registerListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
 	  this, SLOT( registerSelected(QListWidgetItem *, QListWidgetItem *) ) );
 
+  connect(_hardMonForm.registerListWidget, SIGNAL(itemActivated(QListWidgetItem *)), 
+	  this, SLOT( registerSelected(QListWidgetItem *) ) );
+
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
 					       
@@ -311,6 +314,9 @@ void QtHardMon::read()
     return;
   }
 
+  std::cout << "this is QtHardMon::read()" 
+   << " reading register " <<  registerListItem->getRegisterMapElement().reg_name<< std::endl;
+
   // In order to fill all following rows with -1 in case of a read error, but not try to do any
   // further read attempts, we introduce a status variable.
   bool readError=false;
@@ -438,6 +444,8 @@ void QtHardMon::preferences()
 						      "which will lead to a segmentation fault. Default value is "+
 						      QString::number(DEFAULT_MAX_WORDS));
 
+  preferencesDialogForm.fontSizeSpinBox->setValue(font().pointSize());
+
   // set up the current value of maxWords
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
   preferencesDialogForm.maxWordsSpinBox->setValue( _maxWords );
@@ -451,6 +459,10 @@ void QtHardMon::preferences()
     // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
     // from the device
     registerSelected(_hardMonForm.registerListWidget->currentItem(),_hardMonForm.registerListWidget->currentItem());
+
+    QFont newFont(this->font());
+    newFont.setPointSize(preferencesDialogForm.fontSizeSpinBox->value());
+    QApplication::setFont(newFont);
   }
   
 }
@@ -960,4 +972,3 @@ QtHardMon::RegisterListItem::~RegisterListItem(){}
 {
   return _registerMapElement;
 }
-

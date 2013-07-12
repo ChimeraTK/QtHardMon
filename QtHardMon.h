@@ -40,7 +40,7 @@ class QtHardMon: public QMainWindow
   void loadBoards();
 
   void deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */);
-  void registerSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousRegisterItem */);
+  void registerSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousRegisterItem */ = NULL);
 
   void aboutQtHardMon(); //< Show the aboutQtHardMon
   void aboutQt(); //< Show the aboutQt dialog
