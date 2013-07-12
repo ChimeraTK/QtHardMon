@@ -3,21 +3,23 @@ Priority: extra
 Maintainer: Martin Killenberg <martin.killenberg@desy.de>
 Build-Depends: debhelper (>= 7), cmake (>= 2.8), libqt4-dev (>= 4:4.6.2), dev-mtcamappeddevice (>=00.03.01)
 Standards-Version: 3.8.3
-#Section: libs #fixme: which section to use?
+Section: utils
 #Homepage: <insert the upstream URL, if relevant>
 
 #No devel package for the time being. This is not a library but a GUI.
 #We might need this later to provide Matlab binding (directly use the 
 #QtHardMon inside Matlab instead of having two implementations of a GUI).
 #Package: dev-qthardmon
-#Section: libdevel
+#Section: devel
 #Architecture: any
 #Depends: qthardmon (= ${binary:Version})
 #Description: Header and cmake files for MTCA4U QtHardMon.
 # The files you need to compile against MTCA4U QtHardMon.
 
 Package: qthardmon-empty
-#Section: libdevel
+#The section is intentionally not set. Like this the package
+#cannot be (accidentally) installed on the repository server.
+#Section: 
 Architecture: all
 Depends: qthardmon (= ${binary:Version})
 Description: Empty package to trick dpkg-buildpackage.
@@ -25,7 +27,7 @@ Description: Empty package to trick dpkg-buildpackage.
  the case if at least two packages are build. Just ignore it.
 
 Package: qthardmon
-#Section: libs #fixme: which section to use?
+Section: utils
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: MTCA4U QtHardMon provides a GUI to access MTCA.4 devices.
