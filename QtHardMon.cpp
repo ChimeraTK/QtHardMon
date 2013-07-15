@@ -331,8 +331,8 @@ void QtHardMon::read()
     return;
   }
 
-  std::cout << "this is QtHardMon::read()" 
-   << " reading register " <<  registerListItem->getRegisterMapElement().reg_name<< std::endl;
+//  std::cout << "this is QtHardMon::read()" 
+//   << " reading register " <<  registerListItem->getRegisterMapElement().reg_name<< std::endl;
 
   // In order to fill all following rows with -1 in case of a read error, but not try to do any
   // further read attempts, we introduce a status variable.
@@ -1033,7 +1033,7 @@ void QtHardMon::registerClicked(QListWidgetItem * /*registerItem*/)
   // registerSelected method.
   if (!_readOnClick)
   {
-    std::cout << "Ignoring click" <<std::endl;
+    //    std::cout << "Ignoring click" <<std::endl;
     return;
   }
 
