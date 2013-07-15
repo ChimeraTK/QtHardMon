@@ -34,9 +34,13 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
 #define PLOT_AFTER_READ_STRING "plotAfterRead"
 #define REGISTER_EXTENSION_STRING "_REGISTER"
+#define FONT_SIZE_STRING "fontSize"
+#define AUTO_READ_STRING "autoRead"
+#define READ_ON_CLICK_STRING "readOnClick"
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _currentDeviceListItem(NULL)
+  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _autoRead(true),
+    _readOnClick(true), _currentDeviceListItem(NULL)
 {
   _hardMonForm.setupUi(this);
 
@@ -52,7 +56,7 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
 	  this, SLOT( registerSelected(QListWidgetItem *, QListWidgetItem *) ) );
 
   connect(_hardMonForm.registerListWidget, SIGNAL(itemActivated(QListWidgetItem *)), 
-	  this, SLOT( registerSelected(QListWidgetItem *) ) );
+	  this, SLOT( registerClicked(QListWidgetItem *) ) );
 
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
@@ -248,6 +252,7 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   }
 
   _hardMonForm.registerListWidget->setCurrentRow( deviceListItem->getLastSelectedRegisterRow() );
+
 }
 
 void QtHardMon::closeDevice()
@@ -299,8 +304,20 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   int nRows = ( registerListItem->getRegisterMapElement().reg_elem_nr >  _maxWords ? 
 		   _maxWords + 1 :  registerListItem->getRegisterMapElement().reg_elem_nr );
 
+  if (!_autoRead)
+  {
+    // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
+    // In addition the write button is deactivated so the invalid items cannot be written to the register.
+    _hardMonForm.valuesTableWidget->clear();
+    _hardMonForm.writeButton->setEnabled(false);
+  }
+
   _hardMonForm.valuesTableWidget->setRowCount( nRows );
-  read();
+  
+  if (_autoRead)
+  {
+    read();
+  }
 }
 
 void QtHardMon::read()
@@ -364,6 +381,19 @@ void QtHardMon::read()
       dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
       _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
       break;
+    }
+
+    if (readError)
+    {
+      // Disable the write button. The register size in the mapping might be wrong.
+      // Writing is only permitted after a successful read.
+      _hardMonForm.writeButton->setEnabled(false);
+    }
+    else
+    {
+      //(re)enable the write button. It can habe been off due to a read error or if the register had not been
+      // read before.
+      _hardMonForm.writeButton->setEnabled(true);      
     }
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
@@ -445,6 +475,8 @@ void QtHardMon::preferences()
 						      QString::number(DEFAULT_MAX_WORDS));
 
   preferencesDialogForm.fontSizeSpinBox->setValue(font().pointSize());
+  preferencesDialogForm.autoReadCheckBox->setChecked(_autoRead);
+  preferencesDialogForm.readOnClickCheckBox->setChecked(_readOnClick);
 
   // set up the current value of maxWords
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
@@ -463,6 +495,9 @@ void QtHardMon::preferences()
     QFont newFont(this->font());
     newFont.setPointSize(preferencesDialogForm.fontSizeSpinBox->value());
     QApplication::setFont(newFont);
+
+    _readOnClick = preferencesDialogForm.readOnClickCheckBox->isChecked();
+    _autoRead = preferencesDialogForm.autoReadCheckBox->isChecked();
   }
   
 }
@@ -583,6 +618,20 @@ void QtHardMon::loadConfig(QString const & configFileName)
 						 _plotWindow->plotAfterReadIsChecked() ? 1 : 0);
    _plotWindow->setPlotAfterRead( plotAfterReadFlag );
 
+   _readOnClick = static_cast<bool>( configReader.getValue(READ_ON_CLICK_STRING, _readOnClick ? 1 : 0 ) );
+   _autoRead = static_cast<bool>( configReader.getValue(AUTO_READ_STRING, _autoRead ? 1 : 0 ) );
+
+   int fontSize = configReader.getValue( FONT_SIZE_STRING, font().pointSize() );
+   // Check validity of the font size.
+   if (fontSize < 1 || fontSize > 99)
+   {
+   }
+   else
+   {
+     QFont newFont(this->font());
+     newFont.setPointSize(fontSize);
+     QApplication::setFont(newFont);
+   }
     
   // now read the mapping file, device and register. If anything goes wrong we can just exit the function because
   // all other variables have already been processed.
@@ -781,6 +830,9 @@ void QtHardMon::writeConfig(QString const & fileName)
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(PLOT_AFTER_READ_STRING, _plotWindow->plotAfterReadIsChecked() ? 1 : 0 );
+  configWriter.setValue(FONT_SIZE_STRING, font().pointSize());
+  configWriter.setValue(AUTO_READ_STRING, _autoRead ? 1 : 0 );
+  configWriter.setValue(READ_ON_CLICK_STRING, _readOnClick ? 1 : 0 );
 
   // this 
    try{
@@ -971,4 +1023,19 @@ QtHardMon::RegisterListItem::~RegisterListItem(){}
  mapFile::mapElem const & QtHardMon::RegisterListItem::getRegisterMapElement() const
 {
   return _registerMapElement;
+}
+
+void QtHardMon::registerClicked(QListWidgetItem * /*registerItem*/)
+{
+  // RegisterListItem * registerListItem = static_cast< RegisterListItem *>(registerItem);
+
+  // Do not execute the read if the corresponding flag is off
+  // registerSelected method.
+  if (!_readOnClick)
+  {
+    std::cout << "Ignoring click" <<std::endl;
+    return;
+  }
+
+  read();
 }

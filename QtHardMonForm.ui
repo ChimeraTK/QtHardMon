@@ -119,7 +119,11 @@
        </widget>
       </item>
       <item>
-       <widget class="QListWidget" name="registerListWidget"/>
+       <widget class="QListWidget" name="registerListWidget">
+        <property name="toolTip">
+         <string>Clicking on an already selected register can trigger a read up to the 'number of words on auto read' (if activated in the preferences).</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -323,6 +327,9 @@
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
           <widget class="QPushButton" name="readButton">
+           <property name="toolTip">
+            <string>Read all words in the register up to the maximum defined in the preferences. This is not limited by the number of words on auto read.</string>
+           </property>
            <property name="text">
             <string>Read</string>
            </property>

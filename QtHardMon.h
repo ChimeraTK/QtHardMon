@@ -37,10 +37,17 @@ class QtHardMon: public QMainWindow
 
   void read();//< Read register from device.
   void write();//< Read register to device.
-  void loadBoards();
+  void loadBoards();//< Read a dmap file
 
+  /** The device has changed. Read the meta data for this device and select the last active recister in this
+   *  device.
+   */
   void deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */);
-  void registerSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousRegisterItem */ = NULL);
+  /** The register has changed. Read the meta data for this register and perform an auto-read if this is
+   *  activated.
+   */
+  void registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */ = NULL);
+  void registerClicked(QListWidgetItem * registerItem); //< Executed if a register is clicked
 
   void aboutQtHardMon(); //< Show the aboutQtHardMon
   void aboutQt(); //< Show the aboutQt dialog
@@ -65,6 +72,8 @@ class QtHardMon: public QMainWindow
   Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.
   devPCIE _mtcaDevice; //< The instance of the device which is being accessed.
   unsigned int _maxWords; //< The maximum number of words displayed in the values list.
+  bool _autoRead; //< Flag whether to automatically read on register change
+  bool _readOnClick; //< Flag wheter to read on click in the register list
   QString _dmapFileName; //< The file name of the last opened dmap file
   QString _configFileName; //< Name of the config file (last saved or read)
 
@@ -166,7 +175,7 @@ class QtHardMon: public QMainWindow
       static const int RegisterListItemType = QListWidgetItem::UserType + 2;
 
     private:
-      mapFile::mapElem _registerMapElement; //< The instance of the RegisterMapElement
+      mapFile::mapElem _registerMapElement; //< The instance of the RegisterMapElement.
   };
 
   DeviceListItem * _currentDeviceListItem; //< Pointer to the currently selected deviceListItem
