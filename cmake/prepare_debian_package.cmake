@@ -26,3 +26,10 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/make_debian_package.sh.in
 add_custom_target(debian_package ${CMAKE_BINARY_DIR}/make_debian_package.sh
                   COMMENT Building debian package for tag ${MtcaMappedDevice_VERSION})
 
+#For convenience: Also create an install script for DESY
+set(PACKAGE_NAME "qthardmon")
+set(PACKAGE_FILES_WILDCARDS "${PACKAGE_NAME}_*.deb ${PACKAGE_NAME}_*.changes")
+
+configure_file(${CMAKE_SOURCE_DIR}/cmake/install_debian_package_at_DESY.sh.in
+               install_debian_package_at_DESY.sh @ONLY)
+
