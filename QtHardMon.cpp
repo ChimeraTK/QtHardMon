@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <limits>
+#include <sstream>
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -304,8 +305,7 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   int nRows = ( registerListItem->getRegisterMapElement().reg_elem_nr >  _maxWords ? 
 		   _maxWords + 1 :  registerListItem->getRegisterMapElement().reg_elem_nr );
 
-  if (!_autoRead)
-  {
+  if (!_autoRead){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
     _hardMonForm.valuesTableWidget->clear();
@@ -313,9 +313,17 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   }
 
   _hardMonForm.valuesTableWidget->setRowCount( nRows );
+
+  // set the 
+  for( int row=0; row < nRows; ++row ){
+    std::stringstream rowAsText;
+    rowAsText << row;
+    QTableWidgetItem * tableWidgetItem = new QTableWidgetItem();
+    tableWidgetItem->setText( rowAsText.str().c_str() );
+    _hardMonForm.valuesTableWidget->setVerticalHeaderItem(row, tableWidgetItem );
+  }
   
-  if (_autoRead)
-  {
+  if (_autoRead){
     read();
   }
 }
