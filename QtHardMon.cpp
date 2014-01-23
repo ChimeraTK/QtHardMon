@@ -14,6 +14,7 @@
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
+using namespace mtca4u;
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
 // => need to improve the api
@@ -142,7 +143,7 @@ void  QtHardMon::loadBoards()
 bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
 {
 
-  dmapFilesParser filesParser;  
+  mtca4u::dmapFilesParser filesParser;  
 
   try{
     filesParser.parse_file(dmapFileName.toStdString());
@@ -933,23 +934,23 @@ void QtHardMon::unckeckShowPlotWindow()
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
-QtHardMon::DeviceListItem::DeviceListItem( dmapFile::dmapElem const & device_map_emlement, 
-					   ptrmapFile const & register_map_pointer,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
+					   mtca4u::ptrmapFile const & register_map_pointer,
 					   QListWidget * parent )
   : QListWidgetItem(parent, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
   
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( dmapFile::dmapElem const & device_map_emlement, 
-					   ptrmapFile const & register_map_pointer,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
+					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QString & text, QListWidget * parent )
   : QListWidgetItem(text, parent, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( dmapFile::dmapElem const & device_map_emlement, 
-					   ptrmapFile const & register_map_pointer,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
+					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QIcon & icon, const QString & text, QListWidget * parent )
   : QListWidgetItem(icon, text, parent, DeviceListItemType),
     _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer ),
@@ -974,12 +975,12 @@ QtHardMon::DeviceListItem::~DeviceListItem(){}
 //  _registerMapPointer=other._registerMapPointer;
 //}
 
- dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
+ mtca4u::dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
 }
 
-ptrmapFile const & QtHardMon::DeviceListItem::getRegisterMapPointer() const
+mtca4u::ptrmapFile const & QtHardMon::DeviceListItem::getRegisterMapPointer() const
 {
   return _registerMapPointer;
 }
@@ -996,17 +997,17 @@ void QtHardMon::DeviceListItem::setLastSelectedRegisterRow(int row)
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
-QtHardMon::RegisterListItem::RegisterListItem( mapFile::mapElem const & register_map_emlement, 
+QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
 					       QListWidget * parent )
   : QListWidgetItem(parent, RegisterListItemType), _registerMapElement( register_map_emlement )
 {}
 
-QtHardMon::RegisterListItem::RegisterListItem( mapFile::mapElem const & register_map_emlement, 
+QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
 					       const QString & text, QListWidget * parent )
   : QListWidgetItem(text, parent, RegisterListItemType), _registerMapElement( register_map_emlement )
 {}
 
-QtHardMon::RegisterListItem::RegisterListItem( mapFile::mapElem const & register_map_emlement, 
+QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
 					       const QIcon & icon, const QString & text, QListWidget * parent )
   : QListWidgetItem(icon, text, parent, RegisterListItemType),
     _registerMapElement( register_map_emlement )
@@ -1028,7 +1029,7 @@ QtHardMon::RegisterListItem::~RegisterListItem(){}
 //  _registerMapElement=other._registerMapElement;
 //}
 
- mapFile::mapElem const & QtHardMon::RegisterListItem::getRegisterMapElement() const
+ mtca4u::mapFile::mapElem const & QtHardMon::RegisterListItem::getRegisterMapElement() const
 {
   return _registerMapElement;
 }
