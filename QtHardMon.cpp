@@ -93,9 +93,14 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.quitAction, SIGNAL(triggered()),
 	  this, SLOT(close()));
 
+  connect(_hardMonForm.openCloseButton, SIGNAL(clicked()),
+	  this, SLOT(openCloseDevice()));
+
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
   _hardMonForm.operationsGroupBox->setEnabled(false);
   _hardMonForm.optionsGroupBox->setEnabled(false);
+  _hardMonForm.deviceStatusGroupBox->setEnabled(false);
+  _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
 
   // The following widgets are diabled because they are not implemented yet
   _hardMonForm.hexValuesCheckBox->setEnabled(false);
@@ -187,6 +192,8 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
 
 void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */)
 {
+  _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
+
   // When the deviceListWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
   // We have to catch this here and return. Before returning we clear the device specific display info,
   // close the device and empty the register list.
@@ -195,12 +202,17 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     _hardMonForm.deviceNameDisplay->setText( "" );
     _hardMonForm.deviceFileDisplay->setText( "" );
     _hardMonForm.mapFileDisplay->setText( "" );
+    _hardMonForm.deviceStatusGroupBox->setEnabled(false);
+    _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
     closeDevice();
     _hardMonForm.registerListWidget->clear();
+
     return;
   }
 
   //std::cout << "Device " << deviceItem->text().toStdString() << " selected." << std::endl;
+  _hardMonForm.deviceStatusGroupBox->setEnabled(true);
+  _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
 
   // the deviceItem actually is a DeviceListItemType. As this is a private slot it is safe to assume this
   // and use a static cast.
@@ -226,35 +238,44 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   //close the previous device. This also disables the relevant GUI elements
   closeDevice();
   
+  //opening the device enables the gui elements if success
+  openDevice( deviceListItem->getDeviceMapElement().dev_file );
+
+  _hardMonForm.registerListWidget->setCurrentRow( deviceListItem->getLastSelectedRegisterRow() );
+
+}
+
+void QtHardMon::openDevice( std::string const & deviceFileName )
+{
   //try to open a new device. If this fails disable the buttons and the registerValues
   try
   {
-    _mtcaDevice.openDev(  deviceListItem->getDeviceMapElement().dev_file );
-  }
-  catch(exDevPCIE & e)
-  {
-    QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			   QString("Could not open the device ")+ 
-			   deviceListItem->getDeviceMapElement().dev_file.c_str()+".",
-			   QMessageBox::Ok, this);
-    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
-    messageBox.exec();
+    // this might throw
+    _mtcaDevice.openDev( deviceFileName );
     
-    // we cannot exit here because the last selected row still has to be restored
-    //return;    
-  }
-
-  // enable all of the GUI in case it was deactivated before
-  if ( _mtcaDevice.isOpen())
-  {
+    // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
     _hardMonForm.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
+
+    _hardMonForm.openClosedLabel->setText(
+	 QApplication::translate("QtHardMonForm",
+				 "Device is open.", 0,
+				 QApplication::UnicodeUTF8));
+    _hardMonForm.openCloseButton->setText(
+	 QApplication::translate("QtHardMonForm", "Close", 0,
+				 QApplication::UnicodeUTF8));
   }
-
-  _hardMonForm.registerListWidget->setCurrentRow( deviceListItem->getLastSelectedRegisterRow() );
-
+  catch(exDevPCIE & e)
+  {
+    QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
+			   QString("Could not open the device ")+
+			   deviceFileName.c_str()+".",
+			   QMessageBox::Ok, this);
+    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+    messageBox.exec();
+  }
 }
 
 void QtHardMon::closeDevice()
@@ -264,6 +285,13 @@ void QtHardMon::closeDevice()
    _hardMonForm.operationsGroupBox->setEnabled(false);
    _hardMonForm.optionsGroupBox->setEnabled(false);
    _plotWindow->setEnabled(false);
+
+   _hardMonForm.openClosedLabel->setText(
+		QApplication::translate("QtHardMonForm", "Device is closed.", 0,
+					QApplication::UnicodeUTF8));
+   _hardMonForm.openCloseButton->setText(
+		QApplication::translate("QtHardMonForm", "Open", 0,
+					QApplication::UnicodeUTF8));
 }
 
 void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */)
@@ -370,8 +398,11 @@ void QtHardMon::read()
 			   QString("Error reading from device ")+ 
 			   _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
 			   QMessageBox::Ok, this);
-	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
+					  +QString("\n\nClosing the device."));
 	    messageBox.exec();
+
+	    closeDevice();
 
 	    // Turn on the read error flag. No further read attempts on this register.
 	    readError=true;
@@ -456,8 +487,11 @@ void QtHardMon::write()
 			   QString("Error writing to device ")+ 
 			   _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
 			   QMessageBox::Ok, this);
-	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
+	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
+					  +QString("\n\nClosing the device."));
 	    messageBox.exec();
+
+	    closeDevice();
 
       }//catch
 
@@ -1047,4 +1081,12 @@ void QtHardMon::registerClicked(QListWidgetItem * /*registerItem*/)
   }
 
   read();
+}
+
+void QtHardMon::openCloseDevice(){
+  if (_mtcaDevice.isOpen()){
+    closeDevice();
+  }else{
+    openDevice( _currentDeviceListItem->getDeviceMapElement().dev_file );
+  }
 }

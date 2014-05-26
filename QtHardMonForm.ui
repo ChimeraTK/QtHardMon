@@ -10,6 +10,12 @@
     <height>571</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -29,76 +35,103 @@
         <item>
          <widget class="QListWidget" name="deviceListWidget"/>
         </item>
+        <item>
+         <widget class="QGroupBox" name="deviceStatusGroupBox">
+          <property name="title">
+           <string>Device status</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLabel" name="openClosedLabel">
+               <property name="text">
+                <string>Device is closed.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="openCloseButton">
+               <property name="text">
+                <string>Open</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="devicePropertiesGroupBox">
+          <property name="title">
+           <string>Device properties</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QLabel" name="deviceNameLabel">
+             <property name="text">
+              <string>Device name</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="deviceNameDisplay">
+             <property name="frameShape">
+              <enum>QFrame::Panel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="deviceFileLabel">
+             <property name="text">
+              <string>Device file</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="deviceFileDisplay">
+             <property name="frameShape">
+              <enum>QFrame::Panel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="mapFileLabel">
+             <property name="text">
+              <string>Map file</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="mapFileDisplay">
+             <property name="frameShape">
+              <enum>QFrame::Panel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="devicePropertiesGroupBox">
-        <property name="title">
-         <string>Device properties</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
-         <item>
-          <widget class="QLabel" name="deviceNameLabel">
-           <property name="text">
-            <string>Device name</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="deviceNameDisplay">
-           <property name="frameShape">
-            <enum>QFrame::Panel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="deviceFileLabel">
-           <property name="text">
-            <string>Device file</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="deviceFileDisplay">
-           <property name="frameShape">
-            <enum>QFrame::Panel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="mapFileLabel">
-           <property name="text">
-            <string>Map file</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="mapFileDisplay">
-           <property name="frameShape">
-            <enum>QFrame::Panel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="loadBoardsButton">
@@ -385,7 +418,7 @@
      <x>0</x>
      <y>0</y>
      <width>978</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">

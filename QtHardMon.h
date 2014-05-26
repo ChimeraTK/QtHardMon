@@ -59,6 +59,11 @@ class QtHardMon: public QMainWindow
    */
   void loadConfig();
 
+  /** React on the open/close button. Calls openDevice or closeDevice, depending whether the
+   *  device is closed/open.
+   */
+  void openCloseDevice();
+
   /** Save the config to the same file. If no config was loaded or previously saved, saveConfigAs is called.
    */
   void saveConfig();
@@ -89,6 +94,10 @@ class QtHardMon: public QMainWindow
   /** Close the device and disable the access buttons.
    */
   void closeDevice();
+
+  /** Open the device and update the GUI accordingly.
+   */
+  void openDevice(std::string const & deviceFileName );
 
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */
