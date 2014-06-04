@@ -49,7 +49,6 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   setWindowTitle("QtHardMon");
   setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
   _hardMonForm.logoLabel->setPixmap( QPixmap(":/DESY_logo.png") );
-  
 
   connect(_hardMonForm.deviceListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
 	  this, SLOT( deviceSelected(QListWidgetItem *, QListWidgetItem *) ) );
@@ -59,6 +58,9 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
 
   connect(_hardMonForm.registerListWidget, SIGNAL(itemActivated(QListWidgetItem *)), 
 	  this, SLOT( registerClicked(QListWidgetItem *) ) );
+
+  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
+	  this, SLOT( updateHexIfDecChanged(int, int) ) );
 
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
@@ -341,6 +343,12 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     _hardMonForm.writeButton->setEnabled(false);
   }
 
+  QTableWidgetItem *decHeaderItem = _hardMonForm.valuesTableWidget->horizontalHeaderItem(0);
+  decHeaderItem->setText(QApplication::translate("QtHardMonForm", "dec", 0, QApplication::UnicodeUTF8));
+
+  QTableWidgetItem *hexHeaderItem = _hardMonForm.valuesTableWidget->horizontalHeaderItem(1);
+  hexHeaderItem->setText(QApplication::translate("QtHardMonForm", "hex", 0, QApplication::UnicodeUTF8));
+
   _hardMonForm.valuesTableWidget->setRowCount( nRows );
 
   // set the 
@@ -420,6 +428,7 @@ void QtHardMon::read()
       dataItem->setFlags( dataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
       dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
       _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
+      // no need to set the hex item
       break;
     }
 
@@ -438,7 +447,7 @@ void QtHardMon::read()
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
-
+    
   }// for row
  
   // check if plotting after reading is requested
@@ -1088,5 +1097,25 @@ void QtHardMon::openCloseDevice(){
     closeDevice();
   }else{
     openDevice( _currentDeviceListItem->getDeviceMapElement().dev_file );
+  }
+}
+
+void QtHardMon::updateHexIfDecChanged( int row, int column ){
+  // only update the hex value if when the dec value (column 0) changed
+  // to avoid an endless loop. This function is also triggered by
+  // itself when the hex value is changed.
+  if (column==0){
+    
+    QTableWidgetItem * hexDataItem =  new QTableWidgetItem();
+    // for the time being: make the code easy, hex is just for display
+    hexDataItem->setFlags( hexDataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
+    
+    std::stringstream hexValueAsText;
+    hexValueAsText << "0x" << std::hex 
+		   << _hardMonForm.valuesTableWidget->item(row, column)
+                                                    ->data(0 /*default role*/).toInt();
+    hexDataItem->setText(hexValueAsText.str().c_str());
+    _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem );
+    
   }
 }

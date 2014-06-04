@@ -72,6 +72,8 @@ class QtHardMon: public QMainWindow
    */
   void saveConfigAs();
 
+  void updateHexIfDecChanged( int row, int column );
+
  private:
   
   Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.

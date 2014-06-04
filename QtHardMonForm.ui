@@ -287,18 +287,24 @@
             <bool>true</bool>
            </property>
            <property name="columnCount">
-            <number>1</number>
+            <number>2</number>
            </property>
-           <attribute name="horizontalHeaderVisible">
-            <bool>false</bool>
-           </attribute>
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>20</number>
            </attribute>
            <attribute name="verticalHeaderHighlightSections">
             <bool>false</bool>
            </attribute>
-           <column/>
+           <column>
+            <property name="text">
+             <string>dec</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>hex</string>
+            </property>
+           </column>
           </widget>
          </item>
         </layout>
