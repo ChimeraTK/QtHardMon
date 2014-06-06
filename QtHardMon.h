@@ -101,6 +101,10 @@ class QtHardMon: public QMainWindow
    */
   void openDevice(std::string const & deviceFileName );
 
+  /** Clear the valuesTableWidget and restore the dec/hex headers.
+   */
+  void clearValuesTableWidget();
+
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */
   class DeviceListItem: public QListWidgetItem

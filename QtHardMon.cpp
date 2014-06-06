@@ -308,8 +308,8 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     _hardMonForm.registerNElementsDisplay->setText("");
     _hardMonForm.registerAddressDisplay->setText("");
     _hardMonForm.registerSizeDisplay->setText("");
-    _hardMonForm.valuesTableWidget->clear();
-    
+    clearValuesTableWidget();
+
     return;
   }
 
@@ -339,15 +339,9 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   if (!_autoRead){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
-    _hardMonForm.valuesTableWidget->clear();
+    clearValuesTableWidget();
     _hardMonForm.writeButton->setEnabled(false);
   }
-
-  QTableWidgetItem *decHeaderItem = _hardMonForm.valuesTableWidget->horizontalHeaderItem(0);
-  decHeaderItem->setText(QApplication::translate("QtHardMonForm", "dec", 0, QApplication::UnicodeUTF8));
-
-  QTableWidgetItem *hexHeaderItem = _hardMonForm.valuesTableWidget->horizontalHeaderItem(1);
-  hexHeaderItem->setText(QApplication::translate("QtHardMonForm", "hex", 0, QApplication::UnicodeUTF8));
 
   _hardMonForm.valuesTableWidget->setRowCount( nRows );
 
@@ -363,6 +357,20 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   if (_autoRead){
     read();
   }
+}
+
+void QtHardMon::clearValuesTableWidget(){
+  _hardMonForm.valuesTableWidget->clear();
+  //restore the dec/hex header
+  _hardMonForm.valuesTableWidget->setColumnCount(2);
+  
+  QTableWidgetItem *decHeaderItem =  new QTableWidgetItem();
+  decHeaderItem->setText(QApplication::translate("QtHardMonForm", "dec", 0, QApplication::UnicodeUTF8));
+  _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(0, decHeaderItem);
+  
+  QTableWidgetItem *hexHeaderItem = new QTableWidgetItem();
+  hexHeaderItem->setText(QApplication::translate("QtHardMonForm", "hex", 0, QApplication::UnicodeUTF8));
+  _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(1, hexHeaderItem);
 }
 
 void QtHardMon::read()
