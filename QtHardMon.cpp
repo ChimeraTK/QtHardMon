@@ -394,13 +394,19 @@ void QtHardMon::read()
     size_t nBytesToRead = std::min(nWordsInRegister,_maxWords) * WORD_SIZE_IN_BYTES;
 
     try{
-      _mtcaDevice.readArea( registerListItem->getRegisterMapElement().reg_address,
-			    &(inputBuffer[0]),
-			    nBytesToRead,
-			    registerListItem->getRegisterMapElement().reg_bar );
-      
-    }
-    catch(exDevPCIE & e){
+      // valid pcie bars are 0 to 5, bar 0xD is used to indicate that transfer should be done via DMA
+      if (registerListItem->getRegisterMapElement().reg_bar == 0xD){
+	_mtcaDevice.readDMA( registerListItem->getRegisterMapElement().reg_address,
+			     &(inputBuffer[0]),
+			     nBytesToRead,
+			     registerListItem->getRegisterMapElement().reg_bar );	
+      }else{ // normal read
+	_mtcaDevice.readArea( registerListItem->getRegisterMapElement().reg_address,
+			      &(inputBuffer[0]),
+			      nBytesToRead,
+			      registerListItem->getRegisterMapElement().reg_bar );
+      }
+    }catch(exDevPCIE & e){
       closeDevice();
       
       // the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
