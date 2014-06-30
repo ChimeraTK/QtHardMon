@@ -384,47 +384,52 @@ void QtHardMon::read()
     return;
   }
 
-//  std::cout << "this is QtHardMon::read()" 
-//   << " reading register " <<  registerListItem->getRegisterMapElement().reg_name<< std::endl;
-
-  // In order to fill all following rows with -1 in case of a read error, but not try to do any
-  // further read attempts, we introduce a status variable.
+  unsigned int nWordsInRegister = registerListItem->getRegisterMapElement().reg_elem_nr;
+  // prepare a read buffer with the correct size
+  std::vector<int> inputBuffer(nWordsInRegister);
+  // In order to fill all rows with -1 in case of a read error we introduce a status variable.
   bool readError=false;
 
-  for (unsigned int row=0; row < registerListItem->getRegisterMapElement().reg_elem_nr; row++)
-  {
-    int registerContent = -1;
+  if ( _mtcaDevice.isOpen() ){
+    size_t nBytesToRead = std::min(nWordsInRegister,_maxWords) * WORD_SIZE_IN_BYTES;
 
-    // Try reading from the file, but only when it's open.
-    // This avoids provoking exceptions in the "normal" data flow if a device could not be opened.
-    // One might want to browse the registers for theis size on an unopened device, e.g.
-    if ( _mtcaDevice.isOpen() && !readError)
-    {
-      // try to read from the device. If this fails this really is a problem.
-      try
-      {
-	_mtcaDevice.readReg( registerListItem->getRegisterMapElement().reg_address + row*WORD_SIZE_IN_BYTES,
-			     &registerContent,
-			     registerListItem->getRegisterMapElement().reg_bar );
-      }
-      catch(exDevPCIE & e)
-      {
-	// the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
-	    QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
-			   QString("Error reading from device ")+ 
-			   _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
-			   QMessageBox::Ok, this);
-	    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
-					  +QString("\n\nClosing the device."));
-	    messageBox.exec();
-
-	    closeDevice();
-
-	    // Turn on the read error flag. No further read attempts on this register.
-	    readError=true;
-      }
+    try{
+      _mtcaDevice.readArea( registerListItem->getRegisterMapElement().reg_address,
+			    &(inputBuffer[0]),
+			    nBytesToRead,
+			    registerListItem->getRegisterMapElement().reg_bar );
+      
     }
-    
+    catch(exDevPCIE & e){
+      // the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
+      QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
+			     QString("Error reading from device ")+ 
+			     _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
+			     QMessageBox::Ok, this);
+      messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
+				    +QString("\n\nClosing the device."));
+      messageBox.exec();
+      
+      closeDevice();
+      
+      // Turn on the read error flag. No further read attempts on this register.
+      readError=true;
+    }
+  }
+
+  if (readError){
+      // Disable the write button. The register size in the mapping might be wrong.
+      // Writing is only permitted after a successful read.
+      _hardMonForm.writeButton->setEnabled(false);
+  }
+  else{
+    //(re)enable the write button. It can habe been off due to a read error or if the register had not been
+    // read before.
+    _hardMonForm.writeButton->setEnabled(true);      
+  }
+
+  for (unsigned int row=0; row < nWordsInRegister; row++)
+  {
     // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
     // int and a proper editor (spin box) is used when editing in the GUI.
     QTableWidgetItem * dataItem =  new QTableWidgetItem();
@@ -440,18 +445,7 @@ void QtHardMon::read()
       break;
     }
 
-    if (readError)
-    {
-      // Disable the write button. The register size in the mapping might be wrong.
-      // Writing is only permitted after a successful read.
-      _hardMonForm.writeButton->setEnabled(false);
-    }
-    else
-    {
-      //(re)enable the write button. It can habe been off due to a read error or if the register had not been
-      // read before.
-      _hardMonForm.writeButton->setEnabled(true);      
-    }
+    int registerContent = (readError?-1:inputBuffer[row]);
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
