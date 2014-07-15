@@ -134,7 +134,7 @@ void  QtHardMon::loadBoards()
   QString dmapFileName = QFileDialog::getOpenFileName(this,
 						      tr("Open DeviceMap file"), 
 						      ".", 
-						      tr("DeviceMap files (*.dmap) (*.dmap);; All files (*) (*)"));
+						      tr("DeviceMap files (*.dmap);; All files (*)"));
 
   if (dmapFileName.isEmpty())
   {
@@ -577,7 +577,7 @@ void QtHardMon::loadConfig()
   QString configFileName = QFileDialog::getOpenFileName(this,
 							tr("Open DeviceMap file"), 
 							".",
-							tr("HardMon config files (*.cfg) (*.cfg);; All files (*) (*)"));
+							tr("HardMon config files (*.cfg);; All files (*)"));
 
   if (configFileName.isEmpty())
   {
@@ -828,7 +828,7 @@ void QtHardMon::saveConfigAs()
   QString configFileName = QFileDialog::getSaveFileName(this,
 							tr("Open DeviceMap file"), 
 							".",
-							tr("HardMon config files (*.cfg) (*.cfg);; All files (*) (*)"));
+							tr("HardMon config files (*.cfg);; All files (*)"));
 
   if (configFileName.isEmpty())
   {
