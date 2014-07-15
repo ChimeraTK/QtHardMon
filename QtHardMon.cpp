@@ -142,6 +142,10 @@ void  QtHardMon::loadBoards()
     return;
   }
 
+  // set the directory of the dmap file as the current working directory so 
+  // relative map file pathes work
+  QDir::setCurrent( QFileInfo(dmapFileName).absolutePath() );
+
   // The return value is intentionally ignored. Cast to void to suppress compiler warnings.
   // (I use c-type because it's shorter syntax and does not matter here).
   (void) loadDmapFile(dmapFileName);
