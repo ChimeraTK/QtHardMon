@@ -31,13 +31,13 @@ class QtHardMon: public QMainWindow
   /*  void readFromFile();
   void saveToFile();
   */
-  void showPlotWindow(int checkState);//< Slot to toggle the plot window visibility. Needs to be int because the sender slot is int.
+  void showPlotWindow(int checkState);///< Slot to toggle the plot window visibility. Needs to be int because the sender slot is int.
 
-  void unckeckShowPlotWindow();//< Slot with void argument to uncheck the check box.
+  void unckeckShowPlotWindow();///< Slot with void argument to uncheck the check box.
 
-  void read();//< Read register from device.
-  void write();//< Read register to device.
-  void loadBoards();//< Read a dmap file
+  void read();///< Read register from device.
+  void write();///< Read register to device.
+  void loadBoards();///< Read a dmap file
 
   /** The device has changed. Read the meta data for this device and select the last active recister in this
    *  device.
@@ -47,12 +47,12 @@ class QtHardMon: public QMainWindow
    *  activated.
    */
   void registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */ = NULL);
-  void registerClicked(QListWidgetItem * registerItem); //< Executed if a register is clicked
+  void registerClicked(QListWidgetItem * registerItem); ///< Executed if a register is clicked
 
-  void aboutQtHardMon(); //< Show the aboutQtHardMon
-  void aboutQt(); //< Show the aboutQt dialog
+  void aboutQtHardMon(); ///< Show the aboutQtHardMon
+  void aboutQt(); ///< Show the aboutQt dialog
 
-  void preferences(); //< Show the preferences dialog and set the according variables
+  void preferences(); ///< Show the preferences dialog and set the according variables
 
   /** Load config from a file. This slot calls a file dialog and then accesses
    *  loadConfig(QString const & filename).
@@ -72,17 +72,33 @@ class QtHardMon: public QMainWindow
    */
   void saveConfigAs();
 
+  /** Updates the hex value if the dec value changes */
   void updateHexIfDecChanged( int row, int column );
+
+  /** Sets the background color of the cell, depending on whether the update is made by read (normal color)
+   *  or manually by the user (red).
+   */
+  void changeBackgroundIfModified( int row, int column );
+
+  /** Set all background to non modified color.
+   */
+  void clearBackground();
 
  private:
   
-  Ui::QtHardMonForm _hardMonForm; //< The GUI form which hold all the widgets.
-  mtca4u::devPCIE _mtcaDevice; //< The instance of the device which is being accessed.
-  unsigned int _maxWords; //< The maximum number of words displayed in the values list.
-  bool _autoRead; //< Flag whether to automatically read on register change
-  bool _readOnClick; //< Flag wheter to read on click in the register list
-  QString _dmapFileName; //< The file name of the last opened dmap file
-  QString _configFileName; //< Name of the config file (last saved or read)
+  Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
+  mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
+  unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
+  bool _autoRead; ///< Flag whether to automatically read on register change
+  bool _readOnClick; ///< Flag wheter to read on click in the register list
+  QString _dmapFileName; ///< The file name of the last opened dmap file
+  QString _configFileName; ///< Name of the config file (last saved or read)
+  int _insideReadOrWrite; ///< Counter flag to indicate if the read or write function is being executed
+  ////< (used to set background color). It is implemented as a counter because read can be called from write,
+  ////< and if read would reset a bool to false, it would be wrong in write. Just adding and subtracting is 
+  ///< easier than catching all possible use cases.
+  QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
+  QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
 
   /** Write the config to the given file name.
    */
@@ -150,9 +166,9 @@ class QtHardMon: public QMainWindow
       void setLastSelectedRegisterRow(int row);
 
     private:
-      mtca4u::dmapFile::dmapElem _deviceMapElement; //< The instance of the DeviceMapElement
-      mtca4u::ptrmapFile _registerMapPointer; //< The instance of the RegisterMapPointer
-      int _lastSelectedRegisterRow; //< The last selected register before the item was deselected
+      mtca4u::dmapFile::dmapElem _deviceMapElement; ///< The instance of the DeviceMapElement
+      mtca4u::ptrmapFile _registerMapPointer; ///< The instance of the RegisterMapPointer
+      int _lastSelectedRegisterRow; ///< The last selected register before the item was deselected
   };
 
   /** A helper class to store listWidgetItems which also contain the mapElem information.
@@ -176,7 +192,7 @@ class QtHardMon: public QMainWindow
       /* No copy constructor, the default is fine. */
       //RegisterListItem ( const RegisterListItem & other );
 
-      /** No assignment operator, the default is fine. */
+      /* No assignment operator, the default is fine. */
       //RegisterListItem & operator=( const RegisterListItem & other );
       
       /** The destructor. Currently does nothing because the members go out of scope automatically. */
@@ -190,12 +206,12 @@ class QtHardMon: public QMainWindow
       static const int RegisterListItemType = QListWidgetItem::UserType + 2;
 
     private:
-      mtca4u::mapFile::mapElem _registerMapElement; //< The instance of the RegisterMapElement.
+      mtca4u::mapFile::mapElem _registerMapElement; ///< The instance of the RegisterMapElement.
   };
 
-  DeviceListItem * _currentDeviceListItem; //< Pointer to the currently selected deviceListItem
+  DeviceListItem * _currentDeviceListItem; ///< Pointer to the currently selected deviceListItem
 
-  PlotWindow * _plotWindow; //< The plot window
+  PlotWindow * _plotWindow; ///< The plot window
 
   // The plot window is allowed to access the internal varaibles (mutex and register content) for plotting.
   // We allow this for performance reasons: A thread-safe getter for the data members would require one further

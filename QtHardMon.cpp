@@ -42,7 +42,10 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
   : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _autoRead(true),
-    _readOnClick(true), _currentDeviceListItem(NULL)
+    _readOnClick(true),  _insideReadOrWrite(0),
+    _defaultBackgroundBrush( Qt::transparent ), // transparent
+    _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
+    _currentDeviceListItem(NULL)
 {
   _hardMonForm.setupUi(this);
 
@@ -61,6 +64,9 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
 
   connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
 	  this, SLOT( updateHexIfDecChanged(int, int) ) );
+
+  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
+	  this, SLOT( changeBackgroundIfModified(int, int) ) );
 
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
@@ -379,6 +385,8 @@ void QtHardMon::clearValuesTableWidget(){
 
 void QtHardMon::read()
 {
+  ++_insideReadOrWrite;
+
   RegisterListItem * registerListItem =
     static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
 
@@ -467,10 +475,14 @@ void QtHardMon::read()
   {
     _plotWindow->plot();
   }
+
+  --_insideReadOrWrite;
 }
 
 void QtHardMon::write()
 {
+  ++_insideReadOrWrite;
+
   RegisterListItem * registerListItem =
     static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
 
@@ -523,7 +535,11 @@ void QtHardMon::write()
   {
     read();
   }
+  else{
+    clearBackground();
+  }
 
+  --_insideReadOrWrite;
 }
 
 void QtHardMon::preferences()
@@ -619,14 +635,6 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // show message box with parse errors, but just continue normally
   if (!configReader.getBadLines().isEmpty() )
   {
-//    if (configReader.getBadLines().begin() != configReader.getBadLines().end() )
-//      {
-//	std::cout << "begin and end are different" << std::endl;
-//      }
-//    else
-//      {
-//	std::cout << "begin and end are the same" << std::endl;
-//      }
      QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
 			    QString("The following lines from the config file ")+
 			    configFileName+" are invalid and will be ignored. Please fix your config file.\n",
@@ -934,58 +942,6 @@ void QtHardMon::unckeckShowPlotWindow()
   _hardMonForm.showPlotWindowCheckBox->setChecked(false);
 }
 
-//void QtHardMon::plot()
-//{
-//#if(USE_QWT)
-//  QVector<QPointF> samples;
-//
-//  //FIXME: use a data vector here. This also overcomes the truncation limitation (wanted?)
-//  //Use the minimum of rowCount and maxWords. for truncated lists the last entry is invalid
-//  for (int row = 0; row < std::min(_hardMonForm.valuesTableWidget->rowCount(), static_cast<int>(_maxWords)); ++row)
-//  {
-//    QTableWidgetItem *tableWidgetItem = _hardMonForm.valuesTableWidget->item(row,0); // always column 0
-//    if (!tableWidgetItem)
-//    {
-//      // strange, this should not happen. print a warning message end stop plotting
-//      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"), QString("Value in row ")
-//			    +QString::number(row) + " does not exist.");
-//      return;
-//    }
-//
-//    bool conversionOk;
-//    // The 0 in data(0) is the policy.
-//    int value = tableWidgetItem->data(0).toInt(&conversionOk);
-//    
-//    if (!conversionOk)
-//    {
-//      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"),
-//			    QString("Value in row ")+QString::number(row) + " is invalid.");
-//      return;
-//    }
-//
-//    samples.push_back(QPoint(row, value));
-//  }
-//  
-//  QwtPointSeriesData* myData = new QwtPointSeriesData;
-//  myData->setSamples(samples);
-// 
-//  QwtPlotCurve *curve1 = new QwtPlotCurve("Curve 1");
-//
-//  // at this point the curve takes ownership of the data object
-//  curve1->setData(myData);
-//
-//  // replace the current plot.
-//  delete _qwtPlot;
-//  _qwtPlot = new QwtPlot(_plotDock); 
-//  _plotDock->setWidget(_qwtPlot);
-// 
-//  // at this point the curve is attached to the plot, which will delete it when it goes out of scope
-//  curve1->attach(_qwtPlot);
-// 
-//  _qwtPlot->replot();
-//#endif // USE_QWT
-//}
-
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
@@ -1020,14 +976,6 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
 
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}
-
-// non need to implement this. It is excactly what the default does.
-//QtHardMon::DeviceListItem::operator=( const DeviceListItem & other )
-//{
-//  QListWidgetItem::operator=(other);
-//  _deviceMapElement=other._deviceMapElement;
-//  _registerMapPointer=other._registerMapPointer;
-//}
 
  mtca4u::dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
@@ -1128,5 +1076,23 @@ void QtHardMon::updateHexIfDecChanged( int row, int column ){
     hexDataItem->setText(hexValueAsText.str().c_str());
     _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem );
     
+  }
+}
+
+void QtHardMon::changeBackgroundIfModified( int row, int column ){
+  if (_insideReadOrWrite==0){
+    _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
+  }
+  else{
+    _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _defaultBackgroundBrush );
+  }
+}
+
+void QtHardMon::clearBackground(){
+  int nRows = _hardMonForm.valuesTableWidget->rowCount();
+
+  for( int row=0; row < nRows; ++row ){
+    _hardMonForm.valuesTableWidget->item(row, 0)->setBackground( _defaultBackgroundBrush );
+    _hardMonForm.valuesTableWidget->item(row, 1)->setBackground( _defaultBackgroundBrush );
   }
 }
