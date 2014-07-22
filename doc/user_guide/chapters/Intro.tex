@@ -23,7 +23,7 @@ Thus, essentially the .dmap file is made up of lines in the following syntax:
 \end{lstlisting}
 
 \section{Loading the crate configuration / .dmap file}
-Once the cards on your crate have been specified through the .dmap file, the next step is loading this configuration on to the GUI (Fig \ref{load_boards_button} and Fig \ref{load_boards_open_menu_to_load_dmap}). This is done using the "Load Boards" button on the GUI or using the menu option under File > Load Boards:
+Once the cards on your crate have been specified through the .dmap file, the next step is loading this configuration on to the GUI (Fig \ref{load_boards_button} and Fig \ref{load_boards_open_menu_to_load_dmap}). This is done using the "Load Boards" button on the GUI or using the menu option under \textit{File > Load Boards}:
 
 \begin{figure}[htbp]
 \centering
@@ -46,38 +46,58 @@ Once the cards on your crate have been specified through the .dmap file, the nex
 \label{qthardmon_interface}
 \end{figure}
 
-\subsection{The QtHardMon Interface}
-Information on the induvidual cards become available in the GUI once the .dmap file has been loaded(as seen in Fig \ref{qthardmon_interface}). The GUI has sections that display information on the cards in the crate and these are numbered as in Fig \ref{qthardmon_interface}. The numbered components of the QtHardMon Interface are as below:
+\section{The QtHardMon Interface}
+Information on the individual cards become available in the GUI once the .dmap file has been loaded(as seen in Fig \ref{qthardmon_interface}). The GUI has sections that display information on the cards in the crate and these are numbered as in Fig \ref{qthardmon_interface}. The numbered components of the QtHardMon Interface are as below:
 \begin{enumerate}
-\item \textbf{Devices List:} This section displays the list of cards that were specified in the user defined .dmap file. The user can click on the listed alias names to select induvidual cards and then modify/display properties of that particular card. 
+\item \textbf{Devices List:} This section displays the list of cards that were specified in the user defined .dmap file. The user can click on the listed alias names to select individual cards and then modify/display properties of that particular card. 
 \item \textbf{Device Status and Properties:} Gives an option to open or close a particular card and provides information on the cards device identifier and register mapping file\todo{Check Terminology}.
-\item \textbf{Register List:} This part of the GUI displays all registers of the card that are accesible to the user.
-\item \textbf{Register Properties:} The properties of the currently selected register is shown here. The properties displayed here include the register name, the PCI express base address range (Register bar), the register address, number of 32 bit words in the register and register size in bytes respecteively.
-\item \textbf{Register Values:} The current value present inside the register is displayed here. This field can also be used to set user defined values into the writable registers of the card. The write to a register is done by setting the intended value first in this field and then pressing the write button in the Register Operations section \todo{add a reference here} of the GUI.
-\item \textbf{Register Operations:} This part has two working buttons, the first named read and the other one named write. The read button essentially fetches the current value inside the selected register when pressed.
+
+\item \textbf{Register List:} This part of the GUI displays all registers of the card that are accessible to the user.
+
+\item \textbf{Register Properties:} The properties of the currently selected register is shown here. The properties displayed here include the register name, the PCI express base address range (Register bar), the register address, number of 32 bit words in the register and register size in bytes respectively.
+
+\item \textbf{Register Values:} The current value present inside the register is displayed here. This field can also be used to set user defined values into the writeable registers of the card. The write to a register is done by setting the intended value first in this field and then pressing the write button in the Register Operations section \todo{add a reference here} of the GUI.
+
+\item \textbf{Register Operations:} \label{itm:Register_Operations} This part has two working buttons, the first named read and the other one named write. The read button essentially fetches the current value inside the selected register when pressed.
 
 The write button is needed because writing to a register using the GUI, is a two step process. The first step is selecting the register on the card and setting the desired value in the Register Value field and the second part is actually triggering the write to the card by pressing the write button. The value is written only if the write button is pressed, else it gets discarded when the user moves on to select another register/card. 
-\item \textbf{GUI options:} If the checkbox titled 'Read after Write' is selected, the GUI actually performs a read from the register and refreshs the display with this value once the write button is clicked. The second checkbox named 'Show plot window' opens a new display window when checked. The function of this  plot window is explained below.
-\item \textbf{Plot Window:} The plot window can be used to draw graphs, using the data contained in the registers. The x-axis of the plot is the number of data points/32 bit elements the register contains and the y-axis is the value of those elements. 
 
-The GUI by default generates a plot (for the selected register) only after the plot button is clicked. This default behavior may be modified by setting the 'Plot after read' checkbox in the Plot Window. Selecting this option triggers plotting of the register values, once the register name is clicked or selected using the arrow keys. 
+\item \textbf{GUI options:} If the check-box titled 'Read after Write' is selected, the GUI actually performs a read from the register and refreshes the display with this value once the write button is clicked. The second check-box named 'Show plot window' opens a new display window when checked. The function of this  plot window is explained below.
 
-(By defaut the GUI performs an implicit read of the register values from the card when clicking/selecting the register. This is the reason why the checkbox option 'Plot after read' triggers plotting of the register values when register is selected. A thing to note is that the GUI can be set to disable this implicit read when clicking/selecting the register name. The option to do this is in the preferences menu (see section \todo{reference to the prefrence section}). If these implicit read options are disabled in the prefrences, then selecting the 'Plot after read' option will trigger the plot only after the read button is clicked.)
+\item \textbf{Plot Window:} The plot window can be used to draw graphs, using the data contained in the registers. The x-axis of the plot is the number of data points/32 bit elements the register contains and the y-axis is the value of those elements. It is also possible to customize the number of data points on the x-axis. This can be done through the preferences section in the menu (See section \ref{subsub::graph_x_axis})
+
+The GUI by default generates a plot (for the selected register) only after the 'plot' button is clicked. This default behaviour may be modified by setting the 'Plot after read' check-box in the Plot Window. Selecting this option triggers plotting of the register values, once the register name is clicked or selected using the arrow keys. 
+	
+(Note: By default the GUI performs an implicit read of the register values from the card when the register is clicked/selected. This is why the check-box option 'Plot after read' plots the register values as soon as the register is selected (basically selecting the register in this case is actually reading the contents from it and hence triggering the plot). A thing to note is that the GUI can be set to disable this implicit read when clicking/selecting the register name. The option to do this is in the preferences menu (see section \ref{preference_section}). If these implicit read options are disabled in the preferences, then selecting the 'Plot after read' option will trigger the plot only after the read button or the plot button is clicked.)
+
 \end{enumerate}
 
-\subsection{Reading and Writing To a Register}
-see \todo{Reference to Register Values section}
+\section{Reading and Writing To a Register}
+see \ref{itm:Register_Operations}.
 
-\subsection{The Prefrences Menu}
-The QtHardMon prefrences are under settings>preferences. (Fig \ref{qthardmon_preferences})
+\section{The Preferences Menu}\label{preference_section}
+The QtHardMon preferences menu can be accessed under \textit{settings > preferences}. (Fig \ref{qthardmon_preferences})
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{images/preferences.png}
  \caption{The QtHardMon Preferences}
-\label{qthardmon_preferences}
+\label{qthardmon_preferences}			
 \end{figure}
 
+\subsection{Changing GUI Menu Font Size}
+The font size of the GUI menu can be specified here in the preferences menu, by setting size value in the provided text field.
+
+\subsection{Implicit read of Register Values}
+The two check-boxes - 'Automatically read when selecting a register' and 'Read on click in register list' are selected by default. These options causes an implicit read of the register values from the card, as soon as the register name is selected from the Register list using the arrow keys on the keyboard or when the name is clicked on.
+
+\subsection{Specifying Data Points for X-Axis of Plot}\label{subsub::graph_x_axis}
+The graph plot for a register, by default uses all elements/32 bit words in the register. The 	'Maximum number of words' option in the preferences actually indicates the number of data points/register elements that the software will use to plot the graph. This is useful when the samples of interest are the first 'N' elements/32 bit words of the register. By setting 'N' in the text box, the plot will include only the first N values, which in this case are the samples of interest.
+		
+\section{Saving and Restoring Preferences}
+As seen Section \ref{preference_section} lets the user customize the font and behaviour of the GUI. The software lets the user save these customizations as a configuration file (.cfg), which can be later loaded back into a fresh session to restore the custom settings.
+
+The option for saving and loading the GUI configuration file can be found under \textit{File > Save config}/\textit{File > Save config as} and \textit{File > Load config }menu items respectively.
 
 % info is displayed in three windows as in fig 2 (labelled as 1, 2, 3)
 %
