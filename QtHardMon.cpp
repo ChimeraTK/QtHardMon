@@ -1096,3 +1096,33 @@ void QtHardMon::clearBackground(){
     _hardMonForm.valuesTableWidget->item(row, 1)->setBackground( _defaultBackgroundBrush );
   }
 }
+
+void QtHardMon::parseArgument(QString const &fileName) {
+  if (checkExtension(fileName, ".dmap") == true) {
+    // Not setting the current directory to the location of the
+    // dmap file. dmapFilesParser::parse_file has been modified
+    // to handle map file location as absolute paths
+    // QDir::setCurrent(QFileInfo(fileName).absolutePath());
+    QDir::setCurrent(
+        QFileInfo(fileName).absolutePath());  // This may be removed once
+                                              // changes in dmapFilesParser have
+                                              // been submitted to the trunk
+    (void)loadDmapFile(fileName);
+  } else if (checkExtension(fileName, ".cfg") == true) {
+    loadConfig(fileName);
+  } else {
+    QMessageBox messageBox(
+        QMessageBox::Warning, tr("QtHardMon: Warning"),
+        QString(
+            "Unsupported file extension provided. Filename will be ignored."),
+        QMessageBox::Ok, this);
+    messageBox.exec();
+  }
+}
+
+bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
+  QStringRef extensionOfProvidedFile(
+      &fileName, (fileName.size() - extension.size()), extension.size());
+  bool areStringsEqual = (extension.compare(extensionOfProvidedFile) == 0);
+  return areStringsEqual;
+}

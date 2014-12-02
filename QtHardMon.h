@@ -26,6 +26,17 @@ class QtHardMon: public QMainWindow
    */
   void loadConfig(QString const & configFileName);
 
+  /**
+   * This method checks if QtHardMon executable has been called with a
+   * valid configuration or dmap file as an argument. It checks
+   * the extension of the passed in argument to distinguish the two file
+   * types. Depending on the file type passed, the method invokes either
+   * loadConfig or loadBoards internally.
+   * A pop up window with a warning is displayed if the fileName
+   * argument provided does not end with extension ".dmap" or ".cfg"
+   */
+  void parseArgument(QString const &fileName);
+
   // slots for internal use in this class. We do not provide a widget to be used inside another widget.
  private slots:
   /*  void readFromFile();
@@ -83,6 +94,11 @@ class QtHardMon: public QMainWindow
   /** Set all background to non modified color.
    */
   void clearBackground();
+  /*
+   * returns true if the fileName ends with the provided
+   * extension else false
+   */
+  bool checkExtension(QString const &fileName, QString extension);
 
  private:
   
