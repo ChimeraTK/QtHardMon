@@ -8,6 +8,7 @@
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
+//#include <>
 
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -235,6 +236,17 @@ class QtHardMon: public QMainWindow
   // pointer, would require unnecessarily long locking of the mutex.
   friend class PlotWindow;
 
+  /*
+   * Converts the input decimalValue to double. Internally uses
+   * mtca4u::FixedPointConverter
+   */
+  double getFractionalValue(int decimalValue, RegisterListItem *registerInformation);
+
+  /*
+   * Converts the input doubleValue to Fixed point int. Internally uses
+   * mtca4u::FixedPointConverter
+   */
+  int getFixedPointValue(double doubleValue, RegisterListItem *registerInformation);
 };
 
 #endif// QT_HARD_MON

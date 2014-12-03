@@ -287,8 +287,14 @@
             <bool>true</bool>
            </property>
            <property name="columnCount">
-            <number>2</number>
+            <number>3</number>
            </property>
+           <attribute name="horizontalHeaderCascadingSectionResizes">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderDefaultSectionSize">
+            <number>75</number>
+           </attribute>
            <attribute name="verticalHeaderDefaultSectionSize">
             <number>20</number>
            </attribute>
@@ -303,6 +309,11 @@
            <column>
             <property name="text">
              <string>hex</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>double</string>
             </property>
            </column>
           </widget>
@@ -424,7 +435,7 @@
      <x>0</x>
      <y>0</y>
      <width>978</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">

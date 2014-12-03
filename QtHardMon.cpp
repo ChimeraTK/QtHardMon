@@ -14,6 +14,7 @@
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
+#include <MtcaMappedDevice/FixedPointConverter.h>
 using namespace mtca4u;
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
@@ -370,7 +371,8 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
 }
 
 void QtHardMon::clearValuesTableWidget(){
-  _hardMonForm.valuesTableWidget->clear();
+  _hardMonForm.valuesTableWidget->clearContents();
+  /*_hardMonForm.valuesTableWidget->clear();
   //restore the dec/hex header
   _hardMonForm.valuesTableWidget->setColumnCount(2);
   
@@ -381,7 +383,7 @@ void QtHardMon::clearValuesTableWidget(){
   QTableWidgetItem *hexHeaderItem = new QTableWidgetItem();
   hexHeaderItem->setText(QApplication::translate("QtHardMonForm", "hex", 0, QApplication::UnicodeUTF8));
   _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(1, hexHeaderItem);
-}
+*/}
 
 void QtHardMon::read()
 {
@@ -462,11 +464,10 @@ void QtHardMon::read()
       // no need to set the hex item
       break;
     }
-
     int registerContent = (readError?-1:inputBuffer[row]);
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
-    _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
+    _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );;
     
   }// for row
  
@@ -1063,19 +1064,65 @@ void QtHardMon::updateHexIfDecChanged( int row, int column ){
   // only update the hex value if when the dec value (column 0) changed
   // to avoid an endless loop. This function is also triggered by
   // itself when the hex value is changed.
+  RegisterListItem * registerListItem =
+        static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
+
   if (column==0){
     
     QTableWidgetItem * hexDataItem =  new QTableWidgetItem();
     // for the time being: make the code easy, hex is just for display
+
     hexDataItem->setFlags( hexDataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
-    
-    std::stringstream hexValueAsText;
-    hexValueAsText << "0x" << std::hex 
-		   << _hardMonForm.valuesTableWidget->item(row, column)
-                                                    ->data(0 /*default role*/).toInt();
-    hexDataItem->setText(hexValueAsText.str().c_str());
-    _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem );
-    
+    int userEnteredDecValue = _hardMonForm.valuesTableWidget->item(row, column)->data(0 /*default role*/).toInt();
+    // check the get the corresponding double value currently in the table
+    double currentDoubleValue;
+    int convVal;
+    QTableWidgetItem* cell = _hardMonForm.valuesTableWidget->item(row, 2);
+	if(cell != NULL){
+	  currentDoubleValue = cell->data(0).toDouble();
+	  convVal =  getFixedPointValue(currentDoubleValue, registerListItem);
+	   if(userEnteredDecValue == convVal){
+	     return;
+	   }
+	}
+
+
+   std::stringstream hexValueAsText;
+
+   hexValueAsText << "0x" << std::hex << userEnteredDecValue;
+   hexDataItem->setText(hexValueAsText.str().c_str());
+   _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem );
+
+    QTableWidgetItem * dataItemForFractionalValue =  new QTableWidgetItem();
+
+    double fractionalVersionOfuserValue = getFractionalValue(userEnteredDecValue, registerListItem);
+    dataItemForFractionalValue->setData( 0, QVariant(fractionalVersionOfuserValue) );
+    _hardMonForm.valuesTableWidget->setItem(row, 2, dataItemForFractionalValue );
+  } else if (column == 2){
+
+    QTableWidgetItem * dataItemForDecField =  new QTableWidgetItem();
+
+     double userEnteredDoubleValue = _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
+     int FixedPtVersionOfuserValue = getFixedPointValue(userEnteredDoubleValue, registerListItem);
+
+     QTableWidgetItem * dataItemForHexField =  new QTableWidgetItem();
+     dataItemForHexField->setFlags( dataItemForHexField->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
+     std::stringstream hexValueAsText;
+     hexValueAsText << "0x" << std::hex << FixedPtVersionOfuserValue;
+     dataItemForHexField->setText(hexValueAsText.str().c_str());
+     _hardMonForm.valuesTableWidget->setItem(row, 1, dataItemForHexField );
+
+     int correspondingInt;
+     QTableWidgetItem* cell = _hardMonForm.valuesTableWidget->item(row, 0);
+     if(cell != NULL){
+       correspondingInt =  cell->data(0).toInt();
+       if(correspondingInt == FixedPtVersionOfuserValue){
+         return;
+       }
+     }
+
+     dataItemForDecField->setData( 0, QVariant(FixedPtVersionOfuserValue) );
+     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItemForDecField );
   }
 }
 
@@ -1124,4 +1171,21 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
       &fileName, (fileName.size() - extension.size()), extension.size());
   bool areStringsEqual = (extension.compare(extensionOfProvidedFile) == 0);
   return areStringsEqual;
+}
+
+double QtHardMon::getFractionalValue (int decimalValue,
+			       RegisterListItem* registerInformation) {
+  if(!registerInformation) return 0;
+  FixedPointConverter converter(registerInformation->getRegisterMapElement().reg_width,
+                                        registerInformation->getRegisterMapElement().reg_frac_bits,
+                                        registerInformation->getRegisterMapElement().reg_signed);
+  return converter.toDouble(decimalValue);
+}
+
+int QtHardMon::getFixedPointValue(double doubleValue, RegisterListItem *registerInformation){
+  if(!registerInformation) return 0;
+  FixedPointConverter converter(registerInformation->getRegisterMapElement().reg_width,
+                                        registerInformation->getRegisterMapElement().reg_frac_bits,
+                                        registerInformation->getRegisterMapElement().reg_signed);
+  return converter.toFixedPoint(doubleValue);
 }
