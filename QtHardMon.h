@@ -85,7 +85,7 @@ class QtHardMon: public QMainWindow
   void saveConfigAs();
 
   /** Updates the hex value if the dec value changes */
-  void updateHexIfDecChanged( int row, int column );
+  void updateTableEntries( int row, int column );
 
   /** Sets the background color of the cell, depending on whether the update is made by read (normal color)
    *  or manually by the user (red).
@@ -133,10 +133,6 @@ class QtHardMon: public QMainWindow
   /** Open the device and update the GUI accordingly.
    */
   void openDevice(std::string const & deviceFileName );
-
-  /** Clear the valuesTableWidget and restore the dec/hex headers.
-   */
-  void clearValuesTableWidget();
 
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */
@@ -240,13 +236,19 @@ class QtHardMon: public QMainWindow
    * Converts the input decimalValue to double. Internally uses
    * mtca4u::FixedPointConverter
    */
-  double getFractionalValue(int decimalValue, RegisterListItem *registerInformation);
+  double getFractionalValue(int decimalValue);
 
   /*
    * Converts the input doubleValue to Fixed point int. Internally uses
    * mtca4u::FixedPointConverter
    */
-  int getFixedPointValue(double doubleValue, RegisterListItem *registerInformation);
+  int getFixedPointValue(double doubleValue);
+
+  void updateHexField(int row, int value);
+
+  void updateDoubleField(int row, double value);
+
+  void updateDecimalField(int row, int value);
 };
 
 #endif// QT_HARD_MON

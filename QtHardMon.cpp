@@ -64,7 +64,7 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
 	  this, SLOT( registerClicked(QListWidgetItem *) ) );
 
   connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
-	  this, SLOT( updateHexIfDecChanged(int, int) ) );
+	  this, SLOT( updateTableEntries(int, int) ) );
 
   connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
 	  this, SLOT( changeBackgroundIfModified(int, int) ) );
@@ -319,7 +319,7 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     _hardMonForm.registerNElementsDisplay->setText("");
     _hardMonForm.registerAddressDisplay->setText("");
     _hardMonForm.registerSizeDisplay->setText("");
-    clearValuesTableWidget();
+    _hardMonForm.valuesTableWidget->clearContents();
 
     return;
   }
@@ -350,7 +350,7 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   if (!_autoRead){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
-    clearValuesTableWidget();
+    _hardMonForm.valuesTableWidget->clearContents();
     _hardMonForm.writeButton->setEnabled(false);
   }
 
@@ -369,21 +369,6 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     read();
   }
 }
-
-void QtHardMon::clearValuesTableWidget(){
-  _hardMonForm.valuesTableWidget->clearContents();
-  /*_hardMonForm.valuesTableWidget->clear();
-  //restore the dec/hex header
-  _hardMonForm.valuesTableWidget->setColumnCount(2);
-  
-  QTableWidgetItem *decHeaderItem =  new QTableWidgetItem();
-  decHeaderItem->setText(QApplication::translate("QtHardMonForm", "dec", 0, QApplication::UnicodeUTF8));
-  _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(0, decHeaderItem);
-  
-  QTableWidgetItem *hexHeaderItem = new QTableWidgetItem();
-  hexHeaderItem->setText(QApplication::translate("QtHardMonForm", "hex", 0, QApplication::UnicodeUTF8));
-  _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(1, hexHeaderItem);
-*/}
 
 void QtHardMon::read()
 {
@@ -1060,69 +1045,69 @@ void QtHardMon::openCloseDevice(){
   }
 }
 
-void QtHardMon::updateHexIfDecChanged( int row, int column ){
-  // only update the hex value if when the dec value (column 0) changed
-  // to avoid an endless loop. This function is also triggered by
-  // itself when the hex value is changed.
-  RegisterListItem * registerListItem =
-        static_cast<RegisterListItem *>(  _hardMonForm.registerListWidget->currentItem() );
+void QtHardMon::updateTableEntries(int row, int column) {
 
-  if (column==0){
-    
-    QTableWidgetItem * hexDataItem =  new QTableWidgetItem();
-    // for the time being: make the code easy, hex is just for display
+  // We have two editable fields - The decimal field and double field.
+  // The values reflect each other and to avoid an infinite
+  // loop  situation,  an update to one field with a new value, sets
+  // off an update to the other field only if the current value in the
+  // other field is different from this new value.
+  //
+  // Column 0 and 2 are the current editable fields.
+  //
+  if (column == 0) {  // The decimal field column
+    int userUpdatedValueInCell =
+        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toInt();
+    double fractionalVersionOfUserValue =
+        getFractionalValue(userUpdatedValueInCell);
 
-    hexDataItem->setFlags( hexDataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
-    int userEnteredDecValue = _hardMonForm.valuesTableWidget->item(row, column)->data(0 /*default role*/).toInt();
-    // check the get the corresponding double value currently in the table
-    double currentDoubleValue;
-    int convVal;
-    QTableWidgetItem* cell = _hardMonForm.valuesTableWidget->item(row, 2);
-	if(cell != NULL){
-	  currentDoubleValue = cell->data(0).toDouble();
-	  convVal =  getFixedPointValue(currentDoubleValue, registerListItem);
-	   if(userEnteredDecValue == convVal){
-	     return;
-	   }
-	}
+    bool doesCorrespondingDoubleExist =
+        (_hardMonForm.valuesTableWidget->item(row, 2) != NULL);
 
+    if (doesCorrespondingDoubleExist) {
+      double currentValueInDoubleField;
+      currentValueInDoubleField =
+          _hardMonForm.valuesTableWidget->item(row, 2)
+              ->data(0)
+              .toDouble();  // fetch the content from the
+                            // corresponding double field cell
+                            // on the same row
 
-   std::stringstream hexValueAsText;
+      int convertedValueFromDoubleField =
+          getFixedPointValue(currentValueInDoubleField);
+      if (convertedValueFromDoubleField == userUpdatedValueInCell)
+        return;  // both decimal and double fields already have the same value
+    }
 
-   hexValueAsText << "0x" << std::hex << userEnteredDecValue;
-   hexDataItem->setText(hexValueAsText.str().c_str());
-   _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem );
+    // If here, trigger an update of the hex and double fields
+    updateHexField(row, userUpdatedValueInCell);
+    updateDoubleField(row, fractionalVersionOfUserValue);
 
-    QTableWidgetItem * dataItemForFractionalValue =  new QTableWidgetItem();
+  } else if (column == 2) {  // The double Field column
+    double userUpdatedValueInCell =
+        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
+    int FixedPointVersionOfUserValue =
+        getFixedPointValue(userUpdatedValueInCell);
 
-    double fractionalVersionOfuserValue = getFractionalValue(userEnteredDecValue, registerListItem);
-    dataItemForFractionalValue->setData( 0, QVariant(fractionalVersionOfuserValue) );
-    _hardMonForm.valuesTableWidget->setItem(row, 2, dataItemForFractionalValue );
-  } else if (column == 2){
+    bool doesCorrespondingFixedPointCellExist =
+        (_hardMonForm.valuesTableWidget->item(row, 0) != NULL);
 
-    QTableWidgetItem * dataItemForDecField =  new QTableWidgetItem();
-
-     double userEnteredDoubleValue = _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
-     int FixedPtVersionOfuserValue = getFixedPointValue(userEnteredDoubleValue, registerListItem);
-
-     QTableWidgetItem * dataItemForHexField =  new QTableWidgetItem();
-     dataItemForHexField->setFlags( dataItemForHexField->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
-     std::stringstream hexValueAsText;
-     hexValueAsText << "0x" << std::hex << FixedPtVersionOfuserValue;
-     dataItemForHexField->setText(hexValueAsText.str().c_str());
-     _hardMonForm.valuesTableWidget->setItem(row, 1, dataItemForHexField );
-
-     int correspondingInt;
-     QTableWidgetItem* cell = _hardMonForm.valuesTableWidget->item(row, 0);
-     if(cell != NULL){
-       correspondingInt =  cell->data(0).toInt();
-       if(correspondingInt == FixedPtVersionOfuserValue){
-         return;
-       }
-     }
-
-     dataItemForDecField->setData( 0, QVariant(FixedPtVersionOfuserValue) );
-     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItemForDecField );
+    if (doesCorrespondingFixedPointCellExist) {
+      int currentValueInFixedPointCell;
+      currentValueInFixedPointCell =
+          _hardMonForm.valuesTableWidget->item(row, 0)
+              ->data(0)
+              .toInt();  // fetch current content of the decimal field on the
+                         // same row
+      double convertedValueFrmFPCell =
+          getFractionalValue(currentValueInFixedPointCell);
+      if (userUpdatedValueInCell == convertedValueFrmFPCell)
+        return;  // The current user updated value in the double field has the
+                 // same Fixed Point representation as existing content in the
+                 // decimal field of the same row.
+    }
+    updateHexField(row, FixedPointVersionOfUserValue);
+    updateDecimalField(row, FixedPointVersionOfUserValue);
   }
 }
 
@@ -1141,6 +1126,7 @@ void QtHardMon::clearBackground(){
   for( int row=0; row < nRows; ++row ){
     _hardMonForm.valuesTableWidget->item(row, 0)->setBackground( _defaultBackgroundBrush );
     _hardMonForm.valuesTableWidget->item(row, 1)->setBackground( _defaultBackgroundBrush );
+    _hardMonForm.valuesTableWidget->item(row, 2)->setBackground( _defaultBackgroundBrush );
   }
 }
 
@@ -1173,19 +1159,47 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
   return areStringsEqual;
 }
 
-double QtHardMon::getFractionalValue (int decimalValue,
-			       RegisterListItem* registerInformation) {
-  if(!registerInformation) return 0;
-  FixedPointConverter converter(registerInformation->getRegisterMapElement().reg_width,
-                                        registerInformation->getRegisterMapElement().reg_frac_bits,
-                                        registerInformation->getRegisterMapElement().reg_signed);
+double QtHardMon::getFractionalValue(int decimalValue) {
+  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
+      _hardMonForm.registerListWidget->currentItem());
+
+  FixedPointConverter converter(
+      registerInformation->getRegisterMapElement().reg_width,
+      registerInformation->getRegisterMapElement().reg_frac_bits,
+      registerInformation->getRegisterMapElement().reg_signed);
   return converter.toDouble(decimalValue);
 }
 
-int QtHardMon::getFixedPointValue(double doubleValue, RegisterListItem *registerInformation){
-  if(!registerInformation) return 0;
-  FixedPointConverter converter(registerInformation->getRegisterMapElement().reg_width,
-                                        registerInformation->getRegisterMapElement().reg_frac_bits,
-                                        registerInformation->getRegisterMapElement().reg_signed);
+int QtHardMon::getFixedPointValue(double doubleValue) {
+  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
+      _hardMonForm.registerListWidget->currentItem());
+
+  FixedPointConverter converter(
+      registerInformation->getRegisterMapElement().reg_width,
+      registerInformation->getRegisterMapElement().reg_frac_bits,
+      registerInformation->getRegisterMapElement().reg_signed);
   return converter.toFixedPoint(doubleValue);
+}
+
+void QtHardMon::updateHexField(int row, int value) {
+  QTableWidgetItem *hexDataItem = new QTableWidgetItem();
+  hexDataItem->setFlags(hexDataItem->flags() & ~Qt::ItemIsSelectable &
+                        ~Qt::ItemIsEditable);
+  std::stringstream hexValueAsText;
+  // set the dataitem as text and update table
+  hexValueAsText << "0x" << std::hex << value;
+  hexDataItem->setText(hexValueAsText.str().c_str());
+  _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem);
+}
+
+void QtHardMon::updateDoubleField(int row, double value) {
+  QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
+  dataItemForDouble->setData(0, QVariant(value));
+  _hardMonForm.valuesTableWidget->setItem(row, 2, dataItemForDouble);
+}
+
+void QtHardMon::updateDecimalField(int row, int value) {
+  QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
+  dataItemForFixedPoint->setData(0, QVariant(value));
+  _hardMonForm.valuesTableWidget->setItem(row, 0, dataItemForFixedPoint);
 }
