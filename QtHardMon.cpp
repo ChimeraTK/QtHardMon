@@ -1079,7 +1079,8 @@ void QtHardMon::updateTableEntries(int row, int column) {
         return;  // both decimal and double fields already have the same value
     }
 
-    // If here, trigger an update of the hex and double fields
+    // If here, This is a new value. Trigger update of the other
+    // fields in the same row
     updateHexField(row, userUpdatedValueInCell);
     updateDoubleField(row, fractionalVersionOfUserValue);
 
