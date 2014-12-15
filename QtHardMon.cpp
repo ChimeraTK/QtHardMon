@@ -63,7 +63,7 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.registerListWidget, SIGNAL(itemActivated(QListWidgetItem *)), 
 	  this, SLOT( registerClicked(QListWidgetItem *) ) );
 
-  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
+  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)),
 	  this, SLOT( updateTableEntries(int, int) ) );
 
   connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
@@ -117,6 +117,7 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
 
+  _hardMonForm.valuesTableWidget->setItemDelegate(new DoubleDelegate());
   _plotWindow = new PlotWindow(this);
 
   connect(_hardMonForm.showPlotWindowCheckBox, SIGNAL(stateChanged(int)),
@@ -1202,14 +1203,15 @@ void QtHardMon::updateHexField(int row, int value) {
 
 void QtHardMon::updateDoubleField(int row, double value) {
   QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
-  dataItemForDouble->setData(0, QVariant(value));
+  dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
       row, 2, dataItemForDouble);  // column 2 is the double Field
+  //_hardMonForm.valuesTableWidget->setCellWidget(row, 2, test);
 }
 
 void QtHardMon::updateDecimalField(int row, int value) {
   QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
-  dataItemForFixedPoint->setData(0, QVariant(value));
+  dataItemForFixedPoint->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
       row, 0, dataItemForFixedPoint);  // column 0 has the decimal Field
 }

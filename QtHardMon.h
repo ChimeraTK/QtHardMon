@@ -5,6 +5,7 @@
 #include "PlotWindow.h"
 #include <QIcon>
 #include <QDir>
+#include <QStyledItemDelegate>
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
@@ -249,6 +250,34 @@ class QtHardMon: public QMainWindow
   void updateDoubleField(int row, double value);
 
   void updateDecimalField(int row, int value);
+};
+
+
+class DoubleDelegate: public QStyledItemDelegate
+{
+Q_OBJECT
+public:
+
+DoubleDelegate(QObject* parent=0) : QStyledItemDelegate(parent) { }
+virtual ~DoubleDelegate() { }
+
+QWidget *createEditor(QWidget *parent,
+    const QStyleOptionViewItem & option,
+    const QModelIndex & index ) const
+{
+
+  if(index.column() == 2)
+  {
+    QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
+    editor->setMaximum(10000);
+    editor->setDecimals(5);
+    return editor;
+  }
+  return QStyledItemDelegate::createEditor(parent, option, index);
+
+}
+
+
 };
 
 #endif// QT_HARD_MON
