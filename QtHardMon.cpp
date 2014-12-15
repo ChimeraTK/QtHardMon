@@ -319,7 +319,11 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     _hardMonForm.registerNElementsDisplay->setText("");
     _hardMonForm.registerAddressDisplay->setText("");
     _hardMonForm.registerSizeDisplay->setText("");
+    _hardMonForm.registerWidthDisplay->setText("");
+    _hardMonForm.registerFracBitsDisplay->setText("");
+    _hardMonForm.registeSignBitDisplay->setText("");
     _hardMonForm.valuesTableWidget->clearContents();
+
 
     return;
   }
@@ -338,6 +342,9 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
 				  QString::number( registerListItem->getRegisterMapElement().reg_address ));
   _hardMonForm.registerSizeDisplay->setText(  
 				  QString::number( registerListItem->getRegisterMapElement().reg_size ));
+  _hardMonForm.registerWidthDisplay->setText(QString::number( registerListItem->getRegisterMapElement().reg_width ));
+  _hardMonForm.registerFracBitsDisplay->setText(QString::number( registerListItem->getRegisterMapElement().reg_frac_bits ));
+  _hardMonForm.registeSignBitDisplay->setText(QString::number( registerListItem->getRegisterMapElement().reg_signed ));
 
   // remember that this register has been selected
   _currentDeviceListItem->setLastSelectedRegisterRow(  _hardMonForm.registerListWidget->currentRow() );
@@ -1196,11 +1203,13 @@ void QtHardMon::updateHexField(int row, int value) {
 void QtHardMon::updateDoubleField(int row, double value) {
   QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
   dataItemForDouble->setData(0, QVariant(value));
-  _hardMonForm.valuesTableWidget->setItem(row, 2, dataItemForDouble);
+  _hardMonForm.valuesTableWidget->setItem(
+      row, 2, dataItemForDouble);  // column 2 is the double Field
 }
 
 void QtHardMon::updateDecimalField(int row, int value) {
   QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
   dataItemForFixedPoint->setData(0, QVariant(value));
-  _hardMonForm.valuesTableWidget->setItem(row, 0, dataItemForFixedPoint);
+  _hardMonForm.valuesTableWidget->setItem(
+      row, 0, dataItemForFixedPoint);  // column 0 has the decimal Field
 }
