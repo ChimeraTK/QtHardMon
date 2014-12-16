@@ -1223,13 +1223,13 @@ void QtHardMon::updateDoubleField(int row, double value) {
   QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
   dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
-      row, 2, dataItemForDouble);  // column 2 is the double Field
-  //_hardMonForm.valuesTableWidget->setCellWidget(row, 2, test);
+      row, FLOATING_POINT_DISPLAY_COLUMN,
+      dataItemForDouble); // column 2 is the double Field
 }
 
 void QtHardMon::updateDecimalField(int row, int value) {
   QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
   dataItemForFixedPoint->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
-      row, 0, dataItemForFixedPoint);  // column 0 has the decimal Field
+      row, 0, dataItemForFixedPoint); // column 0 has the decimal Field
 }
