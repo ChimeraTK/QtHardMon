@@ -32,6 +32,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define CURRENT_DEVICE_STRING "currentDevice"
 #define CURRENT_REGISTER_ROW_STRING "currentRegisterRow"
 #define MAX_WORDS_STRING "maxWords"
+#define PRECISION_INDICATOR_STRING "decimalPlaces"
 #define READ_AFTER_WRITE_STRING "readAfterWrite"
 #define HEX_VALUES_STRING "hexValues"
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
@@ -42,10 +43,11 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define READ_ON_CLICK_STRING "readOnClick"
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _autoRead(true),
+  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true),  _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
+    //_customDelegate(NULL),
     _currentDeviceListItem(NULL)
 {
   _hardMonForm.setupUi(this);
@@ -117,7 +119,10 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
 
-  _hardMonForm.valuesTableWidget->setItemDelegate(new DoubleDelegate());
+  // customize table display
+  _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
+  _hardMonForm.valuesTableWidget->setItemDelegate(&_customDelegate);
+
   _plotWindow = new PlotWindow(this);
 
   connect(_hardMonForm.showPlotWindowCheckBox, SIGNAL(stateChanged(int)),
@@ -555,12 +560,22 @@ void QtHardMon::preferences()
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
   preferencesDialogForm.maxWordsSpinBox->setValue( _maxWords );
 
+  // set up the floating point display decimal places
+  preferencesDialogForm.precisionSpinBox->setMinimum(1); // minimum one decimal place display
+  preferencesDialogForm.precisionSpinBox->setMaximum(10);// maximum 10 decimal places
+  preferencesDialogForm.precisionSpinBox->setValue(_floatPrecision);
+
   int dialogResult = preferencesDialog.exec();
 
   // only set the values if ok has been pressed
   if (dialogResult == QDialog::Accepted )
   {
     _maxWords =  preferencesDialogForm.maxWordsSpinBox->value();
+
+    // Read and set precision for delegate class
+    _floatPrecision = preferencesDialogForm.precisionSpinBox->value();
+    _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
+
     // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
     // from the device
     registerSelected(_hardMonForm.registerListWidget->currentItem(),_hardMonForm.registerListWidget->currentItem());
@@ -647,6 +662,9 @@ void QtHardMon::loadConfig(QString const & configFileName)
 
 
   // first handle all settings that do not depend on opening a device map
+
+  _floatPrecision = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision)); // is check necessary? should display default
+  _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
 
   // store in a local variable for now
   int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
@@ -891,6 +909,7 @@ void QtHardMon::writeConfig(QString const & fileName)
   }
 
   configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
+  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
@@ -1063,7 +1082,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
   //
   // Column 0 and 2 are the current editable fields.
   //
-  if (column == 0) {  // The decimal field column
+  if (column == 0) { // The decimal field column
     int userUpdatedValueInCell =
         _hardMonForm.valuesTableWidget->item(row, column)->data(0).toInt();
     double fractionalVersionOfUserValue =
@@ -1074,17 +1093,16 @@ void QtHardMon::updateTableEntries(int row, int column) {
 
     if (doesCorrespondingDoubleExist) {
       double currentValueInDoubleField;
-      currentValueInDoubleField =
-          _hardMonForm.valuesTableWidget->item(row, 2)
-              ->data(0)
-              .toDouble();  // fetch the content from the
-                            // corresponding double field cell
-                            // on the same row
+      currentValueInDoubleField = _hardMonForm.valuesTableWidget->item(row, 2)
+                                      ->data(0)
+                                      .toDouble(); // fetch the content from the
+      // corresponding double field cell
+      // on the same row
 
       int convertedValueFromDoubleField =
           getFixedPointValue(currentValueInDoubleField);
       if (convertedValueFromDoubleField == userUpdatedValueInCell)
-        return;  // both decimal and double fields already have the same value
+        return; // both decimal and double fields already have the same value
     }
 
     // If here, This is a new value. Trigger update of the other
@@ -1092,7 +1110,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
     updateHexField(row, userUpdatedValueInCell);
     updateDoubleField(row, fractionalVersionOfUserValue);
 
-  } else if (column == 2) {  // The double Field column
+  } else if (column == 2) { // The double Field column
     double userUpdatedValueInCell =
         _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
     int FixedPointVersionOfUserValue =
@@ -1106,14 +1124,14 @@ void QtHardMon::updateTableEntries(int row, int column) {
       currentValueInFixedPointCell =
           _hardMonForm.valuesTableWidget->item(row, 0)
               ->data(0)
-              .toInt();  // fetch current content of the decimal field on the
-                         // same row
+              .toInt(); // fetch current content of the decimal field on the
+                        // same row
       double convertedValueFrmFPCell =
           getFractionalValue(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
-        return;  // The current user updated value in the double field has the
-                 // same Fixed Point representation as existing content in the
-                 // decimal field of the same row.
+        return; // The current user updated value in the double field has the
+                // same Fixed Point representation as existing content in the
+                // decimal field of the same row.
     }
     updateHexField(row, FixedPointVersionOfUserValue);
     updateDecimalField(row, FixedPointVersionOfUserValue);

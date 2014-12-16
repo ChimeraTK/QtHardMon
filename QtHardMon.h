@@ -3,6 +3,7 @@
 
 #include "ui_QtHardMonForm.h"
 #include "PlotWindow.h"
+#include "TableSpinBoxDelegate.h"
 #include <QIcon>
 #include <QDir>
 #include <QStyledItemDelegate>
@@ -107,6 +108,7 @@ class QtHardMon: public QMainWindow
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
+  unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
   bool _readOnClick; ///< Flag wheter to read on click in the register list
   QString _dmapFileName; ///< The file name of the last opened dmap file
@@ -117,6 +119,7 @@ class QtHardMon: public QMainWindow
   ///< easier than catching all possible use cases.
   QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
+  TableSpinBoxDelegate _customDelegate;///< provides display customizations for the table widget.
 
   /** Write the config to the given file name.
    */
@@ -250,34 +253,6 @@ class QtHardMon: public QMainWindow
   void updateDoubleField(int row, double value);
 
   void updateDecimalField(int row, int value);
-};
-
-
-class DoubleDelegate: public QStyledItemDelegate
-{
-Q_OBJECT
-public:
-
-DoubleDelegate(QObject* parent=0) : QStyledItemDelegate(parent) { }
-virtual ~DoubleDelegate() { }
-
-QWidget *createEditor(QWidget *parent,
-    const QStyleOptionViewItem & option,
-    const QModelIndex & index ) const
-{
-
-  if(index.column() == 2)
-  {
-    QDoubleSpinBox *editor = new QDoubleSpinBox(parent);
-    editor->setMaximum(10000);
-    editor->setDecimals(5);
-    return editor;
-  }
-  return QStyledItemDelegate::createEditor(parent, option, index);
-
-}
-
-
 };
 
 #endif// QT_HARD_MON
