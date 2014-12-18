@@ -16,7 +16,7 @@ const int HEX_VALUE_DISPLAY_COLUMN = 1;
 const int FIXED_POINT_DISPLAY_COLUMN = 0;
 const unsigned int DOUBLE_SPINBOX_DEFAULT_PRECISION = 4;
 
-/*
+/**
  * TableSpinBoxDelegate provides  custom implemented delegates
  * that can be used to modify cell display properties of a QTableWidget. A
  * QTableWidget linked with a TableSpinBoxDelegate object will use the delegates
