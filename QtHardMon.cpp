@@ -1086,18 +1086,18 @@ void QtHardMon::updateTableEntries(int row, int column) {
         getFractionalValue(userUpdatedValueInCell);
 
     bool doesCorrespondingDoubleExist =
-        (_hardMonForm.valuesTableWidget->item(row, 2) != NULL);
+        (_hardMonForm.valuesTableWidget->item(
+             row, FLOATING_POINT_DISPLAY_COLUMN) != NULL);
 
     if (doesCorrespondingDoubleExist) {
-      double currentValueInDoubleField =
-          _hardMonForm.valuesTableWidget->item(row, 2)
+      double currentValueInDoubleColumn =
+          _hardMonForm.valuesTableWidget->item(row,
+                                               FLOATING_POINT_DISPLAY_COLUMN)
               ->data(0)
-              .toDouble(); // fetch the content from the
-      // corresponding double field cell
-      // on the same row
-
-      if (currentValueInDoubleField == fractionalVersionOfUserValue)
-        return; // same values, so no update required
+              .toDouble();
+      if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
+        return; // same value in the corresponding double cell, so no update
+                // required
     }
     // If here, This is a new value. Trigger update of the other
     // fields in the same row
@@ -1111,11 +1111,12 @@ void QtHardMon::updateTableEntries(int row, int column) {
         getFixedPointValue(userUpdatedValueInCell);
 
     bool doesCorrespondingFixedPointCellExist =
-        (_hardMonForm.valuesTableWidget->item(row, 0) != NULL);
+        (_hardMonForm.valuesTableWidget->item(
+             row, FIXED_POINT_DISPLAY_COLUMN) != NULL);
 
     if (doesCorrespondingFixedPointCellExist) {
       int currentValueInFixedPointCell =
-          _hardMonForm.valuesTableWidget->item(row, 0)
+          _hardMonForm.valuesTableWidget->item(row, FIXED_POINT_DISPLAY_COLUMN)
               ->data(0)
               .toInt(); // fetch current content of the decimal field on the
                         // same row
@@ -1125,7 +1126,12 @@ void QtHardMon::updateTableEntries(int row, int column) {
         return;
     }
     updateHexField(row, FixedPointVersionOfUserValue);
-    updateDecimalField(row, FixedPointVersionOfUserValue);
+    updateDecimalField(
+        row, FixedPointVersionOfUserValue); // This will trigger an update to
+                                            // the fixed point display column,
+                                            // which will in turn correct the
+                                            // value in this double cell to a
+                                            // valid one
   }
 }
 
