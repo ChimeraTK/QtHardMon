@@ -1131,7 +1131,8 @@ void QtHardMon::updateTableEntries(int row, int column) {
                                             // the fixed point display column,
                                             // which will in turn correct the
                                             // value in this double cell to a
-                                            // valid one
+    // valid one (In case the user entered one is not supported by the floating
+    // point converter settings)
   }
 }
 
