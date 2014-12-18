@@ -9,17 +9,19 @@
 #include <QDoubleSpinBox>
 
 static const int DOUBLE_SPINBOX_MAX_VALUE = 1000000000;
+static const int DOUBLE_SPINBOX_MIN_VALUE = -1000000000;
 
 TableSpinBoxDelegate::TableSpinBoxDelegate(QObject* parent)
     : QStyledItemDelegate(parent),
-      _doubleSpinBoxPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION),
-      _doubleSpinBoxMaxVaue(DOUBLE_SPINBOX_MAX_VALUE) {}
+      _doubleSpinBoxPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION)
+      {}
 
-// Method displays double values in the cell with decimal places. ((eg: 123.6500
-// if precision required is 4)). The desired number of decimal places
-// (precision) can be specified by setting
-// _doubleSpinBoxPrecision
-//
+/*
+ * Method displays double values in the cell with decimal places. ((eg: 123.6500
+ * if precision required is 4)). The desired number of decimal places
+ * (precision) can be specified by setting
+ * _doubleSpinBoxPrecision
+ */
 QString TableSpinBoxDelegate::displayText(const QVariant& value,
                                           const QLocale& locale) const {
   if (value.type() == QVariant::Double) { // frame and return a formatted
@@ -32,18 +34,25 @@ QString TableSpinBoxDelegate::displayText(const QVariant& value,
   }
 }
 
-// Use a customized QDoubleSpinbox to modify cells with double value. The
-// spinbox supports a precision specified by _doubleSpinBoxPrecision.
-//
+/*
+ * Use a customized QDoubleSpinbox to modify cells with double value. The
+ * spinbox supports a precision specified by _doubleSpinBoxPrecision.
+ */
 QWidget* TableSpinBoxDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& option,
                                             const QModelIndex& index) const {
+  // TODO: Modify to make created editor 'column independent' - All
+  // cells accepting double in the table should
+  // have a common type of editor.
+  // <chk source: QStyledItemDelegate::createEditor>
+  //
   if (index.column() ==
       FLOATING_POINT_DISPLAY_COLUMN) { // create spinbox with custom precision
                                        // for cells in the double column
     QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(parent);
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
-    doubleSpinBox->setMaximum(_doubleSpinBoxMaxVaue);
+    doubleSpinBox->setMaximum(DOUBLE_SPINBOX_MAX_VALUE);
+    doubleSpinBox->setMinimum(DOUBLE_SPINBOX_MIN_VALUE);
     return doubleSpinBox;
   } else {
     return QStyledItemDelegate::createEditor(parent, option, index);

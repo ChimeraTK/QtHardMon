@@ -253,6 +253,8 @@ class QtHardMon: public QMainWindow
   void updateDoubleField(int row, double value);
 
   void updateDecimalField(int row, int value);
+
+  void clearRowBackgroundColour(int row);
 };
 
 #endif// QT_HARD_MON

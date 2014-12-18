@@ -1076,13 +1076,10 @@ void QtHardMon::updateTableEntries(int row, int column) {
 
   // We have two editable fields - The decimal field and double field.
   // The values reflect each other and to avoid an infinite
-  // loop  situation,  an update to one field with a new value, sets
-  // off an update to the other field only if the current value in the
-  // other field is different from this new value.
+  // loop  situation,  corresponding column cells are updated
+  // only if required
   //
-  // Column 0 and 2 are the current editable fields.
-  //
-  if (column == 0) { // The decimal field column
+  if (column == FIXED_POINT_DISPLAY_COLUMN) {
     int userUpdatedValueInCell =
         _hardMonForm.valuesTableWidget->item(row, column)->data(0).toInt();
     double fractionalVersionOfUserValue =
@@ -1092,25 +1089,22 @@ void QtHardMon::updateTableEntries(int row, int column) {
         (_hardMonForm.valuesTableWidget->item(row, 2) != NULL);
 
     if (doesCorrespondingDoubleExist) {
-      double currentValueInDoubleField;
-      currentValueInDoubleField = _hardMonForm.valuesTableWidget->item(row, 2)
-                                      ->data(0)
-                                      .toDouble(); // fetch the content from the
+      double currentValueInDoubleField =
+          _hardMonForm.valuesTableWidget->item(row, 2)
+              ->data(0)
+              .toDouble(); // fetch the content from the
       // corresponding double field cell
       // on the same row
 
-      int convertedValueFromDoubleField =
-          getFixedPointValue(currentValueInDoubleField);
-      if (convertedValueFromDoubleField == userUpdatedValueInCell)
-        return; // both decimal and double fields already have the same value
+      if (currentValueInDoubleField == fractionalVersionOfUserValue)
+        return; // same values, so no update required
     }
-
     // If here, This is a new value. Trigger update of the other
     // fields in the same row
     updateHexField(row, userUpdatedValueInCell);
     updateDoubleField(row, fractionalVersionOfUserValue);
 
-  } else if (column == 2) { // The double Field column
+  } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
     double userUpdatedValueInCell =
         _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
     int FixedPointVersionOfUserValue =
@@ -1120,8 +1114,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
         (_hardMonForm.valuesTableWidget->item(row, 0) != NULL);
 
     if (doesCorrespondingFixedPointCellExist) {
-      int currentValueInFixedPointCell;
-      currentValueInFixedPointCell =
+      int currentValueInFixedPointCell =
           _hardMonForm.valuesTableWidget->item(row, 0)
               ->data(0)
               .toInt(); // fetch current content of the decimal field on the
@@ -1129,9 +1122,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
       double convertedValueFrmFPCell =
           getFractionalValue(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
-        return; // The current user updated value in the double field has the
-                // same Fixed Point representation as existing content in the
-                // decimal field of the same row.
+        return;
     }
     updateHexField(row, FixedPointVersionOfUserValue);
     updateDecimalField(row, FixedPointVersionOfUserValue);
@@ -1143,7 +1134,7 @@ void QtHardMon::changeBackgroundIfModified( int row, int column ){
     _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
   }
   else{
-    _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _defaultBackgroundBrush );
+    clearRowBackgroundColour(row);
   }
 }
 
@@ -1151,9 +1142,7 @@ void QtHardMon::clearBackground(){
   int nRows = _hardMonForm.valuesTableWidget->rowCount();
 
   for( int row=0; row < nRows; ++row ){
-    _hardMonForm.valuesTableWidget->item(row, 0)->setBackground( _defaultBackgroundBrush );
-    _hardMonForm.valuesTableWidget->item(row, 1)->setBackground( _defaultBackgroundBrush );
-    _hardMonForm.valuesTableWidget->item(row, 2)->setBackground( _defaultBackgroundBrush );
+    clearRowBackgroundColour(row);
   }
 }
 
@@ -1216,7 +1205,7 @@ void QtHardMon::updateHexField(int row, int value) {
   // set the dataitem as text and update table
   hexValueAsText << "0x" << std::hex << value;
   hexDataItem->setText(hexValueAsText.str().c_str());
-  _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem);
+  _hardMonForm.valuesTableWidget->setItem(row, HEX_VALUE_DISPLAY_COLUMN, hexDataItem);
 }
 
 void QtHardMon::updateDoubleField(int row, double value) {
@@ -1224,12 +1213,24 @@ void QtHardMon::updateDoubleField(int row, double value) {
   dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
       row, FLOATING_POINT_DISPLAY_COLUMN,
-      dataItemForDouble); // column 2 is the double Field
+      dataItemForDouble);
 }
 
 void QtHardMon::updateDecimalField(int row, int value) {
   QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
   dataItemForFixedPoint->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
-      row, 0, dataItemForFixedPoint); // column 0 has the decimal Field
+      row, FIXED_POINT_DISPLAY_COLUMN, dataItemForFixedPoint);
+}
+
+void QtHardMon::clearRowBackgroundColour(int row) {
+  int numberOfColumns = _hardMonForm.valuesTableWidget->columnCount();
+  for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+    bool cellExists =
+        (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
+    if (cellExists) {
+      _hardMonForm.valuesTableWidget->item(row, columnIndex)
+          ->setBackground(_defaultBackgroundBrush);
+    }
+  }
 }
