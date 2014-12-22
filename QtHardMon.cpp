@@ -14,6 +14,7 @@
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
+#include <MtcaMappedDevice/FixedPointConverter.h>
 using namespace mtca4u;
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
@@ -31,6 +32,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define CURRENT_DEVICE_STRING "currentDevice"
 #define CURRENT_REGISTER_ROW_STRING "currentRegisterRow"
 #define MAX_WORDS_STRING "maxWords"
+#define PRECISION_INDICATOR_STRING "decimalPlaces"
 #define READ_AFTER_WRITE_STRING "readAfterWrite"
 #define HEX_VALUES_STRING "hexValues"
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
@@ -41,10 +43,11 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define READ_ON_CLICK_STRING "readOnClick"
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _autoRead(true),
+  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true),  _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
+    //_customDelegate(NULL),
     _currentDeviceListItem(NULL)
 {
   _hardMonForm.setupUi(this);
@@ -62,8 +65,8 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   connect(_hardMonForm.registerListWidget, SIGNAL(itemActivated(QListWidgetItem *)), 
 	  this, SLOT( registerClicked(QListWidgetItem *) ) );
 
-  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
-	  this, SLOT( updateHexIfDecChanged(int, int) ) );
+  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)),
+	  this, SLOT( updateTableEntries(int, int) ) );
 
   connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
 	  this, SLOT( changeBackgroundIfModified(int, int) ) );
@@ -115,6 +118,10 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   _hardMonForm.continuousReadCheckBox->setEnabled(false);
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
+
+  // customize table display
+  _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
+  _hardMonForm.valuesTableWidget->setItemDelegate(&_customDelegate);
 
   _plotWindow = new PlotWindow(this);
 
@@ -318,7 +325,11 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
     _hardMonForm.registerNElementsDisplay->setText("");
     _hardMonForm.registerAddressDisplay->setText("");
     _hardMonForm.registerSizeDisplay->setText("");
-    clearValuesTableWidget();
+    _hardMonForm.registerWidthDisplay->setText("");
+    _hardMonForm.registerFracBitsDisplay->setText("");
+    _hardMonForm.registeSignBitDisplay->setText("");
+    _hardMonForm.valuesTableWidget->clearContents();
+
 
     return;
   }
@@ -337,6 +348,9 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
 				  QString::number( registerListItem->getRegisterMapElement().reg_address ));
   _hardMonForm.registerSizeDisplay->setText(  
 				  QString::number( registerListItem->getRegisterMapElement().reg_size ));
+  _hardMonForm.registerWidthDisplay->setText(QString::number( registerListItem->getRegisterMapElement().reg_width ));
+  _hardMonForm.registerFracBitsDisplay->setText(QString::number( registerListItem->getRegisterMapElement().reg_frac_bits ));
+  _hardMonForm.registeSignBitDisplay->setText(QString::number( registerListItem->getRegisterMapElement().reg_signed ));
 
   // remember that this register has been selected
   _currentDeviceListItem->setLastSelectedRegisterRow(  _hardMonForm.registerListWidget->currentRow() );
@@ -349,7 +363,7 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   if (!_autoRead){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
-    clearValuesTableWidget();
+    _hardMonForm.valuesTableWidget->clearContents();
     _hardMonForm.writeButton->setEnabled(false);
   }
 
@@ -367,20 +381,6 @@ void QtHardMon::registerSelected(QListWidgetItem * registerItem, QListWidgetItem
   if (_autoRead){
     read();
   }
-}
-
-void QtHardMon::clearValuesTableWidget(){
-  _hardMonForm.valuesTableWidget->clear();
-  //restore the dec/hex header
-  _hardMonForm.valuesTableWidget->setColumnCount(2);
-  
-  QTableWidgetItem *decHeaderItem =  new QTableWidgetItem();
-  decHeaderItem->setText(QApplication::translate("QtHardMonForm", "dec", 0, QApplication::UnicodeUTF8));
-  _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(0, decHeaderItem);
-  
-  QTableWidgetItem *hexHeaderItem = new QTableWidgetItem();
-  hexHeaderItem->setText(QApplication::translate("QtHardMonForm", "hex", 0, QApplication::UnicodeUTF8));
-  _hardMonForm.valuesTableWidget->setHorizontalHeaderItem(1, hexHeaderItem);
 }
 
 void QtHardMon::read()
@@ -462,11 +462,10 @@ void QtHardMon::read()
       // no need to set the hex item
       break;
     }
-
     int registerContent = (readError?-1:inputBuffer[row]);
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
-    _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
+    _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );;
     
   }// for row
  
@@ -561,12 +560,22 @@ void QtHardMon::preferences()
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
   preferencesDialogForm.maxWordsSpinBox->setValue( _maxWords );
 
+  // set up the floating point display decimal places
+  preferencesDialogForm.precisionSpinBox->setMinimum(1); // minimum one decimal place display
+  preferencesDialogForm.precisionSpinBox->setMaximum(10);// maximum 10 decimal places
+  preferencesDialogForm.precisionSpinBox->setValue(_floatPrecision);
+
   int dialogResult = preferencesDialog.exec();
 
   // only set the values if ok has been pressed
   if (dialogResult == QDialog::Accepted )
   {
     _maxWords =  preferencesDialogForm.maxWordsSpinBox->value();
+
+    // Read and set precision for delegate class
+    _floatPrecision = preferencesDialogForm.precisionSpinBox->value();
+    _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
+
     // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
     // from the device
     registerSelected(_hardMonForm.registerListWidget->currentItem(),_hardMonForm.registerListWidget->currentItem());
@@ -653,6 +662,9 @@ void QtHardMon::loadConfig(QString const & configFileName)
 
 
   // first handle all settings that do not depend on opening a device map
+
+  _floatPrecision = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision)); // is check necessary? should display default
+  _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
 
   // store in a local variable for now
   int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
@@ -897,6 +909,7 @@ void QtHardMon::writeConfig(QString const & fileName)
   }
 
   configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
+  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
@@ -1059,23 +1072,67 @@ void QtHardMon::openCloseDevice(){
   }
 }
 
-void QtHardMon::updateHexIfDecChanged( int row, int column ){
-  // only update the hex value if when the dec value (column 0) changed
-  // to avoid an endless loop. This function is also triggered by
-  // itself when the hex value is changed.
-  if (column==0){
-    
-    QTableWidgetItem * hexDataItem =  new QTableWidgetItem();
-    // for the time being: make the code easy, hex is just for display
-    hexDataItem->setFlags( hexDataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
-    
-    std::stringstream hexValueAsText;
-    hexValueAsText << "0x" << std::hex 
-		   << _hardMonForm.valuesTableWidget->item(row, column)
-                                                    ->data(0 /*default role*/).toInt();
-    hexDataItem->setText(hexValueAsText.str().c_str());
-    _hardMonForm.valuesTableWidget->setItem(row, 1, hexDataItem );
-    
+void QtHardMon::updateTableEntries(int row, int column) {
+
+  // We have two editable fields - The decimal field and double field.
+  // The values reflect each other and to avoid an infinite
+  // loop  situation,  corresponding column cells are updated
+  // only if required
+  //
+  if (column == FIXED_POINT_DISPLAY_COLUMN) {
+    int userUpdatedValueInCell =
+        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toInt();
+    double fractionalVersionOfUserValue =
+        getFractionalValue(userUpdatedValueInCell);
+
+    bool doesCorrespondingDoubleExist =
+        (_hardMonForm.valuesTableWidget->item(
+             row, FLOATING_POINT_DISPLAY_COLUMN) != NULL);
+
+    if (doesCorrespondingDoubleExist) {
+      double currentValueInDoubleColumn =
+          _hardMonForm.valuesTableWidget->item(row,
+                                               FLOATING_POINT_DISPLAY_COLUMN)
+              ->data(0)
+              .toDouble();
+      if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
+        return; // same value in the corresponding double cell, so no update
+                // required
+    }
+    // If here, This is a new value. Trigger update of the other
+    // fields in the same row
+    updateHexField(row, userUpdatedValueInCell);
+    updateDoubleField(row, fractionalVersionOfUserValue);
+
+  } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
+    double userUpdatedValueInCell =
+        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
+    int FixedPointVersionOfUserValue =
+        getFixedPointValue(userUpdatedValueInCell);
+
+    bool doesCorrespondingFixedPointCellExist =
+        (_hardMonForm.valuesTableWidget->item(
+             row, FIXED_POINT_DISPLAY_COLUMN) != NULL);
+
+    if (doesCorrespondingFixedPointCellExist) {
+      int currentValueInFixedPointCell =
+          _hardMonForm.valuesTableWidget->item(row, FIXED_POINT_DISPLAY_COLUMN)
+              ->data(0)
+              .toInt(); // fetch current content of the decimal field on the
+                        // same row
+      double convertedValueFrmFPCell =
+          getFractionalValue(currentValueInFixedPointCell);
+      if (userUpdatedValueInCell == convertedValueFrmFPCell)
+        return;
+    }
+    updateHexField(row, FixedPointVersionOfUserValue);
+    updateDecimalField(
+        row, FixedPointVersionOfUserValue); // This will trigger an update to
+                                            // the fixed point display column,
+                                            // which will in turn correct the
+                                            // value in this double cell to a
+    // valid one (In case the user entered one is not supported by the floating
+    // point converter settings)
   }
 }
 
@@ -1084,7 +1141,7 @@ void QtHardMon::changeBackgroundIfModified( int row, int column ){
     _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
   }
   else{
-    _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _defaultBackgroundBrush );
+    clearRowBackgroundColour(row);
   }
 }
 
@@ -1092,7 +1149,95 @@ void QtHardMon::clearBackground(){
   int nRows = _hardMonForm.valuesTableWidget->rowCount();
 
   for( int row=0; row < nRows; ++row ){
-    _hardMonForm.valuesTableWidget->item(row, 0)->setBackground( _defaultBackgroundBrush );
-    _hardMonForm.valuesTableWidget->item(row, 1)->setBackground( _defaultBackgroundBrush );
+    clearRowBackgroundColour(row);
+  }
+}
+
+void QtHardMon::parseArgument(QString const &fileName) {
+  if (checkExtension(fileName, ".dmap") == true) {
+    QDir::setCurrent(
+        QFileInfo(fileName).absolutePath());  // This may be removed once
+                                              // changes in dmapFilesParser have
+    // been submitted to the trunk. New code (currently on branch) modifies
+    // dmapFilesParser::parse_file. The map file location from the .dmap file is
+    // converted to its absolute path before use. (in the new code)
+
+    (void)loadDmapFile(fileName);
+  } else if (checkExtension(fileName, ".cfg") == true) {
+    loadConfig(fileName);
+  } else {
+    QMessageBox messageBox(
+        QMessageBox::Warning, tr("QtHardMon: Warning"),
+        QString(
+            "Unsupported file extension provided. Filename will be ignored."),
+        QMessageBox::Ok, this);
+    messageBox.exec();
+  }
+}
+
+bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
+  QStringRef extensionOfProvidedFile(
+      &fileName, (fileName.size() - extension.size()), extension.size());
+  bool areStringsEqual = (extension.compare(extensionOfProvidedFile) == 0);
+  return areStringsEqual;
+}
+
+double QtHardMon::getFractionalValue(int decimalValue) {
+  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
+      _hardMonForm.registerListWidget->currentItem());
+
+  FixedPointConverter converter(
+      registerInformation->getRegisterMapElement().reg_width,
+      registerInformation->getRegisterMapElement().reg_frac_bits,
+      registerInformation->getRegisterMapElement().reg_signed);
+  return converter.toDouble(decimalValue);
+}
+
+int QtHardMon::getFixedPointValue(double doubleValue) {
+  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
+      _hardMonForm.registerListWidget->currentItem());
+
+  FixedPointConverter converter(
+      registerInformation->getRegisterMapElement().reg_width,
+      registerInformation->getRegisterMapElement().reg_frac_bits,
+      registerInformation->getRegisterMapElement().reg_signed);
+  return converter.toFixedPoint(doubleValue);
+}
+
+void QtHardMon::updateHexField(int row, int value) {
+  QTableWidgetItem *hexDataItem = new QTableWidgetItem();
+  hexDataItem->setFlags(hexDataItem->flags() & ~Qt::ItemIsSelectable &
+                        ~Qt::ItemIsEditable);
+  std::stringstream hexValueAsText;
+  // set the dataitem as text and update table
+  hexValueAsText << "0x" << std::hex << value;
+  hexDataItem->setText(hexValueAsText.str().c_str());
+  _hardMonForm.valuesTableWidget->setItem(row, HEX_VALUE_DISPLAY_COLUMN, hexDataItem);
+}
+
+void QtHardMon::updateDoubleField(int row, double value) {
+  QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
+  dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
+  _hardMonForm.valuesTableWidget->setItem(
+      row, FLOATING_POINT_DISPLAY_COLUMN,
+      dataItemForDouble);
+}
+
+void QtHardMon::updateDecimalField(int row, int value) {
+  QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
+  dataItemForFixedPoint->setData(Qt::DisplayRole, QVariant(value));
+  _hardMonForm.valuesTableWidget->setItem(
+      row, FIXED_POINT_DISPLAY_COLUMN, dataItemForFixedPoint);
+}
+
+void QtHardMon::clearRowBackgroundColour(int row) {
+  int numberOfColumns = _hardMonForm.valuesTableWidget->columnCount();
+  for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+    bool cellExists =
+        (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
+    if (cellExists) {
+      _hardMonForm.valuesTableWidget->item(row, columnIndex)
+          ->setBackground(_defaultBackgroundBrush);
+    }
   }
 }

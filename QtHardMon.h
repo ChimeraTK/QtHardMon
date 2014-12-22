@@ -3,11 +3,14 @@
 
 #include "ui_QtHardMonForm.h"
 #include "PlotWindow.h"
+#include "TableSpinBoxDelegate.h"
 #include <QIcon>
 #include <QDir>
+#include <QStyledItemDelegate>
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
+//#include <>
 
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -25,6 +28,17 @@ class QtHardMon: public QMainWindow
   /** The function which actually performs the loading of the config file.
    */
   void loadConfig(QString const & configFileName);
+
+  /**
+   * This method checks if QtHardMon executable has been called with a
+   * valid configuration or dmap file as an argument. It checks
+   * the extension of the passed in argument to distinguish the two file
+   * types. Depending on the file type passed, the method invokes either
+   * loadConfig or loadBoards internally.
+   * A pop up window with a warning is displayed if the fileName
+   * argument provided does not end with extension ".dmap" or ".cfg"
+   */
+  void parseArgument(QString const &fileName);
 
   // slots for internal use in this class. We do not provide a widget to be used inside another widget.
  private slots:
@@ -73,7 +87,7 @@ class QtHardMon: public QMainWindow
   void saveConfigAs();
 
   /** Updates the hex value if the dec value changes */
-  void updateHexIfDecChanged( int row, int column );
+  void updateTableEntries( int row, int column );
 
   /** Sets the background color of the cell, depending on whether the update is made by read (normal color)
    *  or manually by the user (red).
@@ -83,12 +97,18 @@ class QtHardMon: public QMainWindow
   /** Set all background to non modified color.
    */
   void clearBackground();
+  /*
+   * returns true if the fileName ends with the provided
+   * extension else false
+   */
+  bool checkExtension(QString const &fileName, QString extension);
 
  private:
   
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
+  unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
   bool _readOnClick; ///< Flag wheter to read on click in the register list
   QString _dmapFileName; ///< The file name of the last opened dmap file
@@ -99,6 +119,7 @@ class QtHardMon: public QMainWindow
   ///< easier than catching all possible use cases.
   QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
+  TableSpinBoxDelegate _customDelegate;///< provides display customizations for the table widget.
 
   /** Write the config to the given file name.
    */
@@ -116,10 +137,6 @@ class QtHardMon: public QMainWindow
   /** Open the device and update the GUI accordingly.
    */
   void openDevice(std::string const & deviceFileName );
-
-  /** Clear the valuesTableWidget and restore the dec/hex headers.
-   */
-  void clearValuesTableWidget();
 
   /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
    */
@@ -219,6 +236,25 @@ class QtHardMon: public QMainWindow
   // pointer, would require unnecessarily long locking of the mutex.
   friend class PlotWindow;
 
+  /*
+   * Converts the input decimalValue to double. Internally uses
+   * mtca4u::FixedPointConverter
+   */
+  double getFractionalValue(int decimalValue);
+
+  /*
+   * Converts the input doubleValue to Fixed point int. Internally uses
+   * mtca4u::FixedPointConverter
+   */
+  int getFixedPointValue(double doubleValue);
+
+  void updateHexField(int row, int value);
+
+  void updateDoubleField(int row, double value);
+
+  void updateDecimalField(int row, int value);
+
+  void clearRowBackgroundColour(int row);
 };
 
 #endif// QT_HARD_MON
