@@ -263,8 +263,9 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 
   // In case the read on select option is enabled, selecting the previously
   // active register on the card triggers an implicit read as well.
-  // The user may now opt to not select (and hence read) the last active
-  // register on the card.
+  // The user may now opt to not select the last active
+  // register (and hence avoid the implicit read on this register when
+  // the card is selected)
   bool showLastSelectedRegister =
       _hardMonForm.regSelectionCheckBox->isChecked();
   if (showLastSelectedRegister) {
