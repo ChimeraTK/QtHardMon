@@ -35,7 +35,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define PRECISION_INDICATOR_STRING "decimalPlaces"
 #define READ_AFTER_WRITE_STRING "readAfterWrite"
 #define HEX_VALUES_STRING "hexValues"
-#define DISPLAY_LAST_SELECTED_REGISTER_STRING "showLastSelectedRegister"
+#define AUTOSELECT_PREVIOUS_REGISTER_STRING "autoselectPreviousRegister"
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
 #define PLOT_AFTER_READ_STRING "plotAfterRead"
 #define REGISTER_EXTENSION_STRING "_REGISTER"
@@ -262,13 +262,11 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   openDevice( deviceListItem->getDeviceMapElement().dev_file );
 
   // In case the read on select option is enabled, selecting the previously
-  // active register on the card triggers an implicit read as well.
+  // active register on the device triggers an implicit read as well.
   // The user may now opt to not select the last active
   // register (and hence avoid the implicit read on this register when
   // the card is selected)
-  bool showLastSelectedRegister =
-      _hardMonForm.regSelectionCheckBox->isChecked();
-  if (showLastSelectedRegister) {
+  if ( _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ) {
     _hardMonForm.registerListWidget->setCurrentRow(
         deviceListItem->getLastSelectedRegisterRow());
   }
@@ -711,11 +709,11 @@ void QtHardMon::loadConfig(QString const & configFileName)
 						 _plotWindow->plotAfterReadIsChecked() ? 1 : 0);
    _plotWindow->setPlotAfterRead( plotAfterReadFlag );
 
-   int displayLastSelectedRegisterFlag = configReader.getValue(
-       DISPLAY_LAST_SELECTED_REGISTER_STRING,
-       _hardMonForm.regSelectionCheckBox->isChecked() ? 1 : 0);
-   _hardMonForm.regSelectionCheckBox->setChecked(
-       displayLastSelectedRegisterFlag);
+   int autoselectPreviousRegisterFlag = configReader.getValue(
+       AUTOSELECT_PREVIOUS_REGISTER_STRING,
+       _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
+   _hardMonForm.autoselectPreviousRegisterCheckBox->setChecked(
+       autoselectPreviousRegisterFlag);
 
    _readOnClick = static_cast<bool>( configReader.getValue(READ_ON_CLICK_STRING, _readOnClick ? 1 : 0 ) );
    _autoRead = static_cast<bool>( configReader.getValue(AUTO_READ_STRING, _autoRead ? 1 : 0 ) );
@@ -929,8 +927,8 @@ void QtHardMon::writeConfig(QString const & fileName)
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
-  configWriter.setValue(DISPLAY_LAST_SELECTED_REGISTER_STRING,
-                        _hardMonForm.regSelectionCheckBox->isChecked() ? 1 : 0);
+  configWriter.setValue(AUTOSELECT_PREVIOUS_REGISTER_STRING,
+                        _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
   configWriter.setValue(PLOT_AFTER_READ_STRING, _plotWindow->plotAfterReadIsChecked() ? 1 : 0 );
   configWriter.setValue(FONT_SIZE_STRING, font().pointSize());
   configWriter.setValue(AUTO_READ_STRING, _autoRead ? 1 : 0 );
