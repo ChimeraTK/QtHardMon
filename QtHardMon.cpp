@@ -980,14 +980,6 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
     _lastSelectedRegisterRow(0)
 {}
 
-// non need to implement this. It is excactly what the default does.
-//QtHardMon::DeviceListItem::DeviceListItem( const DeviceListItem & other )
-//  : QListWidgetItem( other ) ,  _deviceMapElement( other.device_map_emlement ),
-//    _registerMapPointer( other.register_map_pointer )
-//{
-//}
-
-
 QtHardMon::DeviceListItem::~DeviceListItem(){}
 
  mtca4u::dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
@@ -1028,21 +1020,7 @@ QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & 
     _registerMapElement( register_map_emlement )
 {}
 
-// non need to implement this. It is excactly what the default does.
-//QtHardMon::RegisterListItem::RegisterListItem( const RegisterListItem & other )
-//  : QListWidgetItem( other ) ,  _registerMapElement( other.register_map_emlement )
-//{
-//}
-
-
 QtHardMon::RegisterListItem::~RegisterListItem(){}
-
-// non need to implement this. It is excactly what the default does.
-//QtHardMon::RegisterListItem::operator=( const RegisterListItem & other )
-//{
-//  QListWidgetItem::operator=(other);
-//  _registerMapElement=other._registerMapElement;
-//}
 
  mtca4u::mapFile::mapElem const & QtHardMon::RegisterListItem::getRegisterMapElement() const
 {
