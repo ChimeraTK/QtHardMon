@@ -10,7 +10,8 @@
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
-//#include <>
+#include <MtcaMappedDevice/FixedPointConverter.h>
+
 
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -257,6 +258,10 @@ class QtHardMon: public QMainWindow
   template<typename T>
   void updateCell(int row, QtHardMon::columns columnType, T value);
 
+  mtca4u::FixedPointConverter createConverter();
+  int getNumberOfColumsInTableWidget();
+  bool isValidCell(int row, int columnIndex);
+  void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
 };
 

@@ -14,7 +14,7 @@
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
-#include <MtcaMappedDevice/FixedPointConverter.h>
+
 using namespace mtca4u;
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
@@ -1176,47 +1176,61 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
 }
 
 double QtHardMon::getFractionalValue(int decimalValue) {
-  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
-      _hardMonForm.registerListWidget->currentItem());
-
-  FixedPointConverter converter(
-      registerInformation->getRegisterMapElement().reg_width,
-      registerInformation->getRegisterMapElement().reg_frac_bits,
-      registerInformation->getRegisterMapElement().reg_signed);
+  FixedPointConverter converter = createConverter();
   return converter.toDouble(decimalValue);
 }
 
 int QtHardMon::getFixedPointValue(double doubleValue) {
-  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
-      _hardMonForm.registerListWidget->currentItem());
-
-  FixedPointConverter converter(
-      registerInformation->getRegisterMapElement().reg_width,
-      registerInformation->getRegisterMapElement().reg_frac_bits,
-      registerInformation->getRegisterMapElement().reg_signed);
+  FixedPointConverter converter = createConverter();
   return converter.toFixedPoint(doubleValue);
 }
 
 
 void QtHardMon::clearRowBackgroundColour(int row) {
-  int numberOfColumns = _hardMonForm.valuesTableWidget->columnCount();
+  int numberOfColumns = getNumberOfColumsInTableWidget();
   for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-    bool cellExists =
-        (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
-    if (cellExists) {
-      _hardMonForm.valuesTableWidget->item(row, columnIndex)
-          ->setBackground(_defaultBackgroundBrush);
+    if (isValidCell(row, columnIndex)) {
+      clearCellBackground(row, columnIndex);
     }
   }
 }
-
 
 template<typename T>
   void
   QtHardMon::updateCell (int row, QtHardMon::columns columnType, T value) {
   int column = columnType;
+
   QTableWidgetItem *hexDataItem = new QTableWidgetItem();
   hexDataItem->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
       row, column, hexDataItem);
   }
+
+mtca4u::FixedPointConverter
+QtHardMon::createConverter () {
+  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
+      _hardMonForm.registerListWidget->currentItem());
+
+  FixedPointConverter converter(
+      registerInformation->getRegisterMapElement().reg_width,
+      registerInformation->getRegisterMapElement().reg_frac_bits,
+      registerInformation->getRegisterMapElement().reg_signed);
+
+  return converter;
+}
+
+int
+QtHardMon::getNumberOfColumsInTableWidget () {
+  return (_hardMonForm.valuesTableWidget->columnCount());
+}
+
+bool
+QtHardMon::isValidCell (int row, int columnIndex) {
+  return (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
+}
+
+void
+QtHardMon::clearCellBackground (int row, int columnIndex) {
+  _hardMonForm.valuesTableWidget->item(row, columnIndex)
+      ->setBackground(_defaultBackgroundBrush);
+}
