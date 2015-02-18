@@ -13,6 +13,10 @@
 //#include <>
 
 
+
+
+
+
 /** The QtHadMon class which implements all the GUI functionality.
  */
 class QtHardMon: public QMainWindow

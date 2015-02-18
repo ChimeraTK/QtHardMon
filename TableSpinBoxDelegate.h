@@ -11,6 +11,16 @@
 #include <QStyledItemDelegate>
 #include <QObject>
 
+struct Mytype{
+  static const int Type  = 5;
+  double i;
+  Mytype():i(10){};
+  inline double toDouble(){return i;}
+};
+
+Q_DECLARE_METATYPE(Mytype);
+
+
 const int FLOATING_POINT_DISPLAY_COLUMN = 2;
 const int HEX_VALUE_DISPLAY_COLUMN = 1;
 const int FIXED_POINT_DISPLAY_COLUMN = 0;
@@ -51,6 +61,10 @@ public:
    */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const;
+
+
+  void setEditorData ( QWidget * editor, const QModelIndex & index ) const ;
+  void setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
 
 private:
   int _doubleSpinBoxPrecision;

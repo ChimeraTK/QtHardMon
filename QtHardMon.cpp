@@ -17,6 +17,12 @@
 #include <MtcaMappedDevice/FixedPointConverter.h>
 using namespace mtca4u;
 
+
+enum myEnum {
+  a = 259
+};
+
+
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
 // => need to improve the api
 static const size_t WORD_SIZE_IN_BYTES = 4;
@@ -1210,8 +1216,12 @@ void QtHardMon::updateHexField(int row, int value) {
 }
 
 void QtHardMon::updateDoubleField(int row, double value) {
+  Mytype a;
+  a.i = value;
+  QVariant var;
+  var.setValue(a);
   QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
-  dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
+  dataItemForDouble->setData(Qt::DisplayRole, var);
   _hardMonForm.valuesTableWidget->setItem(
       row, FLOATING_POINT_DISPLAY_COLUMN,
       dataItemForDouble);
