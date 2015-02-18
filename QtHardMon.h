@@ -256,13 +256,16 @@ class QtHardMon: public QMainWindow
   int getFixedPointValue(double doubleValue);
 
   template<typename T>
-  void updateCell(int row, QtHardMon::columns columnType, T value);
+  void writeCell(int row, int column, T value);
+  template<typename T>
+  T readCell (int row, int column);
 
   mtca4u::FixedPointConverter createConverter();
   int getNumberOfColumsInTableWidget();
   bool isValidCell(int row, int columnIndex);
   void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
+
 };
 
 

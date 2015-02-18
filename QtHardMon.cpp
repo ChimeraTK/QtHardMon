@@ -1074,8 +1074,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
   // only if required
   //
   if (column == FIXED_POINT_DISPLAY_COLUMN) {
-    int userUpdatedValueInCell =
-        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toInt();
+    int userUpdatedValueInCell = readCell<int>(row, column);
     double fractionalVersionOfUserValue =
         getFractionalValue(userUpdatedValueInCell);
 
@@ -1096,11 +1095,11 @@ void QtHardMon::updateTableEntries(int row, int column) {
     // If here, This is a new value. Trigger update of the other
     // fields in the same row
     //updateHexField(row, userUpdatedValueInCell);
-    updateCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN, fractionalVersionOfUserValue);
+    writeCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN, fractionalVersionOfUserValue);
 
   } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
-    double userUpdatedValueInCell =
-        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
+    double userUpdatedValueInCell = readCell<double>(row, column);
+
     int FixedPointVersionOfUserValue =
         getFixedPointValue(userUpdatedValueInCell);
 
@@ -1120,7 +1119,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
         return;
     }
     //updateHexField(row, FixedPointVersionOfUserValue);
-    updateCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, FixedPointVersionOfUserValue); // This will trigger an update to
+    writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, FixedPointVersionOfUserValue); // This will trigger an update to
                                             // the fixed point display column,
                                             // which will in turn correct the
                                             // value in this double cell to a
@@ -1197,13 +1196,17 @@ void QtHardMon::clearRowBackgroundColour(int row) {
 
 template<typename T>
   void
-  QtHardMon::updateCell (int row, QtHardMon::columns columnType, T value) {
-  int column = columnType;
-
+  QtHardMon::writeCell (int row, int column, T value) {
   QTableWidgetItem *hexDataItem = new QTableWidgetItem();
   hexDataItem->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
       row, column, hexDataItem);
+  }
+
+template<typename T>
+  T
+  QtHardMon::readCell (int row, int column) {
+  return (_hardMonForm.valuesTableWidget->item(row, column)->data(Qt::DisplayRole).value<T>());
   }
 
 mtca4u::FixedPointConverter
