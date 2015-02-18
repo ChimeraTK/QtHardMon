@@ -474,7 +474,7 @@ void QtHardMon::read()
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );;
-    
+
   }// for row
  
   // check if plotting after reading is requested
@@ -1074,20 +1074,22 @@ void QtHardMon::updateTableEntries(int row, int column) {
   // only if required
   //
   if (column == FIXED_POINT_DISPLAY_COLUMN) {
+    HexData hexValue;
     int userUpdatedValueInCell = readCell<int>(row, column);
+    hexValue.value = userUpdatedValueInCell;
     double fractionalVersionOfUserValue =
         convertToDouble(userUpdatedValueInCell);
 
+    // update the hex field in all  cases
+    writeCell<HexData>(row, HEX_VALUE_DISPLAY_COLUMN, hexValue);
 
     if (isValidCell(row, FLOATING_POINT_DISPLAY_COLUMN)) {
       double currentValueInDoubleColumn = readCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN);
       if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
-        return; // same value in the corresponding double cell, so no update
-                // required
+        return; // same value in the corresponding double cell, so not updating this cell
     }
-    // If here, This is a new value. Trigger update of the other
-    // fields in the same row
-    //updateHexField(row, userUpdatedValueInCell);
+    // If here, This is a new value. Trigger update of the float cell
+
     writeCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN, fractionalVersionOfUserValue);
 
   } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
@@ -1097,20 +1099,28 @@ void QtHardMon::updateTableEntries(int row, int column) {
 
     if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
       int currentValueInFixedPointCell = readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
-           // fetch current content of the decimal field on the
-                        // same row
       double convertedValueFrmFPCell =
           convertToDouble(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
         return;
     }
-    //updateHexField(row, FixedPointVersionOfUserValue);
+
     writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, FixedPointVersionOfUserValue); // This will trigger an update to
                                             // the fixed point display column,
                                             // which will in turn correct the
                                             // value in this double cell to a
     // valid one (In case the user entered one is not supported by the floating
     // point converter settings)
+  } else if (column == HEX_VALUE_DISPLAY_COLUMN){
+   HexData hexInCell = readCell<HexData>(row, column);
+    int userUpdatedValueInCell = hexInCell.value;
+
+    if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
+      int currentValueInFixedPointCell = readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+      if (userUpdatedValueInCell == currentValueInFixedPointCell)
+              return;
+    }
+    writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, userUpdatedValueInCell);
   }
 }
 
@@ -1183,10 +1193,12 @@ void QtHardMon::clearRowBackgroundColour(int row) {
 template<typename T>
   void
   QtHardMon::writeCell (int row, int column, T value) {
-  QTableWidgetItem *hexDataItem = new QTableWidgetItem();
-  hexDataItem->setData(Qt::DisplayRole, QVariant(value));
+  QTableWidgetItem *widgetItem = new QTableWidgetItem();
+  QVariant dataVariant;
+  dataVariant.setValue(value);
+  widgetItem->setData(Qt::DisplayRole, dataVariant);
   _hardMonForm.valuesTableWidget->setItem(
-      row, column, hexDataItem);
+      row, column, widgetItem);
   }
 
 template<typename T>
