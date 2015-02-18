@@ -11,21 +11,7 @@
 #include <QStyledItemDelegate>
 #include <QObject>
 
-const int FLOATING_POINT_DISPLAY_COLUMN = 2;
-const int HEX_VALUE_DISPLAY_COLUMN = 1;
-const int FIXED_POINT_DISPLAY_COLUMN = 0;
-const unsigned int DOUBLE_SPINBOX_DEFAULT_PRECISION = 4;
 
-
-
-struct Mytype{
-  static const int Type  = 5;
-  double i;
-  Mytype():i(10){};
-  inline double toDouble(){return i;}
-};
-
-Q_DECLARE_METATYPE(Mytype);
 
 /**
  * TableSpinBoxDelegate provides  custom implemented delegates
@@ -36,6 +22,11 @@ Q_DECLARE_METATYPE(Mytype);
 class TableSpinBoxDelegate : public QStyledItemDelegate {
   Q_OBJECT
 public:
+  // Constants
+  static const unsigned int DOUBLE_SPINBOX_DEFAULT_PRECISION = 4;
+  static const int MAX_VALUE = 1000000000;
+  static const int MIN_VALUE = -1000000000;
+
   /**
    * Default constructor
    */
@@ -62,13 +53,6 @@ public:
    */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const;
-
-  void
-  setEditorData (QWidget* editor,
-  				     const QModelIndex& index) const;
-  void
-  setModelData (QWidget* editor, QAbstractItemModel* model,
-  				    const QModelIndex& index) const;
 
 private:
   int _doubleSpinBoxPrecision;

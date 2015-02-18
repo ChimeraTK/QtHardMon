@@ -104,6 +104,10 @@ class QtHardMon: public QMainWindow
   bool checkExtension(QString const &fileName, QString extension);
 
  private:
+  // Constants
+  static const int FLOATING_POINT_DISPLAY_COLUMN = 2;
+  static const int HEX_VALUE_DISPLAY_COLUMN = 1;
+  static const int FIXED_POINT_DISPLAY_COLUMN = 0;
   
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
