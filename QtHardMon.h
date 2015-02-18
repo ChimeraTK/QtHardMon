@@ -247,13 +247,13 @@ class QtHardMon: public QMainWindow
    * Converts the input decimalValue to double. Internally uses
    * mtca4u::FixedPointConverter
    */
-  double getFractionalValue(int decimalValue);
+  double convertToDouble(int decimalValue);
 
   /*
    * Converts the input doubleValue to Fixed point int. Internally uses
    * mtca4u::FixedPointConverter
    */
-  int getFixedPointValue(double doubleValue);
+  int convertToFixedPoint(double doubleValue);
 
   template<typename T>
   void writeCell(int row, int column, T value);

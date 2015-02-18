@@ -1076,18 +1076,11 @@ void QtHardMon::updateTableEntries(int row, int column) {
   if (column == FIXED_POINT_DISPLAY_COLUMN) {
     int userUpdatedValueInCell = readCell<int>(row, column);
     double fractionalVersionOfUserValue =
-        getFractionalValue(userUpdatedValueInCell);
+        convertToDouble(userUpdatedValueInCell);
 
-    bool doesCorrespondingDoubleExist =
-        (_hardMonForm.valuesTableWidget->item(
-             row, FLOATING_POINT_DISPLAY_COLUMN) != NULL);
 
-    if (doesCorrespondingDoubleExist) {
-      double currentValueInDoubleColumn =
-          _hardMonForm.valuesTableWidget->item(row,
-					       FLOATING_POINT_DISPLAY_COLUMN)
-              ->data(0)
-              .toDouble();
+    if (isValidCell(row, FLOATING_POINT_DISPLAY_COLUMN)) {
+      double currentValueInDoubleColumn = readCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN);
       if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
         return; // same value in the corresponding double cell, so no update
                 // required
@@ -1099,22 +1092,15 @@ void QtHardMon::updateTableEntries(int row, int column) {
 
   } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
     double userUpdatedValueInCell = readCell<double>(row, column);
-
     int FixedPointVersionOfUserValue =
-        getFixedPointValue(userUpdatedValueInCell);
+        convertToFixedPoint(userUpdatedValueInCell);
 
-    bool doesCorrespondingFixedPointCellExist =
-        (_hardMonForm.valuesTableWidget->item(
-             row, FIXED_POINT_DISPLAY_COLUMN) != NULL);
-
-    if (doesCorrespondingFixedPointCellExist) {
-      int currentValueInFixedPointCell =
-          _hardMonForm.valuesTableWidget->item(row, FIXED_POINT_DISPLAY_COLUMN)
-              ->data(0)
-              .toInt(); // fetch current content of the decimal field on the
+    if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
+      int currentValueInFixedPointCell = readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+           // fetch current content of the decimal field on the
                         // same row
       double convertedValueFrmFPCell =
-          getFractionalValue(currentValueInFixedPointCell);
+          convertToDouble(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
         return;
     }
@@ -1174,12 +1160,12 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
   return areStringsEqual;
 }
 
-double QtHardMon::getFractionalValue(int decimalValue) {
+double QtHardMon::convertToDouble(int decimalValue) {
   FixedPointConverter converter = createConverter();
   return converter.toDouble(decimalValue);
 }
 
-int QtHardMon::getFixedPointValue(double doubleValue) {
+int QtHardMon::convertToFixedPoint(double doubleValue) {
   FixedPointConverter converter = createConverter();
   return converter.toFixedPoint(doubleValue);
 }
