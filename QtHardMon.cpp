@@ -17,12 +17,6 @@
 #include <MtcaMappedDevice/FixedPointConverter.h>
 using namespace mtca4u;
 
-
-enum myEnum {
-  a = 259
-};
-
-
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
 // => need to improve the api
 static const size_t WORD_SIZE_IN_BYTES = 4;
@@ -481,6 +475,17 @@ void QtHardMon::read()
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );;
     
+
+    Mytype a;
+    a.i = registerContent;
+    QVariant var;
+    var.setValue(a);
+   QTableWidgetItem *dataItemForhex = new QTableWidgetItem();
+    dataItemForhex->setData(Qt::DisplayRole, var);
+    _hardMonForm.valuesTableWidget->setItem(
+        row, HEX_VALUE_DISPLAY_COLUMN,
+        dataItemForhex);
+
   }// for row
  
   // check if plotting after reading is requested
@@ -1090,23 +1095,36 @@ void QtHardMon::updateTableEntries(int row, int column) {
              row, FLOATING_POINT_DISPLAY_COLUMN) != NULL);
 
     if (doesCorrespondingDoubleExist) {
-      double currentValueInDoubleColumn =
+/*      double currentValueInDoubleColumn =
           _hardMonForm.valuesTableWidget->item(row,
                                                FLOATING_POINT_DISPLAY_COLUMN)
               ->data(0)
-              .toDouble();
+              .toDouble();*/
+      Mytype a = _hardMonForm.valuesTableWidget->item(row,
+	                                               FLOATING_POINT_DISPLAY_COLUMN)
+	              ->data(0).value<Mytype>();
+      double currentValueInDoubleColumn = a.i;
+
       if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
         return; // same value in the corresponding double cell, so no update
                 // required
     }
     // If here, This is a new value. Trigger update of the other
     // fields in the same row
-    updateHexField(row, userUpdatedValueInCell);
+    //updateHexField(row, userUpdatedValueInCell);
     updateDoubleField(row, fractionalVersionOfUserValue);
 
   } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
-    double userUpdatedValueInCell =
-        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
+/*    double userUpdatedValueInCell =
+        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();*/
+    Mytype a = _hardMonForm.valuesTableWidget->item(row,
+	                                               column)
+	              ->data(0).value<Mytype>();
+
+    double userUpdatedValueInCell = a.i;
+
+
+
     int FixedPointVersionOfUserValue =
         getFixedPointValue(userUpdatedValueInCell);
 
@@ -1125,7 +1143,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
         return;
     }
-    updateHexField(row, FixedPointVersionOfUserValue);
+    //updateHexField(row, FixedPointVersionOfUserValue);
     updateDecimalField(
         row, FixedPointVersionOfUserValue); // This will trigger an update to
                                             // the fixed point display column,
@@ -1206,22 +1224,24 @@ int QtHardMon::getFixedPointValue(double doubleValue) {
 
 void QtHardMon::updateHexField(int row, int value) {
   QTableWidgetItem *hexDataItem = new QTableWidgetItem();
-  hexDataItem->setFlags(hexDataItem->flags() & ~Qt::ItemIsSelectable &
-                        ~Qt::ItemIsEditable);
-  std::stringstream hexValueAsText;
-  // set the dataitem as text and update table
-  hexValueAsText << "0x" << std::hex << value;
-  hexDataItem->setText(hexValueAsText.str().c_str());
-  _hardMonForm.valuesTableWidget->setItem(row, HEX_VALUE_DISPLAY_COLUMN, hexDataItem);
-}
+  //hexDataItem->setFlags(hexDataItem->flags() & ~Qt::ItemIsSelectable &
+   //                     ~Qt::ItemIsEditable);
 
-void QtHardMon::updateDoubleField(int row, double value) {
   Mytype a;
   a.i = value;
   QVariant var;
   var.setValue(a);
+ QTableWidgetItem *dataItemForhex = new QTableWidgetItem();
+  dataItemForhex->setData(Qt::DisplayRole, var);
+  _hardMonForm.valuesTableWidget->setItem(
+      row, HEX_VALUE_DISPLAY_COLUMN,
+      dataItemForhex);
+
+}
+
+void QtHardMon::updateDoubleField(int row, double value) {
   QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
-  dataItemForDouble->setData(Qt::DisplayRole, var);
+  dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
   _hardMonForm.valuesTableWidget->setItem(
       row, FLOATING_POINT_DISPLAY_COLUMN,
       dataItemForDouble);
