@@ -52,7 +52,14 @@ QWidget* TableSpinBoxDelegate::createEditor(QWidget* parent,
     doubleSpinBox->setMaximum(MAX_VALUE);
     doubleSpinBox->setMinimum(MIN_VALUE);
     return doubleSpinBox;
-  } else {
+  } if (index.data(Qt::EditRole).type() == QVariant::Double) {
+    // Want to customize the decimal spin boxes to limit the max and minimum value they can display
+    QSpinBox* decimalSpinbox = new QSpinBox(parent);
+    decimalSpinbox->setMaximum(MAX_VALUE);
+    decimalSpinbox->setMinimum(MIN_VALUE);
+    return decimalSpinbox;
+  }
+  else {
     return QStyledItemDelegate::createEditor(parent, option, index);
   }
 }
