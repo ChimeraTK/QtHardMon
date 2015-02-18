@@ -10,6 +10,7 @@
 
 #include <QStyledItemDelegate>
 #include <QObject>
+#include "HexSpinBox.h"
 
 
 

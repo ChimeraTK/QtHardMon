@@ -105,9 +105,11 @@ class QtHardMon: public QMainWindow
 
  private:
   // Constants
-  static const int FLOATING_POINT_DISPLAY_COLUMN = 2;
-  static const int HEX_VALUE_DISPLAY_COLUMN = 1;
-  static const int FIXED_POINT_DISPLAY_COLUMN = 0;
+  enum columns{
+  FIXED_POINT_DISPLAY_COLUMN = 0,
+  HEX_VALUE_DISPLAY_COLUMN = 1,
+  FLOATING_POINT_DISPLAY_COLUMN = 2
+  };
   
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
@@ -252,13 +254,12 @@ class QtHardMon: public QMainWindow
    */
   int getFixedPointValue(double doubleValue);
 
-  void updateHexField(int row, int value);
-
-  void updateDoubleField(int row, double value);
-
-  void updateDecimalField(int row, int value);
+  template<typename T>
+  void updateCell(int row, QtHardMon::columns columnType, T value);
 
   void clearRowBackgroundColour(int row);
 };
+
+
 
 #endif// QT_HARD_MON

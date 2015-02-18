@@ -40,23 +40,17 @@ QString TableSpinBoxDelegate::displayText(const QVariant& value,
 QWidget* TableSpinBoxDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& option,
                                             const QModelIndex& index) const {
-  // TODO: Modify to make created editor 'column independent' - All
-  // cells accepting double in the table should
-  // have a common type of editor.
-  // <chk source: QStyledItemDelegate::createEditor>
-  //
+
   if (index.data(Qt::EditRole).type() == QVariant::Double) { // create spinbox with custom precision
                                        // for cells in the double column
     QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(parent);
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
-    doubleSpinBox->setMaximum(MAX_VALUE);
-    doubleSpinBox->setMinimum(MIN_VALUE);
+    doubleSpinBox->setRange(MIN_VALUE, MAX_VALUE);
     return doubleSpinBox;
   } if (index.data(Qt::EditRole).type() == QVariant::Double) {
     // Want to customize the decimal spin boxes to limit the max and minimum value they can display
     QSpinBox* decimalSpinbox = new QSpinBox(parent);
-    decimalSpinbox->setMaximum(MAX_VALUE);
-    decimalSpinbox->setMinimum(MIN_VALUE);
+    decimalSpinbox->setRange(MIN_VALUE, MAX_VALUE);
     return decimalSpinbox;
   }
   else {
