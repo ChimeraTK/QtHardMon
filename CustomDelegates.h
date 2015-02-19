@@ -32,12 +32,12 @@ public:
   /**
    * This is the Maximum value that can be entered into the tables spinboxes
    */
-  static const int MAX_VALUE = 0x7FFFFFFE;
+  static const int MAX_VALUE = 2147483647;
 
   /**
    * This is the Minimum value that can be entered into the tables spinboxes
    */
-  static const int MIN_VALUE = -1000000000;
+  static const int MIN_VALUE = -2147483648;
 
   /**
    * Default constructor

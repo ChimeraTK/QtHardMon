@@ -28,7 +28,7 @@ QString HexSpinBox::textFromValue(int value) const {
 
 int HexSpinBox::valueFromText(const QString& text) const {
   bool conversionStatus = false;
-  int convertedValue = text.toInt(&conversionStatus, 16);
+  int convertedValue = text.toUInt(&conversionStatus, 16);
   return convertedValue;
 }
 
