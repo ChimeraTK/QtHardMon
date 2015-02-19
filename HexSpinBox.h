@@ -42,7 +42,6 @@ Q_DECLARE_METATYPE(HexData);
 class HexSpinBox : public QSpinBox {
   Q_OBJECT
   QRegExpValidator* validator;
-  const int MAX_VALUE;
 
 public:
   /**

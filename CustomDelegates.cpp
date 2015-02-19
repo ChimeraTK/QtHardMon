@@ -29,7 +29,7 @@ QString CustomDelegates::displayText(const QVariant& value,
     // The hex type is the only defined type at this point so this check should
     // be OK
 
-    HexData hexValue = value.value<HexData>();
+    HexData hexValue = value.value<HexData>(); // get the datatype stored in this cell
     int intValue = hexValue.value;
     return (QString("0x") % QString::number(intValue, 16));
 
@@ -92,7 +92,6 @@ void CustomDelegates::setModelData(QWidget* editor, QAbstractItemModel* model,
     QVariant dataVariant;
     dataVariant.setValue(hexData);
     model->setData(index, dataVariant, Qt::EditRole);
-
   } else {
     QStyledItemDelegate::setModelData(editor, model, index);
   }
