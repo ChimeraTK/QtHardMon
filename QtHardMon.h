@@ -3,7 +3,7 @@
 
 #include "ui_QtHardMonForm.h"
 #include "PlotWindow.h"
-#include "TableSpinBoxDelegate.h"
+#include "CustomDelegates.h"
 #include <QIcon>
 #include <QDir>
 #include <QStyledItemDelegate>
@@ -126,7 +126,7 @@ class QtHardMon: public QMainWindow
   ///< easier than catching all possible use cases.
   QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
-  TableSpinBoxDelegate _customDelegate;///< provides display customizations for the table widget.
+  CustomDelegates _customDelegate;///< provides display customizations for the table widget.
 
   /** Write the config to the given file name.
    */

@@ -44,7 +44,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define READ_ON_CLICK_STRING "readOnClick"
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(TableSpinBoxDelegate::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
+  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true),  _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
@@ -1084,13 +1084,16 @@ void QtHardMon::updateTableEntries(int row, int column) {
     writeCell<HexData>(row, HEX_VALUE_DISPLAY_COLUMN, hexValue);
 
     if (isValidCell(row, FLOATING_POINT_DISPLAY_COLUMN)) {
-      double currentValueInDoubleColumn = readCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN);
+      double currentValueInDoubleColumn =
+          readCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN);
       if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
-        return; // same value in the corresponding double cell, so not updating this cell
+        return; // same value in the corresponding double cell, so not updating
+                // this cell
     }
     // If here, This is a new value. Trigger update of the float cell
 
-    writeCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN, fractionalVersionOfUserValue);
+    writeCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN,
+                      fractionalVersionOfUserValue);
 
   } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
     double userUpdatedValueInCell = readCell<double>(row, column);
@@ -1098,27 +1101,31 @@ void QtHardMon::updateTableEntries(int row, int column) {
         convertToFixedPoint(userUpdatedValueInCell);
 
     if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
-      int currentValueInFixedPointCell = readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+      int currentValueInFixedPointCell =
+          readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
       double convertedValueFrmFPCell =
           convertToDouble(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
         return;
     }
 
-    writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, FixedPointVersionOfUserValue); // This will trigger an update to
-                                            // the fixed point display column,
-                                            // which will in turn correct the
-                                            // value in this double cell to a
+    writeCell<int>(
+        row, FIXED_POINT_DISPLAY_COLUMN,
+        FixedPointVersionOfUserValue); // This will trigger an update to
+                                       // the fixed point display column,
+                                       // which will in turn correct the
+                                       // value in this double cell to a
     // valid one (In case the user entered one is not supported by the floating
     // point converter settings)
-  } else if (column == HEX_VALUE_DISPLAY_COLUMN){
-   HexData hexInCell = readCell<HexData>(row, column);
+  } else if (column == HEX_VALUE_DISPLAY_COLUMN) {
+    HexData hexInCell = readCell<HexData>(row, column);
     int userUpdatedValueInCell = hexInCell.value;
 
     if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
-      int currentValueInFixedPointCell = readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+      int currentValueInFixedPointCell =
+          readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
       if (userUpdatedValueInCell == currentValueInFixedPointCell)
-              return;
+        return;
     }
     writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, userUpdatedValueInCell);
   }
@@ -1144,8 +1151,8 @@ void QtHardMon::clearBackground(){
 void QtHardMon::parseArgument(QString const &fileName) {
   if (checkExtension(fileName, ".dmap") == true) {
     QDir::setCurrent(
-        QFileInfo(fileName).absolutePath());  // This may be removed once
-                                              // changes in dmapFilesParser have
+        QFileInfo(fileName).absolutePath()); // This may be removed once
+                                             // changes in dmapFilesParser have
     // been submitted to the trunk. New code (currently on branch) modifies
     // dmapFilesParser::parse_file. The map file location from the .dmap file is
     // converted to its absolute path before use. (in the new code)
@@ -1180,7 +1187,6 @@ int QtHardMon::convertToFixedPoint(double doubleValue) {
   return converter.toFixedPoint(doubleValue);
 }
 
-
 void QtHardMon::clearRowBackgroundColour(int row) {
   int numberOfColumns = getNumberOfColumsInTableWidget();
   for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
@@ -1190,25 +1196,21 @@ void QtHardMon::clearRowBackgroundColour(int row) {
   }
 }
 
-template<typename T>
-  void
-  QtHardMon::writeCell (int row, int column, T value) {
+template <typename T> void QtHardMon::writeCell(int row, int column, T value) {
   QTableWidgetItem *widgetItem = new QTableWidgetItem();
   QVariant dataVariant;
   dataVariant.setValue(value);
   widgetItem->setData(Qt::DisplayRole, dataVariant);
-  _hardMonForm.valuesTableWidget->setItem(
-      row, column, widgetItem);
-  }
+  _hardMonForm.valuesTableWidget->setItem(row, column, widgetItem);
+}
 
-template<typename T>
-  T
-  QtHardMon::readCell (int row, int column) {
-  return (_hardMonForm.valuesTableWidget->item(row, column)->data(Qt::DisplayRole).value<T>());
-  }
+template <typename T> T QtHardMon::readCell(int row, int column) {
+  return (_hardMonForm.valuesTableWidget->item(row, column)
+              ->data(Qt::DisplayRole)
+              .value<T>());
+}
 
-mtca4u::FixedPointConverter
-QtHardMon::createConverter () {
+mtca4u::FixedPointConverter QtHardMon::createConverter() {
   RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
       _hardMonForm.registerListWidget->currentItem());
 
@@ -1220,18 +1222,15 @@ QtHardMon::createConverter () {
   return converter;
 }
 
-int
-QtHardMon::getNumberOfColumsInTableWidget () {
+int QtHardMon::getNumberOfColumsInTableWidget() {
   return (_hardMonForm.valuesTableWidget->columnCount());
 }
 
-bool
-QtHardMon::isValidCell (int row, int columnIndex) {
+bool QtHardMon::isValidCell(int row, int columnIndex) {
   return (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
 }
 
-void
-QtHardMon::clearCellBackground (int row, int columnIndex) {
+void QtHardMon::clearCellBackground(int row, int columnIndex) {
   _hardMonForm.valuesTableWidget->item(row, columnIndex)
       ->setBackground(_defaultBackgroundBrush);
 }
