@@ -34,7 +34,6 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define MAX_WORDS_STRING "maxWords"
 #define PRECISION_INDICATOR_STRING "decimalPlaces"
 #define READ_AFTER_WRITE_STRING "readAfterWrite"
-#define HEX_VALUES_STRING "hexValues"
 #define AUTOSELECT_PREVIOUS_REGISTER_STRING "autoselectPreviousRegister"
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
 #define PLOT_AFTER_READ_STRING "plotAfterRead"
@@ -115,7 +114,6 @@ QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags)
   _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
 
   // The following widgets are diabled because they are not implemented yet
-  _hardMonForm.hexValuesCheckBox->setEnabled(false);
   _hardMonForm.continuousReadCheckBox->setEnabled(false);
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
@@ -697,10 +695,6 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // we use the implicit conversion 0=false, everyting else is true
   _hardMonForm.readAfterWriteCheckBox->setChecked( readAfterWriteFlag );
 
-  int hexValuesFlag =  configReader.getValue(HEX_VALUES_STRING,
-						 _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0);
-  _hardMonForm.hexValuesCheckBox->setChecked( hexValuesFlag );
-
   int showPlotWindowFlag =  configReader.getValue(SHOW_PLOT_WINDOW_STRING,
 						 _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0);
   _hardMonForm.showPlotWindowCheckBox->setChecked( showPlotWindowFlag );
@@ -925,7 +919,6 @@ void QtHardMon::writeConfig(QString const & fileName)
   configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
   configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
-  configWriter.setValue(HEX_VALUES_STRING,  _hardMonForm.hexValuesCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(AUTOSELECT_PREVIOUS_REGISTER_STRING,
                         _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
