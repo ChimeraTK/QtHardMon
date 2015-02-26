@@ -3,14 +3,15 @@
 
 #include "ui_QtHardMonForm.h"
 #include "PlotWindow.h"
-#include "TableSpinBoxDelegate.h"
+#include "CustomDelegates.h"
 #include <QIcon>
 #include <QDir>
 #include <QStyledItemDelegate>
 
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/devPCIE.h>
-//#include <>
+#include <MtcaMappedDevice/FixedPointConverter.h>
+
 
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -104,6 +105,12 @@ class QtHardMon: public QMainWindow
   bool checkExtension(QString const &fileName, QString extension);
 
  private:
+  // Constants
+  enum columns{
+  FIXED_POINT_DISPLAY_COLUMN = 0,
+  HEX_VALUE_DISPLAY_COLUMN = 1,
+  FLOATING_POINT_DISPLAY_COLUMN = 2
+  };
   
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
@@ -119,7 +126,7 @@ class QtHardMon: public QMainWindow
   ///< easier than catching all possible use cases.
   QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
-  TableSpinBoxDelegate _customDelegate;///< provides display customizations for the table widget.
+  CustomDelegates _customDelegate;///< provides display customizations for the table widget.
 
   /** Write the config to the given file name.
    */
@@ -240,21 +247,27 @@ class QtHardMon: public QMainWindow
    * Converts the input decimalValue to double. Internally uses
    * mtca4u::FixedPointConverter
    */
-  double getFractionalValue(int decimalValue);
+  double convertToDouble(int decimalValue);
 
   /*
    * Converts the input doubleValue to Fixed point int. Internally uses
    * mtca4u::FixedPointConverter
    */
-  int getFixedPointValue(double doubleValue);
+  int convertToFixedPoint(double doubleValue);
 
-  void updateHexField(int row, int value);
+  template<typename T>
+  void writeCell(int row, int column, T value);
+  template<typename T>
+  T readCell (int row, int column);
 
-  void updateDoubleField(int row, double value);
-
-  void updateDecimalField(int row, int value);
-
+  mtca4u::FixedPointConverter createConverter();
+  int getNumberOfColumsInTableWidget();
+  bool isValidCell(int row, int columnIndex);
+  void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
+
 };
+
+
 
 #endif// QT_HARD_MON

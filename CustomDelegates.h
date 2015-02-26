@@ -10,25 +10,39 @@
 
 #include <QStyledItemDelegate>
 #include <QObject>
-
-const int FLOATING_POINT_DISPLAY_COLUMN = 2;
-const int HEX_VALUE_DISPLAY_COLUMN = 1;
-const int FIXED_POINT_DISPLAY_COLUMN = 0;
-const unsigned int DOUBLE_SPINBOX_DEFAULT_PRECISION = 4;
+#include "HexSpinBox.h"
 
 /**
- * TableSpinBoxDelegate provides  custom implemented delegates
+ * CustomDelegates provides  custom implemented delegates
  * that can be used to modify cell display properties of a QTableWidget. A
  * QTableWidget linked with a TableSpinBoxDelegate object will use the delegates
  * of this class instead of the base class(QStyledItemDelegate)
  */
-class TableSpinBoxDelegate : public QStyledItemDelegate {
+class CustomDelegates : public QStyledItemDelegate {
   Q_OBJECT
 public:
+  // Constants
+
+  /**
+   * This is the default precision of the float values displayed by the table
+   * widget.
+   */
+  static const unsigned int DOUBLE_SPINBOX_DEFAULT_PRECISION = 4;
+
+  /**
+   * This is the Maximum value that can be entered into the tables spinboxes
+   */
+  static const int MAX_VALUE = 2147483647;
+
+  /**
+   * This is the Minimum value that can be entered into the tables spinboxes
+   */
+  static const int MIN_VALUE = -2147483648;
+
   /**
    * Default constructor
    */
-  TableSpinBoxDelegate(QObject *parent = 0);
+  CustomDelegates(QObject *parent = 0);
 
   /**
    * This method is used to specify the number of decimal places that
@@ -51,6 +65,19 @@ public:
    */
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const;
+
+  /**
+   * This delegate is responsible for the initial data displayed inside the
+   * spinbox when the user selects/clicks the cell (to create a spinbox).
+   */
+  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+
+  /**
+   * This method handles how the user entered  data is picked up from the cell
+   * and put into the custom data type that was introduced.
+   */
+  void setModelData(QWidget *editor, QAbstractItemModel *model,
+                    const QModelIndex &index) const;
 
 private:
   int _doubleSpinBoxPrecision;

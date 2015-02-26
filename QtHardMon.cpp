@@ -14,7 +14,7 @@
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
-#include <MtcaMappedDevice/FixedPointConverter.h>
+
 using namespace mtca4u;
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
@@ -44,7 +44,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define READ_ON_CLICK_STRING "readOnClick"
 
 QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
+  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true),  _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
@@ -474,7 +474,7 @@ void QtHardMon::read()
 
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );;
-    
+
   }// for row
  
   // check if plotting after reading is requested
@@ -1074,59 +1074,60 @@ void QtHardMon::updateTableEntries(int row, int column) {
   // only if required
   //
   if (column == FIXED_POINT_DISPLAY_COLUMN) {
-    int userUpdatedValueInCell =
-        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toInt();
+    HexData hexValue;
+    int userUpdatedValueInCell = readCell<int>(row, column);
+    hexValue.value = userUpdatedValueInCell;
     double fractionalVersionOfUserValue =
-        getFractionalValue(userUpdatedValueInCell);
+        convertToDouble(userUpdatedValueInCell);
 
-    bool doesCorrespondingDoubleExist =
-        (_hardMonForm.valuesTableWidget->item(
-             row, FLOATING_POINT_DISPLAY_COLUMN) != NULL);
+    // update the hex field in all  cases
+    writeCell<HexData>(row, HEX_VALUE_DISPLAY_COLUMN, hexValue);
 
-    if (doesCorrespondingDoubleExist) {
+    if (isValidCell(row, FLOATING_POINT_DISPLAY_COLUMN)) {
       double currentValueInDoubleColumn =
-          _hardMonForm.valuesTableWidget->item(row,
-                                               FLOATING_POINT_DISPLAY_COLUMN)
-              ->data(0)
-              .toDouble();
+          readCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN);
       if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
-        return; // same value in the corresponding double cell, so no update
-                // required
+        return; // same value in the corresponding double cell, so not updating
+                // this cell
     }
-    // If here, This is a new value. Trigger update of the other
-    // fields in the same row
-    updateHexField(row, userUpdatedValueInCell);
-    updateDoubleField(row, fractionalVersionOfUserValue);
+    // If here, This is a new value. Trigger update of the float cell
+
+    writeCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN,
+                      fractionalVersionOfUserValue);
 
   } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
-    double userUpdatedValueInCell =
-        _hardMonForm.valuesTableWidget->item(row, column)->data(0).toDouble();
+    double userUpdatedValueInCell = readCell<double>(row, column);
     int FixedPointVersionOfUserValue =
-        getFixedPointValue(userUpdatedValueInCell);
+        convertToFixedPoint(userUpdatedValueInCell);
 
-    bool doesCorrespondingFixedPointCellExist =
-        (_hardMonForm.valuesTableWidget->item(
-             row, FIXED_POINT_DISPLAY_COLUMN) != NULL);
-
-    if (doesCorrespondingFixedPointCellExist) {
+    if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
       int currentValueInFixedPointCell =
-          _hardMonForm.valuesTableWidget->item(row, FIXED_POINT_DISPLAY_COLUMN)
-              ->data(0)
-              .toInt(); // fetch current content of the decimal field on the
-                        // same row
+          readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
       double convertedValueFrmFPCell =
-          getFractionalValue(currentValueInFixedPointCell);
+          convertToDouble(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
         return;
     }
-    updateHexField(row, FixedPointVersionOfUserValue);
-    updateDecimalField(
-        row, FixedPointVersionOfUserValue); // This will trigger an update to
-                                            // the fixed point display column,
-                                            // which will in turn correct the
-                                            // value in this double cell to a
+
+    writeCell<int>(
+        row, FIXED_POINT_DISPLAY_COLUMN,
+        FixedPointVersionOfUserValue); // This will trigger an update to
+                                       // the fixed point display column,
+                                       // which will in turn correct the
+                                       // value in this double cell to a
     // valid one (In case the user entered one is not supported by the floating
     // point converter settings)
+  } else if (column == HEX_VALUE_DISPLAY_COLUMN) {
+    HexData hexInCell = readCell<HexData>(row, column);
+    int userUpdatedValueInCell = hexInCell.value;
+
+    if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
+      int currentValueInFixedPointCell =
+          readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+      if (userUpdatedValueInCell == currentValueInFixedPointCell)
+        return;
+    }
+    writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, userUpdatedValueInCell);
   }
 }
 
@@ -1150,8 +1151,8 @@ void QtHardMon::clearBackground(){
 void QtHardMon::parseArgument(QString const &fileName) {
   if (checkExtension(fileName, ".dmap") == true) {
     QDir::setCurrent(
-        QFileInfo(fileName).absolutePath());  // This may be removed once
-                                              // changes in dmapFilesParser have
+        QFileInfo(fileName).absolutePath()); // This may be removed once
+                                             // changes in dmapFilesParser have
     // been submitted to the trunk. New code (currently on branch) modifies
     // dmapFilesParser::parse_file. The map file location from the .dmap file is
     // converted to its absolute path before use. (in the new code)
@@ -1176,18 +1177,40 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
   return areStringsEqual;
 }
 
-double QtHardMon::getFractionalValue(int decimalValue) {
-  RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
-      _hardMonForm.registerListWidget->currentItem());
-
-  FixedPointConverter converter(
-      registerInformation->getRegisterMapElement().reg_width,
-      registerInformation->getRegisterMapElement().reg_frac_bits,
-      registerInformation->getRegisterMapElement().reg_signed);
+double QtHardMon::convertToDouble(int decimalValue) {
+  FixedPointConverter converter = createConverter();
   return converter.toDouble(decimalValue);
 }
 
-int QtHardMon::getFixedPointValue(double doubleValue) {
+int QtHardMon::convertToFixedPoint(double doubleValue) {
+  FixedPointConverter converter = createConverter();
+  return converter.toFixedPoint(doubleValue);
+}
+
+void QtHardMon::clearRowBackgroundColour(int row) {
+  int numberOfColumns = getNumberOfColumsInTableWidget();
+  for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+    if (isValidCell(row, columnIndex)) {
+      clearCellBackground(row, columnIndex);
+    }
+  }
+}
+
+template <typename T> void QtHardMon::writeCell(int row, int column, T value) {
+  QTableWidgetItem *widgetItem = new QTableWidgetItem();
+  QVariant dataVariant;
+  dataVariant.setValue(value);
+  widgetItem->setData(Qt::DisplayRole, dataVariant);
+  _hardMonForm.valuesTableWidget->setItem(row, column, widgetItem);
+}
+
+template <typename T> T QtHardMon::readCell(int row, int column) {
+  return (_hardMonForm.valuesTableWidget->item(row, column)
+              ->data(Qt::DisplayRole)
+              .value<T>());
+}
+
+mtca4u::FixedPointConverter QtHardMon::createConverter() {
   RegisterListItem *registerInformation = static_cast<RegisterListItem *>(
       _hardMonForm.registerListWidget->currentItem());
 
@@ -1195,43 +1218,19 @@ int QtHardMon::getFixedPointValue(double doubleValue) {
       registerInformation->getRegisterMapElement().reg_width,
       registerInformation->getRegisterMapElement().reg_frac_bits,
       registerInformation->getRegisterMapElement().reg_signed);
-  return converter.toFixedPoint(doubleValue);
+
+  return converter;
 }
 
-void QtHardMon::updateHexField(int row, int value) {
-  QTableWidgetItem *hexDataItem = new QTableWidgetItem();
-  hexDataItem->setFlags(hexDataItem->flags() & ~Qt::ItemIsSelectable &
-                        ~Qt::ItemIsEditable);
-  std::stringstream hexValueAsText;
-  // set the dataitem as text and update table
-  hexValueAsText << "0x" << std::hex << value;
-  hexDataItem->setText(hexValueAsText.str().c_str());
-  _hardMonForm.valuesTableWidget->setItem(row, HEX_VALUE_DISPLAY_COLUMN, hexDataItem);
+int QtHardMon::getNumberOfColumsInTableWidget() {
+  return (_hardMonForm.valuesTableWidget->columnCount());
 }
 
-void QtHardMon::updateDoubleField(int row, double value) {
-  QTableWidgetItem *dataItemForDouble = new QTableWidgetItem();
-  dataItemForDouble->setData(Qt::DisplayRole, QVariant(value));
-  _hardMonForm.valuesTableWidget->setItem(
-      row, FLOATING_POINT_DISPLAY_COLUMN,
-      dataItemForDouble);
+bool QtHardMon::isValidCell(int row, int columnIndex) {
+  return (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
 }
 
-void QtHardMon::updateDecimalField(int row, int value) {
-  QTableWidgetItem *dataItemForFixedPoint = new QTableWidgetItem();
-  dataItemForFixedPoint->setData(Qt::DisplayRole, QVariant(value));
-  _hardMonForm.valuesTableWidget->setItem(
-      row, FIXED_POINT_DISPLAY_COLUMN, dataItemForFixedPoint);
-}
-
-void QtHardMon::clearRowBackgroundColour(int row) {
-  int numberOfColumns = _hardMonForm.valuesTableWidget->columnCount();
-  for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-    bool cellExists =
-        (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
-    if (cellExists) {
-      _hardMonForm.valuesTableWidget->item(row, columnIndex)
-          ->setBackground(_defaultBackgroundBrush);
-    }
-  }
+void QtHardMon::clearCellBackground(int row, int columnIndex) {
+  _hardMonForm.valuesTableWidget->item(row, columnIndex)
+      ->setBackground(_defaultBackgroundBrush);
 }
