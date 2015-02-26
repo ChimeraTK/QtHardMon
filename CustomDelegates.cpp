@@ -8,6 +8,8 @@
 #include "CustomDelegates.h"
 #include <QDoubleSpinBox>
 #include <QStringBuilder>
+#include <climits> // for the max and min integer values
+#include <sstream>
 
 CustomDelegates::CustomDelegates(QObject* parent)
     : QStyledItemDelegate(parent),
@@ -30,8 +32,12 @@ QString CustomDelegates::displayText(const QVariant& value,
     // be OK
 
     HexData hexValue = value.value<HexData>(); // get the datatype stored in this cell
-    int intValue = hexValue.value;
-    return (QString("0x") % QString::number(intValue, 16));
+    // QString::number has a bug and gives negative values as 64 bit hex.
+    // So we have to do it manually.
+    int intValue = hexValue.value; // covert the value to 32 bit int
+    std::stringstream s;
+    s << "0x" << std::hex << intValue;
+    return QString(s.str().c_str());
 
   } else { // else let the default delegate take care of formatting if
            // content is not double
@@ -52,18 +58,18 @@ QWidget* CustomDelegates::createEditor(QWidget* parent,
                           // for cells in the double column
     QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(parent);
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
-    doubleSpinBox->setRange(MIN_VALUE, MAX_VALUE);
+    doubleSpinBox->setRange(INT_MIN, INT_MAX);
     return doubleSpinBox;
   } else if (index.data(Qt::EditRole).type() == QVariant::Int) {
     // Want to customize the decimal spin boxes to limit the max and minimum
     // value they can display
     QSpinBox* decimalSpinbox = new QSpinBox(parent);
-    decimalSpinbox->setRange(MIN_VALUE, MAX_VALUE);
+    decimalSpinbox->setRange(INT_MIN, INT_MAX);
     return decimalSpinbox;
   } else if (index.data(Qt::EditRole).type() == QVariant::UserType) {
     // TODO: make the check above specific to our custom HexDataType
     HexSpinBox* hexSpinBox = new HexSpinBox(parent);
-    hexSpinBox->setRange(MIN_VALUE, MAX_VALUE);
+    hexSpinBox->setRange(INT_MIN, INT_MAX);
     return hexSpinBox;
   } else {
     return QStyledItemDelegate::createEditor(parent, option, index);

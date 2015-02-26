@@ -6,7 +6,7 @@
  */
 
 #include "HexSpinBox.h"
-
+#include <sstream>
 
 
 HexSpinBox::HexSpinBox(QWidget* parent)
@@ -19,7 +19,11 @@ HexSpinBox::HexSpinBox(QWidget* parent)
 HexSpinBox::~HexSpinBox() { delete validator; }
 
 QString HexSpinBox::textFromValue(int value) const {
-  return QString::number(value, 16);
+  // QString::number has a bug and gives negative values as 64 bit hex.
+  // So we have to do it manually.
+  std::stringstream s;
+  s << std::hex << value;
+  return QString(s.str().c_str());
 }
 
 int HexSpinBox::valueFromText(const QString& text) const {

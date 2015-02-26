@@ -30,16 +30,6 @@ public:
   static const unsigned int DOUBLE_SPINBOX_DEFAULT_PRECISION = 4;
 
   /**
-   * This is the Maximum value that can be entered into the tables spinboxes
-   */
-  static const int MAX_VALUE = 2147483647;
-
-  /**
-   * This is the Minimum value that can be entered into the tables spinboxes
-   */
-  static const int MIN_VALUE = -2147483648;
-
-  /**
    * Default constructor
    */
   CustomDelegates(QObject *parent = 0);
