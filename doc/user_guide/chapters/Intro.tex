@@ -48,24 +48,28 @@ and llrf\_card\_registers.map are the register mapping files for
 \textit{/dev/mtcadummys0} and \textit{/dev/llrfdummys4} respectively. 
 
 
-\section{Loading The Crate Configuration/.dmap File} 
+\section{Loading The Crate Configuration /.dmap File} 
 
 Once the cards on your
 crate have been specified through the .dmap file, the next step is loading this
 configuration on to the GUI. This is done using the "Load Boards" button on the
 GUI or using the menu option under \textit{File > Load Boards}: 
 (Fig \ref{load_boards_open_menu_to_load_dmap})
-
+ 
 \begin{figure}[htbp] 
     \centering
-    \includegraphics[width=1\textwidth]{images/load_boards_2.png}
+    \includegraphics[width=1\textwidth]{images/load_boards.png}
     \caption{Loading the .dmap file} \label{load_boards_open_menu_to_load_dmap}
 \end{figure}
 
 \begin{figure}[htbp] 
     \centering
-    \includegraphics[width=1\textwidth]{images/explain_windows.png} \caption{The
+    \includegraphics[width=1\textwidth]{images/GUI_interface.png} \caption{The
     QtHardMon Interface} \label{qthardmon_interface} \end{figure}
+
+\hl{The boards may also be loaded by invoking QtHardMon GUI from the command prompt:}
+\\\centerline{\texttt{\$ QtHardMon ./example\_crates.dmap \&}} \\\\
+
 
 \section{The QtHardMon Interface} Information on the individual cards become
 available in the GUI once the .dmap is loaded (Fig \ref{qthardmon_interface}).
@@ -95,7 +99,12 @@ QtHardMon Interface are as below:
     the register name using the arrow keys on the keyboard can also trigger a
     read (in case \texttt{`Automatically read when selecting a register'} is
     selected in the preferences).
-
+	
+	\hl{The Register List section also contains  the checkbox   -
+	\texttt{Autoselect previous register}. Enabling this checkbox will cause the GUI to automatically 
+	reselect the previously selected register when a device is repoened
+	(For example when browsing between the devices on the Device List of the GUI).}
+	
 	\item \textbf{Register Properties:} The properties of the currently selected
     register is shown here. These include the register name, the PCI express
     \textbf{Base Address Range} (Register \textbf{bar}), the register address,
@@ -103,11 +112,17 @@ QtHardMon Interface are as below:
     bytes.
 
 	\item \textbf{Register Values:} This displays the current value in the register.
-    Both decimal and hexadecimal representations of the value are displayed
-    here. This field is also used to write custom values into the writeable
-    registers of the card. The write to a register is done by setting the
-    intended value in the decimal field and then pressing the write button in
-    the \texttt{Register Operations} section of the GUI.
+    Both decimal and hexadecimal representation of the raw value are displayed
+    here. The double field displays the fixed point converted version of this raw value.
+    
+	\hl{The Register Values section can also be used to input custom values (into writeable registers).
+    Values may be entered as its raw decimal representation, raw hex representation or 
+    its fixed point converted decimal representation. This can be done by setting the
+    intended value in the decimal, hex or double field respecteively and pressing the write button in
+    the \texttt{Register Operations} section of the GUI. 
+    
+    \textbf{Note:} The number of decimal
+    places to be displayed for the double field is customizable in the preferences menu }
 
 	\item \textbf{Register Operations:} \label{itm:Register_Operations} This part
     has two working buttons, the first is the \texttt{Read} and the other is the
@@ -178,6 +193,12 @@ The QtHardMon preferences menu can be accessed under
 The font size of the GUI can be specified here in the preferences menu, 
 by setting required font size in the provided field.
 
+\subsection{Double field precision in Register Values}
+\hl{The ``Displayed decimal places'' spinbox can be used change the number of 
+decimal palces displayed for the double representation of the register value.
+The GUI can display a double value with a maximum precision of 10 decimal places.}
+
+
 \subsection{Implicit read of Register Values}\label{sub::imp_read} 
 The two check-boxes - \texttt{`Automatically read when selecting a register'} 
 and \texttt{`Read on click in register list'} are enabled by default. 
@@ -187,8 +208,8 @@ keys on the keyboard or when the name is clicked on (respectively). These
 check boxes lets the user disable implicit read when selected or clicked. 
 This is useful in case of large registers, where implicitly reading in 
 these slows down the work flow. The \texttt{Read} button in the 
-\texttt{Register Operations} can be used for reading in values, when 
-both these options are turned off.
+``Register Operations'' section of the GUI can be used for reading in values, when 
+both checkboxes remain unchecked.
 
 \subsection{Limiting The Number Of Read In Values}\label{subsub::graph_x_axis}
 There can be problems when registers have a large number of elements/32-bit
@@ -214,11 +235,13 @@ Load config }menu items respectively. The configuration file stores/retrieves
 the following information:
 
 \begin{itemize} 
-	\item The loaded .dmap file.  \item The selected card/device.
-    \item The selected registers on all cards.  \item The user selected
-    settings in the prefrences menu \item The user selected settings in the
-    \texttt{GUI Options} \item The user selected settings in the
-    \texttt{Plot Window} 
+	\item The loaded .dmap file. 
+	\item The selected card/device.
+    \item The selected registers on all cards. 
+    \item The user selected
+    settings in the prefrences menu 
+    \item The user selected settings in the \texttt{GUI Options} 
+    \item The user selected settings in the \texttt{Plot Window} 
 \end{itemize}
 
 
