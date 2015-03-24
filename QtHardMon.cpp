@@ -1143,13 +1143,6 @@ void QtHardMon::clearBackground(){
 
 void QtHardMon::parseArgument(QString const &fileName) {
   if (checkExtension(fileName, ".dmap") == true) {
-    QDir::setCurrent(
-        QFileInfo(fileName).absolutePath()); // This may be removed once
-                                             // changes in dmapFilesParser have
-    // been submitted to the trunk. New code (currently on branch) modifies
-    // dmapFilesParser::parse_file. The map file location from the .dmap file is
-    // converted to its absolute path before use. (in the new code)
-
     (void)loadDmapFile(fileName);
   } else if (checkExtension(fileName, ".cfg") == true) {
     loadConfig(fileName);
