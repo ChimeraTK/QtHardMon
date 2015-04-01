@@ -202,11 +202,11 @@ class QtHardMon: public QMainWindow
     public:
       /** Constructor for top level items */
       RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-			 const QString & text, QTreeWidget * parent_ = 0 );
+			 const QString & text_, QTreeWidget * parent_ = 0 );
 
       /** Constructor for child items */
       RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-			 const QString & text, QTreeWidgetItem * parent_ = 0 );
+			 const QString & text_, QTreeWidgetItem * parent_ = 0);
       
       /** The destructor. Currently does nothing because the members go out of scope automatically. */
       virtual ~RegisterTreeItem();
