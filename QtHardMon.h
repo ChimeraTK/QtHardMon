@@ -61,8 +61,8 @@ class QtHardMon: public QMainWindow
   /** The register has changed. Read the meta data for this register and perform an auto-read if this is
    *  activated.
    */
-  void registerSelected(QListWidgetItem * registerItem, QListWidgetItem * /*previousRegisterItem */ = NULL);
-  void registerClicked(QListWidgetItem * registerItem); ///< Executed if a register is clicked
+  void registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */ = NULL);
+  void registerClicked(QTreeWidgetItem * registerItem); ///< Executed if a register is clicked
 
   void aboutQtHardMon(); ///< Show the aboutQtHardMon
   void aboutQt(); ///< Show the aboutQt dialog
@@ -195,39 +195,28 @@ class QtHardMon: public QMainWindow
       int _lastSelectedRegisterRow; ///< The last selected register before the item was deselected
   };
 
-  /** A helper class to store listWidgetItems which also contain the mapElem information.
-      FIXME: looks suspiciously like DeviceListItem -> code duplication. Make it template code?
+  /** A helper class to store treeWidgetItems which also contain the mapElem information.
    */
-  class RegisterListItem: public QListWidgetItem
+  class RegisterTreeItem: public QTreeWidgetItem
   {
     public:
-      /** The simplest cvonstructor, no text or icon for the entry*/
-      RegisterListItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-		       QListWidget * parent_ = 0 );
+      /** Constructor for top level items */
+      RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
+			 const QString & text, QTreeWidget * parent_ = 0 );
 
-      /** Constructor which sets the text entry in the list. */
-      RegisterListItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-		       const QString & text_, QListWidget * parent_ = 0 );
-
-      /** Constructor which sets the text entry in the list and an icon. */      
-      RegisterListItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-		       const QIcon & icon_, const QString & text_, QListWidget * parent_ = 0 );
-
-      /* No copy constructor, the default is fine. */
-      //RegisterListItem ( const RegisterListItem & other );
-
-      /* No assignment operator, the default is fine. */
-      //RegisterListItem & operator=( const RegisterListItem & other );
+      /** Constructor for child items */
+      RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
+			 const QString & text, QTreeWidgetItem * parent_ = 0 );
       
       /** The destructor. Currently does nothing because the members go out of scope automatically. */
-      virtual ~RegisterListItem();
+      virtual ~RegisterTreeItem();
       
       /** Returns a reference to the registerMapElement, i.e. the register information. */
       mtca4u::mapFile::mapElem const & getRegisterMapElement() const;
       
-      /** The type of RegisterListItemType.  It's a user type because it is larger than QListWidgetItem::UserType.
+      /** The type of RegisterTreeItemType.  It's a user type because it is larger than QTreeWidgetItem::UserType.
        */
-      static const int RegisterListItemType = QListWidgetItem::UserType + 2;
+      static const int RegisterTreeItemType = QTreeWidgetItem::UserType + 1;
 
     private:
       mtca4u::mapFile::mapElem _registerMapElement; ///< The instance of the RegisterMapElement.
