@@ -52,9 +52,9 @@ PlotWindow::~PlotWindow()
 {
 }
 
-void PlotWindow::closeEvent( QCloseEvent * event )
+void PlotWindow::closeEvent( QCloseEvent * event_ )
 {
-  QWidget::closeEvent(event);
+  QWidget::closeEvent(event_);
   emit  plotWindowClosed();
 }
 

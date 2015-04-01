@@ -29,7 +29,7 @@ class PlotWindow: public QWidget
  protected:
   /** Reimplemented to emit the plotWindowClosed signal
    */
-  virtual void closeEvent ( QCloseEvent * event );
+  virtual void closeEvent ( QCloseEvent * event_ );
   
 public slots:
   /** Slot which performs the actual plotting.

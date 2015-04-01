@@ -32,7 +32,7 @@ public:
   /**
    * Default constructor
    */
-  CustomDelegates(QObject *parent = 0);
+  CustomDelegates(QObject *parent_ = 0);
 
   /**
    * This method is used to specify the number of decimal places that
@@ -53,7 +53,7 @@ public:
    * modify its value. Overriding this delegate lets us customize the
    * type of editor widget displayed in the cell when clicked for editing
    */
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+  QWidget *createEditor(QWidget *parent_, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const;
 
   /**

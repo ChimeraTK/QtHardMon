@@ -22,7 +22,7 @@ class QtHardMon: public QMainWindow
 
  public:
   /** The constructor */
-  QtHardMon(QWidget * parent = 0, Qt::WindowFlags flags = 0);
+  QtHardMon(QWidget * parent_ = 0, Qt::WindowFlags flags = 0);
   /* The destructor. Need not be virtual because we have no virtual functions */
   ~QtHardMon();
 
@@ -152,15 +152,15 @@ class QtHardMon: public QMainWindow
     public:
       /** The simplest cvonstructor, no text or icon for the entry*/
       DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
-		       QListWidget * parent = 0 );
+		       QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list. */
       DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
-		       const QString & text, QListWidget * parent = 0 );
+		       const QString & text_, QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list and an icon. */      
       DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
-		       const QIcon & icon, const QString & text, QListWidget * parent = 0 );
+		       const QIcon & icon_, const QString & text_, QListWidget * parent_ = 0 );
 
       /* No copy constructor, the default is fine. */
       //DeviceListItem ( const DeviceListItem & other );
@@ -203,15 +203,15 @@ class QtHardMon: public QMainWindow
     public:
       /** The simplest cvonstructor, no text or icon for the entry*/
       RegisterListItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-		       QListWidget * parent = 0 );
+		       QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list. */
       RegisterListItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-		       const QString & text, QListWidget * parent = 0 );
+		       const QString & text_, QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list and an icon. */      
       RegisterListItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-		       const QIcon & icon, const QString & text, QListWidget * parent = 0 );
+		       const QIcon & icon_, const QString & text_, QListWidget * parent_ = 0 );
 
       /* No copy constructor, the default is fine. */
       //RegisterListItem ( const RegisterListItem & other );

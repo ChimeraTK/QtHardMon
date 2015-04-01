@@ -42,8 +42,8 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define AUTO_READ_STRING "autoRead"
 #define READ_ON_CLICK_STRING "readOnClick"
 
-QtHardMon::QtHardMon(QWidget * parent, Qt::WindowFlags flags) 
-  : QMainWindow(parent, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
+QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags) 
+  : QMainWindow(parent_, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true),  _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
@@ -805,7 +805,7 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // We know that it is a deviceListItem, no nynamic checking needed.
   // We also know that matchingDevices.begin() is valid because the list is not empty.
   // In case there is more than one entry with the same name we just pick the first one.
-  DeviceListItem * deviceListItem = static_cast< DeviceListItem *>(*matchingDevices.begin());
+  DeviceListItem *deviceListItem = static_cast< DeviceListItem *>(*matchingDevices.begin());
 
   //START_OBSOLETE: reading the CURRENT_REGISTER_ROW_STRING is only kept for backward compatibility
   //Before selecting the device we try to read and set the correct register
@@ -909,8 +909,7 @@ void QtHardMon::writeConfig(QString const & fileName)
   // add a value to store the last register for each device
   for (int deviceRow = 0; deviceRow < _hardMonForm.deviceListWidget->count(); ++deviceRow)
   {
-    DeviceListItem * deviceListItem =  
-      static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
+    deviceListItem = static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
     
     std::string deviceRegisterString = deviceListItem->getDeviceMapElement().dev_name + REGISTER_EXTENSION_STRING;
     configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterRow());
@@ -968,23 +967,23 @@ void QtHardMon::unckeckShowPlotWindow()
 // constructors of the data members
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
 					   mtca4u::ptrmapFile const & register_map_pointer,
-					   QListWidget * parent )
-  : QListWidgetItem(parent, DeviceListItemType), _deviceMapElement( device_map_emlement ),
+					   QListWidget * parent_ )
+  : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
   
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
 					   mtca4u::ptrmapFile const & register_map_pointer,
-					   const QString & text, QListWidget * parent )
-  : QListWidgetItem(text, parent, DeviceListItemType), _deviceMapElement( device_map_emlement ),
+					   const QString & text_, QListWidget * parent_ )
+  : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
 					   mtca4u::ptrmapFile const & register_map_pointer,
-					   const QIcon & icon, const QString & text, QListWidget * parent )
-  : QListWidgetItem(icon, text, parent, DeviceListItemType),
+					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
+  : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
     _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer ),
     _lastSelectedRegisterRow(0)
 {}
@@ -1014,18 +1013,18 @@ void QtHardMon::DeviceListItem::setLastSelectedRegisterRow(int row)
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
 QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
-					       QListWidget * parent )
-  : QListWidgetItem(parent, RegisterListItemType), _registerMapElement( register_map_emlement )
+					       QListWidget * parent_ )
+  : QListWidgetItem(parent_, RegisterListItemType), _registerMapElement( register_map_emlement )
 {}
 
 QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
-					       const QString & text, QListWidget * parent )
-  : QListWidgetItem(text, parent, RegisterListItemType), _registerMapElement( register_map_emlement )
+					       const QString & text_, QListWidget * parent_ )
+  : QListWidgetItem(text_, parent_, RegisterListItemType), _registerMapElement( register_map_emlement )
 {}
 
 QtHardMon::RegisterListItem::RegisterListItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
-					       const QIcon & icon, const QString & text, QListWidget * parent )
-  : QListWidgetItem(icon, text, parent, RegisterListItemType),
+					       const QIcon & icon_, const QString & text_, QListWidget * parent_ )
+  : QListWidgetItem(icon_, text_, parent_, RegisterListItemType),
     _registerMapElement( register_map_emlement )
 {}
 
