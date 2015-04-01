@@ -248,11 +248,20 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   for (mapFile::const_iterator registerIter = deviceListItem->getRegisterMapPointer()->begin(); 
        registerIter != deviceListItem->getRegisterMapPointer()->end(); ++registerIter)
   {
-    //std::cout << *registerIter << std::endl;
-    _hardMonForm.registerTreeWidget->addTopLevelItem( new RegisterTreeItem( *registerIter,
-									    registerIter->reg_name.c_str(),  
-									    _hardMonForm.registerTreeWidget ) );
+    QString moduleName( registerIter->reg_module.empty() ? "[No Module Name]" : registerIter->reg_module.c_str() );
+    QList<QTreeWidgetItem *> moduleList = _hardMonForm.registerTreeWidget->findItems( moduleName , Qt::MatchExactly);
+
+    QTreeWidgetItem *moduleItem;
+    if (moduleList.empty()){
+        moduleItem = new QTreeWidgetItem(_hardMonForm.registerTreeWidget, QStringList( moduleName ));
+	_hardMonForm.registerTreeWidget->addTopLevelItem( moduleItem );
+    }else{
+        moduleItem = moduleList.front();
+    }
+
+    moduleItem->addChild( new RegisterTreeItem( *registerIter, registerIter->reg_name.c_str(), moduleItem ) );
   }
+  _hardMonForm.registerTreeWidget->expandAll();
 
   //close the previous device. This also disables the relevant GUI elements
   closeDevice();
@@ -323,10 +332,15 @@ void QtHardMon::closeDevice()
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
 {
+  // the registerItem actually is a RegisterTreeItemType. As this is a private slot it is safe to assume this
+  // and use a static cast.
+  RegisterTreeItem * registerTreeItem = dynamic_cast<RegisterTreeItem *>(registerItem);  
+
   // When the registerTreeWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
   // We have to catch this here and return.
+  // For modules the dynamic cast also yields a null pointer.
   // Before returning we have to clear the register specific display info and the values list.
-  if (!registerItem )
+  if (!registerTreeItem )
   {
     _hardMonForm.registerNameDisplay->setText("");
     _hardMonForm.registerBarDisplay->setText("");
@@ -341,12 +355,6 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 
     return;
   }
-
-  //std::cout << "Register " << registerItem->text().toStdString() << " selected." << std::endl;
-
-  // the registerItem actually is a RegisterTreeItemType. As this is a private slot it is safe to assume this
-  // and use a static cast.
-  RegisterTreeItem * registerTreeItem = static_cast<RegisterTreeItem *>(registerItem);  
   
   _hardMonForm.registerNameDisplay->setText(    registerTreeItem->getRegisterMapElement().reg_name.c_str() );
   _hardMonForm.registerBarDisplay->setText( QString::number( registerTreeItem->getRegisterMapElement().reg_bar ));
@@ -397,11 +405,11 @@ void QtHardMon::read()
   ++_insideReadOrWrite;
 
   RegisterTreeItem * registerTreeItem =
-    static_cast<RegisterTreeItem *>(  _hardMonForm.registerTreeWidget->currentItem() );
+    dynamic_cast<RegisterTreeItem *>(  _hardMonForm.registerTreeWidget->currentItem() );
 
   if (!registerTreeItem)
   {
-    QMessageBox::warning(this, "QtHardMon read error", "No current register. Check your mapping file.");
+    QMessageBox::warning(this, "QtHardMon read error", "You cannot read from a module. Select a register.");
     return;
   }
 
@@ -492,11 +500,11 @@ void QtHardMon::write()
   ++_insideReadOrWrite;
 
   RegisterTreeItem * registerTreeItem =
-    static_cast<RegisterTreeItem *>(  _hardMonForm.registerTreeWidget->currentItem() );
+    dynamic_cast<RegisterTreeItem *>(  _hardMonForm.registerTreeWidget->currentItem() );
 
   if (!registerTreeItem)
   {
-    QMessageBox::warning(this, "QtHardMon read error", "No current register. Check your mapping file.");
+    QMessageBox::warning(this, "QtHardMon write error", "You cannot write to a module. Select a regiter!");
     return;
   }
 
@@ -1032,14 +1040,18 @@ QtHardMon::RegisterTreeItem::~RegisterTreeItem(){}
   return _registerMapElement;
 }
 
-void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/)
+void QtHardMon::registerClicked(QTreeWidgetItem * registerItem)
 {
-  // RegisterTreeItem * registerTreeItem = static_cast< RegisterTreeItem *>(registerItem);
+  // check if the tree widget is a register or module
+  RegisterTreeItem * registerTreeItem = dynamic_cast< RegisterTreeItem *>(registerItem);
+  if (!registerTreeItem){
+    // cast failed -> it's a module, you cannot read it. Just return
+    return;
+  }
 
   // Do not execute the read if the corresponding flag is off
   // registerSelected method.
-  if (!_readOnClick)
-  {
+  if (!_readOnClick){
     //    std::cout << "Ignoring click" <<std::endl;
     return;
   }
@@ -1193,9 +1205,13 @@ template <typename T> T QtHardMon::readCell(int row, int column) {
 }
 
 mtca4u::FixedPointConverter QtHardMon::createConverter() {
-  RegisterTreeItem *registerInformation = static_cast<RegisterTreeItem *>(
+  RegisterTreeItem *registerInformation = dynamic_cast<RegisterTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
-
+  if (!registerInformation){
+    QMessageBox::warning(this, "QtHardMon internal error", "Could not create fixed point converter for current register.");
+    return FixedPointConverter();
+  }
+  
   FixedPointConverter converter(
       registerInformation->getRegisterMapElement().reg_width,
       registerInformation->getRegisterMapElement().reg_frac_bits,
