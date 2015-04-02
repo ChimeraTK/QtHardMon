@@ -343,6 +343,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   if (!registerTreeItem )
   {
     _hardMonForm.registerNameDisplay->setText("");
+    _hardMonForm.moduleDisplay->setText("");
     _hardMonForm.registerBarDisplay->setText("");
     _hardMonForm.registerNElementsDisplay->setText("");
     _hardMonForm.registerAddressDisplay->setText("");
@@ -357,6 +358,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   }
   
   _hardMonForm.registerNameDisplay->setText(    registerTreeItem->getRegisterMapElement().reg_name.c_str() );
+  _hardMonForm.moduleDisplay->setText(    registerTreeItem->getRegisterMapElement().reg_module.c_str() );
   _hardMonForm.registerBarDisplay->setText( QString::number( registerTreeItem->getRegisterMapElement().reg_bar ));
   _hardMonForm.registerNElementsDisplay->setText(  
 				  QString::number( registerTreeItem->getRegisterMapElement().reg_elem_nr ));

@@ -235,28 +235,35 @@
          <property name="rightMargin">
           <number>10</number>
          </property>
-         <item row="10" column="0">
+         <item row="2" column="0">
+          <widget class="QLabel" name="moduleLabel">
+           <property name="text">
+            <string>Module</string>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0">
           <widget class="QLabel" name="valuesLabel">
            <property name="text">
             <string>Values</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
+         <item row="8" column="0">
           <widget class="QLabel" name="registerNElementsLabel">
            <property name="text">
             <string>Number of elements</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="0">
+         <item row="10" column="0">
           <widget class="QLabel" name="registerSizeLabel">
            <property name="text">
             <string>Total size</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="7" column="0">
           <widget class="QLabel" name="registerAddressDisplay">
            <property name="frameShape">
             <enum>QFrame::Panel</enum>
@@ -269,14 +276,14 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="registerBarLabel">
            <property name="text">
             <string>Register bar</string>
            </property>
           </widget>
          </item>
-         <item row="7" column="0">
+         <item row="9" column="0">
           <widget class="QLabel" name="registerNElementsDisplay">
            <property name="frameShape">
             <enum>QFrame::Panel</enum>
@@ -289,7 +296,7 @@
            </property>
           </widget>
          </item>
-         <item row="11" column="0" colspan="2">
+         <item row="13" column="0" colspan="2">
           <widget class="QTableWidget" name="valuesTableWidget">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -338,7 +345,7 @@
            </column>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item row="11" column="0">
           <widget class="QLabel" name="registerSizeDisplay">
            <property name="frameShape">
             <enum>QFrame::Panel</enum>
@@ -351,7 +358,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="registerBarDisplay">
            <property name="frameShape">
             <enum>QFrame::Panel</enum>
@@ -364,7 +371,7 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="6" column="0">
           <widget class="QLabel" name="registerAddressLabel">
            <property name="text">
             <string>Register address</string>
@@ -378,7 +385,7 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1" rowspan="8">
+         <item row="4" column="1" rowspan="8">
           <widget class="QGroupBox" name="fixedPointGroupBox">
            <property name="title">
             <string>Fixed Point Interpreration</string>
@@ -488,6 +495,19 @@
            <property name="layoutDirection">
             <enum>Qt::LeftToRight</enum>
            </property>
+           <property name="frameShape">
+            <enum>QFrame::Panel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="moduleDisplay">
            <property name="frameShape">
             <enum>QFrame::Panel</enum>
            </property>
@@ -609,7 +629,7 @@
      <x>0</x>
      <y>0</y>
      <width>1044</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
