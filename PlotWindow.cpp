@@ -69,7 +69,9 @@ void PlotWindow::plot()
 				   static_cast<int>(_hardMon->_maxWords));
        ++row)
   {
-    QTableWidgetItem *tableWidgetItem = _hardMon->_hardMonForm.valuesTableWidget->item(row,0); // always column 0
+    QTableWidgetItem *tableWidgetItem 
+      = _hardMon->_hardMonForm.valuesTableWidget->item(row, QtHardMon::FLOATING_POINT_DISPLAY_COLUMN);
+
     if (!tableWidgetItem)
     {
       // strange, this should not happen. print a warning message end stop plotting
