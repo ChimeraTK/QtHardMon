@@ -30,7 +30,8 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 // These strings are used in the config file
 #define DMAP_FILE_STRING "dmapFile"
 #define CURRENT_DEVICE_STRING "currentDevice"
-#define CURRENT_REGISTER_ROW_STRING "currentRegisterRow"
+#define CURRENT_REGISTER_STRING "currentRegister"
+#define CURRENT_MODULE_STRING "currentModule"
 #define MAX_WORDS_STRING "maxWords"
 #define PRECISION_INDICATOR_STRING "decimalPlaces"
 #define READ_AFTER_WRITE_STRING "readAfterWrite"
@@ -38,9 +39,11 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define SHOW_PLOT_WINDOW_STRING "showPlotWindow"
 #define PLOT_AFTER_READ_STRING "plotAfterRead"
 #define REGISTER_EXTENSION_STRING "_REGISTER"
+#define MODULE_EXTENSION_STRING "_MODULE"
 #define FONT_SIZE_STRING "fontSize"
 #define AUTO_READ_STRING "autoRead"
 #define READ_ON_CLICK_STRING "readOnClick"
+#define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags) 
   : QMainWindow(parent_, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
@@ -248,8 +251,10 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   for (mapFile::const_iterator registerIter = deviceListItem->getRegisterMapPointer()->begin(); 
        registerIter != deviceListItem->getRegisterMapPointer()->end(); ++registerIter)
   {
-    QString moduleName( registerIter->reg_module.empty() ? "[No Module Name]" : registerIter->reg_module.c_str() );
-    QList<QTreeWidgetItem *> moduleList = _hardMonForm.registerTreeWidget->findItems( moduleName , Qt::MatchExactly);
+    QString moduleName( registerIter->reg_module.empty() 
+			? NO_MODULE_NAME_STRING : registerIter->reg_module.c_str() );
+    QList<QTreeWidgetItem *> moduleList = _hardMonForm.registerTreeWidget->findItems( moduleName, 
+										      Qt::MatchExactly);
 
     QTreeWidgetItem *moduleItem;
     if (moduleList.empty()){
@@ -275,10 +280,28 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   // register (and hence avoid the implicit read on this register when
   // the card is selected)
   if ( _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ) {
-    // FIXME how to select in a hierachy? by module/register name?
-    //_hardMonForm.registerTreeWidget->setCurrentRow(
-    //deviceListItem->getLastSelectedRegisterRow());
-  }
+    // Searching a sub-tree does not work in QTreeWidget. So here is the strategy:
+    // Get a list of all registers with this name.
+    QList<QTreeWidgetItem *> registerList 
+      = _hardMonForm.registerTreeWidget->findItems( deviceListItem->getLastSelectedRegisterName().c_str(),
+						    Qt::MatchExactly | Qt::MatchRecursive );
+
+    // Iterate the list until we find the one with the right module
+    for( QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+	 registerIter != registerList.end(); ++registerIter ){
+      // we have to cast to RegisterTreeItem in order to access the mapElem information
+      RegisterTreeItem * registerItem = dynamic_cast<RegisterTreeItem *>(*registerIter);
+      // the cast can fail if there is module with the same name as the register
+      if (!registerItem){
+	continue;
+      }
+      // if we found the right register select it and quit the loop
+      if (registerItem->getRegisterMapElement().reg_module == deviceListItem->getLastSelectedModuleName()){
+	_hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
+	break;
+      }
+    }// for registerIter
+  }// if autoselectPreviousRegister
 }
 
 void QtHardMon::openDevice( std::string const & deviceFileName )
@@ -370,9 +393,9 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   _hardMonForm.registerFracBitsDisplay->setText(QString::number( registerTreeItem->getRegisterMapElement().reg_frac_bits ));
   _hardMonForm.registeSignBitDisplay->setText(QString::number( registerTreeItem->getRegisterMapElement().reg_signed ));
 
-  // FIXME: This does not work by row any more
   // remember that this register has been selected
-  //  _currentDeviceListItem->setLastSelectedRegisterRow(  _hardMonForm.registerTreeWidget->currentRow() );
+  _currentDeviceListItem->setLastSelectedRegisterName( registerTreeItem->getRegisterMapElement().reg_name ) ;
+  _currentDeviceListItem->setLastSelectedModuleName( registerTreeItem->getRegisterMapElement().reg_module ) ;
 
   // if the register is too large not all words are displayed.
   // Set the size of the list to maxWords + 1, so the last line can show "truncated"
@@ -753,43 +776,21 @@ void QtHardMon::loadConfig(QString const & configFileName)
     return;
   }
 
-  //loop all devices and try to determine the last used register
+  //loop all devices and try to determine the last used module and register
   for (int deviceRow = 0; deviceRow < _hardMonForm.deviceListWidget->count(); ++deviceRow)
   {
     DeviceListItem * deviceListItem =  
       static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
     
+    // determine the module and the register 
     std::string deviceRegisterString = deviceListItem->getDeviceMapElement().dev_name + REGISTER_EXTENSION_STRING;
+    std::string registerName = configReader.getValue(deviceRegisterString, std::string() );
 
-    // we put 0 as default, which should be a safe value because that is set already
-    int registerRow = configReader.getValue(deviceRegisterString, 0);
-
-    // We just ignore negative values. The user can use this undocumented "feature" to comment out
-    // the entry (although using a comment line is preferred).
-    if (registerRow > 0)
-    {
-      // check that the requested row is not too large
-      if (static_cast<unsigned int>(registerRow) >= deviceListItem->getRegisterMapPointer()->getMapFileSize())
-      {
-	QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			       QString(deviceRegisterString.c_str()) + " = "
-			       + QString::number(registerRow)
-			       + " is too large for device "+
-			       deviceListItem->getDeviceMapElement().dev_name.c_str() +".",
-			       QMessageBox::Ok, this);
-	messageBox.setInformativeText( QString("Mapping file ") + 
-				       deviceListItem->getDeviceMapElement().map_file_name.c_str() + 
-				       " only has " +
-				       QString::number( deviceListItem->getRegisterMapPointer()->getMapFileSize() )+
-				       " entries." );
-	messageBox.exec();
-      }
-      else
-      {
-	// currentRegisterRow is ok, set it in the device list item
-	deviceListItem->setLastSelectedRegisterRow(registerRow);
-      }
-    }// if (registerRow > 0)
+    std::string deviceModuleString = deviceListItem->getDeviceMapElement().dev_name + MODULE_EXTENSION_STRING;
+    std::string moduleName = configReader.getValue(deviceModuleString, std::string() );
+    
+    deviceListItem->setLastSelectedRegisterName(registerName);
+    deviceListItem->setLastSelectedModuleName(moduleName);
   }// for deviceRow
   
 
@@ -819,36 +820,6 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // We also know that matchingDevices.begin() is valid because the list is not empty.
   // In case there is more than one entry with the same name we just pick the first one.
   DeviceListItem *deviceListItem = static_cast< DeviceListItem *>(*matchingDevices.begin());
-
-  //START_OBSOLETE: reading the CURRENT_REGISTER_ROW_STRING is only kept for backward compatibility
-  //Before selecting the device we try to read and set the correct register
-  int currentRegisterRow =  configReader.getValue(CURRENT_REGISTER_ROW_STRING, -1);
-  
-  // We just ignore negative values. The user can use this undocumented "feature" to comment out
-  // the entry (although using a comment line is preferred).
-  if (currentRegisterRow > 0)
-  {
-    // check that the requested row is not too large
-    if (static_cast<unsigned int>(currentRegisterRow) >= deviceListItem->getRegisterMapPointer()->getMapFileSize())
-    {
-      QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			     QString("currentRegisterRow=") + QString::number(currentRegisterRow)
-			     + " is too large for device "+  currentDeviceString.c_str() +".",
-			     QMessageBox::Ok, this);
-      messageBox.setInformativeText( QString("Mapping file ") + 
-				     deviceListItem->getDeviceMapElement().map_file_name.c_str() + 
-				    " only has " +
-				     QString::number( deviceListItem->getRegisterMapPointer()->getMapFileSize() )+
-				     " entries." );
-      messageBox.exec();
-    }
-    else
-    {
-      // currentRegisterRow is ok, set it in the device list item
-      deviceListItem->setLastSelectedRegisterRow(currentRegisterRow);
-    }
-  }
-  //END_OBSOLOETE
 
   // now we are ready to select the device
   _hardMonForm.deviceListWidget->setCurrentItem(deviceListItem);
@@ -924,8 +895,18 @@ void QtHardMon::writeConfig(QString const & fileName)
   {
     deviceListItem = static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
     
-    std::string deviceRegisterString = deviceListItem->getDeviceMapElement().dev_name + REGISTER_EXTENSION_STRING;
-    configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterRow());
+    // Only write to the config file if the 'last selected' strings are not empty.
+    // Empty strings would cause a parse error, and if the entry is not found it falls back to empty string anyway.
+    if( !deviceListItem->getLastSelectedRegisterName().empty() ){
+      std::string deviceRegisterString 
+	= deviceListItem->getDeviceMapElement().dev_name + REGISTER_EXTENSION_STRING;
+      configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterName());
+    }
+
+    if( !deviceListItem->getLastSelectedModuleName().empty() ){
+      std::string deviceModuleString = deviceListItem->getDeviceMapElement().dev_name + MODULE_EXTENSION_STRING;
+      configWriter.setValue(deviceModuleString, deviceListItem->getLastSelectedModuleName());
+    }
   }
 
   configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
@@ -982,7 +963,7 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   QListWidget * parent_ )
   : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
+    _registerMapPointer( register_map_pointer )
   
 {}
 
@@ -990,15 +971,14 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _registerMapPointer( register_map_pointer ), _lastSelectedRegisterRow(0)
+    _registerMapPointer( register_map_pointer )
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
-    _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer ),
-    _lastSelectedRegisterRow(0)
+    _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer )
 {}
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}
@@ -1013,14 +993,24 @@ mtca4u::ptrmapFile const & QtHardMon::DeviceListItem::getRegisterMapPointer() co
   return _registerMapPointer;
 }
 
-int QtHardMon::DeviceListItem::getLastSelectedRegisterRow() const
+std::string QtHardMon::DeviceListItem::getLastSelectedRegisterName() const
 {
-  return _lastSelectedRegisterRow;
+  return _lastSelectedRegisterName;
 }
 
-void QtHardMon::DeviceListItem::setLastSelectedRegisterRow(int row)
+void QtHardMon::DeviceListItem::setLastSelectedRegisterName(std::string const & registerName)
 {
-  _lastSelectedRegisterRow = row;
+  _lastSelectedRegisterName = registerName;
+}
+
+std::string QtHardMon::DeviceListItem::getLastSelectedModuleName() const
+{
+  return _lastSelectedModuleName;
+}
+
+void QtHardMon::DeviceListItem::setLastSelectedModuleName(std::string const & moduleName)
+{
+  _lastSelectedModuleName = moduleName;
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy

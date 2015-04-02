@@ -193,9 +193,6 @@
       </item>
       <item alignment="Qt::AlignHCenter|Qt::AlignBottom">
        <widget class="QCheckBox" name="autoselectPreviousRegisterCheckBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="toolTip">
          <string>Automatically select the previously selected register when reopening the device.</string>
         </property>

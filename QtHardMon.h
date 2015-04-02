@@ -181,18 +181,27 @@ class QtHardMon: public QMainWindow
        */
       static const int DeviceListItemType = QListWidgetItem::UserType + 1;
 
-      /** Get the row of the last register which had been selected.
+      /** Get the name of the last register which had been selected.
        */
-      int getLastSelectedRegisterRow() const;
+      std::string getLastSelectedRegisterName() const;
 
-      /** Set the row of the last register which had been selected.
+      /** Set the last register which had been selected.
        */
-      void setLastSelectedRegisterRow(int row);
+      void setLastSelectedRegisterName(std::string const & registerName);
+
+      /** Get the name of the last register's module which had been selected.
+       */
+      std::string getLastSelectedModuleName() const;
+
+      /** Set the module of the last register which had been selected.
+       */
+      void setLastSelectedModuleName(std::string const & moduleName);
 
     private:
       mtca4u::dmapFile::dmapElem _deviceMapElement; ///< The instance of the DeviceMapElement
       mtca4u::ptrmapFile _registerMapPointer; ///< The instance of the RegisterMapPointer
-      int _lastSelectedRegisterRow; ///< The last selected register before the item was deselected
+      std::string _lastSelectedRegisterName; ///< The last selected register before the item was deselected
+      std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected
   };
 
   /** A helper class to store treeWidgetItems which also contain the mapElem information.
