@@ -5,6 +5,8 @@
 
 class QtHardMon;
 class QwtPlot;
+class QwtPlotZoomer;
+class QwtPlotCurve;
 
 /** The plot windows shows the plot itself and some steering buttons for the plotting.
  *  This class also implements all the plotting functionality.
@@ -57,6 +59,8 @@ public slots:
 
 #if(USE_QWT)
   QwtPlot * _qwtPlot;
+  QwtPlotZoomer* zoomer;
+  QwtPlotCurve *curve1;
 #endif
   
 };

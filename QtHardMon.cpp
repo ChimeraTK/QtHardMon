@@ -947,7 +947,8 @@ void QtHardMon::showPlotWindow(int checkState)
   }
   else
   {
-    _plotWindow->setVisible(true);    
+    _plotWindow->plot();
+    _plotWindow->setVisible(true);
   }
 }
 
