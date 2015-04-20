@@ -10,7 +10,9 @@
 #if(USE_QWT)
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt_scale_map.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_plot_canvas.h>
 #endif
 
 #include <iostream>
@@ -25,7 +27,6 @@ PlotWindow::PlotWindow(QtHardMon * hardMon)
   _plotFrameLayout = new QGridLayout(_plotWindowForm.plotFrame);
 
 #if(USE_QWT)
-  //_qwtPlot = NULL;
 
   // disable the GUI elements which are not implemented yet
   _plotWindowForm.accumulatePlotsLabel->setEnabled(false);
@@ -33,16 +34,11 @@ PlotWindow::PlotWindow(QtHardMon * hardMon)
   _plotWindowForm.plotToNewWindowCheckBox->setEnabled(false);
 
   _qwtPlot = new QwtPlot(_plotWindowForm.plotFrame);
-  curve1 = new QwtPlotCurve("Curve 1");
-  curve1->attach(_qwtPlot);
-  //plot();
+  _myData = new QwtPointSeriesData;
+  _curve1 = new QwtPlotCurve("Curve 1");
+  _curve1->attach(_qwtPlot);
+ 
   _plotFrameLayout->addWidget(_qwtPlot);
-
-  zoomer = new QwtPlotZoomer( _qwtPlot->canvas() );
-  zoomer->setMousePattern( QwtEventPattern::MouseSelect2,
-			   Qt::RightButton, Qt::ControlModifier );
-  zoomer->setMousePattern( QwtEventPattern::MouseSelect3,
-			   Qt::RightButton );
   
   connect(_plotWindowForm.plotButton, SIGNAL(clicked()),
 	  this, SLOT(plot()));
@@ -109,28 +105,23 @@ void PlotWindow::plot()
     samples.push_back(QPoint(row, value));
   }
   
-  QwtPointSeriesData* myData = new QwtPointSeriesData;
-  myData->setSamples(samples);
- 
-  //QwtPlotCurve *curve1 = new QwtPlotCurve("Curve 1");
+  _myData->setSamples(samples);
 
-  // at this point the curve takes ownership of the data object
-  //curve1->detach();
-  curve1->setData(myData);
+  _curve1->setData(_myData);
 
-  // replace the current plot.
-  //delete _qwtPlot;
-  //_qwtPlot = new QwtPlot(_plotWindowForm.plotFrame); 
-  //_plotFrameLayout->addWidget(_qwtPlot);
- 
-  // at this point the curve is attached to the plot, which will delete it when it goes out of scope
-  //curve1->attach(_qwtPlot);
+  _qwtPlot->setAxisAutoScale(0);
+  _qwtPlot->setAxisAutoScale(2);
 
-  std::cout << zoomer->zoomRectIndex() << std::endl;
-
-  
- 
   _qwtPlot->replot();
+
+  if (_zoomer)
+    delete _zoomer;
+
+  _zoomer = new QwtPlotZoomer( _qwtPlot->canvas() );
+  _zoomer->setMousePattern( QwtEventPattern::MouseSelect2,
+  			   Qt::RightButton, Qt::ControlModifier );
+  _zoomer->setMousePattern( QwtEventPattern::MouseSelect3,
+  			   Qt::RightButton );
 
 #endif //USE_QWT
 
