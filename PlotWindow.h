@@ -2,9 +2,14 @@
 #define QTHARDMON_PLOT_WINDOW_H
 
 #include "ui_PlotWindowForm.h"
+#include <QStack>
+#include <QRectF>
 
 class QtHardMon;
 class QwtPlot;
+class QwtPlotZoomer;
+class QwtPlotCurve;
+class QwtPointSeriesData;
 
 /** The plot windows shows the plot itself and some steering buttons for the plotting.
  *  This class also implements all the plotting functionality.
@@ -57,6 +62,9 @@ public slots:
 
 #if(USE_QWT)
   QwtPlot * _qwtPlot;
+  QwtPlotZoomer* _zoomer;
+  QwtPlotCurve * _curve1;
+  QwtPointSeriesData* _myData;
 #endif
   
 };

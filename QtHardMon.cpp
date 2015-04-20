@@ -138,10 +138,7 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
 }
 
 QtHardMon::~QtHardMon()
-{
-  // As the plot window has NULL as parent, we have to delete it here.
-  delete  _plotWindow;
-}
+{}
 
 void  QtHardMon::loadBoards()
 {
@@ -947,7 +944,8 @@ void QtHardMon::showPlotWindow(int checkState)
   }
   else
   {
-    _plotWindow->setVisible(true);    
+    _plotWindow->plot();
+    _plotWindow->setVisible(true);
   }
 }
 
