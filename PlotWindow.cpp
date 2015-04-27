@@ -17,11 +17,14 @@
 
 #include <iostream>
 
-PlotWindow::PlotWindow(QtHardMon * hardMon)
-  : QWidget(hardMon, Qt::Window), _hardMon(hardMon)
+PlotWindow::PlotWindow(QtHardMon *hardMon)
+    : QWidget(hardMon, Qt::Window), _hardMon(hardMon)
+#if (USE_QWT)
+      , _zoomer(NULL)
+#endif
 {
   _plotWindowForm.setupUi(this);
-  setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
+  setWindowIcon(QIcon(":/DESY_logo_nofade.png"));
 
   // a layout for the plotFrame
   _plotFrameLayout = new QGridLayout(_plotWindowForm.plotFrame);
