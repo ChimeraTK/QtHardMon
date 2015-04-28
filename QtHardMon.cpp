@@ -373,6 +373,14 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     _hardMonForm.registeSignBitDisplay->setText("");
     _hardMonForm.valuesTableWidget->clearContents();
 
+    // registerTreeItem == NULL when dynamic cast on the registerItem pointer
+    // to RegisterTreeItem pointer fails. This should happen in the case where
+    // the registerItem is a module (QTreeWidgetItem). If this is the case then
+    // there are no valid values to display in the table + we do not want to
+    // give editable spaces in the table. Set the number of rows in the table to
+    // 0 so that we have an empty table (with no editable cells in it)
+    int nRows = 0;
+    _hardMonForm.valuesTableWidget->setRowCount( nRows );
 
     return;
   }
