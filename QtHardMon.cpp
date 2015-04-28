@@ -534,7 +534,7 @@ void QtHardMon::write()
 
   if (!registerTreeItem)
   {
-    QMessageBox::warning(this, "QtHardMon write error", "You cannot write to a module. Select a regiter!");
+    QMessageBox::warning(this, "QtHardMon write error", "You cannot write to a module. Select a register!");
     return;
   }
 
