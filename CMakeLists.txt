@@ -10,10 +10,10 @@ set(${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}
 
 SET(CMAKE_BUILD_TYPE "Debug")
 #only turn this on for testing. Qt causes WAY too many warning.
-#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -Weffc++ -pedantic -Wuninitialized")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -Weffc++ -pedantic -Wuninitialized")
 
 #Moderate version of the compiler flags which give no qt warnings
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC -Wextra -Wuninitialized -Wshadow")
+#SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC -Wextra -Wuninitialized -Wshadow")
 
 #needed for findQwt
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
@@ -25,7 +25,7 @@ FIND_PACKAGE(Qwt 6)
 #turn on the rpath so libMtcaMappedDevice.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-INCLUDE_DIRECTORIES( ${MtcaMappedDevice_INCLUDE_DIRS} )
+INCLUDE_DIRECTORIES( SYSTEM ${MtcaMappedDevice_INCLUDE_DIRS} )
 
 SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
@@ -39,7 +39,12 @@ QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})
 QT4_WRAP_UI(${PROJECT_NAME}_FORMS_HEADERS ${${PROJECT_NAME}_FORMS})
 QT4_ADD_RESOURCES(${PROJECT_NAME}_RESOURCES_RCC ${${PROJECT_NAME}_RESOURCES})
 
-INCLUDE(${QT_USE_FILE})
+#INCLUDE(${QT_USE_FILE})
+# Do not use INCLUDE(${QT_USE_FILE}). What this does is run
+# /usr/share/cmake-2.8/Modules/UseQt4.cmake which sets the variables for you
+# (including QT_LIBRARIES)
+# http://stackoverflow.com/questions/3505858/qt-libraries-in-cmake
+INCLUDE_DIRECTORIES(SYSTEM ${QT_INCLUDES})
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 #configure a header file which contains the version information for use in C++
@@ -49,7 +54,7 @@ configure_file(cmake/QtHardMonVersion.h.in
 #The use of the QWT plotting library is optional
 if(QWT_FOUND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_QWT=true")
-  INCLUDE_DIRECTORIES( ${QWT_INCLUDE_DIR} )  
+  INCLUDE_DIRECTORIES( SYSTEM ${QWT_INCLUDE_DIR} )  
 else(QWT_FOUND)
   SET( QWT_LIBRARY "")
   message("QWT not found, plotting is disabled in this build.")
@@ -59,7 +64,10 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
   ${${PROJECT_NAME}_HEADERS_MOC}
   ${${PROJECT_NAME}_FORMS_HEADERS} 
   ${${PROJECT_NAME}_RESOURCES_RCC})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY})
+# http://stackoverflow.com/questions/3505858/qt-libraries-in-cmake Reason for
+# removing QT_LIBRARIES: its empty since we are not running
+# INCLUDE(${QT_USE_FILE})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_QTGUI_LIBRARY} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -75,7 +83,10 @@ else(DOXYGEN_FOUND)
   message("Doxygen not found, documentation will not be build.")
 endif(DOXYGEN_FOUND)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+# asking compiler to treat the generate ui_ files as system files (these have
+# warnings in them and we cannot do much because these headers are automatically
+# generated?)
+INCLUDE_DIRECTORIES(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 
 install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
