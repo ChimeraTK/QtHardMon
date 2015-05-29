@@ -46,12 +46,14 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags) 
-  : QMainWindow(parent_, flags), _maxWords( DEFAULT_MAX_WORDS ), _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
-    _readOnClick(true),  _insideReadOrWrite(0),
+  : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(), _maxWords( DEFAULT_MAX_WORDS ),
+    _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
+    _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
-    //_customDelegate(NULL),
-    _currentDeviceListItem(NULL)
+    _customDelegate(),
+    _currentDeviceListItem(NULL),
+    _plotWindow(NULL)
 {
   _hardMonForm.setupUi(this);
 
@@ -969,7 +971,7 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   QListWidget * parent_ )
   : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _registerMapPointer( register_map_pointer )
+    _registerMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
   
 {}
 
@@ -977,14 +979,15 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _registerMapPointer( register_map_pointer )
+    _registerMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
-    _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer )
+    _deviceMapElement( device_map_emlement ),  _registerMapPointer( register_map_pointer ),
+    _lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}

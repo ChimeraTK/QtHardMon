@@ -18,7 +18,8 @@
 #include <iostream>
 
 PlotWindow::PlotWindow(QtHardMon *hardMon)
-    : QWidget(hardMon, Qt::Window), _hardMon(hardMon)
+    : QWidget(hardMon, Qt::Window), _plotWindowForm(), _hardMon(hardMon),
+      _plotFrameLayout(NULL)
 #if (USE_QWT)
       , _zoomer(NULL)
 #endif

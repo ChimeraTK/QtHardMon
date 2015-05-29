@@ -60,6 +60,13 @@ public slots:
   /// A layout so the plot can automatically adapt its size.
   QGridLayout * _plotFrameLayout;
 
+  // Disable copy constructor and assignment operator
+  // This  class should'nt need copying
+  // TODO: confirm this assumption
+  Q_DISABLE_COPY(PlotWindow) // Easy way to get around -Weffc++ warning:
+                             // class QtHardMon’ has pointer data members -
+                             // but does not overide copy constructor and
+                             // assignment operator
 #if(USE_QWT)
   QwtPlot * _qwtPlot;
   QwtPlotZoomer* _zoomer;
