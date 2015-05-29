@@ -21,7 +21,10 @@ PlotWindow::PlotWindow(QtHardMon *hardMon)
     : QWidget(hardMon, Qt::Window), _plotWindowForm(), _hardMon(hardMon),
       _plotFrameLayout(NULL)
 #if (USE_QWT)
+      , _qwtPlot(NULL)
       , _zoomer(NULL)
+      , _curve1(NULL)
+      , _myData(NULL)
 #endif
 {
   _plotWindowForm.setupUi(this);
