@@ -67,7 +67,8 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
 # http://stackoverflow.com/questions/3505858/qt-libraries-in-cmake Reason for
 # removing QT_LIBRARIES: its empty since we are not running
 # INCLUDE(${QT_USE_FILE})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_QTGUI_LIBRARY} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_QTCORE_LIBRARY} 
+    ${QT_QTGUI_LIBRARY} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
