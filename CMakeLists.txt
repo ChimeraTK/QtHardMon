@@ -19,7 +19,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -Weffc++ -
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
 
 FIND_PACKAGE(Qt4 REQUIRED)
-FIND_PACKAGE(MtcaMappedDevice 00.14.00 REQUIRED)
+FIND_PACKAGE(MtcaMappedDevice 00.16.00 REQUIRED)
 FIND_PACKAGE(Qwt 6)
 
 #turn on the rpath so libMtcaMappedDevice.so is found
