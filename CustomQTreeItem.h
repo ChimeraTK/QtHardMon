@@ -73,9 +73,9 @@ public:
 };
 
 
-class ModuleEntry : public CustomQTreeItem {
+class ModuleItem : public CustomQTreeItem {
 public:
-  ModuleEntry(QTreeWidget* parent_, const QString& text_);
+  ModuleItem(QTreeWidget* parent_, const QString& text_);
   virtual void read(QTableWidget* const tablewidget);
   virtual void write(QTableWidget* const tablewidget);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
@@ -83,13 +83,14 @@ public:
   static const int DataType = QTreeWidgetItem::UserType + 1;
 };
 
-class RegisterEntry : public CustomQTreeItem {
+class RegisterItem : public CustomQTreeItem {
 public:
-  RegisterEntry(mtca4u::mapFile::mapElem registerInfo, QTreeWidgetItem* parent_,
+  RegisterItem(const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
                 const QString& text_);
   virtual void read(QTableWidget* const tablewidget);
   virtual void write(QTableWidget* const tablewidget);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
   static const int DataType = QTreeWidgetItem::UserType + 2;
 

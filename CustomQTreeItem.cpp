@@ -23,24 +23,28 @@ CustomQTreeItem::~CustomQTreeItem() {
   // TODO Auto-generated destructor stub
 }
 
-ModuleEntry::ModuleEntry(QTreeWidget* parent_, const QString& text_)
-    : CustomQTreeItem(parent_, text_, ModuleEntry::DataType) {}
+ModuleItem::ModuleItem(QTreeWidget* parent_, const QString& text_)
+    : CustomQTreeItem(parent_, text_, ModuleItem::DataType) {}
 
-void ModuleEntry::read(QTableWidget* const tablewidget) {}
+void ModuleItem::read(QTableWidget* const tablewidget) {}
 
-void ModuleEntry::write(QTableWidget* const tablewidget) {}
+void ModuleItem::write(QTableWidget* const tablewidget) {}
 
-void ModuleEntry::updateRegisterProperties(
+void ModuleItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
-RegisterEntry::RegisterEntry(mtca4u::mapFile::mapElem registerInfo,
+RegisterItem::RegisterItem(const mtca4u::mapFile::mapElem& registerInfo,
                              QTreeWidgetItem* parent_, const QString& text_)
-    : CustomQTreeItem(parent_, text_, RegisterEntry::DataType),
+    : CustomQTreeItem(parent_, text_, RegisterItem::DataType),
       _registerMapElement(registerInfo) {}
 
-void RegisterEntry::read(QTableWidget* const tablewidget) {}
+void RegisterItem::read(QTableWidget* const tablewidget) {}
 
-void RegisterEntry::write(QTableWidget* const tablewidget) {}
+void RegisterItem::write(QTableWidget* const tablewidget) {}
 
-void RegisterEntry::updateRegisterProperties(
+void RegisterItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
+
+const mtca4u::mapFile::mapElem RegisterItem::getRegisterMapElement() {
+	return _registerMapElement;
+}

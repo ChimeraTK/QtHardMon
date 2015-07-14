@@ -15,6 +15,8 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
 
+#include "CustomQTreeItem.h"
+
 using namespace mtca4u;
 
 // FIXME: how to solve the problem of the word size? Should come from pci express. 
@@ -252,18 +254,19 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   {
     QString moduleName( registerIter->reg_module.empty() 
 			? NO_MODULE_NAME_STRING : registerIter->reg_module.c_str() );
-    QList<QTreeWidgetItem *> moduleList = _hardMonForm.registerTreeWidget->findItems( moduleName, 
+    QList<QTreeWidgetItem *> moduleList = _hardMonForm.registerTreeWidget->findItems( moduleName,
 										      Qt::MatchExactly);
 
-    QTreeWidgetItem *moduleItem;
+    CustomQTreeItem *moduleItem;
     if (moduleList.empty()){
-        moduleItem = new QTreeWidgetItem(_hardMonForm.registerTreeWidget, QStringList( moduleName ));
-	_hardMonForm.registerTreeWidget->addTopLevelItem( moduleItem );
+        //moduleItem = dynamic_cast<QTreeWidgetItem *> (new ModuleItem(_hardMonForm.registerTreeWidget, QString( moduleName )));
+    		moduleItem = new ModuleItem(_hardMonForm.registerTreeWidget, QString( moduleName ));
+        _hardMonForm.registerTreeWidget->addTopLevelItem(moduleItem);
     }else{
-        moduleItem = moduleList.front();
+        moduleItem = static_cast<CustomQTreeItem* >(moduleList.front());// should be safe
     }
 
-    moduleItem->addChild( new RegisterTreeItem( *registerIter, registerIter->reg_name.c_str(), moduleItem ) );
+    moduleItem->addChild( new RegisterItem( *registerIter, moduleItem, registerIter->reg_name.c_str()) );
   }
   _hardMonForm.registerTreeWidget->expandAll();
 
@@ -281,7 +284,7 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   if ( _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ) {
     // Searching a sub-tree does not work in QTreeWidget. So here is the strategy:
     // Get a list of all registers with this name.
-    QList<QTreeWidgetItem *> registerList 
+    QList<QTreeWidgetItem *> registerList
       = _hardMonForm.registerTreeWidget->findItems( deviceListItem->getLastSelectedRegisterName().c_str(),
 						    Qt::MatchExactly | Qt::MatchRecursive );
 
@@ -289,11 +292,9 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     for( QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
 	 registerIter != registerList.end(); ++registerIter ){
       // we have to cast to RegisterTreeItem in order to access the mapElem information
-      RegisterTreeItem * registerItem = dynamic_cast<RegisterTreeItem *>(*registerIter);
+    		CustomQTreeItem * registerItem = static_cast<CustomQTreeItem *>(*registerIter);
       // the cast can fail if there is module with the same name as the register
-      if (!registerItem){
-	continue;
-      }
+
       // if we found the right register select it and quit the loop
       if (registerItem->getRegisterMapElement().reg_module == deviceListItem->getLastSelectedModuleName()){
 	_hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
@@ -356,7 +357,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 {
   // the registerItem actually is a RegisterTreeItemType. As this is a private slot it is safe to assume this
   // and use a static cast.
-  RegisterTreeItem * registerTreeItem = dynamic_cast<RegisterTreeItem *>(registerItem);  
+  RegisterItem * registerTreeItem = static_cast<RegisterItem *>(registerItem);
 
   // When the registerTreeWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
   // We have to catch this here and return.
