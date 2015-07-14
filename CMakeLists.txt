@@ -27,7 +27,9 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 INCLUDE_DIRECTORIES( SYSTEM ${MtcaMappedDevice_INCLUDE_DIRS} )
 
-SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp)
+SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp 
+                            PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp
+                            CustomQTreeItem.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
 SET(${PROJECT_NAME}_QOBJECT_HEADERS ${PROJECT_NAME}.h PlotWindow.h CustomDelegates.h HexSpinBox.h)
 # All headers, to have the dependencies correct
