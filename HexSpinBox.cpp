@@ -10,13 +10,13 @@
 
 
 HexSpinBox::HexSpinBox(QWidget* parent_)
-    : QSpinBox(parent_) {
+    : QSpinBox(parent_),_validator(NULL) {
   // right now the hex spin box accepts [1,7] characters
   QString regex("[0-9A-Fa-f]{1,8}");
-  validator = new QRegExpValidator(QRegExp(regex), this);
+  _validator = new QRegExpValidator(QRegExp(regex), this);
 }
 
-HexSpinBox::~HexSpinBox() { delete validator; }
+HexSpinBox::~HexSpinBox() { delete _validator; }
 
 QString HexSpinBox::textFromValue(int value_) const {
   // QString::number has a bug and gives negative values as 64 bit hex.
@@ -34,5 +34,5 @@ int HexSpinBox::valueFromText(const QString& text_) const {
 
 QValidator::State HexSpinBox::validate(QString& text_, int& pos_) const {
   // TODO: Make the number of hex characters accepted in line with the range
-  return (validator->validate(text_, pos_));
+  return (_validator->validate(text_, pos_));
 }

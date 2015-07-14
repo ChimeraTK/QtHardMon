@@ -33,7 +33,7 @@ public:
 /*
  * Register our custom type with the Qt Framework
  */
-Q_DECLARE_METATYPE(HexData);
+Q_DECLARE_METATYPE(HexData)
 
 /**
  * This class defines the properties of the spinbox that is used to accept the
@@ -41,13 +41,17 @@ Q_DECLARE_METATYPE(HexData);
  */
 class HexSpinBox : public QSpinBox {
   Q_OBJECT
-  QRegExpValidator* validator;
+  QRegExpValidator* _validator;
 
 public:
   /**
    * The class can register itself with a parent widget through the constructor.
    */
   HexSpinBox(QWidget* parent_ = 0);
+
+private:
+  // Disable copy constructor and assignment operator
+  Q_DISABLE_COPY(HexSpinBox)
   ~HexSpinBox();
 
 protected:

@@ -4,12 +4,14 @@
 
 #include <fstream>
 
-ConfigFileReaderWriter::ConfigFileReaderWriter(std::string const & fileName )
+ConfigFileReaderWriter::ConfigFileReaderWriter(std::string const & fileName ):
+_intValues(), _doubleValues(), _stringValues(), _fileName(), _badLines()
 {
   read( fileName );
 }
 
-ConfigFileReaderWriter::ConfigFileReaderWriter( )
+ConfigFileReaderWriter::ConfigFileReaderWriter( ):
+    _intValues(), _doubleValues(), _stringValues(), _fileName(), _badLines()
 { /*currently empty*/ }
   
 void ConfigFileReaderWriter::read( std::string const & fileName )
