@@ -18,3 +18,11 @@ mtca4u::mapFile::mapElem CustomQTreeItem::getRegisterMapElement() {
 CustomQTreeItem::~CustomQTreeItem() {
   // TODO Auto-generated destructor stub
 }
+
+ModuleEntry::ModuleEntry(QTreeWidget* parent_, const QString& text_): CustomQTreeItem(parent_, text_, ModuleEntry::DataType) {}
+
+void ModuleEntry::read() {}
+
+void ModuleEntry::write() {}
+
+void ModuleEntry::updateRegisterProperties() {}

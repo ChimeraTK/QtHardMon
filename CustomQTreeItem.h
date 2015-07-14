@@ -44,4 +44,13 @@ public:
   virtual ~CustomQTreeItem();
 };
 
+class ModuleEntry : public CustomQTreeItem {
+public:
+  ModuleEntry(QTreeWidget* parent_, const QString& text_);
+  virtual void read();
+  virtual void write();
+  virtual void updateRegisterProperties();
+  static const int DataType = QTreeWidgetItem::UserType + 1;
+};
+
 #endif /* SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_ */
