@@ -47,7 +47,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags) 
-  : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(), _maxWords( DEFAULT_MAX_WORDS ),
+  : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(new mtca4u::devPCIE()), _maxWords( DEFAULT_MAX_WORDS ),
     _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
@@ -325,7 +325,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName )
   try
   {
     // this might throw
-    _mtcaDevice.openDev( deviceFileName );
+    _mtcaDevice->openDev( deviceFileName );
     
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
@@ -354,7 +354,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName )
 
 void QtHardMon::closeDevice()
 {
-   _mtcaDevice.closeDev();
+   _mtcaDevice->closeDev();
    _hardMonForm.valuesTableWidget->setEnabled(false);
    _hardMonForm.operationsGroupBox->setEnabled(false);
    _hardMonForm.optionsGroupBox->setEnabled(false);
@@ -469,18 +469,18 @@ void QtHardMon::read()
   // In order to fill all rows with -1 in case of a read error we introduce a status variable.
   bool readError=false;
 
-  if ( _mtcaDevice.isOpen() ){
+  if ( _mtcaDevice->isOpen() ){
     size_t nBytesToRead = std::min(nWordsInRegister,_maxWords) * WORD_SIZE_IN_BYTES;
 
     try{
       // valid pcie bars are 0 to 5, bar 0xD is used to indicate that transfer should be done via DMA
       if (registerTreeItem->getRegisterMapElement().reg_bar == 0xD){
-	_mtcaDevice.readDMA( registerTreeItem->getRegisterMapElement().reg_address,
+	_mtcaDevice->readDMA( registerTreeItem->getRegisterMapElement().reg_address,
 			     &(inputBuffer[0]),
 			     nBytesToRead,
 			     registerTreeItem->getRegisterMapElement().reg_bar );	
       }else{ // normal read
-	_mtcaDevice.readArea( registerTreeItem->getRegisterMapElement().reg_address,
+	_mtcaDevice->readArea( registerTreeItem->getRegisterMapElement().reg_address,
 			      &(inputBuffer[0]),
 			      nBytesToRead,
 			      registerTreeItem->getRegisterMapElement().reg_bar );
@@ -570,12 +570,12 @@ void QtHardMon::write()
 
     // Try writing to the file only when it's open.
     // This should only be callable if the device could be opened, but zou never know.
-    if ( _mtcaDevice.isOpen() )
+    if ( _mtcaDevice->isOpen() )
     {
       // try to write to the device. If this fails this really is a problem.
       try
       {
-	_mtcaDevice.writeReg( registerTreeItem->getRegisterMapElement().reg_address + row*WORD_SIZE_IN_BYTES,
+	_mtcaDevice->writeReg( registerTreeItem->getRegisterMapElement().reg_address + row*WORD_SIZE_IN_BYTES,
 			      registerContent,
 			      registerTreeItem->getRegisterMapElement().reg_bar );
       }
@@ -1079,7 +1079,7 @@ void QtHardMon::registerClicked(QTreeWidgetItem * registerItem)
 }
 
 void QtHardMon::openCloseDevice(){
-  if (_mtcaDevice.isOpen()){
+  if (_mtcaDevice->isOpen()){
     closeDevice();
   }else{
     openDevice( _currentDeviceListItem->getDeviceMapElement().dev_file );

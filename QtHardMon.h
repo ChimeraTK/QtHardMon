@@ -13,7 +13,7 @@
 #include <MtcaMappedDevice/FixedPointConverter.h>
 
 #include "CustomQTreeItem.h"
-
+#include <boost/shared_ptr.hpp>
 
 /** The QtHadMon class which implements all the GUI functionality.
  */
@@ -123,7 +123,7 @@ class QtHardMon: public QMainWindow
   };
   
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
-  mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
+  boost::shared_ptr <mtca4u::devBase> _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
   unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
