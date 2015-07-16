@@ -267,13 +267,9 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     }
 
     if (isMultiplexedDataRegion(registerIter->reg_name)) {
-      CustomQTreeItem *areaDescriptor =
-          createAreaDesciptor(deviceListItem, *registerIter);
-
+      CustomQTreeItem *areaDescriptor = createAreaDesciptor(deviceListItem, *registerIter);
       mapFile::const_iterator it_end = deviceListItem->getRegisterMapPointer()->end();
-      areaDescriptor =
-          createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
-
+      areaDescriptor = createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
       moduleItem->addChild(areaDescriptor);
     } else {
       moduleItem->addChild(
@@ -301,19 +297,18 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 						    Qt::MatchExactly | Qt::MatchRecursive );
 
     // Iterate the list until we find the one with the right module
-    for( QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
-	 registerIter != registerList.end(); ++registerIter ){
-      // we have to cast to RegisterTreeItem in order to access the mapElem information
-    		CustomQTreeItem * registerItem = static_cast<CustomQTreeItem *>(*registerIter);
-      // the cast can fail if there is module with the same name as the register
-
+    for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+         registerIter != registerList.end(); ++registerIter) {
+      CustomQTreeItem *registerItem =
+          static_cast<CustomQTreeItem *>(*registerIter);
       // if we found the right register select it and quit the loop
-      if (registerItem->getRegisterMapElement().reg_module == deviceListItem->getLastSelectedModuleName()){
-	_hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
-	break;
+      if (registerItem->getRegisterMapElement().reg_module ==
+          deviceListItem->getLastSelectedModuleName()) {
+        _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
+        break;
       }
-    }// for registerIter
-  }// if autoselectPreviousRegister
+    } // for registerIter
+  }   // if autoselectPreviousRegister
 }
 
 void QtHardMon::openDevice( std::string const & deviceFileName )
@@ -451,8 +446,8 @@ void QtHardMon::read()
 {
   ++_insideReadOrWrite;
 
-  RegisterTreeItem * registerTreeItem =
-    dynamic_cast<RegisterTreeItem *>(  _hardMonForm.registerTreeWidget->currentItem() );
+  CustomQTreeItem *registerTreeItem = dynamic_cast<RegisterTreeItem *>(
+      _hardMonForm.registerTreeWidget->currentItem());
 
   if (!registerTreeItem)
   {

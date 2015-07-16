@@ -8,6 +8,8 @@
 #include <boost/shared_ptr.hpp>
 #include <MtcaMappedDevice/devBase.h>
 
+typedef boost::shared_ptr< mtca4u::MultiplexedDataAccessor<double> > MuxedData;
+
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidget* parent_)
     : QTreeWidgetItem(parent_, QStringList(text_), type_) {}
@@ -74,6 +76,10 @@ void MultiplexedAreaItem::updateRegisterProperties(
 const mtca4u::mapFile::mapElem MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
 }
+const boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >&
+MultiplexedAreaItem::getAccessor() {
+	return (_dataAccessor);
+}
 
 SequenceDescriptor::SequenceDescriptor(
     const mtca4u::mapFile::mapElem& registerInfo, unsigned int sequenceNumber,
@@ -83,7 +89,10 @@ SequenceDescriptor::SequenceDescriptor(
       _sequenceNumber(sequenceNumber) {}
 
 void SequenceDescriptor::read(QTableWidget* const tablewidget,
-                              mtca4u::devPCIE const& device) {}
+                              mtca4u::devPCIE const& device) {
+  MuxedData const& accessor = getAccessor();
+
+}
 
 void SequenceDescriptor::write(QTableWidget* const tablewidget,
                                mtca4u::devPCIE const& device) {}
@@ -93,4 +102,14 @@ void SequenceDescriptor::updateRegisterProperties(
 
 const mtca4u::mapFile::mapElem SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
+}
+
+const boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >&
+SequenceDescriptor::getAccessor() {
+	MultiplexedAreaItem* parent;
+	parent = dynamic_cast<MultiplexedAreaItem* >(this->parent());
+	if(!parent){
+			throw;
+	}
+	return(parent->getAccessor());
 }

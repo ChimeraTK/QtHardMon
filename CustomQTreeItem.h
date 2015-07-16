@@ -113,8 +113,8 @@ public:
                      mtca4u::devPCIE const& device);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
+  boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const & getAccessor();
 
-  mtca4u::ptrmapFile const& getPtrToMapFile();
   static const int DataType = QTreeWidgetItem::UserType + 3;
 
 private:
@@ -139,5 +139,7 @@ public:
 private:
   mtca4u::mapFile::mapElem _registerMapElement;
   unsigned int _sequenceNumber;
+
+  boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const & getAccessor();
 };
 #endif /* SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_ */
