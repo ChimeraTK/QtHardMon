@@ -446,14 +446,14 @@ void QtHardMon::read()
 {
   ++_insideReadOrWrite;
 
-  CustomQTreeItem *registerTreeItem = dynamic_cast<RegisterTreeItem *>(
+  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
 
-  if (!registerTreeItem)
+/*  if (!registerTreeItem)
   {
     QMessageBox::warning(this, "QtHardMon read error", "You cannot read from a module. Select a register.");
     return;
-  }
+  }*/
 
   unsigned int nWordsInRegister = registerTreeItem->getRegisterMapElement().reg_elem_nr;
   // prepare a read buffer with the correct size
