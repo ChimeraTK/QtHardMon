@@ -15,7 +15,6 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
 
-#include "CustomQTreeItem.h"
 
 using namespace mtca4u;
 
@@ -259,8 +258,6 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 
     CustomQTreeItem *moduleItem;
     if (moduleList.empty()) {
-      // moduleItem = dynamic_cast<QTreeWidgetItem *> (new
-      // ModuleItem(_hardMonForm.registerTreeWidget, QString( moduleName )));
       moduleItem =
           new ModuleItem(_hardMonForm.registerTreeWidget, QString(moduleName));
       _hardMonForm.registerTreeWidget->addTopLevelItem(
@@ -269,10 +266,18 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     } else {
         moduleItem = static_cast<CustomQTreeItem* >(moduleList.front());// should be safe
     }
-    if (isMultiplexedDataRegion(registerIter->reg_name.c_str())) {
-      CustomQTreeItem *ptr = createMultiplexedAreaEntry(deviceListItem, registerIter);
-      ptr = createRegionSubtree(ptr, registerIter);
-      moduleItem->addChild(ptr);
+
+    if (isMultiplexedDataRegion(registerIter->reg_name)) {
+
+      CustomQTreeItem *areaDescriptor = new MultiplexedAreaItem(
+          deviceListItem->getRegisterMapPointer(), *registerIter, moduleItem,
+          registerIter->reg_name.c_str());
+
+      areaDescriptor = createAreaDescriptorSubtree(
+          areaDescriptor, registerIter,
+          deviceListItem->getRegisterMapPointer()->end());
+
+      moduleItem->addChild(areaDescriptor);
     } else{
       moduleItem->addChild(new RegisterItem(*registerIter, moduleItem,
                                             registerIter->reg_name.c_str()));
@@ -1250,25 +1255,28 @@ bool QtHardMon::isMultiplexedDataRegion(
   if (registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) ==
       mtca4u::MULTIPLEXED_SEQUENCE_PREFIX) {
     return true;
-  } else {
-    return false;
   }
+    return false;
 }
 
-CustomQTreeItem *QtHardMon::createMultiplexedAreaEntry(
-    const DeviceListItem &deviceListItem,
-    mtca4u::mapFile::const_iterator &registerIter) {
+bool QtHardMon::isSeqDescriptor(const std::string &registerName) {
+  if (registerName.substr(0, mtca4u::SEQUENCE_PREFIX.size()) ==
+      mtca4u::SEQUENCE_PREFIX) {
+    return true;
+  }
+  return false;
+}
 
-	ioDevice = frmSmewhere;
-	registerMapping = deviceListItem;
-	multiplexedSequenceName = extract;
-	moduleName = registerIter;
-  static boost::shared_ptr< MultiplexedDataAccessor<UserType> > createInstance(
-    std::string const & multiplexedSequenceName,
-    std::string const & moduleName,
-    boost::shared_ptr< devBase > const & ioDevice,
-    boost::shared_ptr< mapFile > const & registerMapping );
-
-boost::shared_ptr<>
-boost::shared_ptr< MultiplexedDataAccessor<double> > createInstance()
+CustomQTreeItem *QtHardMon::createAreaDescriptorSubtree(
+    CustomQTreeItem *areaDescriptor, mtca4u::mapFile::const_iterator &it,
+    mtca4u::mapFile::const_iterator finalIterator) {
+	//FIXME: this is not nice
+  ++it; // start from the first seq description
+  for (; ((it != finalIterator) && isSeqDescriptor(it->reg_name)); ++it) {
+    CustomQTreeItem *seq =
+        new SequenceDescriptor(*it, areaDescriptor, it->reg_name.c_str());
+    areaDescriptor->addChild(seq);
+  }
+  --it; // leave the iterator at the last sequence description
+  return areaDescriptor;
 }

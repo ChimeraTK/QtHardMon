@@ -101,9 +101,8 @@ private:
 
 class MultiplexedAreaItem : public CustomQTreeItem{
 public:
-  MultiplexedAreaItem(
+  MultiplexedAreaItem( mtca4u::ptrmapFile const& ptrmapFile,
       const mtca4u::mapFile::mapElem& registerInfo,
-      boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >& accessor,
       QTreeWidgetItem* parent_, const QString& text_);
 
   virtual void read(QTableWidget* const tablewidget);
@@ -113,8 +112,11 @@ public:
   static const int DataType = QTreeWidgetItem::UserType + 3;
 
 private:
+
+  mtca4u::ptrmapFile _ptrmapFile;
   mtca4u::mapFile::mapElem _registerMapElement;
-  boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
+  //FIXME: cant use this in the current design
+  //boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
 };
 
 class SequenceDescriptor : public CustomQTreeItem {

@@ -12,6 +12,7 @@
 #include <MtcaMappedDevice/devPCIE.h>
 #include <MtcaMappedDevice/FixedPointConverter.h>
 
+#include "CustomQTreeItem.h"
 
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -273,9 +274,9 @@ class QtHardMon: public QMainWindow
   void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
   bool isMultiplexedDataRegion(std::string const & registerName);
-  CustomQTreeItem *createMultiplexedAreaEntry(
-      const DeviceListItem &deviceListItem,
-      mtca4u::mapFile::const_iterator &registerIter);
+  bool isSeqDescriptor(std::string const & registerName);
+  CustomQTreeItem *createAreaDescriptorSubtree(
+      CustomQTreeItem *areaDescriptor, mtca4u::mapFile::const_iterator& currentIt, mtca4u::mapFile::const_iterator finalIterator);
 };
 
 

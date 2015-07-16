@@ -50,12 +50,12 @@ const mtca4u::mapFile::mapElem RegisterItem::getRegisterMapElement() {
 }
 
 MultiplexedAreaItem::MultiplexedAreaItem(
-    const mtca4u::mapFile::mapElem& registerInfo,
-    boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >& accessor,
-    QTreeWidgetItem* parent_, const QString& text_)
+		mtca4u::ptrmapFile const & ptrmapFile,
+    const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
+    const QString& text_)
     : CustomQTreeItem(parent_, text_, MultiplexedAreaItem::DataType),
-      _registerMapElement(registerInfo),
-      _dataAccessor(accessor) {}
+      _ptrmapFile(ptrmapFile),
+      _registerMapElement(registerInfo) {}
 
 void MultiplexedAreaItem::read(QTableWidget* const tablewidget) {}
 
