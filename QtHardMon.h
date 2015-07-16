@@ -272,7 +272,10 @@ class QtHardMon: public QMainWindow
   bool isValidCell(int row, int columnIndex);
   void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
-
+  bool isMultiplexedDataRegion(std::string const & registerName);
+  CustomQTreeItem *createMultiplexedAreaEntry(
+      const DeviceListItem &deviceListItem,
+      mtca4u::mapFile::const_iterator &registerIter);
 };
 
 

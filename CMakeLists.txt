@@ -22,6 +22,11 @@ FIND_PACKAGE(Qt4 REQUIRED)
 FIND_PACKAGE(MtcaMappedDevice 00.16.00 REQUIRED)
 FIND_PACKAGE(Qwt 6)
 
+
+#boost as such is required for shared pointers e.g.
+FIND_PACKAGE(Boost COMPONENTS REQUIRED)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
 #turn on the rpath so libMtcaMappedDevice.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -70,7 +75,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
 # removing QT_LIBRARIES: its empty since we are not running
 # INCLUDE(${QT_USE_FILE})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_QTCORE_LIBRARY} 
-    ${QT_QTGUI_LIBRARY} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY})
+    ${QT_QTGUI_LIBRARY} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)

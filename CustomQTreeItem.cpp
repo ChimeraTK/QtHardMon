@@ -30,11 +30,11 @@ void ModuleItem::read(QTableWidget* const tablewidget) {}
 
 void ModuleItem::write(QTableWidget* const tablewidget) {}
 
-void ModuleItem::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {}
+void ModuleItem::updateRegisterProperties(const RegsterPropertyGrpBox& grpBox) {
+}
 
 RegisterItem::RegisterItem(const mtca4u::mapFile::mapElem& registerInfo,
-                             QTreeWidgetItem* parent_, const QString& text_)
+                           QTreeWidgetItem* parent_, const QString& text_)
     : CustomQTreeItem(parent_, text_, RegisterItem::DataType),
       _registerMapElement(registerInfo) {}
 
@@ -46,5 +46,36 @@ void RegisterItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
 const mtca4u::mapFile::mapElem RegisterItem::getRegisterMapElement() {
-	return _registerMapElement;
+  return _registerMapElement;
+}
+
+MultiplexedAreaItem::MultiplexedAreaItem(
+    const mtca4u::mapFile::mapElem& registerInfo,
+    boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >& accessor,
+    QTreeWidgetItem* parent_, const QString& text_)
+    : CustomQTreeItem(parent_, text_, MultiplexedAreaItem::DataType),
+      _registerMapElement(registerInfo),
+      _dataAccessor(accessor) {}
+
+void MultiplexedAreaItem::read(QTableWidget* const tablewidget) {}
+
+void MultiplexedAreaItem::write(QTableWidget* const tablewidget) {}
+
+void MultiplexedAreaItem::updateRegisterProperties(
+    const RegsterPropertyGrpBox& grpBox) {}
+
+SequenceDescriptor::SequenceDescriptor(
+    const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
+    const QString& text_)
+    : CustomQTreeItem(parent_, text_, SequenceDescriptor::DataType) {}
+
+void SequenceDescriptor::read(QTableWidget* const tablewidget) {}
+
+void SequenceDescriptor::write(QTableWidget* const tablewidget) {}
+
+void SequenceDescriptor::updateRegisterProperties(
+    const RegsterPropertyGrpBox& grpBox) {}
+
+const mtca4u::mapFile::mapElem SequenceDescriptor::getRegisterMapElement() {
+  return (_registerMapElement);
 }

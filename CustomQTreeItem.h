@@ -9,6 +9,7 @@
 #define SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 
 #include <MtcaMappedDevice/mapFile.h>
+#include <MtcaMappedDevice/MultiplexedDataAccessor.h>
 #include <qtreewidget.h>
 #include <qlabel.h>
 #include <qtablewidget.h>
@@ -93,6 +94,39 @@ public:
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
   static const int DataType = QTreeWidgetItem::UserType + 2;
+
+private:
+  mtca4u::mapFile::mapElem _registerMapElement;
+};
+
+class MultiplexedAreaItem : public CustomQTreeItem{
+public:
+  MultiplexedAreaItem(
+      const mtca4u::mapFile::mapElem& registerInfo,
+      boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >& accessor,
+      QTreeWidgetItem* parent_, const QString& text_);
+
+  virtual void read(QTableWidget* const tablewidget);
+  virtual void write(QTableWidget* const tablewidget);
+  virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+
+  static const int DataType = QTreeWidgetItem::UserType + 3;
+
+private:
+  mtca4u::mapFile::mapElem _registerMapElement;
+  boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
+};
+
+class SequenceDescriptor : public CustomQTreeItem {
+public:
+	SequenceDescriptor(const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
+                const QString& text_);
+  virtual void read(QTableWidget* const tablewidget);
+  virtual void write(QTableWidget* const tablewidget);
+  virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
+
+  static const int DataType = QTreeWidgetItem::UserType + 4;
 
 private:
   mtca4u::mapFile::mapElem _registerMapElement;

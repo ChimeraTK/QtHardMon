@@ -258,15 +258,25 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 										      Qt::MatchExactly);
 
     CustomQTreeItem *moduleItem;
-    if (moduleList.empty()){
-        //moduleItem = dynamic_cast<QTreeWidgetItem *> (new ModuleItem(_hardMonForm.registerTreeWidget, QString( moduleName )));
-    		moduleItem = new ModuleItem(_hardMonForm.registerTreeWidget, QString( moduleName ));
-        _hardMonForm.registerTreeWidget->addTopLevelItem(moduleItem);
-    }else{
+    if (moduleList.empty()) {
+      // moduleItem = dynamic_cast<QTreeWidgetItem *> (new
+      // ModuleItem(_hardMonForm.registerTreeWidget, QString( moduleName )));
+      moduleItem =
+          new ModuleItem(_hardMonForm.registerTreeWidget, QString(moduleName));
+      _hardMonForm.registerTreeWidget->addTopLevelItem(
+          dynamic_cast<QTreeWidgetItem *>(moduleItem)); // do you really need a
+                                                        // dynamic cast here?
+    } else {
         moduleItem = static_cast<CustomQTreeItem* >(moduleList.front());// should be safe
     }
-
-    moduleItem->addChild( new RegisterItem( *registerIter, moduleItem, registerIter->reg_name.c_str()) );
+    if (isMultiplexedDataRegion(registerIter->reg_name.c_str())) {
+      CustomQTreeItem *ptr = createMultiplexedAreaEntry(deviceListItem, registerIter);
+      ptr = createRegionSubtree(ptr, registerIter);
+      moduleItem->addChild(ptr);
+    } else{
+      moduleItem->addChild(new RegisterItem(*registerIter, moduleItem,
+                                            registerIter->reg_name.c_str()));
+    }
   }
   _hardMonForm.registerTreeWidget->expandAll();
 
@@ -1233,4 +1243,32 @@ bool QtHardMon::isValidCell(int row, int columnIndex) {
 void QtHardMon::clearCellBackground(int row, int columnIndex) {
   _hardMonForm.valuesTableWidget->item(row, columnIndex)
       ->setBackground(_defaultBackgroundBrush);
+}
+
+bool QtHardMon::isMultiplexedDataRegion(
+    const std::string &registerName) {
+  if (registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) ==
+      mtca4u::MULTIPLEXED_SEQUENCE_PREFIX) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+CustomQTreeItem *QtHardMon::createMultiplexedAreaEntry(
+    const DeviceListItem &deviceListItem,
+    mtca4u::mapFile::const_iterator &registerIter) {
+
+	ioDevice = frmSmewhere;
+	registerMapping = deviceListItem;
+	multiplexedSequenceName = extract;
+	moduleName = registerIter;
+  static boost::shared_ptr< MultiplexedDataAccessor<UserType> > createInstance(
+    std::string const & multiplexedSequenceName,
+    std::string const & moduleName,
+    boost::shared_ptr< devBase > const & ioDevice,
+    boost::shared_ptr< mapFile > const & registerMapping );
+
+boost::shared_ptr<>
+boost::shared_ptr< MultiplexedDataAccessor<double> > createInstance()
 }
