@@ -71,7 +71,9 @@ void MultiplexedAreaItem::write(QTableWidget* const tablewidget,
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
-mtca4u::ptrmapFile const & MultiplexedAreaItem::getPtrToMapFile() {return _ptrmapFile;}
+mtca4u::ptrmapFile const& MultiplexedAreaItem::getPtrToMapFile() {
+  return _ptrmapFile;
+}
 
 const mtca4u::mapFile::mapElem MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
@@ -86,19 +88,41 @@ SequenceDescriptor::SequenceDescriptor(
 
 void SequenceDescriptor::read(QTableWidget* const tablewidget,
                               mtca4u::devPCIE const& device) {
-        // FIXME: do not want to be creating demultiplexed accessor each time; wanted
-	// this to be a member of the parent MultiplexedAreaItem class, but the way the
-	// things are currently structured prevents this. For now using this hack
-	boost::shared_ptr<mtca4u::MultiplexedDataAccessor <double> > accessor =
-			createAccessor(device);
-	accessor->read();
+  // FIXME: do not want to be creating demultiplexed accessor each time; wanted
+  // this to be a member of the parent MultiplexedAreaItem class, but the way
+  // the
+  // things are currently structured prevents this. For now using this hack
+  boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > accessor =
+      createAccessor(device);
+  accessor->read();
 
+  for (unsigned int row=0; row < (*accessor)[0].size(); row++)
+  {
+    // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
+    // int and a proper editor (spin box) is used when editing in the GUI.
+    QTableWidgetItem * dataItem =  new QTableWidgetItem();
+/*
+    if (row == _maxWords)
+    { // The register is too large to display. Show that it is truncated and stop reading
+      dataItem->setText("truncated");
+      // turn off the editable and selectable flags for the "truncated" entry
+      dataItem->setFlags( dataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
+      dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
+      _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );
+      // no need to set the hex item
+      break;
+    }*/
+    int registerContent = (*accessor)[_sequenceNumber][row];
 
+    dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
+    tablewidget->setItem(row, 3, dataItem );
+
+  }// for row
 
 }
 
 void SequenceDescriptor::write(QTableWidget* const tablewidget,
-                               mtca4u::devPCIE const & device) {}
+                               mtca4u::devPCIE const& device) {}
 
 void SequenceDescriptor::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
@@ -108,15 +132,18 @@ const mtca4u::mapFile::mapElem SequenceDescriptor::getRegisterMapElement() {
 }
 
 boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >
-SequenceDescriptor::createAccessor(mtca4u::devPCIE const & device) {
-	MultiplexedAreaItem* areaDescriptor = dynamic_cast<MultiplexedAreaItem*>(this->parent());
-	if(!areaDescriptor){
-			throw; //Should not happen when hooked to the QtreeWidget
-	}
-	mtca4u::mapFile::mapElem areaDetails = areaDescriptor->getRegisterMapElement();
-	std::string multiplexedSequenceName = getMuxAreaName(areaDetails.reg_name);
-	std::string moduleName = areaDetails.reg_module;
-	boost::shared_ptr< mtca4u::mapFile > const & registerMapping = areaDescriptor->getPtrToMapFile();
+SequenceDescriptor::createAccessor(mtca4u::devPCIE const& device) {
+  MultiplexedAreaItem* areaDescriptor =
+      dynamic_cast<MultiplexedAreaItem*>(this->parent());
+  if (!areaDescriptor) {
+    throw; // Should not happen when hooked to the QtreeWidget
+  }
+  mtca4u::mapFile::mapElem areaDetails =
+      areaDescriptor->getRegisterMapElement();
+  std::string multiplexedSequenceName = getMuxAreaName(areaDetails.reg_name);
+  std::string moduleName = areaDetails.reg_module;
+  boost::shared_ptr<mtca4u::mapFile> const& registerMapping =
+      areaDescriptor->getPtrToMapFile();
   boost::shared_ptr<mtca4u::devBase> iodevice(new mtca4u::devPCIE(device));
 
   return (mtca4u::MultiplexedDataAccessor<double>::createInstance(
@@ -125,8 +152,9 @@ SequenceDescriptor::createAccessor(mtca4u::devPCIE const & device) {
 
 std::string SequenceDescriptor::getMuxAreaName(
     const std::string& registerName) {
-	if(registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) == mtca4u::MULTIPLEXED_SEQUENCE_PREFIX){
-			return registerName.substr(mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size());
-	}
-	return "";
+  if (registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) ==
+      mtca4u::MULTIPLEXED_SEQUENCE_PREFIX) {
+    return registerName.substr(mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size());
+  }
+  return "";
 }
