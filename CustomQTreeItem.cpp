@@ -5,6 +5,8 @@
  */
 
 #include "CustomQTreeItem.h"
+#include <boost/shared_ptr.hpp>
+#include <MtcaMappedDevice/devBase.h>
 
 CustomQTreeItem::CustomQTreeItem(QTreeWidget* parent_, const QString& text_,
                                  const int type_)
@@ -25,11 +27,11 @@ CustomQTreeItem::~CustomQTreeItem() {
 ModuleItem::ModuleItem(QTreeWidget* parent_, const QString& text_)
     : CustomQTreeItem(parent_, text_, ModuleItem::DataType) {}
 
-void ModuleItem::read(QTableWidget* const tablewidget, mtca4u::devPCIE device) {
-}
+void ModuleItem::read(QTableWidget* const tablewidget,
+                      mtca4u::devPCIE const& device) {}
 
 void ModuleItem::write(QTableWidget* const tablewidget,
-                       mtca4u::devPCIE device) {}
+                       mtca4u::devPCIE const& device) {}
 
 void ModuleItem::updateRegisterProperties(const RegsterPropertyGrpBox& grpBox) {
 }
@@ -40,10 +42,10 @@ RegisterItem::RegisterItem(const mtca4u::mapFile::mapElem& registerInfo,
       _registerMapElement(registerInfo) {}
 
 void RegisterItem::read(QTableWidget* const tablewidget,
-                        mtca4u::devPCIE device) {}
+                        mtca4u::devPCIE const& device) {}
 
 void RegisterItem::write(QTableWidget* const tablewidget,
-                         mtca4u::devPCIE device) {}
+                         mtca4u::devPCIE const& device) {}
 
 void RegisterItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
@@ -61,33 +63,70 @@ MultiplexedAreaItem::MultiplexedAreaItem(
       _registerMapElement(registerInfo) {}
 
 void MultiplexedAreaItem::read(QTableWidget* const tablewidget,
-                               mtca4u::devPCIE device) {}
+                               mtca4u::devPCIE const& device) {}
 
 void MultiplexedAreaItem::write(QTableWidget* const tablewidget,
-                                mtca4u::devPCIE device) {}
+                                mtca4u::devPCIE const& device) {}
 
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
+
+mtca4u::ptrmapFile const & MultiplexedAreaItem::getPtrToMapFile() {return _ptrmapFile;}
 
 const mtca4u::mapFile::mapElem MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
 }
 
 SequenceDescriptor::SequenceDescriptor(
-    const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
-    const QString& text_)
+    const mtca4u::mapFile::mapElem& registerInfo, unsigned int sequenceNumber,
+    QTreeWidgetItem* parent_, const QString& text_)
     : CustomQTreeItem(parent_, text_, SequenceDescriptor::DataType),
-      _registerMapElement(registerInfo) {}
+      _registerMapElement(registerInfo),
+      _sequenceNumber(sequenceNumber) {}
 
 void SequenceDescriptor::read(QTableWidget* const tablewidget,
-                              mtca4u::devPCIE device) {}
+                              mtca4u::devPCIE const& device) {
+        // FIXME: do not want to be creating demultiplexed accessor each time; wanted
+	// this to be a member of the parent MultiplexedAreaItem class, but the way the
+	// things are currently structured prevents this. For now using this hack
+	boost::shared_ptr<mtca4u::MultiplexedDataAccessor <double> > accessor =
+			createAccessor(device);
+	accessor->read();
+
+
+
+}
 
 void SequenceDescriptor::write(QTableWidget* const tablewidget,
-                               mtca4u::devPCIE device) {}
+                               mtca4u::devPCIE const & device) {}
 
 void SequenceDescriptor::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
 const mtca4u::mapFile::mapElem SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
+}
+
+boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> >
+SequenceDescriptor::createAccessor(mtca4u::devPCIE const & device) {
+	MultiplexedAreaItem* areaDescriptor = dynamic_cast<MultiplexedAreaItem*>(this->parent());
+	if(!areaDescriptor){
+			throw; //Should not happen when hooked to the QtreeWidget
+	}
+	mtca4u::mapFile::mapElem areaDetails = areaDescriptor->getRegisterMapElement();
+	std::string multiplexedSequenceName = getMuxAreaName(areaDetails.reg_name);
+	std::string moduleName = areaDetails.reg_module;
+	boost::shared_ptr< mtca4u::mapFile > const & registerMapping = areaDescriptor->getPtrToMapFile();
+  boost::shared_ptr<mtca4u::devBase> iodevice(new mtca4u::devPCIE(device));
+
+  return (mtca4u::MultiplexedDataAccessor<double>::createInstance(
+      multiplexedSequenceName, moduleName, iodevice, registerMapping));
+}
+
+std::string SequenceDescriptor::getMuxAreaName(
+    const std::string& registerName) {
+	if(registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) == mtca4u::MULTIPLEXED_SEQUENCE_PREFIX){
+			return registerName.substr(mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size());
+	}
+	return "";
 }

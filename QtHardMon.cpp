@@ -1272,11 +1272,13 @@ bool QtHardMon::isSeqDescriptor(const std::string &registerName) {
 CustomQTreeItem *QtHardMon::createAreaDescriptorSubtree(
     CustomQTreeItem *areaDescriptor, mtca4u::mapFile::const_iterator &it,
     mtca4u::mapFile::const_iterator finalIterator) {
-	//FIXME: this is not nice
+  // FIXME: this is not nice
   ++it; // start from the first seq description
-  for (; ((it != finalIterator) && isSeqDescriptor(it->reg_name)); ++it) {
-    CustomQTreeItem *seq =
-        new SequenceDescriptor(*it, areaDescriptor, it->reg_name.c_str());
+  for (unsigned int sequenceCount = 0;
+       ((it != finalIterator) && isSeqDescriptor(it->reg_name));
+       ++it, ++sequenceCount) {
+    CustomQTreeItem *seq = new SequenceDescriptor(
+        *it, sequenceCount, areaDescriptor, it->reg_name.c_str());
     areaDescriptor->addChild(seq);
   }
   --it; // leave the iterator at the last sequence description

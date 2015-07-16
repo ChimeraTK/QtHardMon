@@ -45,11 +45,13 @@ public:
   /**
    * read in from the card and polpulate the table widget
    */
-  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE device) = 0;
+  virtual void read(QTableWidget* const tablewidget,
+										mtca4u::devPCIE const &device) = 0;
   /**
    * write user updated values from the table to the card
    */
-  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE device) = 0;
+  virtual void write(QTableWidget* const tablewidget,
+										 mtca4u::devPCIE const &device) = 0;
 
   /**
    * update the register properties window of qthardmon
@@ -67,12 +69,11 @@ public:
   virtual ~CustomQTreeItem();
 };
 
-
 class ModuleItem : public CustomQTreeItem {
 public:
   ModuleItem(QTreeWidget* parent_, const QString& text_);
-  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE device);
-  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE device);
+  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE const &device);
+  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE const &device);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
 
   static const int DataType = QTreeWidgetItem::UserType + 1;
@@ -80,10 +81,10 @@ public:
 
 class RegisterItem : public CustomQTreeItem {
 public:
-  RegisterItem(const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
-                const QString& text_);
-  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE device);
-  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE device);
+  RegisterItem(const mtca4u::mapFile::mapElem& registerInfo,
+               QTreeWidgetItem* parent_, const QString& text_);
+  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE const &device);
+  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE const &device);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
@@ -93,39 +94,44 @@ private:
   mtca4u::mapFile::mapElem _registerMapElement;
 };
 
-class MultiplexedAreaItem : public CustomQTreeItem{
+class MultiplexedAreaItem : public CustomQTreeItem {
 public:
-  MultiplexedAreaItem( mtca4u::ptrmapFile const& ptrmapFile,
-      const mtca4u::mapFile::mapElem& registerInfo,
-      QTreeWidgetItem* parent_, const QString& text_);
+  MultiplexedAreaItem(mtca4u::ptrmapFile const& ptrmapFile,
+                      const mtca4u::mapFile::mapElem& registerInfo,
+                      QTreeWidgetItem* parent_, const QString& text_);
 
-  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE device);
-  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE device);
+  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE const & device);
+  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE const & device);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
+  mtca4u::ptrmapFile const & getPtrToMapFile();
   static const int DataType = QTreeWidgetItem::UserType + 3;
 
 private:
-
   mtca4u::ptrmapFile _ptrmapFile;
   mtca4u::mapFile::mapElem _registerMapElement;
-  //FIXME: cant use this in the current design
-  //boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
+  // FIXME: cant use this in the current design
+  // boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
 };
 
 class SequenceDescriptor : public CustomQTreeItem {
 public:
-	SequenceDescriptor(const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
-                const QString& text_);
-  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE device);
-  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE device);
+  SequenceDescriptor(const mtca4u::mapFile::mapElem& registerInfo,
+                     unsigned int sequenceNumber, QTreeWidgetItem* parent_ = 0,
+                     const QString& text_ ="");
+  virtual void read(QTableWidget* const tablewidget, mtca4u::devPCIE const &device);
+  virtual void write(QTableWidget* const tablewidget, mtca4u::devPCIE const &device);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
   static const int DataType = QTreeWidgetItem::UserType + 4;
 
 private:
+  boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > createAccessor(
+      mtca4u::devPCIE const& device);
+std::string getMuxAreaName(std::string const & registerName);
   mtca4u::mapFile::mapElem _registerMapElement;
+  unsigned int _sequenceNumber;
 };
 #endif /* SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_ */
