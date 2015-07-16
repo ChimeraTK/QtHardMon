@@ -115,12 +115,7 @@ class QtHardMon: public QMainWindow
                             // but does not overide copy constructor and
                             // assignment operator
 
-  // Constants
-  enum columns{
-  FIXED_POINT_DISPLAY_COLUMN = 0,
-  HEX_VALUE_DISPLAY_COLUMN = 1,
-  FLOATING_POINT_DISPLAY_COLUMN = 2
-  };
+
   
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   boost::shared_ptr <mtca4u::devBase> _mtcaDevice; ///< The instance of the device which is being accessed.
@@ -285,6 +280,8 @@ class QtHardMon: public QMainWindow
       mtca4u::mapFile::const_iterator finalIterator);
 
   std::string extractMultiplexedRegionName(std::string const & regName);
+
+  public:
 };
 
 

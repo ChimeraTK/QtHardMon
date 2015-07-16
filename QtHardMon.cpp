@@ -15,6 +15,7 @@
 #include <MtcaMappedDevice/dmapFilesParser.h>
 #include <MtcaMappedDevice/exDevPCIE.h>
 
+#include "Constants.h"
 
 using namespace mtca4u;
 
@@ -455,7 +456,25 @@ void QtHardMon::read()
     return;
   }*/
 
-  unsigned int nWordsInRegister = registerTreeItem->getRegisterMapElement().reg_elem_nr;
+  if ( _mtcaDevice->isOpen() ){
+  		try{
+  				TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords);
+  				registerTreeItem->read(tableData);
+  		} catch(exDevPCIE & e){
+  	      closeDevice();
+
+  	      // the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
+  	      QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
+  				     QString("Error reading from device ")+
+  				     _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
+  				     QMessageBox::Ok, this);
+  	      messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
+  					    +QString("\n\nThe device has been closed."));
+  	      messageBox.exec();
+
+  	    }
+  }
+/*  unsigned int nWordsInRegister = registerTreeItem->getRegisterMapElement().reg_elem_nr;
   // prepare a read buffer with the correct size
   std::vector<int> inputBuffer(nWordsInRegister);
   // In order to fill all rows with -1 in case of a read error we introduce a status variable.
@@ -527,7 +546,7 @@ void QtHardMon::read()
     _hardMonForm.valuesTableWidget->setItem(row, 0, dataItem );;
 
   }// for row
- 
+ */
   // check if plotting after reading is requested
   if (_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked())
   {
@@ -1085,7 +1104,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
   // loop  situation,  corresponding column cells are updated
   // only if required
   //
-  if (column == FIXED_POINT_DISPLAY_COLUMN) {
+  if (column == qthardmon::FIXED_POINT_DISPLAY_COLUMN) {
     HexData hexValue;
     int userUpdatedValueInCell = readCell<int>(row, column);
     hexValue.value = userUpdatedValueInCell;
@@ -1093,28 +1112,28 @@ void QtHardMon::updateTableEntries(int row, int column) {
         convertToDouble(userUpdatedValueInCell);
 
     // update the hex field in all  cases
-    writeCell<HexData>(row, HEX_VALUE_DISPLAY_COLUMN, hexValue);
+    writeCell<HexData>(row, qthardmon::HEX_VALUE_DISPLAY_COLUMN, hexValue);
 
-    if (isValidCell(row, FLOATING_POINT_DISPLAY_COLUMN)) {
+    if (isValidCell(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN)) {
       double currentValueInDoubleColumn =
-          readCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN);
+          readCell<double>(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN);
       if (currentValueInDoubleColumn == fractionalVersionOfUserValue)
         return; // same value in the corresponding double cell, so not updating
                 // this cell
     }
     // If here, This is a new value. Trigger update of the float cell
 
-    writeCell<double>(row, FLOATING_POINT_DISPLAY_COLUMN,
+    writeCell<double>(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN,
                       fractionalVersionOfUserValue);
 
-  } else if (column == FLOATING_POINT_DISPLAY_COLUMN) {
+  } else if (column == qthardmon::FLOATING_POINT_DISPLAY_COLUMN) {
     double userUpdatedValueInCell = readCell<double>(row, column);
     int FixedPointVersionOfUserValue =
         convertToFixedPoint(userUpdatedValueInCell);
 
-    if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
+    if (isValidCell(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN)) {
       int currentValueInFixedPointCell =
-          readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+          readCell<int>(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN);
       double convertedValueFrmFPCell =
           convertToDouble(currentValueInFixedPointCell);
       if (userUpdatedValueInCell == convertedValueFrmFPCell)
@@ -1122,24 +1141,24 @@ void QtHardMon::updateTableEntries(int row, int column) {
     }
 
     writeCell<int>(
-        row, FIXED_POINT_DISPLAY_COLUMN,
+        row, qthardmon::FIXED_POINT_DISPLAY_COLUMN,
         FixedPointVersionOfUserValue); // This will trigger an update to
                                        // the fixed point display column,
                                        // which will in turn correct the
                                        // value in this double cell to a
     // valid one (In case the user entered one is not supported by the floating
     // point converter settings)
-  } else if (column == HEX_VALUE_DISPLAY_COLUMN) {
+  } else if (column == qthardmon::HEX_VALUE_DISPLAY_COLUMN) {
     HexData hexInCell = readCell<HexData>(row, column);
     int userUpdatedValueInCell = hexInCell.value;
 
-    if (isValidCell(row, FIXED_POINT_DISPLAY_COLUMN)) {
+    if (isValidCell(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN)) {
       int currentValueInFixedPointCell =
-          readCell<int>(row, FIXED_POINT_DISPLAY_COLUMN);
+          readCell<int>(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN);
       if (userUpdatedValueInCell == currentValueInFixedPointCell)
         return;
     }
-    writeCell<int>(row, FIXED_POINT_DISPLAY_COLUMN, userUpdatedValueInCell);
+    writeCell<int>(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, userUpdatedValueInCell);
   }
 }
 
@@ -1216,7 +1235,7 @@ template <typename T> T QtHardMon::readCell(int row, int column) {
 }
 
 mtca4u::FixedPointConverter QtHardMon::createConverter() {
-  RegisterTreeItem *registerInformation = dynamic_cast<RegisterTreeItem *>(
+	CustomQTreeItem *registerInformation = static_cast<CustomQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
   if (!registerInformation){
     QMessageBox::warning(this, "QtHardMon internal error", "Could not create fixed point converter for current register.");

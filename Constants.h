@@ -1,0 +1,13 @@
+
+#ifndef SOURCE_DIRECTORY__CONSTANTS_H_
+#define SOURCE_DIRECTORY__CONSTANTS_H_
+
+
+// Constants
+namespace qthardmon {
+const int FIXED_POINT_DISPLAY_COLUMN = 0;
+const int HEX_VALUE_DISPLAY_COLUMN = 1;
+const int FLOATING_POINT_DISPLAY_COLUMN = 2;
+}
+
+#endif //SOURCE_DIRECTORY__CONSTANTS_H_
