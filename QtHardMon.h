@@ -275,8 +275,16 @@ class QtHardMon: public QMainWindow
   void clearRowBackgroundColour(int row);
   bool isMultiplexedDataRegion(std::string const & registerName);
   bool isSeqDescriptor(std::string const & registerName);
+  CustomQTreeItem *createAreaDesciptor(
+      DeviceListItem const *deviceListItem,
+      mtca4u::mapFile::mapElem const & regInfo);
+
   CustomQTreeItem *createAreaDescriptorSubtree(
-      CustomQTreeItem *areaDescriptor, mtca4u::mapFile::const_iterator& currentIt, mtca4u::mapFile::const_iterator finalIterator);
+      CustomQTreeItem *areaDescriptor,
+      mtca4u::mapFile::const_iterator &currentIt,
+      mtca4u::mapFile::const_iterator finalIterator);
+
+  std::string extractMultiplexedRegionName(std::string const & regName);
 };
 
 
