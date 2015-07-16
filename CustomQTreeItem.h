@@ -108,6 +108,7 @@ public:
   virtual void read(QTableWidget* const tablewidget);
   virtual void write(QTableWidget* const tablewidget);
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
   static const int DataType = QTreeWidgetItem::UserType + 3;
 

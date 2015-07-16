@@ -372,7 +372,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 {
   // the registerItem actually is a RegisterTreeItemType. As this is a private slot it is safe to assume this
   // and use a static cast.
-  RegisterItem * registerTreeItem = static_cast<RegisterItem *>(registerItem);
+	CustomQTreeItem * registerTreeItem = static_cast<CustomQTreeItem *>(registerItem);
 
   // When the registerTreeWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
   // We have to catch this here and return.
@@ -417,8 +417,10 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   _hardMonForm.registeSignBitDisplay->setText(QString::number( registerTreeItem->getRegisterMapElement().reg_signed ));
 
   // remember that this register has been selected
-  _currentDeviceListItem->setLastSelectedRegisterName( registerTreeItem->getRegisterMapElement().reg_name ) ;
-  _currentDeviceListItem->setLastSelectedModuleName( registerTreeItem->getRegisterMapElement().reg_module ) ;
+  if(registerTreeItem->type() != ModuleItem::DataType){
+    _currentDeviceListItem->setLastSelectedRegisterName( registerTreeItem->getRegisterMapElement().reg_name ) ;
+    _currentDeviceListItem->setLastSelectedModuleName( registerTreeItem->getRegisterMapElement().reg_module ) ;
+  }
 
   // if the register is too large not all words are displayed.
   // Set the size of the list to maxWords + 1, so the last line can show "truncated"

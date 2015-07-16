@@ -64,10 +64,15 @@ void MultiplexedAreaItem::write(QTableWidget* const tablewidget) {}
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
+const mtca4u::mapFile::mapElem MultiplexedAreaItem::getRegisterMapElement() {
+	return (_registerMapElement);
+}
+
 SequenceDescriptor::SequenceDescriptor(
     const mtca4u::mapFile::mapElem& registerInfo, QTreeWidgetItem* parent_,
     const QString& text_)
-    : CustomQTreeItem(parent_, text_, SequenceDescriptor::DataType) {}
+    : CustomQTreeItem(parent_, text_, SequenceDescriptor::DataType),
+      _registerMapElement(registerInfo) {}
 
 void SequenceDescriptor::read(QTableWidget* const tablewidget) {}
 
@@ -79,3 +84,4 @@ void SequenceDescriptor::updateRegisterProperties(
 const mtca4u::mapFile::mapElem SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
 }
+
