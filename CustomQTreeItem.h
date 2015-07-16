@@ -1,10 +1,3 @@
-/*
- * customQTreeItemInterface.h
- *
- *  Created on: Jul 14, 2015
- *      Author: varghese
- */
-
 #ifndef SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 #define SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 
