@@ -380,7 +380,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     _currentDeviceListItem->setLastSelectedModuleName( registerTreeItem->getRegisterMapElement().reg_module ) ;
   }
 
-  if (!_autoRead){
+  if (!_autoRead || (registerTreeItem->type() == ModuleItem::DataType)){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
     _hardMonForm.valuesTableWidget->clearContents();
@@ -398,33 +398,34 @@ void QtHardMon::read()
   CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
 
-  if (_mtcaDevice->isOpen()) {
-    try {
+  try {
+    if (_mtcaDevice->isOpen()) {
+
       TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
                                 _mtcaDevice);
       registerTreeItem->read(tableData);
       _hardMonForm.writeButton->setEnabled(true);
     }
-    catch (InvalidOperationException &e) {
-      QMessageBox::warning(this, "QtHardMon read error", e.what());
-      return;
-    }
-    catch (std::exception &e) {
-      closeDevice();
-      _hardMonForm.writeButton->setEnabled(false);
-      // the error message accesses the _currentDeviceListItem. Is
-      // this safe? It might be NULL.
-      QMessageBox messageBox(
-          QMessageBox::Critical, tr("QtHardMon: Error"),
-          QString("Error reading from device ") +
-              _currentDeviceListItem->getDeviceMapElement().dev_file.c_str() +
-              ".",
-          QMessageBox::Ok, this);
-      messageBox.setInformativeText(QString("Info: An exception was thrown:") +
-                                    e.what() +
-                                    QString("\n\nThe device has been closed."));
-      messageBox.exec();
-    }
+  }
+  catch (InvalidOperationException &e) {
+    QMessageBox::warning(this, "QtHardMon read error", e.what());
+    return;
+  }
+  catch (std::exception &e) {
+    closeDevice();
+    _hardMonForm.writeButton->setEnabled(false);
+    // the error message accesses the _currentDeviceListItem. Is
+    // this safe? It might be NULL.
+    QMessageBox messageBox(
+        QMessageBox::Critical, tr("QtHardMon: Error"),
+        QString("Error reading from device ") +
+            _currentDeviceListItem->getDeviceMapElement().dev_file.c_str() +
+            ".",
+        QMessageBox::Ok, this);
+    messageBox.setInformativeText(QString("Info: An exception was thrown:") +
+                                  e.what() +
+                                  QString("\n\nThe device has been closed."));
+    messageBox.exec();
   }
 
   // check if plotting after reading is requested
@@ -439,53 +440,36 @@ void QtHardMon::write()
 {
   ++_insideReadOrWrite;
 
-  RegisterTreeItem * registerTreeItem =
-    dynamic_cast<RegisterTreeItem *>(  _hardMonForm.registerTreeWidget->currentItem() );
+  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
+      _hardMonForm.registerTreeWidget->currentItem());
 
-  if (!registerTreeItem)
-  {
-    QMessageBox::warning(this, "QtHardMon write error", "You cannot write to a module. Select a register!");
+  try {
+    if (_mtcaDevice->isOpen()) {
+      TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
+                                _mtcaDevice);
+      registerTreeItem->write(tableData);
+    }
+  }
+  catch (InvalidOperationException &e) {
+    QMessageBox::warning(this, "QtHardMon write error", e.what());
     return;
   }
+  catch (std::exception &e) {
+  		closeDevice();
 
-  for (unsigned int row=0; row < registerTreeItem->getRegisterMapElement().reg_elem_nr; row++)
-  {
-    // if the register is too large only write the valid entries from the display list.
-    if (row == _maxWords)
-    {
-      break;
-    }
-
-    int registerContent =  _hardMonForm.valuesTableWidget->item(row,0)->data(0 /*default role*/).toInt();
-
-    // Try writing to the file only when it's open.
-    // This should only be callable if the device could be opened, but zou never know.
-    if ( _mtcaDevice->isOpen() )
-    {
-      // try to write to the device. If this fails this really is a problem.
-      try
-      {
-	_mtcaDevice->writeReg( registerTreeItem->getRegisterMapElement().reg_address + row*qthardmon::WORD_SIZE_IN_BYTES,
-			      registerContent,
-			      registerTreeItem->getRegisterMapElement().reg_bar );
-      }
-      catch(exDevPCIE & e)
-      {
-	closeDevice();
-
-	// the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
-	QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
-			       QString("Error writing to device ")+ 
-			       _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
-			       QMessageBox::Ok, this);
-	messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
-				      +QString("\n\nThe device has been closed."));
-	messageBox.exec();
-      }//catch
-
-    }//if isOpen
-
-  }// for row
+    // the error message accesses the _currentDeviceListItem. Is this safe? It
+    // might be NULL.
+    QMessageBox messageBox(
+        QMessageBox::Critical, tr("QtHardMon: Error"),
+        QString("Error writing to device ") +
+            _currentDeviceListItem->getDeviceMapElement().dev_file.c_str() +
+            ".",
+        QMessageBox::Ok, this);
+    messageBox.setInformativeText(QString("Info: An exception was thrown:") +
+                                  e.what() +
+                                  QString("\n\nThe device has been closed."));
+    messageBox.exec();
+  }
 
   if (  _hardMonForm.readAfterWriteCheckBox->isChecked() )
   {
@@ -930,36 +914,8 @@ void QtHardMon::DeviceListItem::setLastSelectedModuleName(std::string const & mo
   _lastSelectedModuleName = moduleName;
 }
 
-// The constructor itself is empty. It just calls the construtor of the mother class and the copy
-// constructors of the data members
-QtHardMon::RegisterTreeItem::RegisterTreeItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
-					       const QString & text_, QTreeWidget * parent_ )
-  : QTreeWidgetItem(parent_, QStringList(text_), RegisterTreeItemType), _registerMapElement( register_map_emlement )
-{}
-
-QtHardMon::RegisterTreeItem::RegisterTreeItem( mtca4u::mapFile::mapElem const & register_map_emlement, 
-					       const QString & text_, QTreeWidgetItem * parent_ )
-  : QTreeWidgetItem(parent_, QStringList(text_), RegisterTreeItemType), _registerMapElement( register_map_emlement )
-{}
-
-QtHardMon::RegisterTreeItem::~RegisterTreeItem(){}
-
- mtca4u::mapFile::mapElem const & QtHardMon::RegisterTreeItem::getRegisterMapElement() const
+void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/)
 {
-  return _registerMapElement;
-}
-
-void QtHardMon::registerClicked(QTreeWidgetItem * registerItem)
-{
-/*
-  // check if the tree widget is a register or module
-   * registerTreeItem = dynamic_cast< RegisterTreeItem *>(registerItem);
-  if (!registerTreeItem){
-    // cast failed -> it's a module, you cannot read it. Just return
-    return;
-  }
-*/
-
   // Do not execute the read if the corresponding flag is off
   // registerSelected method.
   if (!_readOnClick){

@@ -82,13 +82,16 @@ ModuleItem::ModuleItem(const QString& text_, QTreeWidget* parent_)
     : CustomQTreeItem(text_, ModuleItem::DataType, parent_) {}
 
 void ModuleItem::read(TableWidgetData const& tabledata) {
-	createTableRowEntries(tabledata, 0);
-	throw InvalidOperationException("You cannot read from a module. Select a register.");
+  createTableRowEntries(tabledata, 0);
+  throw InvalidOperationException( "You cannot read from a module. Select a register.");
 }
 
-void ModuleItem::write(TableWidgetData const& tabledata) {}
+void ModuleItem::write(TableWidgetData const& tabledata) {
+  throw InvalidOperationException( "You cannot write from a module. Select a register.");
+}
 
 void ModuleItem::updateRegisterProperties(const RegsterPropertyGrpBox& grpBox) {
+	clearGrpBox(grpBox);
 }
 
 RegisterItem::RegisterItem(const RegisterInfo& registerInfo,
@@ -133,7 +136,20 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
   return buffer;
 }
 
-void RegisterItem::write(TableWidgetData const& tabledata) {}
+void RegisterItem::write(TableWidgetData const& tabledata) {
+	unsigned int numElementsinRegister = _registerMapElement.reg_elem_nr;
+	std::vector<int> buffer = copyValuesFromTable<int>(tabledata, numElementsinRegister);
+	writeRegisterTodevice(tabledata, buffer);
+}
+
+void RegisterItem::writeRegisterTodevice(TableWidgetData const& tabledata,
+                                         const std::vector<int>& buffer) {
+  Device_t const& mtcadevice = tabledata.device;
+  unsigned int regAddress = _registerMapElement.reg_address;
+  unsigned int regSizeinBytes = _registerMapElement.reg_size;
+  unsigned int register bar = _registerMapElement.reg_bar;
+  mtcadevice->writeArea(regAddress, &buffer[0], regSizeinBytes, bar);
+}
 
 void RegisterItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {
@@ -157,7 +173,9 @@ void MultiplexedAreaItem::read(TableWidgetData const& tabledata) {
 	createTableRowEntries(tabledata, 0);
 }
 
-void MultiplexedAreaItem::write(TableWidgetData const& tabledata) {}
+void MultiplexedAreaItem::write(TableWidgetData const& /*tabledata*/) {
+  // do nothing? -> change behavior later to something better?
+}
 
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {
@@ -204,7 +222,10 @@ void SequenceDescriptor::read(TableWidgetData const& tabledata) {
 
 }
 
-void SequenceDescriptor::write(TableWidgetData const& tabledata ) {}
+void SequenceDescriptor::write(TableWidgetData const& tabledata ) {
+  	MuxedData const& accessor = getAccessor();
+  	writeSequenceToCard(tabledata, accessor);
+}
 
 void SequenceDescriptor::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {
@@ -238,3 +259,23 @@ void CustomQTreeItem::fillGrpBox(const RegsterPropertyGrpBox& grpBox,
       QString::number(regInfo.reg_frac_bits));
   grpBox.registeSignBitDisplay->setText(QString::number(regInfo.reg_signed));
 }
+
+void SequenceDescriptor::writeSequenceToCard(const TableWidgetData& tabledata,
+                                             MuxedData const& accessor) {
+	unsigned int sequenceLength = (*accessor)[_sequenceNumber].size();
+	(*accessor)[_sequenceNumber] = copyValuesFromTable<double>(tabledata, sequenceLength);
+  accessor->write();
+}
+
+void ModuleItem::clearGrpBox(const RegsterPropertyGrpBox& grpBox) {
+  grpBox.registerNameDisplay->setText("");
+  grpBox.moduleDisplay->setText("");
+  grpBox.registerBarDisplay->setText("");
+  grpBox.registerNElementsDisplay->setText("");
+  grpBox.registerAddressDisplay->setText("");
+  grpBox.registerSizeDisplay->setText("");
+  grpBox.registerWidthDisplay->setText("");
+  grpBox.registerFracBitsDisplay->setText("");
+  grpBox.registeSignBitDisplay->setText("");
+}
+

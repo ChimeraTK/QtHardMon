@@ -209,33 +209,6 @@ class QtHardMon: public QMainWindow
       std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected
   };
 
-  /** A helper class to store treeWidgetItems which also contain the mapElem information.
-   */
-  class RegisterTreeItem: public QTreeWidgetItem
-  {
-    public:
-      /** Constructor for top level items */
-      RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-			 const QString & text_, QTreeWidget * parent_ = 0 );
-
-      /** Constructor for child items */
-      RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-			 const QString & text_, QTreeWidgetItem * parent_ = 0);
-      
-      /** The destructor. Currently does nothing because the members go out of scope automatically. */
-      virtual ~RegisterTreeItem();
-      
-      /** Returns a reference to the registerMapElement, i.e. the register information. */
-      mtca4u::mapFile::mapElem const & getRegisterMapElement() const;
-      
-      /** The type of RegisterTreeItemType.  It's a user type because it is larger than QTreeWidgetItem::UserType.
-       */
-      static const int RegisterTreeItemType = QTreeWidgetItem::UserType + 1;
-
-    private:
-      mtca4u::mapFile::mapElem _registerMapElement; ///< The instance of the RegisterMapElement.
-  };
-
   DeviceListItem * _currentDeviceListItem; ///< Pointer to the currently selected deviceListItem
 
   PlotWindow * _plotWindow; ///< The plot window

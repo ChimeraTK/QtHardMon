@@ -99,6 +99,11 @@ protected:
   template <typename T>
   void putValuesIntoTable(TableWidgetData const& tabledata,
                           std::vector<T> buffer);
+
+  template <typename T>
+  std::vector<T> copyValuesFromTable(TableWidgetData const& tabledata,
+                                     unsigned int count);
+
   void fillGrpBox(RegsterPropertyGrpBox const& grpBox,
                   mtca4u::mapFile::mapElem const& regInfo);
 };
@@ -111,6 +116,8 @@ public:
   virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
 
   static const int DataType = QTreeWidgetItem::UserType + 1;
+private:
+  void clearGrpBox(RegsterPropertyGrpBox const& grpBox);
 };
 
 class RegisterItem : public CustomQTreeItem {
@@ -128,6 +135,7 @@ private:
   mtca4u::mapFile::mapElem _registerMapElement;
 
   std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
+  void writeRegisterTodevice(TableWidgetData const& tabledata, std::vector<int> const & buffer);
 };
 
 class MultiplexedAreaItem : public CustomQTreeItem {
@@ -170,6 +178,11 @@ private:
 
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
+
+  void writeSequenceToCard(
+      TableWidgetData const& tabledata,
+      boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
+          accessor);
 };
 
 template <typename T>
@@ -207,6 +220,24 @@ inline void CustomQTreeItem::putValuesIntoTable(
     dataItem->setData(0, QVariant(registerContent)); // 0 is the default role
     table->setItem(row, column, dataItem);
   } // for row
+	}
+
+template <typename T>
+inline std::vector<T> CustomQTreeItem::copyValuesFromTable(
+    const TableWidgetData& tabledata, unsigned int count) {
+
+  unsigned int maxRowCount = tabledata.tableMaxRowCount;
+  QTableWidget const* table = tabledata.table;
+  std::vector<T> buffer(count);
+
+  for (unsigned int row = 0; (row < count) && (row < maxRowCount); row++) {
+    int registerContent =
+        table->item(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN)
+            ->data(0 /*default role*/)
+            .toInt();
+    buffer[row] = registerContent;
+  }
+  return buffer;
 }
 
 #endif /* SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_ */
