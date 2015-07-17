@@ -19,9 +19,7 @@
 
 using namespace mtca4u;
 
-// FIXME: how to solve the problem of the word size? Should come from pci express. 
-// => need to improve the api
-static const size_t WORD_SIZE_IN_BYTES = 4;
+
 
 // The default maximum for the number of words in a register.
 // This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
@@ -456,27 +454,27 @@ void QtHardMon::read()
     return;
   }*/
 
-  if ( _mtcaDevice->isOpen() ){
-  		try{
-  				TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords);
-  				registerTreeItem->read(tableData);
-  		} catch(std::exception& e){
-                  closeDevice();
+  if (_mtcaDevice->isOpen()) {
+    try {
+      TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords, _mtcaDevice);
+      registerTreeItem->read(tableData);
+    }
+    catch (std::exception &e) {
+      closeDevice();
 
-                  // the error message accesses the _currentDeviceListItem. Is
-                  // this safe? It might be NULL.
-                  QMessageBox messageBox(
-                      QMessageBox::Critical, tr("QtHardMon: Error"),
-                      QString("Error reading from device ") +
-                          _currentDeviceListItem->getDeviceMapElement()
-                              .dev_file.c_str() +
-                          ".",
-                      QMessageBox::Ok, this);
-                  messageBox.setInformativeText(
-                      QString("Info: An exception was thrown:") + e.what() +
-                      QString("\n\nThe device has been closed."));
-                  messageBox.exec();
-            }
+      // the error message accesses the _currentDeviceListItem. Is
+      // this safe? It might be NULL.
+      QMessageBox messageBox(
+          QMessageBox::Critical, tr("QtHardMon: Error"),
+          QString("Error reading from device ") +
+              _currentDeviceListItem->getDeviceMapElement().dev_file.c_str() +
+              ".",
+          QMessageBox::Ok, this);
+      messageBox.setInformativeText(QString("Info: An exception was thrown:") +
+                                    e.what() +
+                                    QString("\n\nThe device has been closed."));
+      messageBox.exec();
+    }
   }
 /*  unsigned int nWordsInRegister = registerTreeItem->getRegisterMapElement().reg_elem_nr;
   // prepare a read buffer with the correct size
@@ -590,7 +588,7 @@ void QtHardMon::write()
       // try to write to the device. If this fails this really is a problem.
       try
       {
-	_mtcaDevice->writeReg( registerTreeItem->getRegisterMapElement().reg_address + row*WORD_SIZE_IN_BYTES,
+	_mtcaDevice->writeReg( registerTreeItem->getRegisterMapElement().reg_address + row*qthardmon::WORD_SIZE_IN_BYTES,
 			      registerContent,
 			      registerTreeItem->getRegisterMapElement().reg_bar );
       }

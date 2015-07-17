@@ -7,6 +7,8 @@
 #include <qtreewidget.h>
 #include <qlabel.h>
 #include <qtablewidget.h>
+#include <typeinfo>
+#include "Constants.h"
 
 struct RegsterPropertyGrpBox {
   QLabel* registerNameDisplay;
@@ -33,10 +35,13 @@ struct RegsterPropertyGrpBox {
 
 struct TableWidgetData {
   QTableWidget* table;
-  unsigned int maxRow;
+  unsigned int tableMaxRowCount;
+  boost::shared_ptr <mtca4u::devBase> device;
 
-  TableWidgetData() : table(0), maxRow(0) {}
-  TableWidgetData(QTableWidget* table_, unsigned int maxRow_) : table(table_), maxRow(maxRow_) {}
+  TableWidgetData() : table(0), tableMaxRowCount(0), device() {}
+  TableWidgetData(QTableWidget* table_, unsigned int maxRow_,
+                  boost::shared_ptr<mtca4u::devBase> const& device_)
+      : table(table_), tableMaxRowCount(maxRow_), device(device_) {}
 };
 
 /**
@@ -76,7 +81,10 @@ public:
 
 protected:
   void fillTableWithDummyValues(TableWidgetData const& tableData);
-  void createTableRowEntries(TableWidgetData const& tabledata, int rows = 0);
+  void createTableRowEntries(TableWidgetData const& tabledata, unsigned int rows = 0);
+
+  template <typename T>
+  void putValuesIntoTable(TableWidgetData const& tabledata, std::vector<T> buffer);
 };
 
 class ModuleItem : public CustomQTreeItem {
@@ -102,6 +110,8 @@ public:
 
 private:
   mtca4u::mapFile::mapElem _registerMapElement;
+
+  std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
 };
 
 class MultiplexedAreaItem : public CustomQTreeItem {
@@ -144,10 +154,41 @@ private:
 
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
-
-  void putValuesIntoTable(
-      TableWidgetData const& tabledata,
-      boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
-          accessor);
 };
+
+template <typename T>
+inline void CustomQTreeItem::putValuesIntoTable(
+    const TableWidgetData& tabledata, std::vector<T> buffer) {
+  int column = 0;
+  if (typeid(T) == typeid(int)) {
+    column = qthardmon::FIXED_POINT_DISPLAY_COLUMN;
+  } else if (typeid(T) == typeid(double)) {
+    column = qthardmon::FLOATING_POINT_DISPLAY_COLUMN;
+  }
+
+  QTableWidget* table = tabledata.table;
+  unsigned int maxRow = tabledata.tableMaxRowCount;
+
+  for (unsigned int row=0; row < buffer.size(); row++)
+  {
+    // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
+    // int and a proper editor (spin box) is used when editing in the GUI.
+    QTableWidgetItem * dataItem =  new QTableWidgetItem();
+
+    if (row == maxRow)
+    { // The register is too large to display. Show that it is truncated and stop reading
+      dataItem->setText("truncated");
+      dataItem->setFlags( dataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
+      dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
+      table->setItem(row, 0, dataItem );
+      break;
+    }
+    //int registerContent = (readError?-1:inputBuffer[row]);
+    T registerContent = buffer[row];
+
+    dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
+    table->setItem(row, column, dataItem );
+  }// for row
+}
+
 #endif /* SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_ */

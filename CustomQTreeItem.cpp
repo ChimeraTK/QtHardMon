@@ -8,9 +8,10 @@
 #include <boost/shared_ptr.hpp>
 #include <MtcaMappedDevice/devBase.h>
 #include "Exceptions.h"
-#include "Constants.h"
 
 typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData;
+typedef boost::shared_ptr<mtca4u::devBase> Device_t;
+typedef mtca4u::mapFile::mapElem RegisterInfo;
 
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidget* parent_)
@@ -20,8 +21,8 @@ CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidgetItem* parent_)
     : QTreeWidgetItem(parent_, QStringList(text_), type_) {}
 
-mtca4u::mapFile::mapElem const CustomQTreeItem::getRegisterMapElement() {
-  return (mtca4u::mapFile::mapElem());
+RegisterInfo const CustomQTreeItem::getRegisterMapElement() {
+  return (RegisterInfo());
 }
 
 CustomQTreeItem::~CustomQTreeItem() {
@@ -31,11 +32,11 @@ void CustomQTreeItem::fillTableWithDummyValues(
     const TableWidgetData& tableData) {
 
 	// FIXME: Take care of boilerplate
-  mtca4u::mapFile::mapElem regInfo = this->getRegisterMapElement();
+  RegisterInfo regInfo = this->getRegisterMapElement();
   unsigned int numElements = regInfo.reg_elem_nr;
 
   QTableWidget* table = tableData.table;
-  unsigned int maxRow = tableData.maxRow;
+  unsigned int maxRow = tableData.tableMaxRowCount;
 
   for (unsigned int row = 0; row < numElements; row++) {
     QTableWidgetItem* dataItem = new QTableWidgetItem();
@@ -57,10 +58,10 @@ void CustomQTreeItem::fillTableWithDummyValues(
   }
 }
 
-void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, int rows) {
+void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, unsigned int rows) {
 
 	QTableWidget* table = tabledata.table;
-  unsigned int maxRow = tabledata.maxRow;
+  unsigned int maxRow = tabledata.tableMaxRowCount;
 
   int nRows = ( rows >  maxRow ?
   		maxRow + 1 :  rows );
@@ -87,38 +88,76 @@ void ModuleItem::write(TableWidgetData const& tabledata) {}
 void ModuleItem::updateRegisterProperties(const RegsterPropertyGrpBox& grpBox) {
 }
 
-RegisterItem::RegisterItem(const mtca4u::mapFile::mapElem& registerInfo,
+RegisterItem::RegisterItem(const RegisterInfo& registerInfo,
                            const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, RegisterItem::DataType, parent_),
       _registerMapElement(registerInfo) {}
 
-void RegisterItem::read(TableWidgetData const& tabledata) {}
+void RegisterItem::read(TableWidgetData const& tabledata) {
+  try {
+
+  		std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
+  		createTableRowEntries(tabledata, inputBuffer.size());
+  		//putValuesIntoTable(tabledata, accessor);*/
+  }
+  catch (...) {
+    fillTableWithDummyValues(tabledata);
+    throw;
+  }
+}
+
+std::vector<int> RegisterItem::fetchElementsFromCard(
+    const TableWidgetData& tabledata) {
+  RegisterInfo regInfo = this->getRegisterMapElement();
+
+  int numberOfElements = regInfo.reg_elem_nr;
+  std::vector<int> buffer(numberOfElements);
+
+  unsigned int registerBar = regInfo.reg_bar;
+  Device_t const& mtcadevice = tabledata.device;
+  int maxrows = tabledata.tableMaxRowCount;
+  size_t nBytesToRead =
+      std::min(numberOfElements, maxrows) * qthardmon::WORD_SIZE_IN_BYTES;
+  unsigned int registerAddress = regInfo.reg_address;
+
+  if (registerBar == 0xD) {
+    mtcadevice->readDMA(registerAddress, &(buffer[0]), nBytesToRead,
+                        registerBar);
+  } else {
+    mtcadevice->readArea(registerAddress, &(buffer[0]), nBytesToRead,
+                        registerBar);
+  }
+  return buffer;
+}
 
 void RegisterItem::write(TableWidgetData const& tabledata) {}
 
 void RegisterItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
-const mtca4u::mapFile::mapElem RegisterItem::getRegisterMapElement() {
+const RegisterInfo RegisterItem::getRegisterMapElement() {
   return _registerMapElement;
 }
 
 MultiplexedAreaItem::MultiplexedAreaItem(
     boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const& accessor,
-    const mtca4u::mapFile::mapElem& registerInfo, const QString& text_,
+    const RegisterInfo& registerInfo, const QString& text_,
     QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, MultiplexedAreaItem::DataType, parent_),
       _dataAccessor(accessor),
       _registerMapElement(registerInfo) {}
 
-void MultiplexedAreaItem::read(TableWidgetData const& tabledata) {}
+void MultiplexedAreaItem::read(TableWidgetData const& tabledata) {
+	// Nothing to read
+	createTableRowEntries(tabledata, 0);
+}
 
 void MultiplexedAreaItem::write(TableWidgetData const& tabledata) {}
 
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
-const mtca4u::mapFile::mapElem MultiplexedAreaItem::getRegisterMapElement() {
+const RegisterInfo MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
 }
 boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
@@ -127,7 +166,7 @@ MultiplexedAreaItem::getAccessor() {
 }
 
 SequenceDescriptor::SequenceDescriptor(
-    const mtca4u::mapFile::mapElem& registerInfo, unsigned int sequenceNumber,
+    const RegisterInfo& registerInfo, unsigned int sequenceNumber,
     const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, SequenceDescriptor::DataType, parent_),
       _registerMapElement(registerInfo),
@@ -139,7 +178,7 @@ void SequenceDescriptor::read(TableWidgetData const& tabledata) {
   	MuxedData const& accessor = getAccessor();
     accessor->read();
     createTableRowEntries(tabledata, (*accessor)[0].size());
-    putValuesIntoTable(tabledata, accessor);
+    putValuesIntoTable<double>(tabledata, (*accessor)[_sequenceNumber]);
   }
   catch (...) {
     fillTableWithDummyValues(tabledata);
@@ -153,7 +192,7 @@ void SequenceDescriptor::write(TableWidgetData const& tabledata ) {}
 void SequenceDescriptor::updateRegisterProperties(
     const RegsterPropertyGrpBox& grpBox) {}
 
-const mtca4u::mapFile::mapElem SequenceDescriptor::getRegisterMapElement() {
+const RegisterInfo SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
 }
 
@@ -166,10 +205,10 @@ MuxedData const& SequenceDescriptor::getAccessor() {
   return (areaDescriptor->getAccessor());
 }
 
-void SequenceDescriptor::putValuesIntoTable(const TableWidgetData& tabledata,
+/*void SequenceDescriptor::putValuesIntoTable(const TableWidgetData& tabledata,
                                             const MuxedData& accessor) {
   QTableWidget* table = tabledata.table;
-  unsigned int maxRow = tabledata.maxRow;
+  unsigned int maxRow = tabledata.tableMaxRowCount;
 
   for (unsigned int row=0; row < (*accessor)[0].size(); row++)
   {
@@ -191,5 +230,6 @@ void SequenceDescriptor::putValuesIntoTable(const TableWidgetData& tabledata,
     dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
     table->setItem(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN, dataItem );
   }// for row
-}
+}*/
+
 
