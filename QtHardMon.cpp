@@ -914,11 +914,10 @@ void QtHardMon::DeviceListItem::setLastSelectedModuleName(std::string const & mo
   _lastSelectedModuleName = moduleName;
 }
 
-void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/)
-{
+void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
   // Do not execute the read if the corresponding flag is off
   // registerSelected method.
-  if (!_readOnClick){
+  if (!_readOnClick) {
     //    std::cout << "Ignoring click" <<std::endl;
     return;
   }
