@@ -36,18 +36,30 @@ struct RegsterPropertyGrpBox {
 struct TableWidgetData {
   QTableWidget* table;
   unsigned int tableMaxRowCount;
-  boost::shared_ptr <mtca4u::devBase> device;
+  boost::shared_ptr<mtca4u::devBase> device;
 
   TableWidgetData() : table(0), tableMaxRowCount(0), device() {}
   TableWidgetData(QTableWidget* table_, unsigned int maxRow_,
                   boost::shared_ptr<mtca4u::devBase> const& device_)
       : table(table_), tableMaxRowCount(maxRow_), device(device_) {}
+
+  TableWidgetData(TableWidgetData const& data)
+      : table(data.table),
+        tableMaxRowCount(data.tableMaxRowCount),
+        device(data.device) {}
+
+  TableWidgetData& operator=(TableWidgetData const& data) {
+    table = data.table;
+    tableMaxRowCount = data.tableMaxRowCount;
+    device = data.device;
+    return *this;
+  }
 };
 
 /**
  * interface class for Qtree custom items
  */
-class CustomQTreeItem : public QTreeWidgetItem{
+class CustomQTreeItem : public QTreeWidgetItem {
 public:
   /**
    * Default constructor
@@ -81,10 +93,12 @@ public:
 
 protected:
   void fillTableWithDummyValues(TableWidgetData const& tableData);
-  void createTableRowEntries(TableWidgetData const& tabledata, unsigned int rows = 0);
+  void createTableRowEntries(TableWidgetData const& tabledata,
+                             unsigned int rows = 0);
 
   template <typename T>
-  void putValuesIntoTable(TableWidgetData const& tabledata, std::vector<T> buffer);
+  void putValuesIntoTable(TableWidgetData const& tabledata,
+                          std::vector<T> buffer);
 };
 
 class ModuleItem : public CustomQTreeItem {
@@ -169,26 +183,28 @@ inline void CustomQTreeItem::putValuesIntoTable(
   QTableWidget* table = tabledata.table;
   unsigned int maxRow = tabledata.tableMaxRowCount;
 
-  for (unsigned int row=0; row < buffer.size(); row++)
-  {
-    // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
+  for (unsigned int row = 0; row < buffer.size(); row++) {
+    // Prepare a data item with a QVariant. The QVariant takes care that the
+    // type is recognised as
     // int and a proper editor (spin box) is used when editing in the GUI.
-    QTableWidgetItem * dataItem =  new QTableWidgetItem();
+    QTableWidgetItem* dataItem = new QTableWidgetItem();
 
-    if (row == maxRow)
-    { // The register is too large to display. Show that it is truncated and stop reading
+    if (row == maxRow) { // The register is too large to display. Show that it
+                         // is truncated and stop reading
       dataItem->setText("truncated");
-      dataItem->setFlags( dataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
-      dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
-      table->setItem(row, 0, dataItem );
+      dataItem->setFlags(dataItem->flags() & ~Qt::ItemIsSelectable &
+                         ~Qt::ItemIsEditable);
+      dataItem->setToolTip("List is truncated. You can change the number of "
+                           "words displayed in the preferences.");
+      table->setItem(row, 0, dataItem);
       break;
     }
-    //int registerContent = (readError?-1:inputBuffer[row]);
+    // int registerContent = (readError?-1:inputBuffer[row]);
     T registerContent = buffer[row];
 
-    dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
-    table->setItem(row, column, dataItem );
-  }// for row
+    dataItem->setData(0, QVariant(registerContent)); // 0 is the default role
+    table->setItem(row, column, dataItem);
+  } // for row
 }
 
 #endif /* SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_ */

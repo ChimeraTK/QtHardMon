@@ -81,7 +81,10 @@ void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, un
 ModuleItem::ModuleItem(const QString& text_, QTreeWidget* parent_)
     : CustomQTreeItem(text_, ModuleItem::DataType, parent_) {}
 
-void ModuleItem::read(TableWidgetData const& tabledata) {}
+void ModuleItem::read(TableWidgetData const& tabledata) {
+	createTableRowEntries(tabledata, 0);
+	throw InvalidOperationException("You cannot read from a module. Select a register.");
+}
 
 void ModuleItem::write(TableWidgetData const& tabledata) {}
 
@@ -98,7 +101,7 @@ void RegisterItem::read(TableWidgetData const& tabledata) {
 
   		std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
   		createTableRowEntries(tabledata, inputBuffer.size());
-  		//putValuesIntoTable(tabledata, accessor);*/
+  		putValuesIntoTable<int>(tabledata, inputBuffer);
   }
   catch (...) {
     fillTableWithDummyValues(tabledata);
@@ -205,31 +208,5 @@ MuxedData const& SequenceDescriptor::getAccessor() {
   return (areaDescriptor->getAccessor());
 }
 
-/*void SequenceDescriptor::putValuesIntoTable(const TableWidgetData& tabledata,
-                                            const MuxedData& accessor) {
-  QTableWidget* table = tabledata.table;
-  unsigned int maxRow = tabledata.tableMaxRowCount;
-
-  for (unsigned int row=0; row < (*accessor)[0].size(); row++)
-  {
-    // Prepare a data item with a QVariant. The QVariant takes care that the type is recognised as
-    // int and a proper editor (spin box) is used when editing in the GUI.
-    QTableWidgetItem * dataItem =  new QTableWidgetItem();
-
-    if (row == maxRow)
-    { // The register is too large to display. Show that it is truncated and stop reading
-      dataItem->setText("truncated");
-      dataItem->setFlags( dataItem->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable );
-      dataItem->setToolTip("List is truncated. You can change the number of words displayed in the preferences.");
-      table->setItem(row, 0, dataItem );
-      break;
-    }
-    //int registerContent = (readError?-1:inputBuffer[row]);
-    int registerContent = (*accessor)[_sequenceNumber][row];
-
-    dataItem->setData( 0, QVariant( registerContent ) ); // 0 is the default role
-    table->setItem(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN, dataItem );
-  }// for row
-}*/
 
 

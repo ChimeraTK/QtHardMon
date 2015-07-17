@@ -11,7 +11,7 @@
 #include <exception>
 #include <string>
 
-#define DEFINE_FUSE_RELAY_BOARD_EXCEPTION( NAME )\
+#define DEFINE_QTHARDMON_EXCEPTION( NAME )\
  class NAME : public Exception{\
  public:\
   NAME (std::string const & message)\
@@ -35,7 +35,8 @@ class Exception : public std::exception {
 };
 
 
-DEFINE_FUSE_RELAY_BOARD_EXCEPTION(InternalErrorException)
+DEFINE_QTHARDMON_EXCEPTION(InternalErrorException)
+DEFINE_QTHARDMON_EXCEPTION(InvalidOperationException)
 
 
 

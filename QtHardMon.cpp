@@ -16,7 +16,7 @@
 #include <MtcaMappedDevice/exDevPCIE.h>
 
 #include "Constants.h"
-
+#include "Exceptions.h"
 using namespace mtca4u;
 
 
@@ -456,8 +456,13 @@ void QtHardMon::read()
 
   if (_mtcaDevice->isOpen()) {
     try {
-      TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords, _mtcaDevice);
+      TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
+                                _mtcaDevice);
       registerTreeItem->read(tableData);
+    }
+    catch (InvalidOperationException &e) {
+      QMessageBox::warning(this, "QtHardMon read error", e.what());
+      return;
     }
     catch (std::exception &e) {
       closeDevice();
