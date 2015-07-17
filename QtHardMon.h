@@ -280,7 +280,9 @@ class QtHardMon: public QMainWindow
       mtca4u::mapFile::const_iterator finalIterator);
 
   std::string extractMultiplexedRegionName(std::string const & regName);
-
+  RegsterPropertyGrpBox getRegisterPropertyGrpBoxData();
+  void clearGroupBoxDisplay();
+  void resetTable();
   public:
 };
 

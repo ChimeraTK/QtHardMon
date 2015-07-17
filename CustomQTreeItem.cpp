@@ -136,7 +136,9 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
 void RegisterItem::write(TableWidgetData const& tabledata) {}
 
 void RegisterItem::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {}
+    const RegsterPropertyGrpBox& grpBox) {
+	fillGrpBox(grpBox, _registerMapElement);
+}
 
 const RegisterInfo RegisterItem::getRegisterMapElement() {
   return _registerMapElement;
@@ -158,7 +160,19 @@ void MultiplexedAreaItem::read(TableWidgetData const& tabledata) {
 void MultiplexedAreaItem::write(TableWidgetData const& tabledata) {}
 
 void MultiplexedAreaItem::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {}
+    const RegsterPropertyGrpBox& grpBox) {
+  grpBox.registerNameDisplay->setText(_registerMapElement.reg_name.c_str());
+  grpBox.moduleDisplay->setText(_registerMapElement.reg_module.c_str());
+  grpBox.registerBarDisplay->setText(QString::number(_registerMapElement.reg_bar));
+  grpBox.registerNElementsDisplay->setText("");
+  grpBox.registerAddressDisplay->setText(QString::number(_registerMapElement.reg_address));
+  grpBox.registerSizeDisplay->setText(QString::number(_registerMapElement.reg_size));
+
+  grpBox.registerWidthDisplay->setText("");
+  grpBox.registerFracBitsDisplay->setText("");
+  grpBox.registeSignBitDisplay->setText("");
+}
+
 
 const RegisterInfo MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
@@ -193,7 +207,9 @@ void SequenceDescriptor::read(TableWidgetData const& tabledata) {
 void SequenceDescriptor::write(TableWidgetData const& tabledata ) {}
 
 void SequenceDescriptor::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {}
+    const RegsterPropertyGrpBox& grpBox) {
+	fillGrpBox(grpBox, _registerMapElement);
+}
 
 const RegisterInfo SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
@@ -208,5 +224,17 @@ MuxedData const& SequenceDescriptor::getAccessor() {
   return (areaDescriptor->getAccessor());
 }
 
-
-
+void CustomQTreeItem::fillGrpBox(const RegsterPropertyGrpBox& grpBox,
+                                 const mtca4u::mapFile::mapElem& regInfo) {
+  grpBox.registerNameDisplay->setText(regInfo.reg_name.c_str());
+  grpBox.moduleDisplay->setText(regInfo.reg_module.c_str());
+  grpBox.registerBarDisplay->setText(QString::number(regInfo.reg_bar));
+  grpBox.registerNElementsDisplay->setText(
+      QString::number(regInfo.reg_elem_nr));
+  grpBox.registerAddressDisplay->setText(QString::number(regInfo.reg_address));
+  grpBox.registerSizeDisplay->setText(QString::number(regInfo.reg_size));
+  grpBox.registerWidthDisplay->setText(QString::number(regInfo.reg_width));
+  grpBox.registerFracBitsDisplay->setText(
+      QString::number(regInfo.reg_frac_bits));
+  grpBox.registeSignBitDisplay->setText(QString::number(regInfo.reg_signed));
+}

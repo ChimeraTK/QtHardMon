@@ -99,6 +99,8 @@ protected:
   template <typename T>
   void putValuesIntoTable(TableWidgetData const& tabledata,
                           std::vector<T> buffer);
+  void fillGrpBox(RegsterPropertyGrpBox const& grpBox,
+                  mtca4u::mapFile::mapElem const& regInfo);
 };
 
 class ModuleItem : public CustomQTreeItem {
