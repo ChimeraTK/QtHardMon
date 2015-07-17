@@ -427,7 +427,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     _hardMonForm.writeButton->setEnabled(false);
   }
 
-  _hardMonForm.valuesTableWidget->setRowCount( nRows );
+/*  _hardMonForm.valuesTableWidget->setRowCount( nRows );
 
   // set the 
   for( int row=0; row < nRows; ++row ){
@@ -436,7 +436,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     QTableWidgetItem * tableWidgetItem = new QTableWidgetItem();
     tableWidgetItem->setText( rowAsText.str().c_str() );
     _hardMonForm.valuesTableWidget->setVerticalHeaderItem(row, tableWidgetItem );
-  }
+  }*/
   
   if (_autoRead){
     read();
@@ -460,19 +460,23 @@ void QtHardMon::read()
   		try{
   				TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords);
   				registerTreeItem->read(tableData);
-  		} catch(exDevPCIE & e){
-  	      closeDevice();
+  		} catch(std::exception& e){
+                  closeDevice();
 
-  	      // the error message accesses the _currentDeviceListItem. Is this safe? It might be NULL.
-  	      QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
-  				     QString("Error reading from device ")+
-  				     _currentDeviceListItem->getDeviceMapElement().dev_file.c_str()+".",
-  				     QMessageBox::Ok, this);
-  	      messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what()
-  					    +QString("\n\nThe device has been closed."));
-  	      messageBox.exec();
-
-  	    }
+                  // the error message accesses the _currentDeviceListItem. Is
+                  // this safe? It might be NULL.
+                  QMessageBox messageBox(
+                      QMessageBox::Critical, tr("QtHardMon: Error"),
+                      QString("Error reading from device ") +
+                          _currentDeviceListItem->getDeviceMapElement()
+                              .dev_file.c_str() +
+                          ".",
+                      QMessageBox::Ok, this);
+                  messageBox.setInformativeText(
+                      QString("Info: An exception was thrown:") + e.what() +
+                      QString("\n\nThe device has been closed."));
+                  messageBox.exec();
+            }
   }
 /*  unsigned int nWordsInRegister = registerTreeItem->getRegisterMapElement().reg_elem_nr;
   // prepare a read buffer with the correct size

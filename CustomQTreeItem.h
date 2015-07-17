@@ -42,7 +42,7 @@ struct TableWidgetData {
 /**
  * interface class for Qtree custom items
  */
-class CustomQTreeItem : public QTreeWidgetItem {
+class CustomQTreeItem : public QTreeWidgetItem{
 public:
   /**
    * Default constructor
@@ -76,6 +76,7 @@ public:
 
 protected:
   void fillTableWithDummyValues(TableWidgetData const& tableData);
+  void createTableRowEntries(TableWidgetData const& tabledata, int rows = 0);
 };
 
 class ModuleItem : public CustomQTreeItem {
@@ -144,7 +145,7 @@ private:
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
 
-  void updateTableDisplay(
+  void putValuesIntoTable(
       TableWidgetData const& tabledata,
       boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
           accessor);

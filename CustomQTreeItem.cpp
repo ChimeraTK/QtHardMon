@@ -27,6 +27,55 @@ mtca4u::mapFile::mapElem const CustomQTreeItem::getRegisterMapElement() {
 CustomQTreeItem::~CustomQTreeItem() {
   // TODO Auto-generated destructor stub
 }
+void CustomQTreeItem::fillTableWithDummyValues(
+    const TableWidgetData& tableData) {
+
+	// FIXME: Take care of boilerplate
+  mtca4u::mapFile::mapElem regInfo = this->getRegisterMapElement();
+  unsigned int numElements = regInfo.reg_elem_nr;
+
+  QTableWidget* table = tableData.table;
+  unsigned int maxRow = tableData.maxRow;
+
+  for (unsigned int row = 0; row < numElements; row++) {
+    QTableWidgetItem* dataItem = new QTableWidgetItem();
+    if (row == maxRow) {
+      dataItem->setText("truncated");
+      dataItem->setFlags(dataItem->flags() & ~Qt::ItemIsSelectable &
+                         ~Qt::ItemIsEditable);
+      dataItem->setToolTip("List is truncated. You can change the number of "
+                           "words displayed in the preferences.");
+      table->setItem(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, dataItem);
+      break;
+    }
+
+    int registerContent = -1;
+
+    dataItem->setData(0, QVariant(registerContent)); // 0 is the default role
+    //table->setItem(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, dataItem);
+    table->setItem(row, 0, dataItem);
+  }
+}
+
+void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, int rows) {
+
+	QTableWidget* table = tabledata.table;
+  unsigned int maxRow = tabledata.maxRow;
+
+  int nRows = ( rows >  maxRow ?
+  		maxRow + 1 :  rows );
+
+  table->setRowCount(nRows);
+
+  // set the
+  for (int row = 0; row < nRows; ++row) {
+    std::stringstream rowAsText;
+    rowAsText << row;
+    QTableWidgetItem* tableWidgetItem = new QTableWidgetItem();
+    tableWidgetItem->setText(rowAsText.str().c_str());
+    table->setVerticalHeaderItem(row, tableWidgetItem);
+  }
+}
 
 ModuleItem::ModuleItem(const QString& text_, QTreeWidget* parent_)
     : CustomQTreeItem(text_, ModuleItem::DataType, parent_) {}
@@ -89,7 +138,8 @@ void SequenceDescriptor::read(TableWidgetData const& tabledata) {
   try {
   	MuxedData const& accessor = getAccessor();
     accessor->read();
-    updateTableDisplay(tabledata, accessor);
+    createTableRowEntries(tabledata, (*accessor)[0].size());
+    putValuesIntoTable(tabledata, accessor);
   }
   catch (...) {
     fillTableWithDummyValues(tabledata);
@@ -116,7 +166,7 @@ MuxedData const& SequenceDescriptor::getAccessor() {
   return (areaDescriptor->getAccessor());
 }
 
-void SequenceDescriptor::updateTableDisplay(const TableWidgetData& tabledata,
+void SequenceDescriptor::putValuesIntoTable(const TableWidgetData& tabledata,
                                             const MuxedData& accessor) {
   QTableWidget* table = tabledata.table;
   unsigned int maxRow = tabledata.maxRow;
@@ -143,31 +193,3 @@ void SequenceDescriptor::updateTableDisplay(const TableWidgetData& tabledata,
   }// for row
 }
 
-void CustomQTreeItem::fillTableWithDummyValues(
-    const TableWidgetData& tableData) {
-
-	// FIXME: Take care of boilerplate
-  mtca4u::mapFile::mapElem regInfo = this->getRegisterMapElement();
-  unsigned int numElements = regInfo.reg_elem_nr;
-
-  QTableWidget* table = tableData.table;
-  unsigned int maxRow = tableData.maxRow;
-
-  for (unsigned int row = 0; row < numElements; row++) {
-    QTableWidgetItem* dataItem = new QTableWidgetItem();
-    if (row == maxRow) {
-      dataItem->setText("truncated");
-      dataItem->setFlags(dataItem->flags() & ~Qt::ItemIsSelectable &
-                         ~Qt::ItemIsEditable);
-      dataItem->setToolTip("List is truncated. You can change the number of "
-                           "words displayed in the preferences.");
-      table->setItem(row, 0, dataItem);
-      break;
-    }
-
-    int registerContent = -1;
-
-    dataItem->setData(0, QVariant(registerContent)); // 0 is the default role
-    table->setItem(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, dataItem);
-  }
-}
