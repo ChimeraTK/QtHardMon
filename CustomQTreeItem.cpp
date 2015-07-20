@@ -32,6 +32,7 @@ void CustomQTreeItem::fillTableWithDummyValues(
     const TableWidgetData& tableData) {
   RegisterInfo_t regInfo = this->getRegisterMapElement();
   unsigned int numElements = regInfo.reg_elem_nr;
+  createTableRowEntries(tableData, numElements);
   std::vector<int> buffer(numElements, -1);
 	putValuesIntoTable<int>(tableData, buffer);
 }

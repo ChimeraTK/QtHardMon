@@ -98,7 +98,7 @@ protected:
 
   template <typename T>
   void putValuesIntoTable(TableWidgetData const& tabledata,
-                          std::vector<T> buffer);
+                          std::vector<T> const &buffer);
 
   template <typename T>
   std::vector<T> copyValuesFromTable(TableWidgetData const& tabledata,
@@ -187,7 +187,7 @@ private:
 
 template <typename T>
 inline void CustomQTreeItem::putValuesIntoTable(
-    const TableWidgetData& tabledata, std::vector<T> buffer) {
+    const TableWidgetData& tabledata, std::vector<T> const& buffer) {
   int column = 0;
   if (typeid(T) == typeid(int)) {
     column = qthardmon::FIXED_POINT_DISPLAY_COLUMN;
