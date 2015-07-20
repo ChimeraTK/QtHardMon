@@ -64,7 +64,7 @@ void ModuleItem::read(TableWidgetData const& tabledata) {
   throw InvalidOperationException( "You cannot read from a module. Select a register.");
 }
 
-void ModuleItem::write(TableWidgetData const& tabledata) {
+void ModuleItem::write(TableWidgetData const& /*tabledata*/) {
   throw InvalidOperationException( "You cannot write from a module. Select a register.");
 }
 
@@ -117,10 +117,10 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
 void RegisterItem::write(TableWidgetData const& tabledata) {
 	unsigned int numElementsinRegister = _registerMapElement.reg_elem_nr;
 	std::vector<int> buffer = copyValuesFromTable<int>(tabledata, numElementsinRegister);
-	writeRegisterTodevice(tabledata, buffer);
+	writeRegisterToDevice(tabledata, buffer);
 }
 
-void RegisterItem::writeRegisterTodevice(TableWidgetData const& tabledata,
+void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
                                          const std::vector<int>& buffer) {
   Device_t const& mtcadevice = tabledata.device;
   unsigned int regAddress = _registerMapElement.reg_address;

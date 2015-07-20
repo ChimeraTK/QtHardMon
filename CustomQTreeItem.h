@@ -135,7 +135,7 @@ private:
   mtca4u::mapFile::mapElem _registerMapElement;
 
   std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
-  void writeRegisterTodevice(TableWidgetData const& tabledata, std::vector<int> const & buffer);
+  void writeRegisterToDevice(TableWidgetData const& tabledata, std::vector<int> const & buffer);
 };
 
 class MultiplexedAreaItem : public CustomQTreeItem {

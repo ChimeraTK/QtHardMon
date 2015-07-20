@@ -230,7 +230,6 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     return;
   }
 
-  //std::cout << "Device " << deviceItem->text().toStdString() << " selected." << std::endl;
   _hardMonForm.deviceStatusGroupBox->setEnabled(true);
   _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
 
@@ -246,7 +245,6 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   _hardMonForm.registerTreeWidget->clear();
    
   // get the registerMap and fill the RegisterTreeWidget
-  //  ptrmapFile const & rmp = 
   for (mapFile::const_iterator registerIter = deviceListItem->getRegisterMapPointer()->begin(); 
        registerIter != deviceListItem->getRegisterMapPointer()->end(); ++registerIter)
   {
@@ -308,7 +306,6 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
         break;
       }
     } // for registerIter
-
   }   // if autoselectPreviousRegister
 }
 
@@ -363,16 +360,18 @@ void QtHardMon::closeDevice()
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
 {
-	// There is a case when a the device is clicked in the device list, the slot is called with registerItem as NULL
-	if(!registerItem){
-			clearGroupBoxDisplay();
-			resetTable();
-			return;
-	}
+  // There is a case when a device entry is clicked in the device list, the slot
+  // is called with a NULL registerItem
+  if (!registerItem) {
+    clearGroupBoxDisplay();
+    resetTable();
+    return;
+  }
 
-	CustomQTreeItem * registerTreeItem = static_cast<CustomQTreeItem *>(registerItem);
-	RegisterPropertyGrpBox grpBoxInfo = getRegisterPropertyGrpBoxData();
-	registerTreeItem->updateRegisterProperties(grpBoxInfo);
+  CustomQTreeItem *registerTreeItem =
+      static_cast<CustomQTreeItem *>(registerItem);
+  RegisterPropertyGrpBox grpBoxInfo = getRegisterPropertyGrpBoxData();
+  registerTreeItem->updateRegisterProperties(grpBoxInfo);
 
   // remember that this register has been selected
   if((registerTreeItem->type() != ModuleItem::DataType) && (registerTreeItem->type() != MultiplexedAreaItem::DataType)){
@@ -400,7 +399,6 @@ void QtHardMon::read()
 
   try {
     if (_mtcaDevice->isOpen()) {
-
       TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
                                 _mtcaDevice);
       registerTreeItem->read(tableData);
