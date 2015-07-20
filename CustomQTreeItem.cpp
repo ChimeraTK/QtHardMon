@@ -9,9 +9,9 @@
 #include <MtcaMappedDevice/devBase.h>
 #include "Exceptions.h"
 
-typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData;
+typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData_t;
 typedef boost::shared_ptr<mtca4u::devBase> Device_t;
-typedef mtca4u::mapFile::mapElem RegisterInfo;
+typedef mtca4u::mapFile::mapElem RegisterInfo_t;
 
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidget* parent_)
@@ -21,8 +21,8 @@ CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidgetItem* parent_)
     : QTreeWidgetItem(parent_, QStringList(text_), type_) {}
 
-RegisterInfo const CustomQTreeItem::getRegisterMapElement() {
-  return (RegisterInfo());
+RegisterInfo_t const CustomQTreeItem::getRegisterMapElement() {
+  return (RegisterInfo_t());
 }
 
 CustomQTreeItem::~CustomQTreeItem() {
@@ -30,32 +30,10 @@ CustomQTreeItem::~CustomQTreeItem() {
 }
 void CustomQTreeItem::fillTableWithDummyValues(
     const TableWidgetData& tableData) {
-
-	// FIXME: Take care of boilerplate
-  RegisterInfo regInfo = this->getRegisterMapElement();
+  RegisterInfo_t regInfo = this->getRegisterMapElement();
   unsigned int numElements = regInfo.reg_elem_nr;
-
-  QTableWidget* table = tableData.table;
-  unsigned int maxRow = tableData.tableMaxRowCount;
-
-  for (unsigned int row = 0; row < numElements; row++) {
-    QTableWidgetItem* dataItem = new QTableWidgetItem();
-    if (row == maxRow) {
-      dataItem->setText("truncated");
-      dataItem->setFlags(dataItem->flags() & ~Qt::ItemIsSelectable &
-                         ~Qt::ItemIsEditable);
-      dataItem->setToolTip("List is truncated. You can change the number of "
-                           "words displayed in the preferences.");
-      table->setItem(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, dataItem);
-      break;
-    }
-
-    int registerContent = -1;
-
-    dataItem->setData(0, QVariant(registerContent)); // 0 is the default role
-    //table->setItem(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, dataItem);
-    table->setItem(row, 0, dataItem);
-  }
+  std::vector<int> buffer(numElements, -1);
+	putValuesIntoTable<int>(tableData, buffer);
 }
 
 void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, unsigned int rows) {
@@ -90,11 +68,11 @@ void ModuleItem::write(TableWidgetData const& tabledata) {
   throw InvalidOperationException( "You cannot write from a module. Select a register.");
 }
 
-void ModuleItem::updateRegisterProperties(const RegsterPropertyGrpBox& grpBox) {
+void ModuleItem::updateRegisterProperties(const RegisterPropertyGrpBox& grpBox) {
 	clearGrpBox(grpBox);
 }
 
-RegisterItem::RegisterItem(const RegisterInfo& registerInfo,
+RegisterItem::RegisterItem(const RegisterInfo_t& registerInfo,
                            const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, RegisterItem::DataType, parent_),
       _registerMapElement(registerInfo) {}
@@ -114,7 +92,7 @@ void RegisterItem::read(TableWidgetData const& tabledata) {
 
 std::vector<int> RegisterItem::fetchElementsFromCard(
     const TableWidgetData& tabledata) {
-  RegisterInfo regInfo = this->getRegisterMapElement();
+  RegisterInfo_t regInfo = this->getRegisterMapElement();
 
   int numberOfElements = regInfo.reg_elem_nr;
   std::vector<int> buffer(numberOfElements);
@@ -152,17 +130,17 @@ void RegisterItem::writeRegisterTodevice(TableWidgetData const& tabledata,
 }
 
 void RegisterItem::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {
+    const RegisterPropertyGrpBox& grpBox) {
 	fillGrpBox(grpBox, _registerMapElement);
 }
 
-const RegisterInfo RegisterItem::getRegisterMapElement() {
+const RegisterInfo_t RegisterItem::getRegisterMapElement() {
   return _registerMapElement;
 }
 
 MultiplexedAreaItem::MultiplexedAreaItem(
     boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const& accessor,
-    const RegisterInfo& registerInfo, const QString& text_,
+    const RegisterInfo_t& registerInfo, const QString& text_,
     QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, MultiplexedAreaItem::DataType, parent_),
       _dataAccessor(accessor),
@@ -178,7 +156,7 @@ void MultiplexedAreaItem::write(TableWidgetData const& /*tabledata*/) {
 }
 
 void MultiplexedAreaItem::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {
+    const RegisterPropertyGrpBox& grpBox) {
   grpBox.registerNameDisplay->setText(_registerMapElement.reg_name.c_str());
   grpBox.moduleDisplay->setText(_registerMapElement.reg_module.c_str());
   grpBox.registerBarDisplay->setText(QString::number(_registerMapElement.reg_bar));
@@ -192,7 +170,7 @@ void MultiplexedAreaItem::updateRegisterProperties(
 }
 
 
-const RegisterInfo MultiplexedAreaItem::getRegisterMapElement() {
+const RegisterInfo_t MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
 }
 boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
@@ -201,7 +179,7 @@ MultiplexedAreaItem::getAccessor() {
 }
 
 SequenceDescriptor::SequenceDescriptor(
-    const RegisterInfo& registerInfo, unsigned int sequenceNumber,
+    const RegisterInfo_t& registerInfo, unsigned int sequenceNumber,
     const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, SequenceDescriptor::DataType, parent_),
       _registerMapElement(registerInfo),
@@ -210,7 +188,7 @@ SequenceDescriptor::SequenceDescriptor(
 void SequenceDescriptor::read(TableWidgetData const& tabledata) {
 
   try {
-  	MuxedData const& accessor = getAccessor();
+  	MuxedData_t const& accessor = getAccessor();
     accessor->read();
     createTableRowEntries(tabledata, (*accessor)[0].size());
     putValuesIntoTable<double>(tabledata, (*accessor)[_sequenceNumber]);
@@ -223,20 +201,20 @@ void SequenceDescriptor::read(TableWidgetData const& tabledata) {
 }
 
 void SequenceDescriptor::write(TableWidgetData const& tabledata ) {
-  	MuxedData const& accessor = getAccessor();
+  	MuxedData_t const& accessor = getAccessor();
   	writeSequenceToCard(tabledata, accessor);
 }
 
 void SequenceDescriptor::updateRegisterProperties(
-    const RegsterPropertyGrpBox& grpBox) {
+    const RegisterPropertyGrpBox& grpBox) {
 	fillGrpBox(grpBox, _registerMapElement);
 }
 
-const RegisterInfo SequenceDescriptor::getRegisterMapElement() {
+const RegisterInfo_t SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
 }
 
-MuxedData const& SequenceDescriptor::getAccessor() {
+MuxedData_t const& SequenceDescriptor::getAccessor() {
   MultiplexedAreaItem* areaDescriptor;
   areaDescriptor = dynamic_cast<MultiplexedAreaItem*>(this->parent());
   if (!areaDescriptor) {
@@ -245,7 +223,7 @@ MuxedData const& SequenceDescriptor::getAccessor() {
   return (areaDescriptor->getAccessor());
 }
 
-void CustomQTreeItem::fillGrpBox(const RegsterPropertyGrpBox& grpBox,
+void CustomQTreeItem::fillGrpBox(const RegisterPropertyGrpBox& grpBox,
                                  const mtca4u::mapFile::mapElem& regInfo) {
   grpBox.registerNameDisplay->setText(regInfo.reg_name.c_str());
   grpBox.moduleDisplay->setText(regInfo.reg_module.c_str());
@@ -261,13 +239,13 @@ void CustomQTreeItem::fillGrpBox(const RegsterPropertyGrpBox& grpBox,
 }
 
 void SequenceDescriptor::writeSequenceToCard(const TableWidgetData& tabledata,
-                                             MuxedData const& accessor) {
+                                             MuxedData_t const& accessor) {
 	unsigned int sequenceLength = (*accessor)[_sequenceNumber].size();
 	(*accessor)[_sequenceNumber] = copyValuesFromTable<double>(tabledata, sequenceLength);
   accessor->write();
 }
 
-void ModuleItem::clearGrpBox(const RegsterPropertyGrpBox& grpBox) {
+void ModuleItem::clearGrpBox(const RegisterPropertyGrpBox& grpBox) {
   grpBox.registerNameDisplay->setText("");
   grpBox.moduleDisplay->setText("");
   grpBox.registerBarDisplay->setText("");

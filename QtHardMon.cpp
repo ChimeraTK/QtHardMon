@@ -371,7 +371,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 	}
 
 	CustomQTreeItem * registerTreeItem = static_cast<CustomQTreeItem *>(registerItem);
-	RegsterPropertyGrpBox grpBoxInfo = getRegisterPropertyGrpBoxData();
+	RegisterPropertyGrpBox grpBoxInfo = getRegisterPropertyGrpBoxData();
 	registerTreeItem->updateRegisterProperties(grpBoxInfo);
 
   // remember that this register has been selected
@@ -1157,9 +1157,9 @@ std::string QtHardMon::extractMultiplexedRegionName(
   }
 }
 
-RegsterPropertyGrpBox QtHardMon::getRegisterPropertyGrpBoxData() {
+RegisterPropertyGrpBox QtHardMon::getRegisterPropertyGrpBoxData() {
 
-  RegsterPropertyGrpBox grpBoxData;
+  RegisterPropertyGrpBox grpBoxData;
   grpBoxData.registerNameDisplay = _hardMonForm.registerNameDisplay;
   grpBoxData.moduleDisplay = _hardMonForm.moduleDisplay;
   grpBoxData.registerBarDisplay = _hardMonForm.registerBarDisplay;

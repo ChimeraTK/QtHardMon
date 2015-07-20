@@ -10,7 +10,7 @@
 #include <typeinfo>
 #include "Constants.h"
 
-struct RegsterPropertyGrpBox {
+struct RegisterPropertyGrpBox {
   QLabel* registerNameDisplay;
   QLabel* moduleDisplay;
   QLabel* registerBarDisplay;
@@ -21,7 +21,7 @@ struct RegsterPropertyGrpBox {
   QLabel* registerFracBitsDisplay;
   QLabel* registeSignBitDisplay;
 
-  RegsterPropertyGrpBox()
+  RegisterPropertyGrpBox()
       : registerNameDisplay(0),
         moduleDisplay(0),
         registerBarDisplay(0),
@@ -80,7 +80,7 @@ public:
    * update the register properties window of qthardmon
    */
   virtual void updateRegisterProperties(
-      RegsterPropertyGrpBox const& grpBox) = 0;
+      RegisterPropertyGrpBox const& grpBox) = 0;
 
   /**
    * retuen the map file element if applicable
@@ -104,7 +104,7 @@ protected:
   std::vector<T> copyValuesFromTable(TableWidgetData const& tabledata,
                                      unsigned int count);
 
-  void fillGrpBox(RegsterPropertyGrpBox const& grpBox,
+  void fillGrpBox(RegisterPropertyGrpBox const& grpBox,
                   mtca4u::mapFile::mapElem const& regInfo);
 };
 
@@ -113,11 +113,11 @@ public:
   ModuleItem(const QString& text_, QTreeWidget* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
-  virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
 
   static const int DataType = QTreeWidgetItem::UserType + 1;
 private:
-  void clearGrpBox(RegsterPropertyGrpBox const& grpBox);
+  void clearGrpBox(RegisterPropertyGrpBox const& grpBox);
 };
 
 class RegisterItem : public CustomQTreeItem {
@@ -126,7 +126,7 @@ public:
                const QString& text_, QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
-  virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
   static const int DataType = QTreeWidgetItem::UserType + 2;
@@ -148,7 +148,7 @@ public:
 
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
-  virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
@@ -167,7 +167,7 @@ public:
                      QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
-  virtual void updateRegisterProperties(RegsterPropertyGrpBox const& grpBox);
+  virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
   virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
 
   static const int DataType = QTreeWidgetItem::UserType + 4;
