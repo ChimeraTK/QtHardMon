@@ -12,7 +12,8 @@
 #include <MtcaMappedDevice/devPCIE.h>
 #include <MtcaMappedDevice/FixedPointConverter.h>
 
-
+#include "CustomQTreeItem.h"
+#include <boost/shared_ptr.hpp>
 
 /** The QtHadMon class which implements all the GUI functionality.
  */
@@ -105,24 +106,8 @@ class QtHardMon: public QMainWindow
   bool checkExtension(QString const &fileName, QString extension);
 
  private:
-
-  // Disable copy constructor and assignment operator
-  // This is the main class and it should'nt need copying
-  // TODO: confirm this assumption
-  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
-                            // class QtHardMon’ has pointer data members -
-                            // but does not overide copy constructor and
-                            // assignment operator
-
-  // Constants
-  enum columns{
-  FIXED_POINT_DISPLAY_COLUMN = 0,
-  HEX_VALUE_DISPLAY_COLUMN = 1,
-  FLOATING_POINT_DISPLAY_COLUMN = 2
-  };
-  
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
-  mtca4u::devPCIE _mtcaDevice; ///< The instance of the device which is being accessed.
+  boost::shared_ptr <mtca4u::devBase> _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
   unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
@@ -137,7 +122,8 @@ class QtHardMon: public QMainWindow
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
   CustomDelegates _customDelegate;///< provides display customizations for the table widget.
 
-  /** Write the config to the given file name.
+  /**
+   *  Write the config to the given file name.
    */
   void writeConfig(QString const & fileName);
 
@@ -213,33 +199,6 @@ class QtHardMon: public QMainWindow
       std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected
   };
 
-  /** A helper class to store treeWidgetItems which also contain the mapElem information.
-   */
-  class RegisterTreeItem: public QTreeWidgetItem
-  {
-    public:
-      /** Constructor for top level items */
-      RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-			 const QString & text_, QTreeWidget * parent_ = 0 );
-
-      /** Constructor for child items */
-      RegisterTreeItem ( mtca4u::mapFile::mapElem const & register_map_emlement,
-			 const QString & text_, QTreeWidgetItem * parent_ = 0);
-      
-      /** The destructor. Currently does nothing because the members go out of scope automatically. */
-      virtual ~RegisterTreeItem();
-      
-      /** Returns a reference to the registerMapElement, i.e. the register information. */
-      mtca4u::mapFile::mapElem const & getRegisterMapElement() const;
-      
-      /** The type of RegisterTreeItemType.  It's a user type because it is larger than QTreeWidgetItem::UserType.
-       */
-      static const int RegisterTreeItemType = QTreeWidgetItem::UserType + 1;
-
-    private:
-      mtca4u::mapFile::mapElem _registerMapElement; ///< The instance of the RegisterMapElement.
-  };
-
   DeviceListItem * _currentDeviceListItem; ///< Pointer to the currently selected deviceListItem
 
   PlotWindow * _plotWindow; ///< The plot window
@@ -272,6 +231,30 @@ class QtHardMon: public QMainWindow
   bool isValidCell(int row, int columnIndex);
   void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
+  bool isMultiplexedDataRegion(std::string const & registerName);
+  bool isSeqDescriptor(std::string const & registerName);
+  CustomQTreeItem *createAreaDesciptor(
+      DeviceListItem const *deviceListItem,
+      mtca4u::mapFile::mapElem const & regInfo);
+
+  CustomQTreeItem *createAreaDescriptorSubtree(
+      CustomQTreeItem *areaDescriptor,
+      mtca4u::mapFile::const_iterator &currentIt,
+      mtca4u::mapFile::const_iterator finalIterator);
+
+  std::string extractMultiplexedRegionName(std::string const & regName);
+  RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
+  void clearGroupBoxDisplay();
+  void resetTable();
+  public:
+  private:
+  // Disable copy constructor and assignment operator
+  // This is the main class and it should'nt need copying
+  // TODO: confirm this assumption
+  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
+                            // class QtHardMon’ has pointer data members -
+                            // but does not overide copy constructor and
+                            // assignment operator
 
 };
 

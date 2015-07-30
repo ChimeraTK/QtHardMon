@@ -22,12 +22,19 @@ FIND_PACKAGE(Qt4 REQUIRED)
 FIND_PACKAGE(MtcaMappedDevice 00.16.00 REQUIRED)
 FIND_PACKAGE(Qwt 6)
 
+
+#boost as such is required for shared pointers e.g.
+FIND_PACKAGE(Boost COMPONENTS REQUIRED)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
 #turn on the rpath so libMtcaMappedDevice.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 INCLUDE_DIRECTORIES( SYSTEM ${MtcaMappedDevice_INCLUDE_DIRS} )
 
-SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp)
+SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp 
+                            PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp
+                            CustomQTreeItem.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
 SET(${PROJECT_NAME}_QOBJECT_HEADERS ${PROJECT_NAME}.h PlotWindow.h CustomDelegates.h HexSpinBox.h)
 # All headers, to have the dependencies correct
@@ -39,13 +46,8 @@ QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})
 QT4_WRAP_UI(${PROJECT_NAME}_FORMS_HEADERS ${${PROJECT_NAME}_FORMS})
 QT4_ADD_RESOURCES(${PROJECT_NAME}_RESOURCES_RCC ${${PROJECT_NAME}_RESOURCES})
 
-#INCLUDE(${QT_USE_FILE})
-# Do not use INCLUDE(${QT_USE_FILE}). What this does is run
-# /usr/share/cmake-2.8/Modules/UseQt4.cmake which sets the variables for you
-# (including QT_LIBRARIES)
-# http://stackoverflow.com/questions/3505858/qt-libraries-in-cmake
+INCLUDE(${QT_USE_FILE})
 INCLUDE_DIRECTORIES(SYSTEM ${QT_INCLUDES})
-ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 #configure a header file which contains the version information for use in C++
 configure_file(cmake/QtHardMonVersion.h.in
@@ -64,11 +66,9 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
   ${${PROJECT_NAME}_HEADERS_MOC}
   ${${PROJECT_NAME}_FORMS_HEADERS} 
   ${${PROJECT_NAME}_RESOURCES_RCC})
-# http://stackoverflow.com/questions/3505858/qt-libraries-in-cmake Reason for
-# removing QT_LIBRARIES: its empty since we are not running
-# INCLUDE(${QT_USE_FILE})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_QTCORE_LIBRARY} 
-    ${QT_QTGUI_LIBRARY} ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_LIBRARIES} 
+     ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)

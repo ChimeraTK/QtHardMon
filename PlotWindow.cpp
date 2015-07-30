@@ -16,6 +16,7 @@
 #endif
 
 #include <iostream>
+#include "Constants.h"
 
 PlotWindow::PlotWindow(QtHardMon *hardMon)
     : QWidget(hardMon, Qt::Window), _plotWindowForm(), _hardMon(hardMon),
@@ -88,7 +89,7 @@ void PlotWindow::plot()
        ++row)
   {
     QTableWidgetItem *tableWidgetItem 
-      = _hardMon->_hardMonForm.valuesTableWidget->item(row, QtHardMon::FLOATING_POINT_DISPLAY_COLUMN);
+      = _hardMon->_hardMonForm.valuesTableWidget->item(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN);
 
     if (!tableWidgetItem)
     {
