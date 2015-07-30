@@ -122,15 +122,8 @@ class QtHardMon: public QMainWindow
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
   CustomDelegates _customDelegate;///< provides display customizations for the table widget.
 
-  // Disable copy constructor and assignment operator
-  // This is the main class and it should'nt need copying
-  // TODO: confirm this assumption
-  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
-                            // class QtHardMon’ has pointer data members -
-                            // but does not overide copy constructor and
-                            // assignment operator
-
-  /** Write the config to the given file name.
+  /**
+   *  Write the config to the given file name.
    */
   void writeConfig(QString const & fileName);
 
@@ -254,6 +247,15 @@ class QtHardMon: public QMainWindow
   void clearGroupBoxDisplay();
   void resetTable();
   public:
+  private:
+  // Disable copy constructor and assignment operator
+  // This is the main class and it should'nt need copying
+  // TODO: confirm this assumption
+  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
+                            // class QtHardMon’ has pointer data members -
+                            // but does not overide copy constructor and
+                            // assignment operator
+
 };
 
 
