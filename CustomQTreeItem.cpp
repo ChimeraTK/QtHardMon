@@ -83,7 +83,7 @@ void RegisterItem::read(TableWidgetData const& tabledata) {
 
   		std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
   		createTableRowEntries(tabledata, inputBuffer.size());
-  		putValuesIntoTable<int>(tabledata, inputBuffer);
+  		putValuesIntoTable(tabledata, inputBuffer);
   }
   catch (...) {
     fillTableWithDummyValues(tabledata);
@@ -192,7 +192,7 @@ void SequenceDescriptor::read(TableWidgetData const& tabledata) {
   	MuxedData_t const& accessor = getAccessor();
     accessor->read();
     createTableRowEntries(tabledata, (*accessor)[0].size());
-    putValuesIntoTable<double>(tabledata, (*accessor)[_sequenceNumber]);
+    putValuesIntoTable(tabledata, (*accessor)[_sequenceNumber]);
   }
   catch (...) {
     fillTableWithDummyValues(tabledata);

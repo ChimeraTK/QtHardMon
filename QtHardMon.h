@@ -106,17 +106,6 @@ class QtHardMon: public QMainWindow
   bool checkExtension(QString const &fileName, QString extension);
 
  private:
-
-  // Disable copy constructor and assignment operator
-  // This is the main class and it should'nt need copying
-  // TODO: confirm this assumption
-  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
-                            // class QtHardMon’ has pointer data members -
-                            // but does not overide copy constructor and
-                            // assignment operator
-
-
-  
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   boost::shared_ptr <mtca4u::devBase> _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
@@ -132,6 +121,14 @@ class QtHardMon: public QMainWindow
   QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
   CustomDelegates _customDelegate;///< provides display customizations for the table widget.
+
+  // Disable copy constructor and assignment operator
+  // This is the main class and it should'nt need copying
+  // TODO: confirm this assumption
+  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
+                            // class QtHardMon’ has pointer data members -
+                            // but does not overide copy constructor and
+                            // assignment operator
 
   /** Write the config to the given file name.
    */

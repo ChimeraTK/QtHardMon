@@ -368,8 +368,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     return;
   }
 
-  CustomQTreeItem *registerTreeItem =
-      static_cast<CustomQTreeItem *>(registerItem);
+  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(registerItem);
   RegisterPropertyGrpBox grpBoxInfo = getRegisterPropertyGrpBoxData();
   registerTreeItem->updateRegisterProperties(grpBoxInfo);
 
