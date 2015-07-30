@@ -66,9 +66,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
   ${${PROJECT_NAME}_HEADERS_MOC}
   ${${PROJECT_NAME}_FORMS_HEADERS} 
   ${${PROJECT_NAME}_RESOURCES_RCC})
-# http://stackoverflow.com/questions/3505858/qt-libraries-in-cmake Reason for
-# removing QT_LIBRARIES: its empty since we are not running
-# INCLUDE(${QT_USE_FILE})
+
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_LIBRARIES} 
      ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
 
