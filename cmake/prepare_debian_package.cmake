@@ -5,12 +5,15 @@
 file(COPY ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/compat
            ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/qthardmon.install
            ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/qthardmon-empty.install
-	   ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/control
            ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/rules
      DESTINATION debian_from_template)
 
 file(COPY ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/source/format
      DESTINATION debian_from_template/source)
+
+#Set the MtcaMappedDevice_MIN_VERSION
+configure_file(${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/control.in
+               debian_from_template/control @ONLY)
 
 #Set the version number
 configure_file(${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/copyright.in
