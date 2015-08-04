@@ -349,7 +349,9 @@ void QtHardMon::closeDevice()
    _hardMonForm.operationsGroupBox->setEnabled(false);
    _hardMonForm.optionsGroupBox->setEnabled(false);
    _plotWindow->setEnabled(false);
-
+   // If the device is closed then there is no way we can read values from the
+   // registers - they are not available anymore. Nothing to show on the table
+   clearAllRowsInTable();
    _hardMonForm.openClosedLabel->setText(
 		QApplication::translate("QtHardMonForm", "Device is closed.", 0,
 					QApplication::UnicodeUTF8));
@@ -360,11 +362,14 @@ void QtHardMon::closeDevice()
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
 {
+  clearAllRowsInTable(); // Clearing existing rows of table here to provide a
+  // fresh slate for the values to be read in later down the
+  // control flow
+
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
     clearGroupBoxDisplay();
-    resetTable();
     return;
   }
 
@@ -1181,7 +1186,7 @@ void QtHardMon::clearGroupBoxDisplay() {
   _hardMonForm.registeSignBitDisplay->setText("");
 }
 
-void QtHardMon::resetTable() {
+void QtHardMon::clearAllRowsInTable() {
   _hardMonForm.valuesTableWidget->clearContents();
   int nRows = 0;
   _hardMonForm.valuesTableWidget->setRowCount(nRows);

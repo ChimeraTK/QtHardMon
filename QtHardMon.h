@@ -245,7 +245,7 @@ class QtHardMon: public QMainWindow
   std::string extractMultiplexedRegionName(std::string const & regName);
   RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
   void clearGroupBoxDisplay();
-  void resetTable();
+  void clearAllRowsInTable();
   public:
   private:
   // Disable copy constructor and assignment operator
