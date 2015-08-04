@@ -362,10 +362,6 @@ void QtHardMon::closeDevice()
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
 {
-  clearAllRowsInTable(); // Clearing existing rows of table here to provide a
-  // fresh slate for the values to be read in later down the
-  // control flow
-
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
