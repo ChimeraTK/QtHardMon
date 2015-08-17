@@ -1,9 +1,9 @@
 #ifndef SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 #define SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 
-#include <MtcaMappedDevice/mapFile.h>
+#include <MtcaMappedDevice/MapFile.h>
 #include <MtcaMappedDevice/MultiplexedDataAccessor.h>
-#include <MtcaMappedDevice/devPCIE.h>
+#include <MtcaMappedDevice/PcieDevice.h>
 #include <qtreewidget.h>
 #include <qlabel.h>
 #include <qtablewidget.h>
@@ -55,14 +55,14 @@ struct TableWidgetData {
   /// the table
   unsigned int tableMaxRowCount;
   /// Pointer to the currently opened device.
-  boost::shared_ptr<mtca4u::devBase> device;
+  boost::shared_ptr<mtca4u::BaseDevice> device;
 
   TableWidgetData() : table(0), tableMaxRowCount(0), device() {}
   /**
    * Default constructor
    */
   TableWidgetData(QTableWidget* table_, unsigned int maxRow_,
-                  boost::shared_ptr<mtca4u::devBase> const& device_)
+                  boost::shared_ptr<mtca4u::BaseDevice> const& device_)
       : table(table_), tableMaxRowCount(maxRow_), device(device_) {}
 
   /**

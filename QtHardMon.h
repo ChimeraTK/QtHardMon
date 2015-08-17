@@ -8,8 +8,8 @@
 #include <QDir>
 #include <QStyledItemDelegate>
 
-#include <MtcaMappedDevice/dmapFilesParser.h>
-#include <MtcaMappedDevice/devPCIE.h>
+#include <MtcaMappedDevice/DMapFilesParser.h>
+#include <MtcaMappedDevice/PcieDevice.h>
 #include <MtcaMappedDevice/FixedPointConverter.h>
 
 #include "CustomQTreeItem.h"
@@ -107,7 +107,7 @@ class QtHardMon: public QMainWindow
 
  private:
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
-  boost::shared_ptr <mtca4u::devBase> _mtcaDevice; ///< The instance of the device which is being accessed.
+  boost::shared_ptr <mtca4u::BaseDevice> _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
   unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
@@ -146,15 +146,15 @@ class QtHardMon: public QMainWindow
   {
     public:
       /** The simplest cvonstructor, no text or icon for the entry*/
-      DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DMapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
 		       QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list. */
-      DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DMapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
 		       const QString & text_, QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list and an icon. */      
-      DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DMapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
 		       const QIcon & icon_, const QString & text_, QListWidget * parent_ = 0 );
 
       /* No copy constructor, the default is fine. */
@@ -167,7 +167,7 @@ class QtHardMon: public QMainWindow
       virtual ~DeviceListItem();
       
       /** Returns a reference to the deviceMapElement, i.e. the device information. */
-      mtca4u::dmapFile::dmapElem const & getDeviceMapElement() const;
+      mtca4u::DMapFile::dmapElem const & getDeviceMapElement() const;
       
       /** Returns a reference to the RegisterMapPointer (aka ptrmapFile) of this device. */
       mtca4u::ptrmapFile const & getRegisterMapPointer() const;
@@ -193,7 +193,7 @@ class QtHardMon: public QMainWindow
       void setLastSelectedModuleName(std::string const & moduleName);
 
     private:
-      mtca4u::dmapFile::dmapElem _deviceMapElement; ///< The instance of the DeviceMapElement
+      mtca4u::DMapFile::dmapElem _deviceMapElement; ///< The instance of the DeviceMapElement
       mtca4u::ptrmapFile _registerMapPointer; ///< The instance of the RegisterMapPointer
       std::string _lastSelectedRegisterName; ///< The last selected register before the item was deselected
       std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected

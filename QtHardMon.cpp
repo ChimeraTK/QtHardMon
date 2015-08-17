@@ -11,10 +11,14 @@
 #include <QFileDialog>
 #include <QDockWidget>
 
-#include <MtcaMappedDevice/exBase.h>
-#include <MtcaMappedDevice/dmapFilesParser.h>
-#include <MtcaMappedDevice/exDevPCIE.h>
+#include <MtcaMappedDevice/Exception.h>
+#include <MtcaMappedDevice/DMapFilesParser.h>
+#include <MtcaMappedDevice/PcieDeviceException.h>
+#include <MtcaMappedDevice/DeviceFactory.h>
 
+
+#include <QTextStream>
+#include <QDebug>
 #include "Constants.h"
 #include "Exceptions.h"
 using namespace mtca4u;
@@ -25,7 +29,7 @@ using namespace mtca4u;
 // This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
 // memory is requested.
 static const size_t DEFAULT_MAX_WORDS = 0x10000;
-
+static DeviceFactory FactoryInstance = DeviceFactory::getInstance();//temp
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
 #define DMAP_FILE_STRING "dmapFile"
@@ -46,7 +50,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags) 
-  : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(new mtca4u::devPCIE()), _maxWords( DEFAULT_MAX_WORDS ),
+  : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(), _maxWords( DEFAULT_MAX_WORDS ),
     _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
@@ -55,6 +59,9 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
     _currentDeviceListItem(NULL),
     _plotWindow(NULL)
 {
+
+
+
   _hardMonForm.setupUi(this);
 
   setWindowTitle("QtHardMon");
@@ -168,12 +175,12 @@ void  QtHardMon::loadBoards()
 bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
 {
 
-  mtca4u::dmapFilesParser filesParser;  
+  mtca4u::DMapFilesParser filesParser;
 
   try{
     filesParser.parse_file(dmapFileName.toStdString());
   }
-  catch( exBase & e )
+  catch( Exception & e )
   {
     QMessageBox messageBox;
     messageBox.setText("Could not load DeviceMap file "+dmapFileName+".");
@@ -194,7 +201,7 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
   // on the first entry, which we don't want. The focus is set to the registerTreeWidget.
   _hardMonForm.registerTreeWidget->setFocus(Qt::OtherFocusReason);
 
-  for (dmapFilesParser::iterator deviceIter = filesParser.begin();
+  for (DMapFilesParser::iterator deviceIter = filesParser.begin();
        deviceIter != filesParser.end(); ++deviceIter)
   {
     
@@ -276,10 +283,10 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   _hardMonForm.registerTreeWidget->expandAll();
 
   //close the previous device. This also disables the relevant GUI elements
-  closeDevice();
+ 	closeDevice();
   
   //opening the device enables the gui elements if success
-  openDevice( deviceListItem->getDeviceMapElement().dev_file );
+  openDevice( deviceListItem->getDeviceMapElement().dev_name );
 
   // In case the read on select option is enabled, selecting the previously
   // active register on the device triggers an implicit read as well.
@@ -309,14 +316,15 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   }   // if autoselectPreviousRegister
 }
 
-void QtHardMon::openDevice( std::string const & deviceFileName )
+void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name to createAndOpenDevice();
 {
-  //try to open a new device. If this fails disable the buttons and the registerValues
-  try
+  //try to open a createa and new device. If this fails disable the buttons and the registerValues
+	try
   {
     // this might throw
-    _mtcaDevice->openDev( deviceFileName );
-    
+		_mtcaDevice.reset();
+		_mtcaDevice = FactoryInstance.createDevice(deviceFileName);
+		_mtcaDevice->openDev();
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
@@ -331,10 +339,10 @@ void QtHardMon::openDevice( std::string const & deviceFileName )
 	 QApplication::translate("QtHardMonForm", "Close", 0,
 				 QApplication::UnicodeUTF8));
   }
-  catch(exDevPCIE & e)
+  catch(DeviceFactoryException & e)
   {
     QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			   QString("Could not open the device ")+
+			   QString("Could not create the device ")+
 			   deviceFileName.c_str()+".",
 			   QMessageBox::Ok, this);
     messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
@@ -344,7 +352,8 @@ void QtHardMon::openDevice( std::string const & deviceFileName )
 
 void QtHardMon::closeDevice()
 {
-   _mtcaDevice->closeDev();
+	if (_mtcaDevice)
+		_mtcaDevice->closeDev();
    _hardMonForm.valuesTableWidget->setEnabled(false);
    _hardMonForm.operationsGroupBox->setEnabled(false);
    _hardMonForm.optionsGroupBox->setEnabled(false);
@@ -857,7 +866,7 @@ void QtHardMon::unckeckShowPlotWindow()
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   QListWidget * parent_ )
   : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
@@ -865,14 +874,14 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
   
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & device_map_emlement, 
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
@@ -882,7 +891,7 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::dmapFile::dmapElem const & de
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}
 
- mtca4u::dmapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
+ mtca4u::DMapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
 }
@@ -924,11 +933,16 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
 }
 
 void QtHardMon::openCloseDevice(){
-  if (_mtcaDevice->isOpen()){
+	if (!_mtcaDevice)
+		openDevice( _currentDeviceListItem->getDeviceMapElement().dev_name );
+	else
+	{
+	 if (_mtcaDevice->isOpen()){
     closeDevice();
   }else{
-    openDevice( _currentDeviceListItem->getDeviceMapElement().dev_file );
+    openDevice( _currentDeviceListItem->getDeviceMapElement().dev_name );
   }
+	}
 }
 
 void QtHardMon::updateTableEntries(int row, int column) {

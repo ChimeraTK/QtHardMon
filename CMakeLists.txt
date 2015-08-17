@@ -25,7 +25,8 @@ FIND_PACKAGE(Qwt 6)
 
 
 #boost as such is required for shared pointers e.g.
-FIND_PACKAGE(Boost COMPONENTS REQUIRED)
+
+FIND_PACKAGE(Boost COMPONENTS REQUIRED system filesystem)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 #turn on the rpath so libMtcaMappedDevice.so is found
