@@ -324,7 +324,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
     // this might throw
 		_mtcaDevice.reset();
 		_mtcaDevice = FactoryInstance.createDevice(deviceFileName);
-		_mtcaDevice->openDev();
+		_mtcaDevice->open();
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
@@ -353,7 +353,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
 void QtHardMon::closeDevice()
 {
 	if (_mtcaDevice)
-		_mtcaDevice->closeDev();
+		_mtcaDevice->close();
    _hardMonForm.valuesTableWidget->setEnabled(false);
    _hardMonForm.operationsGroupBox->setEnabled(false);
    _hardMonForm.optionsGroupBox->setEnabled(false);
