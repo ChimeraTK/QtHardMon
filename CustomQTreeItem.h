@@ -115,7 +115,7 @@ public:
   /**
    * retuen the map file element if applicable
    */
-  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
+  virtual mtca4u::mapFile::RegisterInfo const getRegisterMapElement();
   /**
    *
    */
@@ -150,7 +150,7 @@ protected:
    * Helper method
    */
   void fillGrpBox(RegisterPropertyGrpBox const& grpBox,
-                  mtca4u::mapFile::mapElem const& regInfo);
+                  mtca4u::mapFile::RegisterInfo const& regInfo);
 };
 
 /**
@@ -180,18 +180,18 @@ public:
 	/**
 	 * Default constructor
 	 */
-  RegisterItem(const mtca4u::mapFile::mapElem& registerInfo,
+  RegisterItem(const mtca4u::mapFile::RegisterInfo& registerInfo,
                const QString& text_, QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
-  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
+  virtual mtca4u::mapFile::RegisterInfo const getRegisterMapElement();
 
   /// Data type that represents the RegisterItem element
   static const int DataType = QTreeWidgetItem::UserType + 2;
 
 private:
-  mtca4u::mapFile::mapElem _registerMapElement;
+  mtca4u::mapFile::RegisterInfo _registerMapElement;
 
   std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
   void writeRegisterToDevice(TableWidgetData const& tabledata, std::vector<int> const & buffer);
@@ -208,13 +208,13 @@ public:
   MultiplexedAreaItem(
       boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
           accessor,
-      const mtca4u::mapFile::mapElem& registerInfo, const QString& text_,
+      const mtca4u::mapFile::RegisterInfo& registerInfo, const QString& text_,
       QTreeWidgetItem* parent_ = 0);
 
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
-  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
+  virtual mtca4u::mapFile::RegisterInfo const getRegisterMapElement();
   /// return the dmux data accessor.
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
@@ -224,7 +224,7 @@ public:
 
 private:
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
-  mtca4u::mapFile::mapElem _registerMapElement;
+  mtca4u::mapFile::RegisterInfo _registerMapElement;
 };
 
 /**
@@ -235,19 +235,19 @@ public:
 	/**
 	 * Default constructor
 	 */
-  SequenceDescriptor(const mtca4u::mapFile::mapElem& registerInfo,
+  SequenceDescriptor(const mtca4u::mapFile::RegisterInfo& registerInfo,
                      unsigned int sequenceNumber, const QString& text_,
                      QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
-  virtual mtca4u::mapFile::mapElem const getRegisterMapElement();
+  virtual mtca4u::mapFile::RegisterInfo const getRegisterMapElement();
 
   /// Data type that represents the Sequence descriptor element
   static const int DataType = QTreeWidgetItem::UserType + 4;
 
 private:
-  mtca4u::mapFile::mapElem _registerMapElement;
+  mtca4u::mapFile::RegisterInfo _registerMapElement;
   unsigned int _sequenceNumber;
 
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&

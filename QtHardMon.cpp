@@ -866,7 +866,7 @@ void QtHardMon::unckeckShowPlotWindow()
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & device_map_emlement,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   QListWidget * parent_ )
   : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
@@ -874,14 +874,14 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & de
   
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & device_map_emlement,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & device_map_emlement,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
@@ -891,7 +891,7 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dmapElem const & de
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}
 
- mtca4u::DMapFile::dmapElem const & QtHardMon::DeviceListItem::getDeviceMapElement() const
+ mtca4u::DMapFile::dRegisterInfo const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
 }
@@ -1130,7 +1130,7 @@ bool QtHardMon::isSeqDescriptor(const std::string &registerName) {
 
 CustomQTreeItem *QtHardMon::createAreaDesciptor(
     const DeviceListItem *deviceListItem,
-    mtca4u::mapFile::mapElem const &regInfo) {
+    mtca4u::mapFile::RegisterInfo const &regInfo) {
 
 	std::string registerName = regInfo.reg_name;
   std::string regionName = extractMultiplexedRegionName(registerName);
