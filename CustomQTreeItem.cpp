@@ -11,7 +11,7 @@
 
 typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData_t;
 typedef boost::shared_ptr<mtca4u::BaseDevice> Device_t;
-typedef mtca4u::mapFile::RegisterInfo RegisterInfo_t;
+typedef mtca4u::RegisterInfoMap::RegisterInfo RegisterInfo_t;
 
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidget* parent_)
@@ -225,7 +225,7 @@ MuxedData_t const& SequenceDescriptor::getAccessor() {
 }
 
 void CustomQTreeItem::fillGrpBox(const RegisterPropertyGrpBox& grpBox,
-                                 const mtca4u::mapFile::RegisterInfo& regInfo) {
+                                 const mtca4u::RegisterInfoMap::RegisterInfo& regInfo) {
   grpBox.registerNameDisplay->setText(regInfo.reg_name.c_str());
   grpBox.moduleDisplay->setText(regInfo.reg_module.c_str());
   grpBox.registerBarDisplay->setText(QString::number(regInfo.reg_bar));

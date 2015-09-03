@@ -235,12 +235,12 @@ class QtHardMon: public QMainWindow
   bool isSeqDescriptor(std::string const & registerName);
   CustomQTreeItem *createAreaDesciptor(
       DeviceListItem const *deviceListItem,
-      mtca4u::mapFile::RegisterInfo const & regInfo);
+      mtca4u::RegisterInfoMap::RegisterInfo const & regInfo);
 
   CustomQTreeItem *createAreaDescriptorSubtree(
       CustomQTreeItem *areaDescriptor,
-      mtca4u::mapFile::const_iterator &currentIt,
-      mtca4u::mapFile::const_iterator finalIterator);
+      mtca4u::RegisterInfoMap::const_iterator &currentIt,
+      mtca4u::RegisterInfoMap::const_iterator finalIterator);
 
   std::string extractMultiplexedRegionName(std::string const & regName);
   RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
