@@ -284,10 +284,8 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 
   //close the previous device. This also disables the relevant GUI elements
  	closeDevice();
-  
   //opening the device enables the gui elements if success
-  openDevice( deviceListItem->getDeviceMapElement().dev_name );
-
+	openDevice( deviceListItem->getDeviceMapElement().dev_name );
   // In case the read on select option is enabled, selecting the previously
   // active register on the device triggers an implicit read as well.
   // The user may now opt to not select the last active
@@ -339,7 +337,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
 	 QApplication::translate("QtHardMonForm", "Close", 0,
 				 QApplication::UnicodeUTF8));
   }
-  catch(DeviceFactoryException & e)
+  catch(Exception & e)
   {
     QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
 			   QString("Could not create the device ")+
