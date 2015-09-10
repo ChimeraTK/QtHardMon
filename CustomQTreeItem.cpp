@@ -106,11 +106,11 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
   unsigned int registerAddress = regInfo.reg_address;
 
   if (registerBar == 0xD) {
-    mtcadevice->readDMA(registerAddress, &(buffer[0]), nBytesToRead,
-                        registerBar);
+    mtcadevice->readDMA(registerBar, registerAddress, &(buffer[0]),
+    										nBytesToRead);
   } else {
-    mtcadevice->readArea(registerAddress, &(buffer[0]), nBytesToRead,
-                        registerBar);
+    //mtcadevice->readArea(registerAddress, &(buffer[0]), nBytesToRead, registerBar);
+  	mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
   }
   return buffer;
 }
@@ -127,7 +127,7 @@ void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
   unsigned int regAddress = _registerMapElement.reg_address;
   unsigned int regSizeinBytes = _registerMapElement.reg_size;
   unsigned int register bar = _registerMapElement.reg_bar;
-  mtcadevice->writeArea(regAddress, &buffer[0], regSizeinBytes, bar);
+  mtcadevice->write(regSizeinBytes, regAddress, &buffer[0], bar);
 }
 
 void RegisterItem::updateRegisterProperties(
