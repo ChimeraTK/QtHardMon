@@ -3,7 +3,7 @@
 
 #include <MtcaMappedDevice/MapFile.h>
 #include <MtcaMappedDevice/MultiplexedDataAccessor.h>
-#include <MtcaMappedDevice/PcieDevice.h>
+#include <MtcaMappedDevice/PcieBackend.h>
 #include <qtreewidget.h>
 #include <qlabel.h>
 #include <qtablewidget.h>
@@ -55,14 +55,14 @@ struct TableWidgetData {
   /// the table
   unsigned int tableMaxRowCount;
   /// Pointer to the currently opened device.
-  boost::shared_ptr<mtca4u::BaseDevice> device;
+  boost::shared_ptr<mtca4u::DeviceBackend> device;
 
   TableWidgetData() : table(0), tableMaxRowCount(0), device() {}
   /**
    * Default constructor
    */
   TableWidgetData(QTableWidget* table_, unsigned int maxRow_,
-                  boost::shared_ptr<mtca4u::BaseDevice> const& device_)
+                  boost::shared_ptr<mtca4u::DeviceBackend> const& device_)
       : table(table_), tableMaxRowCount(maxRow_), device(device_) {}
 
   /**

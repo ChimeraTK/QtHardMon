@@ -9,7 +9,7 @@
 #include <QStyledItemDelegate>
 
 #include <MtcaMappedDevice/DMapFilesParser.h>
-#include <MtcaMappedDevice/PcieDevice.h>
+#include <MtcaMappedDevice/PcieBackend.h>
 #include <MtcaMappedDevice/FixedPointConverter.h>
 
 #include "CustomQTreeItem.h"
@@ -107,7 +107,7 @@ class QtHardMon: public QMainWindow
 
  private:
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
-  boost::shared_ptr <mtca4u::BaseDevice> _mtcaDevice; ///< The instance of the device which is being accessed.
+  boost::shared_ptr <mtca4u::DeviceBackend> _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
   unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change

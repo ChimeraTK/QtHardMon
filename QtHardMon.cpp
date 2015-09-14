@@ -13,8 +13,8 @@
 
 #include <MtcaMappedDevice/Exception.h>
 #include <MtcaMappedDevice/DMapFilesParser.h>
-#include <MtcaMappedDevice/PcieDeviceException.h>
-#include <MtcaMappedDevice/DeviceFactory.h>
+#include <MtcaMappedDevice/PcieBackendException.h>
+#include <MtcaMappedDevice/BackendFactory.h>
 
 
 #include <QTextStream>
@@ -29,7 +29,7 @@ using namespace mtca4u;
 // This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
 // memory is requested.
 static const size_t DEFAULT_MAX_WORDS = 0x10000;
-static DeviceFactory FactoryInstance = DeviceFactory::getInstance();//temp
+static BackendFactory FactoryInstance = BackendFactory::getInstance();//temp
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
 #define DMAP_FILE_STRING "dmapFile"

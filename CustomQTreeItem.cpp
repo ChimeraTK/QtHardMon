@@ -6,11 +6,11 @@
 
 #include "CustomQTreeItem.h"
 #include <boost/shared_ptr.hpp>
-#include <MtcaMappedDevice/BaseDevice.h>
+#include <MtcaMappedDevice/DeviceBackend.h>
 #include "Exceptions.h"
 
 typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData_t;
-typedef boost::shared_ptr<mtca4u::BaseDevice> Device_t;
+typedef boost::shared_ptr<mtca4u::DeviceBackend> Device_t;
 typedef mtca4u::RegisterInfoMap::RegisterInfo RegisterInfo_t;
 
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
