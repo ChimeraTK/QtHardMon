@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDockWidget>
+#include <qaction.h>
 
 #include <MtcaMappedDevice/exBase.h>
 #include <MtcaMappedDevice/dmapFilesParser.h>
@@ -60,6 +61,11 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
   setWindowTitle("QtHardMon");
   setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
   _hardMonForm.logoLabel->setPixmap( QPixmap(":/DESY_logo.png") );
+
+  // This brings in support for Ctrl + c for copying data to the clipboard.
+  addCopyActionForTableWidget(); // Ctrl + c dosent do anything for now
+  addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
+                                        // clipboard
 
   connect(_hardMonForm.deviceListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
 	  this, SLOT( deviceSelected(QListWidgetItem *, QListWidgetItem *) ) );
@@ -1186,4 +1192,41 @@ void QtHardMon::clearAllRowsInTable() {
   _hardMonForm.valuesTableWidget->clearContents();
   int nRows = 0;
   _hardMonForm.valuesTableWidget->setRowCount(nRows);
+}
+
+void QtHardMon::addCopyActionForTableWidget() {
+  QAction *copy = new QAction(tr("&Copy"), _hardMonForm.valuesTableWidget);
+  copy->setShortcuts(QKeySequence::Copy);
+  copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(copy, SIGNAL(triggered()), this, SLOT(copyTableDataToClipBoard()));
+  _hardMonForm.valuesTableWidget->addAction(copy);
+}
+
+void QtHardMon::addCopyActionForRegisterTreeWidget() {
+  QAction *copy = new QAction(tr("&Copy"), _hardMonForm.registerTreeWidget);
+  copy->setShortcuts(QKeySequence::Copy);
+  copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(copy, SIGNAL(triggered()), this,
+          SLOT(copyRegisterTreeItemNameToClipBoard()));
+  _hardMonForm.registerTreeWidget->addAction(copy);
+}
+
+void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
+  QTreeWidgetItem *currentItem = _hardMonForm.registerTreeWidget->currentItem();
+  if (currentItem) {
+    QClipboard *clipboard = QApplication::clipboard();
+
+    clipboard->clear(QClipboard::Clipboard);
+    // clear the 'selection clipboard'; basically content that you get on
+    // center mouse click
+    clipboard->clear(QClipboard::Selection);
+
+    QString name= currentItem->text(0);
+    clipboard->setText(name);
+  }
+  return;
+}
+
+void QtHardMon::copyTableDataToClipBoard(){
+	//TODO: SOmething for later. Not Implemented yet
 }
