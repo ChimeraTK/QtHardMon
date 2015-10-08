@@ -19,8 +19,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -Weffc++ -
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
 
 FIND_PACKAGE(Qt4 REQUIRED)
-set(MtcaMappedDevice_MIN_VERSION 00.17)
-FIND_PACKAGE(MtcaMappedDevice ${MtcaMappedDevice_MIN_VERSION} REQUIRED)
+set(mtca4u-deviceaccess_MIN_VERSION 00.00)
+FIND_PACKAGE(mtca4u-deviceaccess ${mtca4u-deviceaccess_MIN_VERSION} REQUIRED)
 FIND_PACKAGE(Qwt 6)
 
 
@@ -29,10 +29,10 @@ FIND_PACKAGE(Qwt 6)
 FIND_PACKAGE(Boost COMPONENTS REQUIRED system filesystem)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-#turn on the rpath so libMtcaMappedDevice.so is found
+#turn on the rpath so libmtca4u-deviceaccess.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-INCLUDE_DIRECTORIES( SYSTEM ${MtcaMappedDevice_INCLUDE_DIRS} )
+INCLUDE_DIRECTORIES( SYSTEM ${mtca4u-deviceaccess_INCLUDE_DIRS} )
 
 SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp 
                             PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp
@@ -70,7 +70,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES}
   ${${PROJECT_NAME}_RESOURCES_RCC})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_LIBRARIES} 
-     ${MtcaMappedDevice_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
+     ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)

@@ -1,9 +1,9 @@
 #ifndef SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 #define SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 
-#include <MtcaMappedDevice/MapFile.h>
-#include <MtcaMappedDevice/MultiplexedDataAccessor.h>
-#include <MtcaMappedDevice/PcieBackend.h>
+#include <mtca4u/RegisterInfoMap.h>
+#include <mtca4u/MultiplexedDataAccessor.h>
+#include <mtca4u/PcieBackend.h>
 #include <qtreewidget.h>
 #include <qlabel.h>
 #include <qtablewidget.h>

@@ -11,10 +11,10 @@
 #include <QFileDialog>
 #include <QDockWidget>
 
-#include <MtcaMappedDevice/Exception.h>
-#include <MtcaMappedDevice/DMapFilesParser.h>
-#include <MtcaMappedDevice/PcieBackendException.h>
-#include <MtcaMappedDevice/BackendFactory.h>
+#include <mtca4u/Exception.h>
+#include <mtca4u/DMapFilesParser.h>
+#include <mtca4u/PcieBackendException.h>
+#include <mtca4u/BackendFactory.h>
 
 
 #include <QTextStream>
@@ -179,6 +179,8 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
 
   try{
     filesParser.parse_file(dmapFileName.toStdString());
+    FactoryInstance.setDMapFilePath(dmapFileName.toStdString());
+
   }
   catch( Exception & e )
   {
@@ -321,7 +323,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   {
     // this might throw
 		_mtcaDevice.reset();
-		_mtcaDevice = FactoryInstance.createDevice(deviceFileName);
+		_mtcaDevice = FactoryInstance.createBackend(deviceFileName);
 		_mtcaDevice->open();
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
@@ -864,7 +866,7 @@ void QtHardMon::unckeckShowPlotWindow()
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const & device_map_emlement,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   QListWidget * parent_ )
   : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
@@ -872,14 +874,14 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const
   
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const & device_map_emlement,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
     _registerMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
-QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const & device_map_emlement,
+QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement,
 					   mtca4u::ptrmapFile const & register_map_pointer,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
@@ -889,7 +891,7 @@ QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DMapFile::dRegisterInfo const
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}
 
- mtca4u::DMapFile::dRegisterInfo const & QtHardMon::DeviceListItem::getDeviceMapElement() const
+ mtca4u::DMapFile::DRegisterInfo const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
 }

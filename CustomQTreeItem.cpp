@@ -6,7 +6,7 @@
 
 #include "CustomQTreeItem.h"
 #include <boost/shared_ptr.hpp>
-#include <MtcaMappedDevice/DeviceBackend.h>
+#include <mtca4u/DeviceBackend.h>
 #include "Exceptions.h"
 
 typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData_t;
