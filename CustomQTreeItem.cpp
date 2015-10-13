@@ -6,12 +6,12 @@
 
 #include "CustomQTreeItem.h"
 #include <boost/shared_ptr.hpp>
-#include <MtcaMappedDevice/devBase.h>
+#include <mtca4u/DeviceBackend.h>
 #include "Exceptions.h"
 
 typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData_t;
-typedef boost::shared_ptr<mtca4u::devBase> Device_t;
-typedef mtca4u::mapFile::mapElem RegisterInfo_t;
+typedef boost::shared_ptr<mtca4u::DeviceBackend> Device_t;
+typedef mtca4u::RegisterInfoMap::RegisterInfo RegisterInfo_t;
 
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidget* parent_)
@@ -106,11 +106,10 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
   unsigned int registerAddress = regInfo.reg_address;
 
   if (registerBar == 0xD) {
-    mtcadevice->readDMA(registerAddress, &(buffer[0]), nBytesToRead,
-                        registerBar);
+    mtcadevice->readDMA(registerBar, registerAddress, &(buffer[0]),
+    										nBytesToRead);
   } else {
-    mtcadevice->readArea(registerAddress, &(buffer[0]), nBytesToRead,
-                        registerBar);
+  	mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
   }
   return buffer;
 }
@@ -127,7 +126,7 @@ void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
   unsigned int regAddress = _registerMapElement.reg_address;
   unsigned int regSizeinBytes = _registerMapElement.reg_size;
   unsigned int register bar = _registerMapElement.reg_bar;
-  mtcadevice->writeArea(regAddress, &buffer[0], regSizeinBytes, bar);
+  mtcadevice->write(bar, regAddress, &buffer[0],regSizeinBytes);
 }
 
 void RegisterItem::updateRegisterProperties(
@@ -225,7 +224,7 @@ MuxedData_t const& SequenceDescriptor::getAccessor() {
 }
 
 void CustomQTreeItem::fillGrpBox(const RegisterPropertyGrpBox& grpBox,
-                                 const mtca4u::mapFile::mapElem& regInfo) {
+                                 const mtca4u::RegisterInfoMap::RegisterInfo& regInfo) {
   grpBox.registerNameDisplay->setText(regInfo.reg_name.c_str());
   grpBox.moduleDisplay->setText(regInfo.reg_module.c_str());
   grpBox.registerBarDisplay->setText(QString::number(regInfo.reg_bar));

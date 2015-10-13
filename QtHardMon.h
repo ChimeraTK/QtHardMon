@@ -9,9 +9,9 @@
 #include <QStyledItemDelegate>
 #include <qclipboard.h>
 
-#include <MtcaMappedDevice/dmapFilesParser.h>
-#include <MtcaMappedDevice/devPCIE.h>
-#include <MtcaMappedDevice/FixedPointConverter.h>
+#include <mtca4u/DMapFilesParser.h>
+#include <mtca4u/PcieBackend.h>
+#include <mtca4u/FixedPointConverter.h>
 
 #include "CustomQTreeItem.h"
 #include <boost/shared_ptr.hpp>
@@ -112,7 +112,7 @@ class QtHardMon: public QMainWindow
 
  private:
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
-  boost::shared_ptr <mtca4u::devBase> _mtcaDevice; ///< The instance of the device which is being accessed.
+  boost::shared_ptr <mtca4u::DeviceBackend> _mtcaDevice; ///< The instance of the device which is being accessed.
   unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
   unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
@@ -145,21 +145,21 @@ class QtHardMon: public QMainWindow
    */
   void openDevice(std::string const & deviceFileName );
 
-  /** A helper class to store listWidgetItems which also contain the dmapElem and ptrmapFile information.
+  /** A helper class to store listWidgetItems which also contain the dRegisterInfo and ptrmapFile information.
    */
   class DeviceListItem: public QListWidgetItem
   {
     public:
       /** The simplest cvonstructor, no text or icon for the entry*/
-      DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
 		       QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list. */
-      DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
 		       const QString & text_, QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list and an icon. */      
-      DeviceListItem ( mtca4u::dmapFile::dmapElem const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
 		       const QIcon & icon_, const QString & text_, QListWidget * parent_ = 0 );
 
       /* No copy constructor, the default is fine. */
@@ -172,7 +172,7 @@ class QtHardMon: public QMainWindow
       virtual ~DeviceListItem();
       
       /** Returns a reference to the deviceMapElement, i.e. the device information. */
-      mtca4u::dmapFile::dmapElem const & getDeviceMapElement() const;
+      mtca4u::DMapFile::DRegisterInfo const & getDeviceMapElement() const;
       
       /** Returns a reference to the RegisterMapPointer (aka ptrmapFile) of this device. */
       mtca4u::ptrmapFile const & getRegisterMapPointer() const;
@@ -198,7 +198,7 @@ class QtHardMon: public QMainWindow
       void setLastSelectedModuleName(std::string const & moduleName);
 
     private:
-      mtca4u::dmapFile::dmapElem _deviceMapElement; ///< The instance of the DeviceMapElement
+      mtca4u::DMapFile::DRegisterInfo _deviceMapElement; ///< The instance of the DeviceMapElement
       mtca4u::ptrmapFile _registerMapPointer; ///< The instance of the RegisterMapPointer
       std::string _lastSelectedRegisterName; ///< The last selected register before the item was deselected
       std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected
@@ -240,12 +240,12 @@ class QtHardMon: public QMainWindow
   bool isSeqDescriptor(std::string const & registerName);
   CustomQTreeItem *createAreaDesciptor(
       DeviceListItem const *deviceListItem,
-      mtca4u::mapFile::mapElem const & regInfo);
+      mtca4u::RegisterInfoMap::RegisterInfo const & regInfo);
 
   CustomQTreeItem *createAreaDescriptorSubtree(
       CustomQTreeItem *areaDescriptor,
-      mtca4u::mapFile::const_iterator &currentIt,
-      mtca4u::mapFile::const_iterator finalIterator);
+      mtca4u::RegisterInfoMap::const_iterator &currentIt,
+      mtca4u::RegisterInfoMap::const_iterator finalIterator);
 
   std::string extractMultiplexedRegionName(std::string const & regName);
   RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
