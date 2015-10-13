@@ -7,6 +7,7 @@
 #include <QIcon>
 #include <QDir>
 #include <QStyledItemDelegate>
+#include <qclipboard.h>
 
 #include <mtca4u/DMapFilesParser.h>
 #include <mtca4u/PcieBackend.h>
@@ -104,6 +105,10 @@ class QtHardMon: public QMainWindow
    * extension else false
    */
   bool checkExtension(QString const &fileName, QString extension);
+
+  void copyRegisterTreeItemNameToClipBoard();
+
+  void copyTableDataToClipBoard();
 
  private:
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
@@ -246,8 +251,20 @@ class QtHardMon: public QMainWindow
   RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
   void clearGroupBoxDisplay();
   void clearAllRowsInTable();
-  public:
   private:
+
+  /**
+   *  Give Ctrl+c support for RegisterTreeWidget. Currently calls
+   *  copyRegisterTreeItemNameToClipBoard
+   */
+  void addCopyActionForRegisterTreeWidget();
+
+  /**
+   *   Ctrl+c support TableWidget. alls slot copyTableDataToClipBoard (Currently
+   *   slot is not implemented)
+   */
+  void addCopyActionForTableWidget();
+
   // Disable copy constructor and assignment operator
   // This is the main class and it should'nt need copying
   // TODO: confirm this assumption
@@ -255,6 +272,7 @@ class QtHardMon: public QMainWindow
                             // class QtHardMon’ has pointer data members -
                             // but does not overide copy constructor and
                             // assignment operator
+
 
 };
 

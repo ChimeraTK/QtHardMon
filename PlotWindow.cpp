@@ -88,10 +88,7 @@ void PlotWindow::plot()
 				   static_cast<int>(_hardMon->_maxWords));
        ++row)
   {
-    QTableWidgetItem *tableWidgetItem 
-      = _hardMon->_hardMonForm.valuesTableWidget->item(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN);
-
-    if (!tableWidgetItem)
+    if (!_hardMon->isValidCell(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN))
     {
       // strange, this should not happen. print a warning message end stop plotting
       QMessageBox::critical(this, tr("QtHardMon: Error creating plot"), QString("Value in row ")
@@ -99,18 +96,9 @@ void PlotWindow::plot()
       return;
     }
 
-    bool conversionOk;
-    // The 0 in data(0) is the policy.
-    int value = tableWidgetItem->data(0).toInt(&conversionOk);
-    
-    if (!conversionOk)
-    {
-      QMessageBox::critical(this, tr("QtHardMon: Error creating plot"),
-			    QString("Value in row ")+QString::number(row) + " is invalid.");
-      return;
-    }
+    double value = _hardMon->readCell<double>(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN);
 
-    samples.push_back(QPoint(row, value));
+    samples.push_back(QPointF(row, value));
   }
   
   _myData->setSamples(samples);
