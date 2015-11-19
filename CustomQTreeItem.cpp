@@ -31,7 +31,7 @@ CustomQTreeItem::~CustomQTreeItem() {
 void CustomQTreeItem::fillTableWithDummyValues(
     const TableWidgetData& tableData) {
   RegisterInfo_t regInfo = this->getRegisterMapElement();
-  unsigned int numElements = regInfo.reg_elem_nr;
+  unsigned int numElements = regInfo.nElements;
   createTableRowEntries(tableData, numElements);
   std::vector<int> buffer(numElements, -1);
 	putValuesIntoTable<int>(tableData, buffer);
@@ -95,15 +95,15 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
     const TableWidgetData& tabledata) {
   RegisterInfo_t regInfo = this->getRegisterMapElement();
 
-  int numberOfElements = regInfo.reg_elem_nr;
+  int numberOfElements = regInfo.nElements;
   std::vector<int> buffer(numberOfElements);
 
-  unsigned int registerBar = regInfo.reg_bar;
+  unsigned int registerBar = regInfo.bar;
   Device_t const& mtcadevice = tabledata.device;
   int maxrows = tabledata.tableMaxRowCount;
   size_t nBytesToRead =
       std::min(numberOfElements, maxrows) * qthardmon::WORD_SIZE_IN_BYTES;
-  unsigned int registerAddress = regInfo.reg_address;
+  unsigned int registerAddress = regInfo.address;
 
   if (registerBar == 0xD) {
     mtcadevice->readDMA(registerBar, registerAddress, &(buffer[0]),
@@ -115,7 +115,7 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
 }
 
 void RegisterItem::write(TableWidgetData const& tabledata) {
-	unsigned int numElementsinRegister = _registerMapElement.reg_elem_nr;
+	unsigned int numElementsinRegister = _registerMapElement.nElements;
 	std::vector<int> buffer = copyValuesFromTable<int>(tabledata, numElementsinRegister);
 	writeRegisterToDevice(tabledata, buffer);
 }
@@ -123,9 +123,9 @@ void RegisterItem::write(TableWidgetData const& tabledata) {
 void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
                                          const std::vector<int>& buffer) {
   Device_t const& mtcadevice = tabledata.device;
-  unsigned int regAddress = _registerMapElement.reg_address;
-  unsigned int regSizeinBytes = _registerMapElement.reg_size;
-  unsigned int register bar = _registerMapElement.reg_bar;
+  unsigned int regAddress = _registerMapElement.address;
+  unsigned int regSizeinBytes = _registerMapElement.nBytes;
+  unsigned int register bar = _registerMapElement.bar;
   mtcadevice->write(bar, regAddress, &buffer[0],regSizeinBytes);
 }
 
@@ -157,12 +157,12 @@ void MultiplexedAreaItem::write(TableWidgetData const& /*tabledata*/) {
 
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegisterPropertyGrpBox& grpBox) {
-  grpBox.registerNameDisplay->setText(_registerMapElement.reg_name.c_str());
-  grpBox.moduleDisplay->setText(_registerMapElement.reg_module.c_str());
-  grpBox.registerBarDisplay->setText(QString::number(_registerMapElement.reg_bar));
+  grpBox.registerNameDisplay->setText(_registerMapElement.name.c_str());
+  grpBox.moduleDisplay->setText(_registerMapElement.module.c_str());
+  grpBox.registerBarDisplay->setText(QString::number(_registerMapElement.bar));
   grpBox.registerNElementsDisplay->setText("");
-  grpBox.registerAddressDisplay->setText(QString::number(_registerMapElement.reg_address));
-  grpBox.registerSizeDisplay->setText(QString::number(_registerMapElement.reg_size));
+  grpBox.registerAddressDisplay->setText(QString::number(_registerMapElement.address));
+  grpBox.registerSizeDisplay->setText(QString::number(_registerMapElement.nBytes));
 
   grpBox.registerWidthDisplay->setText("");
   grpBox.registerFracBitsDisplay->setText("");
@@ -225,17 +225,17 @@ MuxedData_t const& SequenceDescriptor::getAccessor() {
 
 void CustomQTreeItem::fillGrpBox(const RegisterPropertyGrpBox& grpBox,
                                  const mtca4u::RegisterInfoMap::RegisterInfo& regInfo) {
-  grpBox.registerNameDisplay->setText(regInfo.reg_name.c_str());
-  grpBox.moduleDisplay->setText(regInfo.reg_module.c_str());
-  grpBox.registerBarDisplay->setText(QString::number(regInfo.reg_bar));
+  grpBox.registerNameDisplay->setText(regInfo.name.c_str());
+  grpBox.moduleDisplay->setText(regInfo.module.c_str());
+  grpBox.registerBarDisplay->setText(QString::number(regInfo.bar));
   grpBox.registerNElementsDisplay->setText(
-      QString::number(regInfo.reg_elem_nr));
-  grpBox.registerAddressDisplay->setText(QString::number(regInfo.reg_address));
-  grpBox.registerSizeDisplay->setText(QString::number(regInfo.reg_size));
-  grpBox.registerWidthDisplay->setText(QString::number(regInfo.reg_width));
+      QString::number(regInfo.nElements));
+  grpBox.registerAddressDisplay->setText(QString::number(regInfo.address));
+  grpBox.registerSizeDisplay->setText(QString::number(regInfo.nBytes));
+  grpBox.registerWidthDisplay->setText(QString::number(regInfo.width));
   grpBox.registerFracBitsDisplay->setText(
-      QString::number(regInfo.reg_frac_bits));
-  grpBox.registeSignBitDisplay->setText(QString::number(regInfo.reg_signed));
+      QString::number(regInfo.nFractionalBits));
+  grpBox.registeSignBitDisplay->setText(QString::number(regInfo.signedFlag));
 }
 
 void SequenceDescriptor::writeSequenceToCard(const TableWidgetData& tabledata,

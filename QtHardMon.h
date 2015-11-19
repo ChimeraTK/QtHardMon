@@ -151,15 +151,15 @@ class QtHardMon: public QMainWindow
   {
     public:
       /** The simplest cvonstructor, no text or icon for the entry*/
-      DeviceListItem ( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement, mtca4u::RegisterInfoMapPointer const & register_map_pointer,
 		       QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list. */
-      DeviceListItem ( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement, mtca4u::RegisterInfoMapPointer const & register_map_pointer,
 		       const QString & text_, QListWidget * parent_ = 0 );
 
       /** Constructor which sets the text entry in the list and an icon. */      
-      DeviceListItem ( mtca4u::DMapFile::DRegisterInfo const & device_map_emlement, mtca4u::ptrmapFile const & register_map_pointer,
+      DeviceListItem ( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement, mtca4u::RegisterInfoMapPointer const & register_map_pointer,
 		       const QIcon & icon_, const QString & text_, QListWidget * parent_ = 0 );
 
       /* No copy constructor, the default is fine. */
@@ -172,10 +172,10 @@ class QtHardMon: public QMainWindow
       virtual ~DeviceListItem();
       
       /** Returns a reference to the deviceMapElement, i.e. the device information. */
-      mtca4u::DMapFile::DRegisterInfo const & getDeviceMapElement() const;
+      mtca4u::DeviceInfoMap::DeviceInfo const & getDeviceMapElement() const;
       
       /** Returns a reference to the RegisterMapPointer (aka ptrmapFile) of this device. */
-      mtca4u::ptrmapFile const & getRegisterMapPointer() const;
+      mtca4u::RegisterInfoMapPointer const & getRegisterMapPointer() const;
       
       /** The type of DeviceListItemType.  It's a user type because it is larger than QListWidgetItem::UserType.
        */
@@ -198,8 +198,8 @@ class QtHardMon: public QMainWindow
       void setLastSelectedModuleName(std::string const & moduleName);
 
     private:
-      mtca4u::DMapFile::DRegisterInfo _deviceMapElement; ///< The instance of the DeviceMapElement
-      mtca4u::ptrmapFile _registerMapPointer; ///< The instance of the RegisterMapPointer
+      mtca4u::DeviceInfoMap::DeviceInfo _deviceMapElement; ///< The instance of the DeviceMapElement
+      mtca4u::RegisterInfoMapPointer _registerInfoMapPointer; ///< The instance of the RegisterInfoMapPointer
       std::string _lastSelectedRegisterName; ///< The last selected register before the item was deselected
       std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected
   };
