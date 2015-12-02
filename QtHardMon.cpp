@@ -30,7 +30,7 @@ using namespace mtca4u;
 // This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
 // memory is requested.
 static const size_t DEFAULT_MAX_WORDS = 0x10000;
-static BackendFactory FactoryInstance = BackendFactory::getInstance();//temp
+
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
 #define DMAP_FILE_STRING "dmapFile"
@@ -185,7 +185,7 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
 
   try{
     filesParser.parse_file(dmapFileName.toStdString());
-    FactoryInstance.setDMapFilePath(dmapFileName.toStdString());
+    BackendFactory::getInstance().setDMapFilePath(dmapFileName.toStdString());
 
   }
   catch( Exception & e )
@@ -329,7 +329,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   {
     // this might throw
 		_mtcaDevice.reset();
-		_mtcaDevice = FactoryInstance.createBackend(deviceFileName);
+		_mtcaDevice = BackendFactory::getInstance().createBackend(deviceFileName);
 		_mtcaDevice->open();
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
