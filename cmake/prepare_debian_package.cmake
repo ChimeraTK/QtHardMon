@@ -11,7 +11,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/compat
 file(COPY ${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/source/format
      DESTINATION debian_from_template/source)
 
-#Set the MtcaMappedDevice_MIN_VERSION
+#Set the mtca4u-deviceaccess_MIN_VERSION
 configure_file(${CMAKE_SOURCE_DIR}/cmake/debian_package_templates/control.in
                debian_from_template/control @ONLY)
 
@@ -27,7 +27,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/make_debian_package.sh.in
 #A custom target so you can just run make debian_package
 #(You could instead run make_debian_package.sh yourself, hm...)
 add_custom_target(debian_package ${CMAKE_BINARY_DIR}/make_debian_package.sh
-                  COMMENT Building debian package for tag ${MtcaMappedDevice_VERSION})
+                  COMMENT Building debian package for tag ${${PROJECT_NAME}_VERSION})
 
 #For convenience: Also create an install script for DESY
 set(PACKAGE_NAME "qthardmon")
