@@ -251,6 +251,7 @@ class QtHardMon: public QMainWindow
   RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
   void clearGroupBoxDisplay();
   void clearAllRowsInTable();
+  std::string extractFileNameFromPath(const std::string &);
   private:
 
   /**

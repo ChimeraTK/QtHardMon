@@ -16,8 +16,6 @@
 #include <mtca4u/DMapFilesParser.h>
 #include <mtca4u/PcieBackendException.h>
 #include <mtca4u/BackendFactory.h>
-#include <mtca4u/Utilities.h>
-
 
 #include <QTextStream>
 #include <QDebug>
@@ -267,10 +265,10 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   _hardMonForm.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().deviceName.c_str() );
   _hardMonForm.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().uri.c_str() );
 
-  std::string absolutePathToMapFile = deviceListItem->getDeviceMapElement().mapFileName;
-  std::string mapFileName = mtca4u::Utilities::extractFileNameFromPath(absolutePathToMapFile);
+  std::string relativePath = deviceListItem->getDeviceMapElement().mapFileName;
+  std::string mapFileName = extractFileNameFromPath(relativePath);
   _hardMonForm.mapFileDisplay->setText( mapFileName.c_str() );
-  _hardMonForm.mapFileDisplay->setToolTip(absolutePathToMapFile.c_str());
+  _hardMonForm.mapFileDisplay->setToolTip(relativePath.c_str());
 
   _hardMonForm.registerTreeWidget->clear();
    
@@ -1222,6 +1220,15 @@ void QtHardMon::clearAllRowsInTable() {
   _hardMonForm.valuesTableWidget->clearContents();
   int nRows = 0;
   _hardMonForm.valuesTableWidget->setRowCount(nRows);
+}
+
+std::string QtHardMon::extractFileNameFromPath(const std::string &fileName) {
+  std::string extractedName = fileName;
+  size_t position = fileName.find_last_of('/');
+  if (position != std::string::npos) {
+    extractedName = fileName.substr(position + 1, std::string::npos);
+  }
+  return extractedName;
 }
 
 void QtHardMon::addCopyActionForTableWidget() {
