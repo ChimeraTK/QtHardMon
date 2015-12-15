@@ -14,23 +14,23 @@
  * Structure used internally
  */
 struct RegisterPropertyGrpBox {
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerNameDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* moduleDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerBarDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerAddressDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerNElementsDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerSizeDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerWidthDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registerFracBitsDisplay;
-	/// Ptr to form label
+  /// Ptr to form label
   QLabel* registeSignBitDisplay;
 
   RegisterPropertyGrpBox()
@@ -49,7 +49,7 @@ struct RegisterPropertyGrpBox {
  * Introduced to move around data from the main form to the helper classes
  */
 struct TableWidgetData {
-	/// Ptr to main form table widget
+  /// Ptr to main form table widget
   QTableWidget* table;
   /// User provisioned value for the maximum number of rows to be displayed in
   /// the table
@@ -125,19 +125,14 @@ protected:
   /**
    * Helper method
    */
-  void fillTableWithDummyValues(TableWidgetData const& tableData);
-  /**
-   * Helper method
-   */
-  void createTableRowEntries(TableWidgetData const& tabledata,
-                             unsigned int rows = 0);
+  void clearTable(TableWidgetData const& tabledata);
 
   /**
    * Helper method
    */
   template <typename T>
   void putValuesIntoTable(TableWidgetData const& tabledata,
-                          std::vector<T> const &buffer);
+                          std::vector<T> const& buffer);
 
   /**
    * Helper method
@@ -158,9 +153,9 @@ protected:
  */
 class ModuleItem : public CustomQTreeItem {
 public:
-	/**
-	 * Default constructor
-	 */
+  /**
+   * Default constructor
+   */
   ModuleItem(const QString& text_, QTreeWidget* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
@@ -168,6 +163,7 @@ public:
 
   /// Data type that represents the module element
   static const int DataType = QTreeWidgetItem::UserType + 1;
+
 private:
   void clearGrpBox(RegisterPropertyGrpBox const& grpBox);
 };
@@ -177,9 +173,9 @@ private:
  */
 class RegisterItem : public CustomQTreeItem {
 public:
-	/**
-	 * Default constructor
-	 */
+  /**
+   * Default constructor
+   */
   RegisterItem(const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo,
                const QString& text_, QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
@@ -194,7 +190,8 @@ private:
   mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
 
   std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
-  void writeRegisterToDevice(TableWidgetData const& tabledata, std::vector<int> const & buffer);
+  void writeRegisterToDevice(TableWidgetData const& tabledata,
+                             std::vector<int> const& buffer);
 };
 
 /**
@@ -202,14 +199,14 @@ private:
  */
 class MultiplexedAreaItem : public CustomQTreeItem {
 public:
-	/**
-	 * Default constructor
-	 */
+  /**
+   * Default constructor
+   */
   MultiplexedAreaItem(
       boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
           accessor,
-      const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo, const QString& text_,
-      QTreeWidgetItem* parent_ = 0);
+      const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo,
+      const QString& text_, QTreeWidgetItem* parent_ = 0);
 
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
@@ -232,9 +229,9 @@ private:
  */
 class SequenceDescriptor : public CustomQTreeItem {
 public:
-	/**
-	 * Default constructor
-	 */
+  /**
+   * Default constructor
+   */
   SequenceDescriptor(const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo,
                      unsigned int sequenceNumber, const QString& text_,
                      QTreeWidgetItem* parent_ = 0);
@@ -272,11 +269,21 @@ inline void CustomQTreeItem::putValuesIntoTable(
   QTableWidget* table = tabledata.table;
   unsigned int maxRow = tabledata.tableMaxRowCount;
 
-  for (unsigned int row = 0; row < buffer.size(); row++) {
+  size_t rowCount = (buffer.size() > maxRow) ? maxRow : buffer.size();
+  // Prepare the appropriate number of rows in the table
+  table->setRowCount(rowCount);
+
+  for (size_t row = 0; row < rowCount; row++) {
     // Prepare a data item with a QVariant. The QVariant takes care that the
     // type is recognised as
     // int and a proper editor (spin box) is used when editing in the GUI.
     QTableWidgetItem* dataItem = new QTableWidgetItem();
+    QTableWidgetItem* rowItem = new QTableWidgetItem();
+    std::stringstream rowAsText;
+    rowAsText << row;
+
+    rowItem->setText(rowAsText.str().c_str());
+    table->setVerticalHeaderItem(row, rowItem);
 
     if (row == maxRow) { // The register is too large to display. Show that it
                          // is truncated and stop reading
@@ -288,13 +295,12 @@ inline void CustomQTreeItem::putValuesIntoTable(
       table->setItem(row, 0, dataItem);
       break;
     }
-    // int registerContent = (readError?-1:inputBuffer[row]);
-    T registerContent = buffer[row];
 
+    T registerContent = buffer[row];
     dataItem->setData(0, QVariant(registerContent)); // 0 is the default role
     table->setItem(row, column, dataItem);
   } // for row
-	}
+}
 
 template <typename T>
 inline std::vector<T> CustomQTreeItem::copyValuesFromTable(

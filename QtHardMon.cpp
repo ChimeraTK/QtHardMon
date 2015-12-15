@@ -16,6 +16,7 @@
 #include <mtca4u/DMapFilesParser.h>
 #include <mtca4u/PcieBackendException.h>
 #include <mtca4u/BackendFactory.h>
+#include <mtca4u/Utilities.h>
 
 
 #include <QTextStream>
@@ -237,6 +238,7 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
     _hardMonForm.deviceNameDisplay->setText( "" );
     _hardMonForm.deviceFileDisplay->setText( "" );
     _hardMonForm.mapFileDisplay->setText( "" );
+    _hardMonForm.mapFileDisplay->setToolTip("");
     _hardMonForm.deviceStatusGroupBox->setEnabled(false);
     _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
     closeDevice();
@@ -252,10 +254,23 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   // and use a static cast.
   DeviceListItem * deviceListItem = static_cast<DeviceListItem *>(deviceItem);  
   _currentDeviceListItem = deviceListItem;
+  //close the previous device. This also disables the relevant GUI elements
+  closeDevice();
+  // The user has selected a new device. The old device pointer should be
+  // cleared. Open device is intelligent to create a new object through the
+  // factory before calling _mtcaDevice->open()
+  _mtcaDevice.reset();
+  //opening the device enables the gui elements if success
+    openDevice( deviceListItem->getDeviceMapElement().deviceName );
+
 
   _hardMonForm.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().deviceName.c_str() );
   _hardMonForm.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().uri.c_str() );
-  _hardMonForm.mapFileDisplay->setText( deviceListItem->getDeviceMapElement().mapFileName.c_str() );
+
+  std::string absolutePathToMapFile = deviceListItem->getDeviceMapElement().mapFileName;
+  std::string mapFileName = mtca4u::Utilities::extractFileNameFromPath(absolutePathToMapFile);
+  _hardMonForm.mapFileDisplay->setText( mapFileName.c_str() );
+  _hardMonForm.mapFileDisplay->setToolTip(absolutePathToMapFile.c_str());
 
   _hardMonForm.registerTreeWidget->clear();
    
@@ -290,10 +305,7 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
   }
   _hardMonForm.registerTreeWidget->expandAll();
 
-  //close the previous device. This also disables the relevant GUI elements
- 	closeDevice();
-  //opening the device enables the gui elements if success
-	openDevice( deviceListItem->getDeviceMapElement().deviceName );
+
   // In case the read on select option is enabled, selecting the previously
   // active register on the device triggers an implicit read as well.
   // The user may now opt to not select the last active
@@ -328,9 +340,13 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
 	try
   {
     // this might throw
-		_mtcaDevice.reset();
-		_mtcaDevice = BackendFactory::getInstance().createBackend(deviceFileName);
-		_mtcaDevice->open();
+  if(_mtcaDevice == NULL){
+    // We work with the same instance on _mtcaDevice as long as the current
+    // entry in the GUI device list is selected. _mtcaDevice is reset only when
+    // the user moves to a new entry in the device list (see deviceSelected)
+    _mtcaDevice = BackendFactory::getInstance().createBackend(deviceFileName);
+  }
+  _mtcaDevice->open();
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
@@ -1138,7 +1154,7 @@ CustomQTreeItem *QtHardMon::createAreaDesciptor(
     const DeviceListItem *deviceListItem,
     mtca4u::RegisterInfoMap::RegisterInfo const &regInfo) {
 
-	std::string registerName = regInfo.name;
+  std::string registerName = regInfo.name;
   std::string regionName = extractMultiplexedRegionName(registerName);
   std::string moduleName = regInfo.module;
   mtca4u::RegisterInfoMapPointer RegisterInfoMap = deviceListItem->getRegisterMapPointer();

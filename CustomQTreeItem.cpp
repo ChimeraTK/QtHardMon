@@ -28,22 +28,14 @@ RegisterInfo_t const CustomQTreeItem::getRegisterMapElement() {
 CustomQTreeItem::~CustomQTreeItem() {
   // TODO Auto-generated destructor stub
 }
-void CustomQTreeItem::fillTableWithDummyValues(
-    const TableWidgetData& tableData) {
-  RegisterInfo_t regInfo = this->getRegisterMapElement();
-  unsigned int numElements = regInfo.nElements;
-  createTableRowEntries(tableData, numElements);
-  std::vector<int> buffer(numElements, -1);
-	putValuesIntoTable<int>(tableData, buffer);
-}
 
-void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, unsigned int rows) {
+/*void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata,
+                                            unsigned int rows) {
 
-	QTableWidget* table = tabledata.table;
+  QTableWidget* table = tabledata.table;
   unsigned int maxRow = tabledata.tableMaxRowCount;
 
-  int nRows = ( rows >  maxRow ?
-  		maxRow + 1 :  rows );
+  int nRows = (rows > maxRow ? maxRow + 1 : rows);
 
   table->setRowCount(nRows);
 
@@ -55,22 +47,25 @@ void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata, un
     tableWidgetItem->setText(rowAsText.str().c_str());
     table->setVerticalHeaderItem(row, tableWidgetItem);
   }
-}
+}*/
 
 ModuleItem::ModuleItem(const QString& text_, QTreeWidget* parent_)
     : CustomQTreeItem(text_, ModuleItem::DataType, parent_) {}
 
 void ModuleItem::read(TableWidgetData const& tabledata) {
-  createTableRowEntries(tabledata, 0);
-  throw InvalidOperationException( "You cannot read from a module. Select a register.");
+  clearTable(tabledata);
+  throw InvalidOperationException(
+      "You cannot read from a module. Select a register.");
 }
 
 void ModuleItem::write(TableWidgetData const& /*tabledata*/) {
-  throw InvalidOperationException( "You cannot write from a module. Select a register.");
+  throw InvalidOperationException(
+      "You cannot write from a module. Select a register.");
 }
 
-void ModuleItem::updateRegisterProperties(const RegisterPropertyGrpBox& grpBox) {
-	clearGrpBox(grpBox);
+void ModuleItem::updateRegisterProperties(
+    const RegisterPropertyGrpBox& grpBox) {
+  clearGrpBox(grpBox);
 }
 
 RegisterItem::RegisterItem(const RegisterInfo_t& registerInfo,
@@ -79,16 +74,8 @@ RegisterItem::RegisterItem(const RegisterInfo_t& registerInfo,
       _registerMapElement(registerInfo) {}
 
 void RegisterItem::read(TableWidgetData const& tabledata) {
-  try {
-
-  		std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
-  		createTableRowEntries(tabledata, inputBuffer.size());
-  		putValuesIntoTable(tabledata, inputBuffer);
-  }
-  catch (...) {
-    fillTableWithDummyValues(tabledata);
-    throw;
-  }
+  std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
+  putValuesIntoTable(tabledata, inputBuffer);
 }
 
 std::vector<int> RegisterItem::fetchElementsFromCard(
@@ -107,17 +94,18 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
 
   if (registerBar == 0xD) {
     mtcadevice->readDMA(registerBar, registerAddress, &(buffer[0]),
-    										nBytesToRead);
+                        nBytesToRead);
   } else {
-  	mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
+    mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
   }
   return buffer;
 }
 
 void RegisterItem::write(TableWidgetData const& tabledata) {
-	unsigned int numElementsinRegister = _registerMapElement.nElements;
-	std::vector<int> buffer = copyValuesFromTable<int>(tabledata, numElementsinRegister);
-	writeRegisterToDevice(tabledata, buffer);
+  unsigned int numElementsinRegister = _registerMapElement.nElements;
+  std::vector<int> buffer =
+      copyValuesFromTable<int>(tabledata, numElementsinRegister);
+  writeRegisterToDevice(tabledata, buffer);
 }
 
 void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
@@ -126,12 +114,12 @@ void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
   unsigned int regAddress = _registerMapElement.address;
   unsigned int regSizeinBytes = _registerMapElement.nBytes;
   unsigned int register bar = _registerMapElement.bar;
-  mtcadevice->write(bar, regAddress, &buffer[0],regSizeinBytes);
+  mtcadevice->write(bar, regAddress, &buffer[0], regSizeinBytes);
 }
 
 void RegisterItem::updateRegisterProperties(
     const RegisterPropertyGrpBox& grpBox) {
-	fillGrpBox(grpBox, _registerMapElement);
+  fillGrpBox(grpBox, _registerMapElement);
 }
 
 const RegisterInfo_t RegisterItem::getRegisterMapElement() {
@@ -147,8 +135,8 @@ MultiplexedAreaItem::MultiplexedAreaItem(
       _registerMapElement(registerInfo) {}
 
 void MultiplexedAreaItem::read(TableWidgetData const& tabledata) {
-	// Nothing to read
-	createTableRowEntries(tabledata, 0);
+  // Nothing to read
+  clearTable(tabledata);
 }
 
 void MultiplexedAreaItem::write(TableWidgetData const& /*tabledata*/) {
@@ -161,14 +149,15 @@ void MultiplexedAreaItem::updateRegisterProperties(
   grpBox.moduleDisplay->setText(_registerMapElement.module.c_str());
   grpBox.registerBarDisplay->setText(QString::number(_registerMapElement.bar));
   grpBox.registerNElementsDisplay->setText("");
-  grpBox.registerAddressDisplay->setText(QString::number(_registerMapElement.address));
-  grpBox.registerSizeDisplay->setText(QString::number(_registerMapElement.nBytes));
+  grpBox.registerAddressDisplay->setText(
+      QString::number(_registerMapElement.address));
+  grpBox.registerSizeDisplay->setText(
+      QString::number(_registerMapElement.nBytes));
 
   grpBox.registerWidthDisplay->setText("");
   grpBox.registerFracBitsDisplay->setText("");
   grpBox.registeSignBitDisplay->setText("");
 }
-
 
 const RegisterInfo_t MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
@@ -178,36 +167,28 @@ MultiplexedAreaItem::getAccessor() {
   return (_dataAccessor);
 }
 
-SequenceDescriptor::SequenceDescriptor(
-    const RegisterInfo_t& registerInfo, unsigned int sequenceNumber,
-    const QString& text_, QTreeWidgetItem* parent_)
+SequenceDescriptor::SequenceDescriptor(const RegisterInfo_t& registerInfo,
+                                       unsigned int sequenceNumber,
+                                       const QString& text_,
+                                       QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, SequenceDescriptor::DataType, parent_),
       _registerMapElement(registerInfo),
       _sequenceNumber(sequenceNumber) {}
 
 void SequenceDescriptor::read(TableWidgetData const& tabledata) {
-
-  try {
-  	MuxedData_t const& accessor = getAccessor();
-    accessor->read();
-    createTableRowEntries(tabledata, (*accessor)[0].size());
-    putValuesIntoTable(tabledata, (*accessor)[_sequenceNumber]);
-  }
-  catch (...) {
-    fillTableWithDummyValues(tabledata);
-    throw;
-  }
-
+  MuxedData_t const& accessor = getAccessor();
+  accessor->read();
+  putValuesIntoTable(tabledata, (*accessor)[_sequenceNumber]);
 }
 
-void SequenceDescriptor::write(TableWidgetData const& tabledata ) {
-  	MuxedData_t const& accessor = getAccessor();
-  	writeSequenceToCard(tabledata, accessor);
+void SequenceDescriptor::write(TableWidgetData const& tabledata) {
+  MuxedData_t const& accessor = getAccessor();
+  writeSequenceToCard(tabledata, accessor);
 }
 
 void SequenceDescriptor::updateRegisterProperties(
     const RegisterPropertyGrpBox& grpBox) {
-	fillGrpBox(grpBox, _registerMapElement);
+  fillGrpBox(grpBox, _registerMapElement);
 }
 
 const RegisterInfo_t SequenceDescriptor::getRegisterMapElement() {
@@ -223,13 +204,19 @@ MuxedData_t const& SequenceDescriptor::getAccessor() {
   return (areaDescriptor->getAccessor());
 }
 
-void CustomQTreeItem::fillGrpBox(const RegisterPropertyGrpBox& grpBox,
-                                 const mtca4u::RegisterInfoMap::RegisterInfo& regInfo) {
+void CustomQTreeItem::clearTable(const TableWidgetData& tabledata) {
+  QTableWidget* table = tabledata.table;
+  table->clearContents();
+  table->setRowCount(0);
+}
+
+void CustomQTreeItem::fillGrpBox(
+    const RegisterPropertyGrpBox& grpBox,
+    const mtca4u::RegisterInfoMap::RegisterInfo& regInfo) {
   grpBox.registerNameDisplay->setText(regInfo.name.c_str());
   grpBox.moduleDisplay->setText(regInfo.module.c_str());
   grpBox.registerBarDisplay->setText(QString::number(regInfo.bar));
-  grpBox.registerNElementsDisplay->setText(
-      QString::number(regInfo.nElements));
+  grpBox.registerNElementsDisplay->setText(QString::number(regInfo.nElements));
   grpBox.registerAddressDisplay->setText(QString::number(regInfo.address));
   grpBox.registerSizeDisplay->setText(QString::number(regInfo.nBytes));
   grpBox.registerWidthDisplay->setText(QString::number(regInfo.width));
@@ -240,8 +227,9 @@ void CustomQTreeItem::fillGrpBox(const RegisterPropertyGrpBox& grpBox,
 
 void SequenceDescriptor::writeSequenceToCard(const TableWidgetData& tabledata,
                                              MuxedData_t const& accessor) {
-	unsigned int sequenceLength = (*accessor)[_sequenceNumber].size();
-	(*accessor)[_sequenceNumber] = copyValuesFromTable<double>(tabledata, sequenceLength);
+  unsigned int sequenceLength = (*accessor)[_sequenceNumber].size();
+  (*accessor)[_sequenceNumber] =
+      copyValuesFromTable<double>(tabledata, sequenceLength);
   accessor->write();
 }
 
@@ -256,4 +244,3 @@ void ModuleItem::clearGrpBox(const RegisterPropertyGrpBox& grpBox) {
   grpBox.registerFracBitsDisplay->setText("");
   grpBox.registeSignBitDisplay->setText("");
 }
-
