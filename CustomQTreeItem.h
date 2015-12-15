@@ -266,6 +266,8 @@ inline void CustomQTreeItem::putValuesIntoTable(
     column = qthardmon::FLOATING_POINT_DISPLAY_COLUMN;
   }
 
+  clearTable(tabledata);
+
   QTableWidget* table = tabledata.table;
   unsigned int maxRow = tabledata.tableMaxRowCount;
 
