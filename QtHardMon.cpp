@@ -124,6 +124,9 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
   connect(_hardMonForm.openCloseButton, SIGNAL(clicked()),
 	  this, SLOT(openCloseDevice()));
 
+  connect(_hardMonForm.SortAscendingcheckBox, SIGNAL(stateChanged(int)),
+	  this, SLOT(handleSortCheckboxClick(int)));
+
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
   _hardMonForm.operationsGroupBox->setEnabled(false);
   _hardMonForm.optionsGroupBox->setEnabled(false);
@@ -146,6 +149,11 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
 
   connect(_plotWindow, SIGNAL(plotWindowClosed()),
 	  this, SLOT(unckeckShowPlotWindow()));
+
+  // Make the register tree widget sort by default. Can be toggled through the
+  // check box
+  _hardMonForm.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
+  _hardMonForm.registerTreeWidget->setSortingEnabled(true);
 
   // also the plot window dfunctions are only enabled when a device is opened.
    _plotWindow->setEnabled(false);
@@ -224,18 +232,18 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
   //_hardMonForm.deviceListWidget->setCurrentRow(0);
 }
 
-void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /*previousDeviceItem */)
-{
+void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
+                               QListWidgetItem * /*previousDeviceItem */) {
   _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
 
-  // When the deviceListWidget is cleared , the currentItemChanged signal is emitted with a null pointer.
-  // We have to catch this here and return. Before returning we clear the device specific display info,
-  // close the device and empty the register list.
-  if (!deviceItem )
-  {
-    _hardMonForm.deviceNameDisplay->setText( "" );
-    _hardMonForm.deviceFileDisplay->setText( "" );
-    _hardMonForm.mapFileDisplay->setText( "" );
+  // When the deviceListWidget is cleared , the currentItemChanged signal is
+  // emitted with a null pointer. We have to catch this here and return. Before
+  // returning we clear the device specific display info, close the device and
+  // empty the register list.
+  if (!deviceItem) {
+    _hardMonForm.deviceNameDisplay->setText("");
+    _hardMonForm.deviceFileDisplay->setText("");
+    _hardMonForm.mapFileDisplay->setText("");
     _hardMonForm.mapFileDisplay->setToolTip("");
     _hardMonForm.deviceStatusGroupBox->setEnabled(false);
     _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
@@ -244,92 +252,27 @@ void QtHardMon::deviceSelected(QListWidgetItem * deviceItem, QListWidgetItem * /
 
     return;
   }
+  DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
 
-  _hardMonForm.deviceStatusGroupBox->setEnabled(true);
-  _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
-
-  // the deviceItem actually is a DeviceListItemType. As this is a private slot it is safe to assume this
-  // and use a static cast.
-  DeviceListItem * deviceListItem = static_cast<DeviceListItem *>(deviceItem);  
   _currentDeviceListItem = deviceListItem;
-  //close the previous device. This also disables the relevant GUI elements
+  // close the previous device. This also disables the relevant GUI elements
   closeDevice();
   // The user has selected a new device. The old device pointer should be
   // cleared. Open device is intelligent to create a new object through the
   // factory before calling _mtcaDevice->open()
   _mtcaDevice.reset();
-  //opening the device enables the gui elements if success
-    openDevice( deviceListItem->getDeviceMapElement().deviceName );
+  // opening the device enables the gui elements if success
+  openDevice(deviceListItem->getDeviceMapElement().deviceName);
 
+  _hardMonForm.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().deviceName.c_str());
+  _hardMonForm.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().uri.c_str());
 
-  _hardMonForm.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().deviceName.c_str() );
-  _hardMonForm.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().uri.c_str() );
+  std::string absPath = deviceListItem->getDeviceMapElement().mapFileName;
+  std::string mapFileName = extractFileNameFromPath(absPath);
+  _hardMonForm.mapFileDisplay->setText(mapFileName.c_str());
+  _hardMonForm.mapFileDisplay->setToolTip(absPath.c_str());
 
-  std::string relativePath = deviceListItem->getDeviceMapElement().mapFileName;
-  std::string mapFileName = extractFileNameFromPath(relativePath);
-  _hardMonForm.mapFileDisplay->setText( mapFileName.c_str() );
-  _hardMonForm.mapFileDisplay->setToolTip(relativePath.c_str());
-
-  _hardMonForm.registerTreeWidget->clear();
-   
-  // get the registerMap and fill the RegisterTreeWidget
-  for (RegisterInfoMap::const_iterator registerIter = deviceListItem->getRegisterMapPointer()->begin(); 
-       registerIter != deviceListItem->getRegisterMapPointer()->end(); ++registerIter)
-  {
-    QString moduleName( registerIter->module.empty()
-			? NO_MODULE_NAME_STRING : registerIter->module.c_str() );
-    QList<QTreeWidgetItem *> moduleList = _hardMonForm.registerTreeWidget->findItems( moduleName,
-										      Qt::MatchExactly);
-
-    CustomQTreeItem *moduleItem;
-    if (moduleList.empty()) {
-      moduleItem = new ModuleItem(QString(moduleName));
-      _hardMonForm.registerTreeWidget->addTopLevelItem(
-          dynamic_cast<QTreeWidgetItem *>(moduleItem)); // do you really need a
-                                                        // dynamic cast here?
-    } else {
-        moduleItem = static_cast<CustomQTreeItem* >(moduleList.front());// should be safe
-    }
-
-    if (isMultiplexedDataRegion(registerIter->name)) {
-      CustomQTreeItem *areaDescriptor = createAreaDesciptor(deviceListItem, *registerIter);
-      RegisterInfoMap::const_iterator it_end = deviceListItem->getRegisterMapPointer()->end();
-      areaDescriptor = createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
-      moduleItem->addChild(areaDescriptor);
-    } else {
-      moduleItem->addChild(
-          new RegisterItem(*registerIter, registerIter->name.c_str()));
-    }
-  }
-  _hardMonForm.registerTreeWidget->expandAll();
-
-
-  // In case the read on select option is enabled, selecting the previously
-  // active register on the device triggers an implicit read as well.
-  // The user may now opt to not select the last active
-  // register (and hence avoid the implicit read on this register when
-  // the card is selected)
-  if ( _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ) {
-
-    // Searching a sub-tree does not work in QTreeWidget. So here is the strategy:
-    // Get a list of all registers with this name.
-    QList<QTreeWidgetItem *> registerList
-      = _hardMonForm.registerTreeWidget->findItems( deviceListItem->getLastSelectedRegisterName().c_str(),
-						    Qt::MatchExactly | Qt::MatchRecursive );
-
-    // Iterate the list until we find the one with the right module
-    for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
-         registerIter != registerList.end(); ++registerIter) {
-      CustomQTreeItem *registerItem =
-          static_cast<CustomQTreeItem *>(*registerIter);
-      // if we found the right register select it and quit the loop
-      if (registerItem->getRegisterMapElement().module ==
-          deviceListItem->getLastSelectedModuleName()) {
-        _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
-        break;
-      }
-    } // for registerIter
-  }   // if autoselectPreviousRegister
+  populateRegisterTree(deviceItem);
 }
 
 void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name to createAndOpenDevice();
@@ -1231,6 +1174,86 @@ std::string QtHardMon::extractFileNameFromPath(const std::string &fileName) {
   return extractedName;
 }
 
+void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
+
+  if (deviceItem == NULL) {
+    return;
+  }
+
+  // the deviceItem actually is a DeviceListItemType. As this is a private slot
+  // it is safe to assume this
+  // and use a static cast.
+  DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
+  _hardMonForm.registerTreeWidget->clear();
+
+  // get the registerMap and fill the RegisterTreeWidget
+  for (RegisterInfoMap::const_iterator registerIter =
+           deviceListItem->getRegisterMapPointer()->begin();
+       registerIter != deviceListItem->getRegisterMapPointer()->end();
+       ++registerIter) {
+    QString moduleName(registerIter->module.empty()
+                           ? NO_MODULE_NAME_STRING
+                           : registerIter->module.c_str());
+    QList<QTreeWidgetItem *> moduleList =
+        _hardMonForm.registerTreeWidget->findItems(moduleName,
+                                                   Qt::MatchExactly);
+
+    CustomQTreeItem *moduleItem;
+    if (moduleList.empty()) {
+      moduleItem = new ModuleItem(QString(moduleName));
+      _hardMonForm.registerTreeWidget->addTopLevelItem(
+          dynamic_cast<QTreeWidgetItem *>(moduleItem)); // do you really need a
+                                                        // dynamic cast here?
+    } else {
+      moduleItem =
+          static_cast<CustomQTreeItem *>(moduleList.front()); // should be safe
+    }
+
+    if (isMultiplexedDataRegion(registerIter->name)) {
+      CustomQTreeItem *areaDescriptor =
+          createAreaDesciptor(deviceListItem, *registerIter);
+      RegisterInfoMap::const_iterator it_end =
+          deviceListItem->getRegisterMapPointer()->end();
+      areaDescriptor =
+          createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
+      moduleItem->addChild(areaDescriptor);
+    } else {
+      moduleItem->addChild(
+          new RegisterItem(*registerIter, registerIter->name.c_str()));
+    }
+  }
+  _hardMonForm.registerTreeWidget->expandAll();
+
+  // In case the read on select option is enabled, selecting the previously
+  // active register on the device triggers an implicit read as well.
+  // The user may now opt to not select the last active
+  // register (and hence avoid the implicit read on this register when
+  // the card is selected)
+  if (_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked()) {
+
+    // Searching a sub-tree does not work in QTreeWidget. So here is the
+    // strategy:
+    // Get a list of all registers with this name.
+    QList<QTreeWidgetItem *> registerList =
+        _hardMonForm.registerTreeWidget->findItems(
+            deviceListItem->getLastSelectedRegisterName().c_str(),
+            Qt::MatchExactly | Qt::MatchRecursive);
+
+    // Iterate the list until we find the one with the right module
+    for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+         registerIter != registerList.end(); ++registerIter) {
+      CustomQTreeItem *registerItem =
+          static_cast<CustomQTreeItem *>(*registerIter);
+      // if we found the right register select it and quit the loop
+      if (registerItem->getRegisterMapElement().module ==
+          deviceListItem->getLastSelectedModuleName()) {
+        _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
+        break;
+      }
+    } // for registerIter
+  }   // if autoselectPreviousRegister
+}
+
 void QtHardMon::addCopyActionForTableWidget() {
   QAction *copy = new QAction(tr("&Copy"), _hardMonForm.valuesTableWidget);
   copy->setShortcuts(QKeySequence::Copy);
@@ -1266,4 +1289,15 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
 
 void QtHardMon::copyTableDataToClipBoard(){
 	//TODO: SOmething for later. Not Implemented yet
+}
+
+void QtHardMon::handleSortCheckboxClick(int state) {
+  if (state == Qt::Checked) {
+    _hardMonForm.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
+    _hardMonForm.registerTreeWidget->setSortingEnabled(true);
+  } else if (state == Qt::Unchecked) {
+    _hardMonForm.registerTreeWidget->setSortingEnabled(false);
+    // redraw the tree and pick up the order from the mapfile
+    populateRegisterTree(_hardMonForm.deviceListWidget->currentItem());
+  }
 }

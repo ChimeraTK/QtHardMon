@@ -97,6 +97,11 @@ class QtHardMon: public QMainWindow
    */
   void changeBackgroundIfModified( int row, int column );
 
+  /*
+   * sort the register tree widget or 'unsort' it by rereading
+   */
+  void handleSortCheckboxClick(int state);
+
   /** Set all background to non modified color.
    */
   void clearBackground();
@@ -105,6 +110,7 @@ class QtHardMon: public QMainWindow
    * extension else false
    */
   bool checkExtension(QString const &fileName, QString extension);
+
 
   void copyRegisterTreeItemNameToClipBoard();
 
@@ -259,6 +265,11 @@ class QtHardMon: public QMainWindow
    *  copyRegisterTreeItemNameToClipBoard
    */
   void addCopyActionForRegisterTreeWidget();
+ /*
+  *  populate the register list for the selected device in the GUI. Exits when
+  *  deviceItem is NULL pointer
+  */
+  void populateRegisterTree(QListWidgetItem *deviceItem);
 
   /**
    *   Ctrl+c support TableWidget. alls slot copyTableDataToClipBoard (Currently

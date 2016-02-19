@@ -191,7 +191,23 @@
         </column>
        </widget>
       </item>
-      <item alignment="Qt::AlignHCenter|Qt::AlignBottom">
+      <item alignment="Qt::AlignLeft">
+       <widget class="QCheckBox" name="SortAscendingcheckBox">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Sort module/registers in Ascending order</string>
+        </property>
+        <property name="text">
+         <string>Sort Modules/Registers</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignLeft|Qt::AlignBottom">
        <widget class="QCheckBox" name="autoselectPreviousRegisterCheckBox">
         <property name="toolTip">
          <string>Automatically select the previously selected register when reopening the device.</string>
@@ -626,7 +642,7 @@
      <x>0</x>
      <y>0</y>
      <width>1044</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
