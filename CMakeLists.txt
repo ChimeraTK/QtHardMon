@@ -81,10 +81,16 @@ if(DOXYGEN_FOUND)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
-  install(DIRECTORY ${CMAKE_BINARY_DIR}/doc DESTINATION .)
+  # do not install the developer information
+  #install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/ DESTINATION share/doc/${PROJECT_NAME})
 else(DOXYGEN_FOUND)
   message("Doxygen not found, documentation will not be build.")
 endif(DOXYGEN_FOUND)
+
+#FIXME: the user guide should be build from source, but we need dependencies defined, 
+# fix the date to the writing date (not compilation date) and put the version
+# guide has been written for (it most probably is outdated)
+INSTALL(FILES doc/user_guide/QtHardMon_user_guide.pdf DESTINATION share/doc/${PROJECT_NAME})
 
 # asking compiler to treat the generate ui_ files as system files (these have
 # warnings in them and we cannot do much because these headers are automatically
