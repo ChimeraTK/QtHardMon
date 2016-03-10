@@ -25,29 +25,32 @@ RegisterInfo_t const CustomQTreeItem::getRegisterMapElement() {
   return (RegisterInfo_t());
 }
 
+bool CustomQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
+  QRegExp checkForNumAtEnd("[0-9]+$");
+
+  QString lhsName = this->text(0);
+  QString rhsName = rhs.text(0);
+  int lhsIndex = checkForNumAtEnd.indexIn(lhsName);
+  int rhsIndex = checkForNumAtEnd.indexIn(rhsName);
+  QString lhsNameTextPart = lhsName.mid(0, lhsIndex);
+  QString rhsNameTextPart = rhsName.mid(0, rhsIndex);
+
+  if ((lhsNameTextPart != rhsNameTextPart) || (lhsIndex == -1) ||
+      (rhsIndex == -1)) { // Index is -1 when the QTreeWidgetItem does not end
+                          // in a numeric value
+    return QTreeWidgetItem::operator<(rhs);
+  } else {
+    int lhsNumericalPart =
+        lhsName.mid(lhsIndex).toInt(); // convert substring from lhsIndex to
+                                       // end of string to int
+    int rhsNumericalPart = rhsName.mid(rhsIndex).toInt();
+    return lhsNumericalPart < rhsNumericalPart;
+  }
+}
+
 CustomQTreeItem::~CustomQTreeItem() {
   // TODO Auto-generated destructor stub
 }
-
-/*void CustomQTreeItem::createTableRowEntries(const TableWidgetData& tabledata,
-                                            unsigned int rows) {
-
-  QTableWidget* table = tabledata.table;
-  unsigned int maxRow = tabledata.tableMaxRowCount;
-
-  int nRows = (rows > maxRow ? maxRow + 1 : rows);
-
-  table->setRowCount(nRows);
-
-  // set the
-  for (int row = 0; row < nRows; ++row) {
-    std::stringstream rowAsText;
-    rowAsText << row;
-    QTableWidgetItem* tableWidgetItem = new QTableWidgetItem();
-    tableWidgetItem->setText(rowAsText.str().c_str());
-    table->setVerticalHeaderItem(row, tableWidgetItem);
-  }
-}*/
 
 ModuleItem::ModuleItem(const QString& text_, QTreeWidget* parent_)
     : CustomQTreeItem(text_, ModuleItem::DataType, parent_) {}
