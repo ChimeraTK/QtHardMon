@@ -7,7 +7,9 @@
 \usepackage{hyperref} 
 \usepackage{amsmath}
 \usepackage{microtype}
+\usepackage[toc,page]{appendix}
 
+\newcommand\textvtt[1]{{\normalfont\fontfamily{cmvtt}\selectfont #1}}
 % For review
 % dependencies of changes package?
 \usepackage{soul}
@@ -20,8 +22,14 @@
 %\definechangesauthor{per}
 
 \begin{document}
-\title{QtHardMon User Guide}
+\title{QtHardMon User Guide \\ 
+\large v00.16.01}
+\date{08.03.2016}
 \maketitle
 \tableofcontents
 \include{chapters/Intro}
+
+\begin{appendices}
+\include{chapters/AppendixA_Mux_Registers}
+\end{appendices}
 \end{document}

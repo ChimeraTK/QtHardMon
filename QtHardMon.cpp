@@ -150,11 +150,6 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
   connect(_plotWindow, SIGNAL(plotWindowClosed()),
 	  this, SLOT(unckeckShowPlotWindow()));
 
-  // Make the register tree widget sort by default. Can be toggled through the
-  // check box
-  _hardMonForm.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
-  _hardMonForm.registerTreeWidget->setSortingEnabled(true);
-
   // also the plot window dfunctions are only enabled when a device is opened.
    _plotWindow->setEnabled(false);
 }
@@ -273,6 +268,7 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   _hardMonForm.mapFileDisplay->setToolTip(absPath.c_str());
 
   populateRegisterTree(deviceItem);
+  _hardMonForm.registerTreeWidget->sortItems(0, Qt::AscendingOrder);
 }
 
 void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name to createAndOpenDevice();
@@ -1198,15 +1194,12 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
         _hardMonForm.registerTreeWidget->findItems(moduleName,
                                                    Qt::MatchExactly);
 
-    CustomQTreeItem *moduleItem;
+    QTreeWidgetItem *moduleItem;
     if (moduleList.empty()) {
       moduleItem = new ModuleItem(QString(moduleName));
-      _hardMonForm.registerTreeWidget->addTopLevelItem(
-          dynamic_cast<QTreeWidgetItem *>(moduleItem)); // do you really need a
-                                                        // dynamic cast here?
+      _hardMonForm.registerTreeWidget->addTopLevelItem(moduleItem);
     } else {
-      moduleItem =
-          static_cast<CustomQTreeItem *>(moduleList.front()); // should be safe
+      moduleItem = moduleList.front(); // should be safe
     }
 
     if (isMultiplexedDataRegion(registerIter->name)) {
@@ -1216,7 +1209,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
           deviceListItem->getRegisterMapPointer()->end();
       areaDescriptor =
           createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
-      moduleItem->addChild(areaDescriptor);
+      moduleItem->addChild(dynamic_cast<QTreeWidgetItem*>(areaDescriptor));
     } else {
       moduleItem->addChild(
           new RegisterItem(*registerIter, registerIter->name.c_str()));
@@ -1294,9 +1287,7 @@ void QtHardMon::copyTableDataToClipBoard(){
 void QtHardMon::handleSortCheckboxClick(int state) {
   if (state == Qt::Checked) {
     _hardMonForm.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
-    _hardMonForm.registerTreeWidget->setSortingEnabled(true);
   } else if (state == Qt::Unchecked) {
-    _hardMonForm.registerTreeWidget->setSortingEnabled(false);
     // redraw the tree and pick up the order from the mapfile
     populateRegisterTree(_hardMonForm.deviceListWidget->currentItem());
   }

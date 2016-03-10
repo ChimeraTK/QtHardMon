@@ -116,6 +116,10 @@ public:
    * retuen the map file element if applicable
    */
   virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+
+  /// overload QTreeWidgetItem's default to manipulate sorting.
+  virtual bool operator<(const QTreeWidgetItem& rhs) const ;
+
   /**
    *
    */
@@ -242,6 +246,8 @@ public:
 
   /// Data type that represents the Sequence descriptor element
   static const int DataType = QTreeWidgetItem::UserType + 4;
+
+
 
 private:
   mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
