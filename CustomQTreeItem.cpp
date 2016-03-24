@@ -95,12 +95,7 @@ std::vector<int> RegisterItem::fetchElementsFromCard(
       std::min(numberOfElements, maxrows) * qthardmon::WORD_SIZE_IN_BYTES;
   unsigned int registerAddress = regInfo.address;
 
-  if (registerBar == 0xD) {
-    mtcadevice->readDMA(registerBar, registerAddress, &(buffer[0]),
-                        nBytesToRead);
-  } else {
-    mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
-  }
+  mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
   return buffer;
 }
 
