@@ -14,6 +14,7 @@
 
 #include <mtca4u/Exception.h>
 #include <mtca4u/DMapFilesParser.h>
+#include <mtca4u/NumericAddressedBackendMuxedRegisterAccessor.h>
 #include <mtca4u/PcieBackendException.h>
 #include <mtca4u/BackendFactory.h>
 
