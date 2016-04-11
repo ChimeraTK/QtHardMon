@@ -248,6 +248,10 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
 
     return;
   }
+
+  _hardMonForm.deviceStatusGroupBox->setEnabled(true);
+  _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
+
   DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
 
   _currentDeviceListItem = deviceListItem;
