@@ -117,8 +117,18 @@ public:
    */
   virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
 
+  /**
+   * return a fixed point converter if applicable. Else a fixed point converter
+   * with default settings is provided. The defaults uses if this is the case
+   * are:
+   *  width = 32
+   *  fractionalBits = 0
+   *  signed bit = true
+   */
+  virtual mtca4u::FixedPointConverter const getFixedPointConverter();
+
   /// overload QTreeWidgetItem's default to manipulate sorting.
-  virtual bool operator<(const QTreeWidgetItem& rhs) const ;
+  virtual bool operator<(const QTreeWidgetItem& rhs) const;
 
   /**
    *
@@ -186,12 +196,14 @@ public:
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
   virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+  virtual mtca4u::FixedPointConverter const getFixedPointConverter();
 
   /// Data type that represents the RegisterItem element
   static const int DataType = QTreeWidgetItem::UserType + 2;
 
 private:
   mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
+  mtca4u::FixedPointConverter _fixedPointConverter;
 
   std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
   void writeRegisterToDevice(TableWidgetData const& tabledata,
@@ -243,16 +255,15 @@ public:
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
   virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+  virtual mtca4u::FixedPointConverter const getFixedPointConverter();
 
   /// Data type that represents the Sequence descriptor element
   static const int DataType = QTreeWidgetItem::UserType + 4;
 
-
-
 private:
   mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
+  mtca4u::FixedPointConverter _fixedPointConverter;
   unsigned int _sequenceNumber;
-
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
 

@@ -74,7 +74,9 @@ void ModuleItem::updateRegisterProperties(
 RegisterItem::RegisterItem(const RegisterInfo_t& registerInfo,
                            const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, RegisterItem::DataType, parent_),
-      _registerMapElement(registerInfo) {}
+      _registerMapElement(registerInfo),
+      _fixedPointConverter(registerInfo.width, registerInfo.nFractionalBits,
+                           registerInfo.signedFlag) {}
 
 void RegisterItem::read(TableWidgetData const& tabledata) {
   std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
@@ -106,6 +108,9 @@ void RegisterItem::write(TableWidgetData const& tabledata) {
   writeRegisterToDevice(tabledata, buffer);
 }
 
+const mtca4u::FixedPointConverter RegisterItem::getFixedPointConverter() {
+  return _fixedPointConverter;
+}
 void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
                                          const std::vector<int>& buffer) {
   Device_t const& mtcadevice = tabledata.device;
@@ -171,6 +176,8 @@ SequenceDescriptor::SequenceDescriptor(const RegisterInfo_t& registerInfo,
                                        QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, SequenceDescriptor::DataType, parent_),
       _registerMapElement(registerInfo),
+      _fixedPointConverter(registerInfo.width, registerInfo.nFractionalBits,
+                           registerInfo.signedFlag),
       _sequenceNumber(sequenceNumber) {}
 
 void SequenceDescriptor::read(TableWidgetData const& tabledata) {
@@ -223,6 +230,10 @@ void CustomQTreeItem::fillGrpBox(
   grpBox.registeSignBitDisplay->setText(QString::number(regInfo.signedFlag));
 }
 
+const mtca4u::FixedPointConverter SequenceDescriptor::getFixedPointConverter() {
+  return _fixedPointConverter;
+}
+
 void SequenceDescriptor::writeSequenceToCard(const TableWidgetData& tabledata,
                                              MuxedData_t const& accessor) {
   unsigned int sequenceLength = (*accessor)[_sequenceNumber].size();
@@ -241,4 +252,12 @@ void ModuleItem::clearGrpBox(const RegisterPropertyGrpBox& grpBox) {
   grpBox.registerWidthDisplay->setText("");
   grpBox.registerFracBitsDisplay->setText("");
   grpBox.registeSignBitDisplay->setText("");
+}
+
+const mtca4u::FixedPointConverter CustomQTreeItem::getFixedPointConverter() {
+  // The default implementation provides a 'dummy' fixed point converter with
+  // the default settings
+  RegisterInfo_t regInfo = this->getRegisterMapElement();
+  return mtca4u::FixedPointConverter(regInfo.width, regInfo.nFractionalBits,
+                                     regInfo.signedFlag);
 }

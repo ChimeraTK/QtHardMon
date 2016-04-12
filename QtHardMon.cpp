@@ -1014,12 +1014,12 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
 }
 
 double QtHardMon::convertToDouble(int decimalValue) {
-  FixedPointConverter converter = createConverter();
+  FixedPointConverter converter = getConverter();
   return converter.toDouble(decimalValue);
 }
 
 int QtHardMon::convertToFixedPoint(double doubleValue) {
-  FixedPointConverter converter = createConverter();
+  FixedPointConverter converter = getConverter();
   return converter.toFixedPoint(doubleValue);
 }
 
@@ -1046,20 +1046,15 @@ template <typename T> T QtHardMon::readCell(int row, int column) {
               .value<T>());
 }
 
-mtca4u::FixedPointConverter QtHardMon::createConverter() {
-	CustomQTreeItem *registerInformation = static_cast<CustomQTreeItem *>(
+mtca4u::FixedPointConverter QtHardMon::getConverter() {
+	CustomQTreeItem *registerInformation = dynamic_cast<CustomQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
   if (!registerInformation){
     QMessageBox::warning(this, "QtHardMon internal error", "Could not create fixed point converter for current register.");
     return FixedPointConverter();
   }
   
-  FixedPointConverter converter(
-      registerInformation->getRegisterMapElement().width,
-      registerInformation->getRegisterMapElement().nFractionalBits,
-      registerInformation->getRegisterMapElement().signedFlag);
-
-  return converter;
+  return registerInformation->getFixedPointConverter();
 }
 
 int QtHardMon::getNumberOfColumsInTableWidget() {
