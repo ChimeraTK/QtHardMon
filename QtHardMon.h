@@ -237,7 +237,7 @@ class QtHardMon: public QMainWindow
   template<typename T>
   T readCell (int row, int column);
 
-  mtca4u::FixedPointConverter createConverter();
+  mtca4u::FixedPointConverter getConverter();
   int getNumberOfColumsInTableWidget();
   bool isValidCell(int row, int columnIndex);
   void clearCellBackground(int row, int columnIndex);
