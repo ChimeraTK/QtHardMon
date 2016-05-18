@@ -145,6 +145,11 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
 
   _plotWindow = new PlotWindow(this);
 
+  // sorted enabled by default; calling this here will trigger the slot, which
+  // sorts the register list.
+  _hardMonForm.SortAscendingcheckBox->setChecked(true);
+
+
   connect(_hardMonForm.showPlotWindowCheckBox, SIGNAL(stateChanged(int)),
 	  this, SLOT(showPlotWindow(int)));
 
@@ -273,7 +278,6 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   _hardMonForm.mapFileDisplay->setToolTip(absPath.c_str());
 
   populateRegisterTree(deviceItem);
-  _hardMonForm.registerTreeWidget->sortItems(0, Qt::AscendingOrder);
 }
 
 void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name to createAndOpenDevice();
@@ -1287,8 +1291,10 @@ void QtHardMon::copyTableDataToClipBoard(){
 void QtHardMon::handleSortCheckboxClick(int state) {
   if (state == Qt::Checked) {
     _hardMonForm.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
+    _hardMonForm.registerTreeWidget->setSortingEnabled(true);
   } else if (state == Qt::Unchecked) {
-    // redraw the tree and pick up the order from the mapfile
+    _hardMonForm.registerTreeWidget->setSortingEnabled(false);
+    // redraw the currently sorted tree to pick up the order from the mapfile.
     populateRegisterTree(_hardMonForm.deviceListWidget->currentItem());
   }
 }
