@@ -259,6 +259,11 @@ class QtHardMon: public QMainWindow
   void clearAllRowsInTable();
   std::string extractFileNameFromPath(const std::string &);
   private:
+  /**
+   * used to validate table entries before invoking the write of the
+   * CustomQTreeItem api
+   */
+  bool isTableDataValid(const TableWidgetData& tabledata);
 
   /**
    *  Give Ctrl+c support for RegisterTreeWidget. Currently calls
@@ -284,6 +289,7 @@ class QtHardMon: public QMainWindow
                             // class QtHardMon’ has pointer data members -
                             // but does not overide copy constructor and
                             // assignment operator
+
 
 
 };

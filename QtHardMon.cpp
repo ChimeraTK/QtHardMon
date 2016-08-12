@@ -371,8 +371,12 @@ void QtHardMon::read()
 {
   ++_insideReadOrWrite;
 
-  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
-      _hardMonForm.registerTreeWidget->currentItem());
+  CustomQTreeItem *registerTreeItem;
+  if ((registerTreeItem = static_cast<CustomQTreeItem *>(
+           _hardMonForm.registerTreeWidget->currentItem())) == nullptr) {
+    return; // this can happen when the button is pressed without selecting a
+            // register
+  }
 
   try {
     if (_mtcaDevice->isOpen()) {
@@ -415,14 +419,22 @@ void QtHardMon::write()
 {
   ++_insideReadOrWrite;
 
-  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
-      _hardMonForm.registerTreeWidget->currentItem());
+  CustomQTreeItem *registerTreeItem;
+  if ((registerTreeItem = static_cast<CustomQTreeItem *>(
+           _hardMonForm.registerTreeWidget->currentItem())) == nullptr) {
+    return; // this can happen when the button is pressed without selecting a
+            // register
+  }
 
   try {
     if (_mtcaDevice->isOpen()) {
       TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
                                 _mtcaDevice);
-      registerTreeItem->write(tableData);
+      if (isTableDataValid(tableData) == false) {
+        return;
+      } else {
+        registerTreeItem->write(tableData);
+      }
     }
   }
   catch (InvalidOperationException &e) {
@@ -1297,4 +1309,10 @@ void QtHardMon::handleSortCheckboxClick(int state) {
     // redraw the currently sorted tree to pick up the order from the mapfile.
     populateRegisterTree(_hardMonForm.deviceListWidget->currentItem());
   }
+}
+
+bool QtHardMon::isTableDataValid(const TableWidgetData &tabledata) {
+  auto rowcount = tabledata.table->rowCount();
+  // for now a non empty table is considered valid
+  return ((rowcount != 0) ? true : false);
 }
