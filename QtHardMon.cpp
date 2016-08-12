@@ -374,6 +374,7 @@ void QtHardMon::read()
   CustomQTreeItem *registerTreeItem;
   if ((registerTreeItem = static_cast<CustomQTreeItem *>(
            _hardMonForm.registerTreeWidget->currentItem())) == nullptr) {
+  --_insideReadOrWrite;
     return; // this can happen when the button is pressed without selecting a
             // register
   }
@@ -388,6 +389,7 @@ void QtHardMon::read()
   }
   catch (InvalidOperationException &e) {
     QMessageBox::warning(this, "QtHardMon read error", e.what());
+    --_insideReadOrWrite;
     return;
   }
   catch (std::exception &e) {
@@ -431,6 +433,7 @@ void QtHardMon::write()
       TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
                                 _mtcaDevice);
       if (isTableDataValid(tableData) == false) {
+        --_insideReadOrWrite;
         return;
       } else {
         registerTreeItem->write(tableData);
@@ -439,6 +442,7 @@ void QtHardMon::write()
   }
   catch (InvalidOperationException &e) {
     QMessageBox::warning(this, "QtHardMon write error", e.what());
+    --_insideReadOrWrite;
     return;
   }
   catch (std::exception &e) {
@@ -992,7 +996,11 @@ void QtHardMon::updateTableEntries(int row, int column) {
 
 void QtHardMon::changeBackgroundIfModified( int row, int column ){
   if (_insideReadOrWrite==0){
-    _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
+    if((column == qthardmon::FIXED_POINT_DISPLAY_COLUMN) || (column == qthardmon::HEX_VALUE_DISPLAY_COLUMN)){return;}
+
+    _hardMonForm.valuesTableWidget->item(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN)->setBackground( _modifiedBackgroundBrush );
+    _hardMonForm.valuesTableWidget->item(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN)->setBackground( _modifiedBackgroundBrush );
+    _hardMonForm.valuesTableWidget->item(row, qthardmon::HEX_VALUE_DISPLAY_COLUMN)->setBackground( _modifiedBackgroundBrush );
   }
   else{
     clearRowBackgroundColour(row);
@@ -1001,7 +1009,6 @@ void QtHardMon::changeBackgroundIfModified( int row, int column ){
 
 void QtHardMon::clearBackground(){
   int nRows = _hardMonForm.valuesTableWidget->rowCount();
-
   for( int row=0; row < nRows; ++row ){
     clearRowBackgroundColour(row);
   }
