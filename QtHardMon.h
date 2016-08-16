@@ -288,6 +288,20 @@ class QtHardMon: public QMainWindow
 
 };
 
+template <typename T> void QtHardMon::writeCell(int row, int column, T value) {
+  QTableWidgetItem *widgetItem = new QTableWidgetItem();
+  QVariant dataVariant;
+  dataVariant.setValue(value);
+  widgetItem->setData(Qt::DisplayRole, dataVariant);
+  _hardMonForm.valuesTableWidget->setItem(row, column, widgetItem);
+}
+
+template <typename T> T QtHardMon::readCell(int row, int column) {
+  return (_hardMonForm.valuesTableWidget->item(row, column)
+              ->data(Qt::DisplayRole)
+              .value<T>());
+}
+
 
 
 #endif// QT_HARD_MON
