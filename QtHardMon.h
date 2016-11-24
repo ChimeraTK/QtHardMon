@@ -9,12 +9,14 @@
 #include <QStyledItemDelegate>
 #include <qclipboard.h>
 
+#ifndef Q_MOC_RUN
 #include <mtca4u/DMapFilesParser.h>
 #include <mtca4u/PcieBackend.h>
 #include <mtca4u/FixedPointConverter.h>
+#include <boost/shared_ptr.hpp>
+#endif
 
 #include "CustomQTreeItem.h"
-#include <boost/shared_ptr.hpp>
 
 /** The QtHadMon class which implements all the GUI functionality.
  */

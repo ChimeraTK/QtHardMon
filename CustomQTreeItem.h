@@ -1,9 +1,12 @@
 #ifndef SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 #define SOURCE_DIRECTORY__CUSTOMQTREEITEM_H_
 
+#ifndef Q_MOC_RUN
 #include <mtca4u/RegisterInfoMap.h>
 #include <mtca4u/MultiplexedDataAccessor.h>
 #include <mtca4u/PcieBackend.h>
+#endif
+
 #include <qtreewidget.h>
 #include <qlabel.h>
 #include <qtablewidget.h>
