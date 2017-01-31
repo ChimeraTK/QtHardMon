@@ -276,6 +276,7 @@ private:
           accessor);
 };
 
+// fill the table from a buffer
 template <typename T>
 inline void CustomQTreeItem::putValuesIntoTable(
     const TableWidgetData& tabledata, std::vector<T> const& buffer) {
@@ -324,6 +325,7 @@ inline void CustomQTreeItem::putValuesIntoTable(
   } // for row
 }
 
+// retreive values from a table as std::vector
 template <typename T>
 inline std::vector<T> CustomQTreeItem::copyValuesFromTable(
     const TableWidgetData& tabledata, unsigned int count) {
