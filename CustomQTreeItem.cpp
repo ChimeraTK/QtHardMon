@@ -75,7 +75,8 @@ RegisterItem::RegisterItem(const RegisterInfo_t& registerInfo,
                            const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, RegisterItem::DataType, parent_),
       _registerMapElement(registerInfo),
-      _fixedPointConverter(registerInfo.width, registerInfo.nFractionalBits,
+      _fixedPointConverter(registerInfo.module+"/"+registerInfo.name,
+                           registerInfo.width, registerInfo.nFractionalBits,
                            registerInfo.signedFlag) {}
 
 void RegisterItem::read(TableWidgetData const& tabledata) {
@@ -176,7 +177,8 @@ SequenceDescriptor::SequenceDescriptor(const RegisterInfo_t& registerInfo,
                                        QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, SequenceDescriptor::DataType, parent_),
       _registerMapElement(registerInfo),
-      _fixedPointConverter(registerInfo.width, registerInfo.nFractionalBits,
+      _fixedPointConverter(registerInfo.module+"/"+registerInfo.name,
+                           registerInfo.width, registerInfo.nFractionalBits,
                            registerInfo.signedFlag),
       _sequenceNumber(sequenceNumber) {}
 
@@ -258,6 +260,7 @@ const mtca4u::FixedPointConverter CustomQTreeItem::getFixedPointConverter() {
   // The default implementation provides a 'dummy' fixed point converter with
   // the default settings
   RegisterInfo_t regInfo = this->getRegisterMapElement();
-  return mtca4u::FixedPointConverter(regInfo.width, regInfo.nFractionalBits,
+  return mtca4u::FixedPointConverter(regInfo.module+"/"+regInfo.name,
+                                     regInfo.width, regInfo.nFractionalBits,
                                      regInfo.signedFlag);
 }

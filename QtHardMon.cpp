@@ -1041,7 +1041,7 @@ mtca4u::FixedPointConverter QtHardMon::getConverter() {
       _hardMonForm.registerTreeWidget->currentItem());
   if (!registerInformation){
     QMessageBox::warning(this, "QtHardMon internal error", "Could not create fixed point converter for current register.");
-    return FixedPointConverter();
+    return FixedPointConverter("Unknown Register");
   }
   
   return registerInformation->getFixedPointConverter();
