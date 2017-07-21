@@ -1,0 +1,2 @@
+NUMDEV   sdm://./dummy=NumDev.map NumDev.map
+LMAPDEV  sdm://./logicalNameMap LmapDev.xlmap
