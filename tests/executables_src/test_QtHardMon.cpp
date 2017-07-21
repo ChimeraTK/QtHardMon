@@ -10,17 +10,14 @@
 
 #include "QtHardMon.h"
 
-
-struct QtHardmon_populatesRegisterTree_fixture {
+/*
+ * This base class is used for all of the fixtures in Qt testing due to the necessity of initializing QApplication instance.
+ */
+struct QtHardmon_fixtureBase {
     QApplication * app;
     QtHardMon * qtHardMon;
-    std::string dmapFile;
-    std::string deviceNameToSelect;
-    
-    QtHardmon_populatesRegisterTree_fixture(const std::string & DmapFile, const std::string & DeviceNameToSelect) :
-    dmapFile(DmapFile),
-    deviceNameToSelect(DeviceNameToSelect)
-    {
+
+    QtHardmon_fixtureBase() {
         int argc = 0;
         char ** argv;
         app = new QApplication(argc, argv);
@@ -29,15 +26,48 @@ struct QtHardmon_populatesRegisterTree_fixture {
         // Seems not necessary to run the tests
         // qtHardMon->show();
         // app->exec();
+    }
 
+};
+
+
+struct QtHardMon_populatesDeviceList_fixture : public QtHardmon_fixtureBase {
+    std::string dmapFile;
+    
+    QtHardMon_populatesDeviceList_fixture(const std::string & DmapFile) :
+    dmapFile(DmapFile)
+    {
+        // First, we want to load DMap file. Normally, we would click "Load Boards" button, 
+        // which would prompt us for a .dmap file and then pass the value to loadDmapFile 
+        // method, OR we would pass it as an argument when starting QtHardMon.
+        // For the purpose of that test, we are directly calling loadDmapFile method.
+    //    qtHardMon->loadDmapFile(QString(dmapFile.c_str()));
+    }
+};
+
+/*
+ * The devices of various backends are read properly and populate the device list.
+*/
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDeviceList )
+{
+    QtHardMon_populatesDeviceList_fixture fixtureNumerical("test_files/test_QtHardMon_valid_dummy_lmap.dmap");
+
+    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.deviceListWidget->count(), 2);
+}
+
+struct QtHardmon_populatesRegisterTree_fixture : public QtHardmon_fixtureBase {
+    std::string dmapFile;
+    std::string deviceNameToSelect;
+    
+    QtHardmon_populatesRegisterTree_fixture(const std::string & DmapFile, const std::string & DeviceNameToSelect) :
+    dmapFile(DmapFile),
+    deviceNameToSelect(DeviceNameToSelect)
+    {
         // First, we want to load DMap file. Normally, we would click "Load Boards" button, 
         // which would prompt us for a .dmap file and then pass the value to loadDmapFile 
         // method, OR we would pass it as an argument when starting QtHardMon.
         // For the purpose of that test, we are directly calling loadDmapFile method.
         qtHardMon->loadDmapFile(QString(dmapFile.c_str()));
-
-
-
     }
 };
 
