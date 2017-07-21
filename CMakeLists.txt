@@ -27,7 +27,7 @@ FIND_PACKAGE(Qt4 REQUIRED)
 set(mtca4u-deviceaccess_MIN_VERSION 00.22)
 FIND_PACKAGE(mtca4u-deviceaccess ${mtca4u-deviceaccess_MIN_VERSION} REQUIRED)
 FIND_PACKAGE(Qwt 6)
-
+include(cmake/add_dependency.cmake)
 
 #boost as such is required for shared pointers e.g.
 
@@ -41,7 +41,7 @@ INCLUDE_DIRECTORIES( SYSTEM ${mtca4u-deviceaccess_INCLUDE_DIRS} )
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
 
-SET(${PROJECT_NAME}_SOURCES src/main.cpp src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
+SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
                             src/PlotWindow.cpp src/CustomDelegates.cpp src/HexSpinBox.cpp
                             src/CustomQTreeItem.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
@@ -71,10 +71,12 @@ else(QWT_FOUND)
   message("QWT not found, plotting is disabled in this build.")
 endif(QWT_FOUND)
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES} 
+ADD_LIBRARY(${PROJECT_NAME}_OBJECTS OBJECT ${${PROJECT_NAME}_SOURCES}
   ${${PROJECT_NAME}_HEADERS_MOC}
   ${${PROJECT_NAME}_FORMS_HEADERS} 
   ${${PROJECT_NAME}_RESOURCES_RCC})
+ADD_EXECUTABLE(${PROJECT_NAME} $<TARGET_OBJECTS:${PROJECT_NAME}_OBJECTS> src/main.cpp )
+
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_LIBRARIES} 
      ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
@@ -110,3 +112,8 @@ install(TARGETS ${PROJECT_NAME}
 
 # The instructions to create a debian package are loaded from a separate file
 include(${CMAKE_SOURCE_DIR}/cmake/prepare_debian_package.cmake)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  enable_testing()
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
