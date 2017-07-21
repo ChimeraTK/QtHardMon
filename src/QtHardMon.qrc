@@ -1,6 +1,6 @@
  <!DOCTYPE RCC><RCC version="1.0">
- <qresource prefix="/">
-     <file>res/DESY_logo.png</file>
-     <file>res/DESY_logo_nofade.png</file>
+ <qresource>
+     <file>../res/DESY_logo.png</file>
+     <file>../res/DESY_logo_nofade.png</file>
  </qresource>
  </RCC>

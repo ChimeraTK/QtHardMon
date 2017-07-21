@@ -41,15 +41,15 @@ INCLUDE_DIRECTORIES( SYSTEM ${mtca4u-deviceaccess_INCLUDE_DIRS} )
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
 
-SET(${PROJECT_NAME}_SOURCES main.cpp ${PROJECT_NAME}.cpp ConfigFileReaderWriter.cpp 
-                            PlotWindow.cpp CustomDelegates.cpp HexSpinBox.cpp
-                            CustomQTreeItem.cpp)
+SET(${PROJECT_NAME}_SOURCES src/main.cpp src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
+                            src/PlotWindow.cpp src/CustomDelegates.cpp src/HexSpinBox.cpp
+                            src/CustomQTreeItem.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
-SET(${PROJECT_NAME}_QOBJECT_HEADERS ${PROJECT_NAME}.h PlotWindow.h CustomDelegates.h HexSpinBox.h)
+SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h)
 # All headers, to have the dependencies correct
-SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}_QOBJECT_HEADERS PlotWindow.h)
-SET(${PROJECT_NAME}_FORMS ${PROJECT_NAME}Form.ui PreferencesForm.ui PlotWindowForm.ui)
-SET(${PROJECT_NAME}_RESOURCES ${PROJECT_NAME}.qrc)
+SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}_QOBJECT_HEADERS src/PlotWindow.h)
+SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui)
+SET(${PROJECT_NAME}_RESOURCES src/${PROJECT_NAME}.qrc)
 
 QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})
 QT4_WRAP_UI(${PROJECT_NAME}_FORMS_HEADERS ${${PROJECT_NAME}_FORMS})
