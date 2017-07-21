@@ -2,10 +2,6 @@
 
 # Shell script to generate a debian package from a particular tag (configured during the cmake configuration).
 
-# ATTENTION: This file has manually been copied from the project template, although the whole project has not been 
-# switched yet. Do not modily this file here but re-copy it from the project template after you did the 
-# modifications there. Then paste in this message again. Sorry for the inconvenience.
-
 #######################################################################################################################
 #
 # IMPORTANT NOTE:
@@ -48,14 +44,14 @@ cd debian_package
 #Note, we first clone and then checkout the tag because the old git version on
 #Ubuntu12.4 does not support to do it in one go.
 BUILD_DIR_NAME=@PACKAGE_BASE_NAME@_@PACKAGE_FULL_LIBRARY_VERSION@
-git clone @PACKAGE_GIT_URI@ ${BUILD_DIR_NAME}
+git clone @CMAKE_SOURCE_DIR@ ${BUILD_DIR_NAME}
 ( cd  ${BUILD_DIR_NAME} &&\
   git checkout @PACKAGE_TAG_VERSION@ &&\
   rm -rf .git )
 #Debian convention: file has to end on .orig.tar.gz
 tar -czf  ${BUILD_DIR_NAME}.orig.tar.gz  ${BUILD_DIR_NAME}
 
-#Copy the prepared debian packaging config files to the source code 
+#Copy the prepared debian packaging config files to the source code
 #directroy
 cp -r ../debian_from_template  ${BUILD_DIR_NAME}/debian
 cd ${BUILD_DIR_NAME}
