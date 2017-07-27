@@ -11,6 +11,9 @@
 #include <climits> // for the max and min integer values
 #include <sstream>
 
+const unsigned int CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION;
+
+
 CustomDelegates::CustomDelegates(QObject* parent_)
     : QStyledItemDelegate(parent_),
       _doubleSpinBoxPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION) {}

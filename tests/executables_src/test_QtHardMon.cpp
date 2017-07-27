@@ -30,6 +30,62 @@ struct QtHardmon_fixtureBase {
 
 };
 
+/*
+ * The window is properly filled with no data and proper states of particular window components.
+*/
+BOOST_AUTO_TEST_CASE ( QtHardMon_emptyUponConstruction )
+{
+    QtHardmon_fixtureBase fixture;
+
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.deviceListWidget->count(), 0);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 0);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.deviceStatusGroupBox->isEnabled(), false);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.openCloseButton->isEnabled(), false);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.devicePropertiesGroupBox->isEnabled(), false);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.loadBoardsButton->isEnabled(), true);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.SortAscendingcheckBox->isChecked(), true);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked(), false);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerPropertiesGroupBox->isEnabled(), true);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), 0);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.optionsGroupBox->isEnabled(), false);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.operationsGroupBox->isEnabled(), false);
+}
+
+
+/*
+ * The initial state of settings is set to particular values.
+*/
+BOOST_AUTO_TEST_CASE ( QtHardMon_defaultSettings )
+{
+    QtHardmon_fixtureBase fixture;
+
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_maxWords, 0x10000);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_floatPrecision, CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
+    BOOST_CHECK_EQUAL(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION, 4);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->font().pointSize(), 11);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_autoRead, true);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_readOnClick, true);
+}
+
+
+// SKIPPED - need to change the code to be test-ready
+/*
+ * The state of settings after changing them in the settings dialog is set to particular values.
+*/
+// BOOST_AUTO_TEST_CASE ( QtHardMon_changeSettings )
+// {
+//     QtHardmon_fixtureBase fixture;
+
+//     // change:
+//     // _maxWords value
+//     // _floatPrecision value
+//     // _customDelegate float precision set
+//     // font().pointSize()
+//     // _autoRead bool
+//     // _readOnClick bool
+//     // check if they were saved 
+// }
+
 
 struct QtHardMon_populatesDeviceList_fixture : public QtHardmon_fixtureBase {
     std::string dmapFile;
@@ -50,9 +106,9 @@ struct QtHardMon_populatesDeviceList_fixture : public QtHardmon_fixtureBase {
 */
 BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDeviceList )
 {
-    QtHardMon_populatesDeviceList_fixture fixtureNumerical("test_files/test_QtHardMon_valid_dummy_lmap.dmap");
+    QtHardMon_populatesDeviceList_fixture fixture("test_files/test_QtHardMon_valid_dummy_lmap.dmap");
 
-    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.deviceListWidget->count(), 2);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.deviceListWidget->count(), 2);
 }
 
 struct QtHardmon_populatesRegisterTree_fixture : public QtHardmon_fixtureBase {
@@ -98,4 +154,86 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTree )
     BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 5);
     // MyModule has two items: 1 register and 1 submodule
     BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
+}
+
+/*
+ * When toggling sorting checkbox, the register tree is sorted in ascending order.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_sortsRegisterTree )
+{
+}
+
+/*
+ * When toggling autoselect checkbox, previously selected register is properly selected.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
+{
+}
+
+
+/*
+ * When selecting register, register properties are properly populated.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
+{
+}
+
+/*
+ * When selecting register, data tables is populated with valid values.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTable )
+{
+}
+
+
+/*
+ * When clicking Read, the register value is updated.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegister )
+{
+}
+
+/*
+ * When clicking Write, the register value is set in device.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_writesRegister )
+{
+}
+
+
+/*
+ * When clicking Read From File, the register value is updated.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegisterFromFile )
+{
+}
+
+/*
+ * When clicking Write From File, the register value is set in device.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_writesRegisterFromFile )
+{
+}
+
+/*
+ * When Read After Write checkbox is checked, the register value is updated after writing.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegisterAfterWrite )
+{
+    // reads after write
+    // reads after write from file
+}
+
+/*
+ * When Read Continuously checkbox is checked, the register value is updated in intervals.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegisterContinuously )
+{
+}
+
+/*
+ * When Show Plot checkbox is checked, the plot is properly shown and filled.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_showsRegisterPlot )
+{
 }
