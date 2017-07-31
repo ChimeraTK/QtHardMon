@@ -10,6 +10,7 @@
     <redirectedChannel name="FewElements">
         <targetDevice>NUMDEV</targetDevice>
         <targetRegister>APP0.MODULE0</targetRegister>
+        <targetChannel>1</targetChannel>
     </redirectedChannel>
     <constant name="Constant">
         <type>integer</type>
@@ -20,12 +21,6 @@
         <value>666</value>
     </constant>
     <module name="MyModule">
-      <module name="SomeSubmodule"> 
-        <variable name="Variable">
-          <type>integer</type>
-          <value>2</value>
-        </variable>
-      </module>
       <redirectedRegister name="SingleWord">
         <targetDevice>NUMDEV</targetDevice>
         <targetRegister>APP0.WORD_STATUS</targetRegister>

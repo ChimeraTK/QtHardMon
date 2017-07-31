@@ -97,7 +97,8 @@ struct QtHardMon_populatesDeviceList_fixture : public QtHardmon_fixtureBase {
         // which would prompt us for a .dmap file and then pass the value to loadDmapFile 
         // method, OR we would pass it as an argument when starting QtHardMon.
         // For the purpose of that test, we are directly calling loadDmapFile method.
-    //    qtHardMon->loadDmapFile(QString(dmapFile.c_str()));
+        QDir::setCurrent( QFileInfo(("test_files/" + dmapFile).c_str()).absolutePath() );
+        qtHardMon->loadDmapFile(QString(dmapFile.c_str()));
     }
 };
 
@@ -119,11 +120,11 @@ struct QtHardmon_populatesRegisterTree_fixture : public QtHardmon_fixtureBase {
     dmapFile(DmapFile),
     deviceNameToSelect(DeviceNameToSelect)
     {
-        // First, we want to load DMap file. Normally, we would click "Load Boards" button, 
-        // which would prompt us for a .dmap file and then pass the value to loadDmapFile 
-        // method, OR we would pass it as an argument when starting QtHardMon.
-        // For the purpose of that test, we are directly calling loadDmapFile method.
-        qtHardMon->loadDmapFile(QString(dmapFile.c_str()));
+        QList<QListWidgetItem *> items =  qtHardMon->_hardMonForm.deviceListWidget->findItems(DeviceNameToSelect.c_str(), Qt::MatchExactly);
+        if (items.size() > 0) {
+            std::cout << "Found!" << std::endl;
+            qtHardMon->_hardMonForm.deviceListWidget->setCurrentItem(items.at(0));
+        }
     }
 };
 
@@ -132,8 +133,7 @@ struct QtHardmon_populatesRegisterTree_fixture : public QtHardmon_fixtureBase {
 */
 BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTree )
 {
-
-    QtHardmon_populatesRegisterTree_fixture fixtureNumerical("test_files/test_QtHardMon_populatesRegisterTree.dmap", "NUMDEV");
+    QtHardmon_populatesRegisterTree_fixture fixtureNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "NUMDEV");
 
     // Expecting BOARD, APP0, MODULE0 and MODULE1 modules
     BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 4);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTree )
     // MODULE1 has 3 items
     BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(3)->childCount(), 3);
 
-    QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_files/test_QtHardMon_populatesRegisterTree.dmap", "LMAPDEV");
+    QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV");
 
     // Expecting MyModule and module, that contains all uncategorized registers
     BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
