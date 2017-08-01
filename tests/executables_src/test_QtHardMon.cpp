@@ -112,12 +112,11 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDeviceList )
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.deviceListWidget->count(), 2);
 }
 
-struct QtHardmon_populatesRegisterTree_fixture : public QtHardmon_fixtureBase {
-    std::string dmapFile;
+struct QtHardmon_populatesRegisterTree_fixture : public QtHardMon_populatesDeviceList_fixture {
     std::string deviceNameToSelect;
     
     QtHardmon_populatesRegisterTree_fixture(const std::string & DmapFile, const std::string & DeviceNameToSelect) :
-    dmapFile(DmapFile),
+    QtHardMon_populatesDeviceList_fixture(DmapFile),
     deviceNameToSelect(DeviceNameToSelect)
     {
         QList<QListWidgetItem *> items =  qtHardMon->_hardMonForm.deviceListWidget->findItems(DeviceNameToSelect.c_str(), Qt::MatchExactly);
