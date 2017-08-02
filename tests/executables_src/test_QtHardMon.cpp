@@ -188,6 +188,23 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeUnsorted )
 }
 
 /*
+ * When device with multiplexed registers is selected, the register tree gets populated properly.
+*/
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
+{
+    QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
+
+    // There is only APP0 module 
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 1);
+
+    // APP0 has 4 items, one of them is multiplexed area
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
+
+    // Multiplexed area has 16 sequence registers
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->child(1)->childCount(), 16);
+}
+
+/*
  * When toggling autoselect checkbox, previously selected register is properly selected.
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
