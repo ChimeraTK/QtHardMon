@@ -7,6 +7,7 @@
 #include <QIcon>
 #include <QDir>
 #include <QStyledItemDelegate>
+#include <QMessageBox>
 #include <qclipboard.h>
 
 #ifndef Q_MOC_RUN
@@ -26,7 +27,7 @@ class QtHardMon: public QMainWindow
 
  public:
   /** The constructor */
-  QtHardMon(QWidget * parent_ = 0, Qt::WindowFlags flags = 0);
+  QtHardMon(bool noPrompts = false, QWidget * parent_ = 0, Qt::WindowFlags flags = 0);
   /* The destructor. Need not be virtual because we have no virtual functions */
   ~QtHardMon();
 
@@ -134,7 +135,7 @@ class QtHardMon: public QMainWindow
   QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
   CustomDelegates _customDelegate;///< provides display customizations for the table widget.
-
+  bool noPrompts_;
   /**
    *  Write the config to the given file name.
    */
@@ -287,6 +288,8 @@ class QtHardMon: public QMainWindow
                             // but does not overide copy constructor and
                             // assignment operator
 
+  void showMessageBox(QMessageBox::Icon boxType, QString boxTitle, 
+                     QString boxText, QString boxInformativeText);
 
 };
 

@@ -17,11 +17,16 @@ struct QtHardmon_fixtureBase {
     QApplication * app;
     QtHardMon * qtHardMon;
 
-    QtHardmon_fixtureBase() {
+    QtHardmon_fixtureBase(bool noPrompts = true) {
         int argc = 0;
         char ** argv;
         app = new QApplication(argc, argv);
-        qtHardMon = new QtHardMon;
+        if (!noPrompts) {
+            qtHardMon = new QtHardMon;
+        } else {
+            qtHardMon = new QtHardMon(true);
+        }
+        
 
         // Seems not necessary to run the tests
         // qtHardMon->show();
@@ -35,7 +40,7 @@ struct QtHardmon_fixtureBase {
 */
 BOOST_AUTO_TEST_CASE ( QtHardMon_emptyUponConstruction )
 {
-    QtHardmon_fixtureBase fixture;
+    QtHardmon_fixtureBase fixture(false);
 
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.deviceListWidget->count(), 0);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 0);
@@ -49,6 +54,8 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_emptyUponConstruction )
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), 0);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.optionsGroupBox->isEnabled(), false);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.operationsGroupBox->isEnabled(), false);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->noPrompts_, false);
+    
 }
 
 
@@ -62,6 +69,8 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_defaultSettings )
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_maxWords, 0x10000);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_floatPrecision, CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
     BOOST_CHECK_EQUAL(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION, 4);
+    
+    // Not passing via ssh connection due to different font size.
     BOOST_CHECK_EQUAL(fixture.qtHardMon->font().pointSize(), 11);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_autoRead, true);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_readOnClick, true);
@@ -115,10 +124,11 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDeviceList )
 struct QtHardmon_populatesRegisterTree_fixture : public QtHardMon_populatesDeviceList_fixture {
     std::string deviceNameToSelect;
     
-    QtHardmon_populatesRegisterTree_fixture(const std::string & DmapFile, const std::string & DeviceNameToSelect) :
+    QtHardmon_populatesRegisterTree_fixture(const std::string & DmapFile, const std::string & DeviceNameToSelect, bool Sorted = true) :
     QtHardMon_populatesDeviceList_fixture(DmapFile),
     deviceNameToSelect(DeviceNameToSelect)
     {
+        qtHardMon->_hardMonForm.SortAscendingcheckBox->setCheckState(Sorted ? Qt::Checked : Qt::Unchecked);
         QList<QListWidgetItem *> items =  qtHardMon->_hardMonForm.deviceListWidget->findItems(DeviceNameToSelect.c_str(), Qt::MatchExactly);
         if (items.size() > 0) {
             std::cout << "Found!" << std::endl;
@@ -128,23 +138,24 @@ struct QtHardmon_populatesRegisterTree_fixture : public QtHardMon_populatesDevic
 };
 
 /*
- * When device is selected, the register tree gets populated properly.
+ * When device is selected, the register tree gets populated properly, sorted.
 */
-BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTree )
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeSorted )
 {
-    QtHardmon_populatesRegisterTree_fixture fixtureNumerical("test_QtHardMon_valid_dummy.dmap", "NUMDEV");
+    QtHardmon_populatesRegisterTree_fixture fixtureSorted("test_QtHardMon_valid_dummy.dmap", "NUMDEV");
 
     // Expecting BOARD, APP0, MODULE0 and MODULE1 modules
-    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 4);
+    BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 4);
     // Modules are initially sorted, so APP0, BOARD, MODULE0, MODULE1
-    // BOARD has 2 items
-    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
+
     // APP0 has 4 items
-    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(1)->childCount(), 2);
+    BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
+    // BOARD has 2 items
+    BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(1)->childCount(), 2);
     // MODULE0 has 2 items
-    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
+    BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
     // MODULE1 has 3 items
-    BOOST_CHECK_EQUAL(fixtureNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(3)->childCount(), 3);
+    BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(3)->childCount(), 3);
 
     // QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV");
 
@@ -157,10 +168,23 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTree )
 }
 
 /*
- * When toggling sorting checkbox, the register tree is sorted in ascending order.
- */ 
-BOOST_AUTO_TEST_CASE ( QtHardMon_sortsRegisterTree )
+ * When device is selected, the register tree gets populated properly. When autosorting checkbox is unchecked, they are not sorted.
+*/
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeUnsorted )
 {
+    QtHardmon_populatesRegisterTree_fixture fixtureUnsorted("test_QtHardMon_valid_dummy.dmap", "NUMDEV", false);
+
+    // Expecting BOARD, APP0, MODULE0 and MODULE1 modules
+    BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 4);
+    // Modules are not sorted, so BOARD, APP0, MODULE0, MODULE1
+    // BOARD has 2 items
+    BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 2);
+    // APP0 has 4 items
+    BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(1)->childCount(), 4);
+    // MODULE0 has 2 items
+    BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
+    // MODULE1 has 3 items
+    BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(3)->childCount(), 3);
 }
 
 /*
@@ -168,8 +192,8 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_sortsRegisterTree )
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
 {
+    
 }
-
 
 /*
  * When selecting register, register properties are properly populated.

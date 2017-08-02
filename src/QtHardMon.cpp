@@ -7,7 +7,6 @@
 #include <limits>
 #include <sstream>
 
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QDockWidget>
 #include <qaction.h>
@@ -50,7 +49,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define READ_ON_CLICK_STRING "readOnClick"
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
-QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags) 
+QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags) 
   : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(), _maxWords( DEFAULT_MAX_WORDS ),
     _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
@@ -58,7 +57,8 @@ QtHardMon::QtHardMon(QWidget * parent_, Qt::WindowFlags flags)
     _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
     _customDelegate(),
     _currentDeviceListItem(NULL),
-    _plotWindow(NULL)
+    _plotWindow(NULL),
+    noPrompts_(noPrompts)
 {
 
 
@@ -198,10 +198,9 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
   }
   catch( Exception & e )
   {
-    QMessageBox messageBox;
-    messageBox.setText("Could not load DeviceMap file "+dmapFileName+".");
-    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
-    messageBox.exec();
+    showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"), 
+    QString("Could not load DeviceMap file " + dmapFileName+"."), 
+    QString("Info: An exception was thrown:") + e.what());
     
     // We just return after displaying the message and leave the deviceList as it was.
     return false;
@@ -309,12 +308,9 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   }
   catch(Exception & e)
   {
-    QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			   QString("Could not create the device ")+
-			   deviceFileName.c_str()+".",
-			   QMessageBox::Ok, this);
-    messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
-    messageBox.exec();
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("Could not create the device ") + deviceFileName.c_str() + ".", 
+    QString("Info: An exception was thrown:") + e.what());
   }
 }
 
@@ -383,7 +379,9 @@ void QtHardMon::read()
     }
   }
   catch (InvalidOperationException &e) {
-    QMessageBox::warning(this, "QtHardMon read error", e.what());
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("QtHardMon read error "), 
+    QString("Info: An exception was thrown:") + e.what());
     return;
   }
   catch (std::exception &e) {
@@ -391,16 +389,11 @@ void QtHardMon::read()
     _hardMonForm.writeButton->setEnabled(false);
     // the error message accesses the _currentDeviceListItem. Is
     // this safe? It might be NULL.
-    QMessageBox messageBox(
-        QMessageBox::Critical, tr("QtHardMon: Error"),
-        QString("Error reading from device ") +
-            _currentDeviceListItem->getDeviceMapElement().uri.c_str() +
-            ".",
-        QMessageBox::Ok, this);
-    messageBox.setInformativeText(QString("Info: An exception was thrown:") +
-                                  e.what() +
-                                  QString("\n\nThe device has been closed."));
-    messageBox.exec();
+    showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"), 
+    QString("Error reading from device ") +
+    _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".", 
+    QString("Info: An exception was thrown:") + e.what() +
+    QString("\n\nThe device has been closed."));
   }
 
   // check if plotting after reading is requested
@@ -426,7 +419,9 @@ void QtHardMon::write()
     }
   }
   catch (InvalidOperationException &e) {
-    QMessageBox::warning(this, "QtHardMon write error", e.what());
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("QtHardMon write error "), 
+    QString("Info: An exception was thrown:") + e.what());
     return;
   }
   catch (std::exception &e) {
@@ -434,16 +429,11 @@ void QtHardMon::write()
 
     // the error message accesses the _currentDeviceListItem. Is this safe? It
     // might be NULL.
-    QMessageBox messageBox(
-        QMessageBox::Critical, tr("QtHardMon: Error"),
-        QString("Error writing to device ") +
-            _currentDeviceListItem->getDeviceMapElement().uri.c_str() +
-            ".",
-        QMessageBox::Ok, this);
-    messageBox.setInformativeText(QString("Info: An exception was thrown:") +
-                                  e.what() +
-                                  QString("\n\nThe device has been closed."));
-    messageBox.exec();
+    showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"), 
+    QString("Error writing to device ") +
+    _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".", 
+    QString("Info: An exception was thrown:") + e.what() +
+    QString("\n\nThe device has been closed."));
   }
 
   if (  _hardMonForm.readAfterWriteCheckBox->isChecked() )
@@ -543,14 +533,10 @@ void QtHardMon::loadConfig(QString const & configFileName)
   }
   catch( std::ifstream::failure & e)
    {
-     QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			    QString("Could not read config file ")+ 
-			    configFileName+".",
-			    QMessageBox::Ok, this);
-     messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
-     messageBox.exec();
-
-     return;
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("Could not read config file ") + configFileName+".", 
+    QString("Info: An exception was thrown:") + e.what());
+    return;
    }
 
   // At this point we considder the config file as successfully loaded, even though it might not contain any
@@ -560,20 +546,19 @@ void QtHardMon::loadConfig(QString const & configFileName)
   // show message box with parse errors, but just continue normally
   if (!configReader.getBadLines().isEmpty() )
   {
-     QMessageBox messageBox(QMessageBox::Warning, tr("QtHardMon: Warning"),
-			    QString("The following lines from the config file ")+
-			    configFileName+" are invalid and will be ignored. Please fix your config file.\n",
-			    QMessageBox::Ok, this);
-     QString infoText;
+    QString infoText;
      for (QStringList::const_iterator badLinesIter = configReader.getBadLines().begin();
 	  badLinesIter != configReader.getBadLines().end(); ++badLinesIter)
      {
        infoText += *badLinesIter;
        infoText += "\n";
      }
-     
-     messageBox.setInformativeText(infoText);
-     messageBox.exec();    
+
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("The following lines from the config file ") + configFileName + 
+    " are invalid and will be ignored. Please fix your config file.\n",
+    infoText);
+    return;
   }
 
 
@@ -597,7 +582,9 @@ void QtHardMon::loadConfig(QString const & configFileName)
   }
   else
   {
-    QMessageBox::warning(this,  tr("QtHardMon: Warning"), QString("Read invalid maxWords from config file."));
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("Read invalid maxWords from config file."),
+    QString(""));
   }
   
   int readAfterWriteFlag = configReader.getValue(READ_AFTER_WRITE_STRING, 
@@ -684,8 +671,9 @@ void QtHardMon::loadConfig(QString const & configFileName)
   if (matchingDevices.isEmpty())
   {
     // the item should have been there, give a warning
-    QMessageBox::warning(this, tr("QtHardMon: Warning"), QString("Device ") + currentDeviceString.c_str()
-			 + " is not in the dmap file.");
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("Device ") + currentDeviceString.c_str() + " is not in the dmap file.",
+    QString(""));
     return;
   }
 
@@ -801,15 +789,12 @@ void QtHardMon::writeConfig(QString const & fileName)
    // we catch a write failure here to show a message box, but rethrow the exception
    catch( std::ifstream::failure & e)
    {
-     QMessageBox messageBox(QMessageBox::Critical, tr("QtHardMon: Error"),
-			    QString("Could not write config file ")+ 
-			    fileName+".",
-			    QMessageBox::Ok, this);
-     messageBox.setInformativeText(QString("Info: An exception was thrown:")+e.what());
-     messageBox.exec();
-
-     // rethrow the exception so the calling code knows that writing failed. 
-     throw;
+    showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"), 
+    QString("Could not write config file ") + fileName + ".",
+    QString("Info: An exception was thrown:")+e.what());
+     
+    // rethrow the exception so the calling code knows that writing failed. 
+    throw;
    }   
 }
 
@@ -1001,12 +986,9 @@ void QtHardMon::parseArgument(QString const &fileName) {
   } else if (checkExtension(fileName, ".cfg") == true) {
     loadConfig(fileName);
   } else {
-    QMessageBox messageBox(
-        QMessageBox::Warning, tr("QtHardMon: Warning"),
-        QString(
-            "Unsupported file extension provided. Filename will be ignored."),
-        QMessageBox::Ok, this);
-    messageBox.exec();
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("Unsupported file extension provided. Filename will be ignored."),
+    QString(""));
   }
 }
 
@@ -1040,7 +1022,9 @@ mtca4u::FixedPointConverter QtHardMon::getConverter() {
 	CustomQTreeItem *registerInformation = dynamic_cast<CustomQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
   if (!registerInformation){
-    QMessageBox::warning(this, "QtHardMon internal error", "Could not create fixed point converter for current register.");
+    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+    QString("QtHardMon internal error"),
+    QString("Could not create fixed point converter for current register."));
     return FixedPointConverter("Unknown Register");
   }
   
@@ -1282,5 +1266,15 @@ void QtHardMon::handleSortCheckboxClick(int state) {
     _hardMonForm.registerTreeWidget->setSortingEnabled(false);
     // redraw the currently sorted tree to pick up the order from the mapfile.
     populateRegisterTree(_hardMonForm.deviceListWidget->currentItem());
+  }
+}
+
+void QtHardMon::showMessageBox(QMessageBox::Icon boxType, QString boxTitle, QString boxText, QString boxInformativeText) {
+  if (noPrompts_) {
+    std::cout << boxText.toStdString() << " "<< boxInformativeText.toStdString() << std::endl;
+  } else {
+    QMessageBox messageBox(boxType, boxTitle, boxText, QMessageBox::Ok, this);
+    messageBox.setInformativeText(boxInformativeText);
+    messageBox.exec();
   }
 }
