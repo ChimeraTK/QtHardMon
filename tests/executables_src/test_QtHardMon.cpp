@@ -131,8 +131,10 @@ struct QtHardmon_populatesRegisterTree_fixture : public QtHardMon_populatesDevic
         qtHardMon->_hardMonForm.SortAscendingcheckBox->setCheckState(Sorted ? Qt::Checked : Qt::Unchecked);
         QList<QListWidgetItem *> items =  qtHardMon->_hardMonForm.deviceListWidget->findItems(DeviceNameToSelect.c_str(), Qt::MatchExactly);
         if (items.size() > 0) {
-            std::cout << "Found!" << std::endl;
+            std::cout << "Found " << deviceNameToSelect << std::endl;
             qtHardMon->_hardMonForm.deviceListWidget->setCurrentItem(items.at(0));
+        } else {
+            BOOST_FAIL("Device not found...");
         }
     }
 };
@@ -156,15 +158,6 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeSorted )
     BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
     // MODULE1 has 3 items
     BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(3)->childCount(), 3);
-
-    // QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV");
-
-    // Expecting MyModule and module, that contains all uncategorized registers
-    // BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
-    // Uncategorized has 5 items: 3 registers and 2 constants
-   //  BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 5);
-    // MyModule has two items: 1 register and 1 submodule
-    // BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
 }
 
 /*
@@ -204,6 +197,78 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
     BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->child(1)->childCount(), 16);
 }
 
+struct QtHardmon_populatesRegisterProperties_fixture : public QtHardmon_populatesRegisterTree_fixture {
+    std::vector<std::string> registerToSelect;
+    QTreeWidgetItem * registerToBeFound;
+
+    QtHardmon_populatesRegisterProperties_fixture(const std::string & DmapFile, const std::string & DeviceNameToSelect, std::vector<std::string> RegisterToSelect) :
+    QtHardmon_populatesRegisterTree_fixture(DmapFile, DeviceNameToSelect),
+    registerToSelect(RegisterToSelect),
+    registerToBeFound(NULL)
+    {
+        QList<QTreeWidgetItem *> registerList =
+        qtHardMon->_hardMonForm.registerTreeWidget->findItems(
+            registerToSelect.back().c_str(),
+            Qt::MatchExactly | Qt::MatchRecursive);
+
+        // Iterate the list until we find the one with the right module
+        for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+            registerIter != registerList.end(); ++registerIter) {
+            // if we found the right register select it and quit the loop
+            if ((*registerIter)->parent()->text(0) ==
+                registerToSelect.front().c_str()) {
+                registerToBeFound = *registerIter;
+                break;
+            }
+        }
+
+        if (!registerToBeFound) {
+            BOOST_FAIL("Register not found...");
+        } else {
+            qtHardMon->_hardMonForm.registerTreeWidget->setCurrentItem(registerToBeFound);
+        }
+    }
+};
+
+void checkRegisterProperties(QtHardMon * qtHardMon,
+                             const std::string & registerName,
+                             const std::string & moduleName,
+                             const std::string & registerBar,
+                             const std::string & registerAddress,
+                             const std::string & registerNElements,
+                             const std::string & registerSize,
+                             const std::string & registerWidth,
+                             const std::string & registerFracBits,
+                             const std::string & registerSignBit
+) {
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerNameDisplay->text().toStdString().c_str(), registerName);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.moduleDisplay->text().toStdString().c_str(), moduleName);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerBarDisplay->text().toStdString().c_str(), registerBar);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerAddressDisplay->text().toStdString().c_str(), registerAddress);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerSizeDisplay->text().toStdString().c_str(), registerSize);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerWidthDisplay->text().toStdString().c_str(), registerWidth);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerFracBitsDisplay->text().toStdString().c_str(), registerFracBits);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
+}
+
+/*
+ * When selecting register, register properties are properly populated.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
+{
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
+
+    checkRegisterProperties(fixture.qtHardMon, "MODULE1", "APP0", "1", "32", "2", "8", "32", "0", "1");
+}
+
+/*
+ * When selecting sequence register, register properties are properly populated.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
+{
+}
+
 /*
  * When toggling autoselect checkbox, previously selected register is properly selected.
  */ 
@@ -212,12 +277,6 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
     
 }
 
-/*
- * When selecting register, register properties are properly populated.
- */ 
-BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
-{
-}
 
 /*
  * When selecting register, data tables is populated with valid values.
@@ -277,4 +336,17 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegisterContinuously )
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_showsRegisterPlot )
 {
+}
+
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeNonNumerical)
+{
+    // QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV");
+
+    // Expecting MyModule and module, that contains all uncategorized registers
+    // BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
+    // Uncategorized has 5 items: 3 registers and 2 constants
+   //  BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 5);
+    // MyModule has two items: 1 register and 1 submodule
+    // BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(2)->childCount(), 2);
+
 }
