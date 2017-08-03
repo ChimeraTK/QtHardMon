@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <QtGui>
+#include <tuple> // std::tuple
 
 // Evil but awesome
 #define private public
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_defaultSettings )
     
     // Not passing via ssh connection due to different font size.
     // BOOST_CHECK_EQUAL(fixture.qtHardMon->font().pointSize(), 11);
-    
+
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_autoRead, true);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_readOnClick, true);
 }
@@ -305,12 +306,27 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
 
 }
 
+void checkTableData(QtHardMon * qtHardMon,
+                    std::vector<std::tuple<int, int, double>> tableDataValues
+) {
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), tableDataValues.size());
+    
+    for (int i = 0; i < tableDataValues.size(); ++i) {
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
+    }
+}
 
 /*
  * When selecting register, data tables is populated with valid values.
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTable )
 {
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
+
+    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
+
 }
 
 
