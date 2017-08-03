@@ -11,7 +11,6 @@
 
 typedef boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > MuxedData_t;
 typedef boost::shared_ptr<mtca4u::DeviceBackend> Device_t;
-typedef mtca4u::RegisterInfoMap::RegisterInfo RegisterInfo_t;
 
 CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidget* parent_)
@@ -21,8 +20,8 @@ CustomQTreeItem::CustomQTreeItem(const QString& text_, const int type_,
                                  QTreeWidgetItem* parent_)
     : QTreeWidgetItem(parent_, QStringList(text_), type_) {}
 
-RegisterInfo_t const CustomQTreeItem::getRegisterMapElement() {
-  return (RegisterInfo_t());
+const mtca4u::RegisterInfo * CustomQTreeItem::getRegisterMapElement() {
+  return new mtca4u::RegisterInfoMap::RegisterInfo();
 }
 
 bool CustomQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
@@ -71,13 +70,13 @@ void ModuleItem::updateRegisterProperties(
   clearGrpBox(grpBox);
 }
 
-RegisterItem::RegisterItem(const RegisterInfo_t& registerInfo,
+RegisterItem::RegisterItem(const mtca4u::RegisterInfo* registerInfo,
                            const QString& text_, QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, RegisterItem::DataType, parent_),
       _registerMapElement(registerInfo),
-      _fixedPointConverter(registerInfo.module+"/"+registerInfo.name,
-                           registerInfo.width, registerInfo.nFractionalBits,
-                           registerInfo.signedFlag) {}
+      _fixedPointConverter(registerInfo->getRegisterName().getComponents().front()+"/"+registerInfo->getRegisterName().getComponents().back(),
+                           dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(registerInfo)->width, dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(registerInfo)->nFractionalBits,
+                           dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(registerInfo)->signedFlag) {}
 
 void RegisterItem::read(TableWidgetData const& tabledata) {
   std::vector<int> inputBuffer = fetchElementsFromCard(tabledata);
@@ -86,24 +85,23 @@ void RegisterItem::read(TableWidgetData const& tabledata) {
 
 std::vector<int> RegisterItem::fetchElementsFromCard(
     const TableWidgetData& tabledata) {
-  RegisterInfo_t regInfo = this->getRegisterMapElement();
+  const mtca4u::RegisterInfo * regInfo = this->getRegisterMapElement();
 
-  int numberOfElements = regInfo.nElements;
+  int numberOfElements = regInfo->getNumberOfElements();
   std::vector<int> buffer(numberOfElements);
 
-  unsigned int registerBar = regInfo.bar;
-  Device_t const& mtcadevice = tabledata.device;
+  unsigned int registerBar = dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->bar;
   int maxrows = tabledata.tableMaxRowCount;
   size_t nBytesToRead =
       std::min(numberOfElements, maxrows) * qthardmon::WORD_SIZE_IN_BYTES;
-  unsigned int registerAddress = regInfo.address;
-
-  mtcadevice->read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
+  unsigned int registerAddress = dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->address;
+  #warning broken functionality of read.
+  //tabledata.device.read(registerBar, registerAddress, &(buffer[0]), nBytesToRead);
   return buffer;
 }
 
 void RegisterItem::write(TableWidgetData const& tabledata) {
-  unsigned int numElementsinRegister = _registerMapElement.nElements;
+  unsigned int numElementsinRegister = _registerMapElement->getNumberOfElements();
   std::vector<int> buffer =
       copyValuesFromTable<int>(tabledata, numElementsinRegister);
   writeRegisterToDevice(tabledata, buffer);
@@ -114,11 +112,11 @@ const mtca4u::FixedPointConverter RegisterItem::getFixedPointConverter() {
 }
 void RegisterItem::writeRegisterToDevice(TableWidgetData const& tabledata,
                                          const std::vector<int>& buffer) {
-  Device_t const& mtcadevice = tabledata.device;
-  unsigned int regAddress = _registerMapElement.address;
-  unsigned int regSizeinBytes = _registerMapElement.nBytes;
-  unsigned int register bar = _registerMapElement.bar;
-  mtcadevice->write(bar, regAddress, &buffer[0], regSizeinBytes);
+  unsigned int regAddress = dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(_registerMapElement)->address;
+  unsigned int regSizeinBytes = dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(_registerMapElement)->nBytes;
+  unsigned int register bar = dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(_registerMapElement)->bar;
+  #warning broken functionality of write.
+  // tabledata.device.write(bar, regAddress, &buffer[0], regSizeinBytes);
 }
 
 void RegisterItem::updateRegisterProperties(
@@ -126,13 +124,13 @@ void RegisterItem::updateRegisterProperties(
   fillGrpBox(grpBox, _registerMapElement);
 }
 
-const RegisterInfo_t RegisterItem::getRegisterMapElement() {
+const mtca4u::RegisterInfo * RegisterItem::getRegisterMapElement() {
   return _registerMapElement;
 }
 
 MultiplexedAreaItem::MultiplexedAreaItem(
     boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const& accessor,
-    const RegisterInfo_t& registerInfo, const QString& text_,
+    const mtca4u::RegisterInfo* registerInfo, const QString& text_,
     QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, MultiplexedAreaItem::DataType, parent_),
       _dataAccessor(accessor),
@@ -149,21 +147,21 @@ void MultiplexedAreaItem::write(TableWidgetData const& /*tabledata*/) {
 
 void MultiplexedAreaItem::updateRegisterProperties(
     const RegisterPropertyGrpBox& grpBox) {
-  grpBox.registerNameDisplay->setText(_registerMapElement.name.c_str());
-  grpBox.moduleDisplay->setText(_registerMapElement.module.c_str());
-  grpBox.registerBarDisplay->setText(QString::number(_registerMapElement.bar));
+  grpBox.registerNameDisplay->setText(_registerMapElement->getRegisterName().getComponents().back().c_str());
+  grpBox.moduleDisplay->setText(_registerMapElement->getRegisterName().getComponents().front().c_str());
+  grpBox.registerBarDisplay->setText(QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(_registerMapElement)->bar));
   grpBox.registerNElementsDisplay->setText("");
   grpBox.registerAddressDisplay->setText(
-      QString::number(_registerMapElement.address));
+      QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(_registerMapElement)->address));
   grpBox.registerSizeDisplay->setText(
-      QString::number(_registerMapElement.nBytes));
+      QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(_registerMapElement)->nBytes));
 
   grpBox.registerWidthDisplay->setText("");
   grpBox.registerFracBitsDisplay->setText("");
   grpBox.registeSignBitDisplay->setText("");
 }
 
-const RegisterInfo_t MultiplexedAreaItem::getRegisterMapElement() {
+const mtca4u::RegisterInfo * MultiplexedAreaItem::getRegisterMapElement() {
   return (_registerMapElement);
 }
 boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
@@ -171,15 +169,15 @@ MultiplexedAreaItem::getAccessor() {
   return (_dataAccessor);
 }
 
-SequenceDescriptor::SequenceDescriptor(const RegisterInfo_t& registerInfo,
+SequenceDescriptor::SequenceDescriptor(const mtca4u::RegisterInfo* registerInfo,
                                        unsigned int sequenceNumber,
                                        const QString& text_,
                                        QTreeWidgetItem* parent_)
     : CustomQTreeItem(text_, SequenceDescriptor::DataType, parent_),
       _registerMapElement(registerInfo),
-      _fixedPointConverter(registerInfo.module+"/"+registerInfo.name,
-                           registerInfo.width, registerInfo.nFractionalBits,
-                           registerInfo.signedFlag),
+      _fixedPointConverter(registerInfo->getRegisterName().getComponents().front()+"/"+registerInfo->getRegisterName().getComponents().back(),
+                           dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(registerInfo)->width, dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(registerInfo)->nFractionalBits,
+                           dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(registerInfo)->signedFlag),
       _sequenceNumber(sequenceNumber) {}
 
 void SequenceDescriptor::read(TableWidgetData const& tabledata) {
@@ -198,7 +196,7 @@ void SequenceDescriptor::updateRegisterProperties(
   fillGrpBox(grpBox, _registerMapElement);
 }
 
-const RegisterInfo_t SequenceDescriptor::getRegisterMapElement() {
+const mtca4u::RegisterInfo  * SequenceDescriptor::getRegisterMapElement() {
   return (_registerMapElement);
 }
 
@@ -219,17 +217,17 @@ void CustomQTreeItem::clearTable(const TableWidgetData& tabledata) {
 
 void CustomQTreeItem::fillGrpBox(
     const RegisterPropertyGrpBox& grpBox,
-    const mtca4u::RegisterInfoMap::RegisterInfo& regInfo) {
-  grpBox.registerNameDisplay->setText(regInfo.name.c_str());
-  grpBox.moduleDisplay->setText(regInfo.module.c_str());
-  grpBox.registerBarDisplay->setText(QString::number(regInfo.bar));
-  grpBox.registerNElementsDisplay->setText(QString::number(regInfo.nElements));
-  grpBox.registerAddressDisplay->setText(QString::number(regInfo.address));
-  grpBox.registerSizeDisplay->setText(QString::number(regInfo.nBytes));
-  grpBox.registerWidthDisplay->setText(QString::number(regInfo.width));
+    const mtca4u::RegisterInfo * regInfo) {
+  grpBox.registerNameDisplay->setText(regInfo->getRegisterName().getComponents().back().c_str());
+  grpBox.moduleDisplay->setText(regInfo->getRegisterName().getComponents().front().c_str());
+  grpBox.registerBarDisplay->setText(QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->bar));
+  grpBox.registerNElementsDisplay->setText(QString::number(regInfo->getNumberOfElements()));
+  grpBox.registerAddressDisplay->setText(QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->address));
+  grpBox.registerSizeDisplay->setText(QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->nBytes));
+  grpBox.registerWidthDisplay->setText(QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->width));
   grpBox.registerFracBitsDisplay->setText(
-      QString::number(regInfo.nFractionalBits));
-  grpBox.registeSignBitDisplay->setText(QString::number(regInfo.signedFlag));
+      QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->nFractionalBits));
+  grpBox.registeSignBitDisplay->setText(QString::number(dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->signedFlag));
 }
 
 const mtca4u::FixedPointConverter SequenceDescriptor::getFixedPointConverter() {
@@ -259,8 +257,8 @@ void ModuleItem::clearGrpBox(const RegisterPropertyGrpBox& grpBox) {
 const mtca4u::FixedPointConverter CustomQTreeItem::getFixedPointConverter() {
   // The default implementation provides a 'dummy' fixed point converter with
   // the default settings
-  RegisterInfo_t regInfo = this->getRegisterMapElement();
-  return mtca4u::FixedPointConverter(regInfo.module+"/"+regInfo.name,
-                                     regInfo.width, regInfo.nFractionalBits,
-                                     regInfo.signedFlag);
+  const mtca4u::RegisterInfo * regInfo = getRegisterMapElement();
+  return mtca4u::FixedPointConverter(regInfo->getRegisterName().getComponents().front()+"/"+regInfo->getRegisterName().getComponents().back(),
+                                     dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->width, dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->nFractionalBits,
+                                     dynamic_cast<const mtca4u::RegisterInfoMap::RegisterInfo*>(regInfo)->signedFlag);
 }

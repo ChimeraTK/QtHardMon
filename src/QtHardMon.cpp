@@ -12,7 +12,7 @@
 #include <qaction.h>
 
 #include <mtca4u/Exception.h>
-#include <mtca4u/DMapFilesParser.h>
+#include <mtca4u/DMapFileParser.h>
 #include <mtca4u/NumericAddressedBackendMuxedRegisterAccessor.h>
 #include <mtca4u/PcieBackendException.h>
 #include <mtca4u/BackendFactory.h>
@@ -50,7 +50,7 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags) 
-  : QMainWindow(parent_, flags),_hardMonForm(),  _mtcaDevice(), _maxWords( DEFAULT_MAX_WORDS ),
+  : QMainWindow(parent_, flags),_hardMonForm(), _maxWords( DEFAULT_MAX_WORDS ),
     _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
     _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
     _defaultBackgroundBrush( Qt::transparent ), // transparent
@@ -188,13 +188,11 @@ void  QtHardMon::loadBoards()
 
 bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
 {
-
-  mtca4u::DMapFilesParser filesParser;
-
+  mtca4u::DMapFileParser fileParser;
+  DeviceInfoMapPointer dmap;
   try{
-    filesParser.parse_file(dmapFileName.toStdString());
+    dmap = fileParser.parse(dmapFileName.toStdString());
     BackendFactory::getInstance().setDMapFilePath(dmapFileName.toStdString());
-
   }
   catch( Exception & e )
   {
@@ -216,16 +214,13 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
   // on the first entry, which we don't want. The focus is set to the registerTreeWidget.
   _hardMonForm.registerTreeWidget->setFocus(Qt::OtherFocusReason);
 
-  for (DMapFilesParser::iterator deviceIter = filesParser.begin();
-       deviceIter != filesParser.end(); ++deviceIter)
+  for (DeviceInfoMap::iterator deviceIter = dmap->begin();
+       deviceIter != dmap->end(); ++deviceIter)
   {
-    
-    // fixme: Issue in libdevMap: why is the iterator on a pair?
-    _hardMonForm.deviceListWidget->addItem( new DeviceListItem( (*deviceIter).first, (*deviceIter).second, 
-							       (*deviceIter).first.deviceName.c_str(),
+    _hardMonForm.deviceListWidget->addItem( new DeviceListItem( (*deviceIter), 
+							       (*deviceIter).deviceName.c_str(),
 							       _hardMonForm.deviceListWidget) );
   }
-
   return true;
   // on user request: do not automatically load the first device. This might be not accessible and
   // immediately gives an error message.
@@ -261,10 +256,6 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   _currentDeviceListItem = deviceListItem;
   // close the previous device. This also disables the relevant GUI elements
   closeDevice();
-  // The user has selected a new device. The old device pointer should be
-  // cleared. Open device is intelligent to create a new object through the
-  // factory before calling _mtcaDevice->open()
-  _mtcaDevice.reset();
   // opening the device enables the gui elements if success
   openDevice(deviceListItem->getDeviceMapElement().deviceName);
 
@@ -284,14 +275,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   //try to open a createa and new device. If this fails disable the buttons and the registerValues
 	try
   {
-    // this might throw
-  if(_mtcaDevice == NULL){
-    // We work with the same instance on _mtcaDevice as long as the current
-    // entry in the GUI device list is selected. _mtcaDevice is reset only when
-    // the user moves to a new entry in the device list (see deviceSelected)
-    _mtcaDevice = BackendFactory::getInstance().createBackend(deviceFileName);
-  }
-  _mtcaDevice->open();
+  currentDevice_.open(deviceFileName);
     // enable all of the GUI in case it was deactivated before
     _hardMonForm.valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
@@ -316,21 +300,21 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
 
 void QtHardMon::closeDevice()
 {
-	if (_mtcaDevice)
-		_mtcaDevice->close();
-   _hardMonForm.valuesTableWidget->setEnabled(false);
-   _hardMonForm.operationsGroupBox->setEnabled(false);
-   _hardMonForm.optionsGroupBox->setEnabled(false);
-   _plotWindow->setEnabled(false);
-   // If the device is closed then there is no way we can read values from the
-   // registers - they are not available anymore. Nothing to show on the table
-   clearAllRowsInTable();
-   _hardMonForm.openClosedLabel->setText(
-		QApplication::translate("QtHardMonForm", "Device is closed.", 0,
-					QApplication::UnicodeUTF8));
-   _hardMonForm.openCloseButton->setText(
-		QApplication::translate("QtHardMonForm", "Open", 0,
-					QApplication::UnicodeUTF8));
+	if (currentDevice_.isOpened())
+		currentDevice_.close();
+  _hardMonForm.valuesTableWidget->setEnabled(false);
+  _hardMonForm.operationsGroupBox->setEnabled(false);
+  _hardMonForm.optionsGroupBox->setEnabled(false);
+  _plotWindow->setEnabled(false);
+  // If the device is closed then there is no way we can read values from the
+  // registers - they are not available anymore. Nothing to show on the table
+  clearAllRowsInTable();
+  _hardMonForm.openClosedLabel->setText(
+  QApplication::translate("QtHardMonForm", "Device is closed.", 0,
+        QApplication::UnicodeUTF8));
+  _hardMonForm.openCloseButton->setText(
+  QApplication::translate("QtHardMonForm", "Open", 0,
+        QApplication::UnicodeUTF8));
 }
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
@@ -348,8 +332,15 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 
   // remember that this register has been selected
   if((registerTreeItem->type() != ModuleItem::DataType) && (registerTreeItem->type() != MultiplexedAreaItem::DataType)){
-    _currentDeviceListItem->setLastSelectedRegisterName( registerTreeItem->getRegisterMapElement().name ) ;
-    _currentDeviceListItem->setLastSelectedModuleName( registerTreeItem->getRegisterMapElement().module ) ;
+    std::vector<std::string> fullRegisterName = registerTreeItem->getRegisterMapElement()->getRegisterName().getComponents();
+    std::string moduleName = NO_MODULE_NAME_STRING;
+    std::string registerName = fullRegisterName.at(0);
+    if (fullRegisterName.size() == 2) {
+      moduleName = fullRegisterName.at(0);
+      registerName = fullRegisterName.at(1);
+    }
+    _currentDeviceListItem->setLastSelectedRegisterName( registerName ) ;
+    _currentDeviceListItem->setLastSelectedModuleName( moduleName ) ;
   }
 
   if (!_autoRead || (registerTreeItem->type() == ModuleItem::DataType)){
@@ -371,9 +362,9 @@ void QtHardMon::read()
       _hardMonForm.registerTreeWidget->currentItem());
 
   try {
-    if (_mtcaDevice->isOpen()) {
+    if (currentDevice_.isOpened()) {
       TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
-                                _mtcaDevice);
+                                currentDevice_);
       registerTreeItem->read(tableData);
       _hardMonForm.writeButton->setEnabled(true);
     }
@@ -412,9 +403,9 @@ void QtHardMon::write()
       _hardMonForm.registerTreeWidget->currentItem());
 
   try {
-    if (_mtcaDevice->isOpen()) {
+    if (currentDevice_.isOpened()) {
       TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
-                                _mtcaDevice);
+                                currentDevice_);
       registerTreeItem->write(tableData);
     }
   }
@@ -820,25 +811,22 @@ void QtHardMon::unckeckShowPlotWindow()
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
 // constructors of the data members
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement,
-					   mtca4u::RegisterInfoMapPointer const & register_map_pointer,
 					   QListWidget * parent_ )
   : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _registerInfoMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
+    _lastSelectedRegisterName(),_lastSelectedModuleName()
   
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement,
-					   mtca4u::RegisterInfoMapPointer const & register_map_pointer,
 					   const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _registerInfoMapPointer( register_map_pointer ),_lastSelectedRegisterName(),_lastSelectedModuleName()
+    _lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement,
-					   mtca4u::RegisterInfoMapPointer const & register_map_pointer,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
-    _deviceMapElement( device_map_emlement ),  _registerInfoMapPointer( register_map_pointer ),
+    _deviceMapElement( device_map_emlement ),
     _lastSelectedRegisterName(),_lastSelectedModuleName()
 {}
 
@@ -847,11 +835,6 @@ QtHardMon::DeviceListItem::~DeviceListItem(){}
  mtca4u::DeviceInfoMap::DeviceInfo const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
-}
-
-mtca4u::RegisterInfoMapPointer const & QtHardMon::DeviceListItem::getRegisterMapPointer() const
-{
-  return _registerInfoMapPointer;
 }
 
 std::string QtHardMon::DeviceListItem::getLastSelectedRegisterName() const
@@ -886,16 +869,12 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
 }
 
 void QtHardMon::openCloseDevice(){
-	if (!_mtcaDevice)
-		openDevice( _currentDeviceListItem->getDeviceMapElement().deviceName );
-	else
-	{
-	 if (_mtcaDevice->isOpen()){
+ if (currentDevice_.isOpened()){
     closeDevice();
   }else{
     openDevice( _currentDeviceListItem->getDeviceMapElement().deviceName );
   }
-	}
+
 }
 
 void QtHardMon::updateTableEntries(int row, int column) {
@@ -1068,29 +1047,32 @@ CustomQTreeItem *QtHardMon::createAreaDesciptor(
   std::string registerName = regInfo.name;
   std::string regionName = extractMultiplexedRegionName(registerName);
   std::string moduleName = regInfo.module;
-  mtca4u::RegisterInfoMapPointer RegisterInfoMap = deviceListItem->getRegisterMapPointer();
+  #warning Broken MultiplexedDataAccessor functionality, fix when redesigning
+  // mtca4u::RegisterInfoMapPointer RegisterInfoMap = deviceListItem->getRegisterMapPointer();
 
-  boost::shared_ptr<MultiplexedDataAccessor<double> > accessor =
-      mtca4u::MultiplexedDataAccessor<double>::createInstance(
-          regionName, moduleName, _mtcaDevice, RegisterInfoMap);
+  // boost::shared_ptr<MultiplexedDataAccessor<double> > accessor =
+  //     mtca4u::MultiplexedDataAccessor<double>::createInstance(
+  //         regionName, moduleName, _mtcaDevice, RegisterInfoMap);
 
-  return (new MultiplexedAreaItem(accessor, regInfo, registerName.c_str()) );
+ // return (new MultiplexedAreaItem(accessor, regInfo, registerName.c_str()) );
+ return NULL;
 }
 
 CustomQTreeItem *QtHardMon::createAreaDescriptorSubtree(
     CustomQTreeItem *areaDescriptor, mtca4u::RegisterInfoMap::const_iterator &it,
     mtca4u::RegisterInfoMap::const_iterator finalIterator) {
   // FIXME: this is not nice
-  ++it; // start from the first seq description
-  for (unsigned int sequenceCount = 0;
-       ((it != finalIterator) && isSeqDescriptor(it->name));
-       ++it, ++sequenceCount) {
-    CustomQTreeItem *seq = new SequenceDescriptor(
-        *it, sequenceCount, it->name.c_str());
-    areaDescriptor->addChild(seq);
-  }
-  --it; // leave the iterator at the last sequence description
-  return areaDescriptor;
+  // ++it; // start from the first seq description
+  // for (unsigned int sequenceCount = 0;
+  //      ((it != finalIterator) && isSeqDescriptor(it->name));
+  //      ++it, ++sequenceCount) {
+  //   CustomQTreeItem *seq = new SequenceDescriptor(
+  //       *it, sequenceCount, it->name.c_str());
+  //   areaDescriptor->addChild(seq);
+  // }
+  // --it; // leave the iterator at the last sequence description
+  // return areaDescriptor;
+  return NULL;
 }
 
 std::string QtHardMon::extractMultiplexedRegionName(
@@ -1151,43 +1133,48 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   }
 
   // the deviceItem actually is a DeviceListItemType. As this is a private slot
-  // it is safe to assume this
-  // and use a static cast.
+  // it is safe to assume this and use a static cast.
   DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
   _hardMonForm.registerTreeWidget->clear();
 
   // get the registerMap and fill the RegisterTreeWidget
-  for (RegisterInfoMap::const_iterator registerIter =
-           deviceListItem->getRegisterMapPointer()->begin();
-       registerIter != deviceListItem->getRegisterMapPointer()->end();
+  for (RegisterCatalogue::const_iterator registerIter =
+           currentDevice_.getRegisterCatalogue().begin();
+       registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
-    QString moduleName(registerIter->module.empty()
-                           ? NO_MODULE_NAME_STRING
-                           : registerIter->module.c_str());
+    
+    std::vector<std::string> fullRegisterName = registerIter->getRegisterName().getComponents();
+    QString moduleName = QString(NO_MODULE_NAME_STRING);
+    QString registerName = QString(fullRegisterName.at(0).c_str());
+    #warning Make it so there might be submodules used
+    if (fullRegisterName.size() == 2) {
+      moduleName = QString(fullRegisterName.at(0).c_str());
+      registerName = QString(fullRegisterName.at(1).c_str());
+    }
     QList<QTreeWidgetItem *> moduleList =
         _hardMonForm.registerTreeWidget->findItems(moduleName,
                                                    Qt::MatchExactly);
 
     QTreeWidgetItem *moduleItem;
     if (moduleList.empty()) {
-      moduleItem = new ModuleItem(QString(moduleName));
+      moduleItem = new ModuleItem(moduleName);
       _hardMonForm.registerTreeWidget->addTopLevelItem(moduleItem);
     } else {
       moduleItem = moduleList.front(); // should be safe
     }
 
-    if (isMultiplexedDataRegion(registerIter->name)) {
-      CustomQTreeItem *areaDescriptor =
-          createAreaDesciptor(deviceListItem, *registerIter);
-      RegisterInfoMap::const_iterator it_end =
-          deviceListItem->getRegisterMapPointer()->end();
-      areaDescriptor =
-          createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
-      moduleItem->addChild(dynamic_cast<QTreeWidgetItem*>(areaDescriptor));
-    } else {
+    // if (isMultiplexedDataRegion(registerName)) {
+    //   CustomQTreeItem *areaDescriptor =
+    //       createAreaDesciptor(deviceListItem, *registerIter);
+    //   RegisterInfoMap::const_iterator it_end =
+    //       deviceListItem->getRegisterMapPointer()->end();
+    //   areaDescriptor =
+    //       createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
+    //   moduleItem->addChild(dynamic_cast<QTreeWidgetItem*>(areaDescriptor));
+    // } else {
       moduleItem->addChild(
-          new RegisterItem(*registerIter, registerIter->name.c_str()));
-    }
+          new RegisterItem(&(*registerIter), registerName));
+    // }
   }
   _hardMonForm.registerTreeWidget->expandAll();
 
@@ -1212,7 +1199,14 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
       CustomQTreeItem *registerItem =
           static_cast<CustomQTreeItem *>(*registerIter);
       // if we found the right register select it and quit the loop
-      if (registerItem->getRegisterMapElement().module ==
+      std::vector<std::string> fullRegisterName = registerItem->getRegisterMapElement()->getRegisterName().getComponents();
+      std::string moduleName = NO_MODULE_NAME_STRING;
+      std::string registerName = fullRegisterName.at(0);
+      if (fullRegisterName.size() == 2) {
+        moduleName = fullRegisterName.at(0);
+        registerName = fullRegisterName.at(1);
+      }
+      if (moduleName ==
           deviceListItem->getLastSelectedModuleName()) {
         _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
         break;

@@ -3,6 +3,7 @@
 
 #ifndef Q_MOC_RUN
 #include <mtca4u/RegisterInfoMap.h>
+#include <mtca4u/Device.h>
 #include <mtca4u/MultiplexedDataAccessor.h>
 #include <mtca4u/PcieBackend.h>
 #endif
@@ -58,14 +59,14 @@ struct TableWidgetData {
   /// the table
   unsigned int tableMaxRowCount;
   /// Pointer to the currently opened device.
-  boost::shared_ptr<mtca4u::DeviceBackend> device;
+  mtca4u::Device device;
 
   TableWidgetData() : table(0), tableMaxRowCount(0), device() {}
   /**
    * Default constructor
    */
   TableWidgetData(QTableWidget* table_, unsigned int maxRow_,
-                  boost::shared_ptr<mtca4u::DeviceBackend> const& device_)
+                  const mtca4u::Device & device_)
       : table(table_), tableMaxRowCount(maxRow_), device(device_) {}
 
   /**
@@ -118,7 +119,7 @@ public:
   /**
    * retuen the map file element if applicable
    */
-  virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+  virtual const mtca4u::RegisterInfo * getRegisterMapElement();
 
   /**
    * return a fixed point converter if applicable. Else a fixed point converter
@@ -162,7 +163,7 @@ protected:
    * Helper method
    */
   void fillGrpBox(RegisterPropertyGrpBox const& grpBox,
-                  mtca4u::RegisterInfoMap::RegisterInfo const& regInfo);
+                  const mtca4u::RegisterInfo * regInfo);
 };
 
 /**
@@ -193,19 +194,19 @@ public:
   /**
    * Default constructor
    */
-  RegisterItem(const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo,
+  RegisterItem(const mtca4u::RegisterInfo * registerInfo,
                const QString& text_, QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
-  virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+  virtual const mtca4u::RegisterInfo * getRegisterMapElement();
   virtual mtca4u::FixedPointConverter const getFixedPointConverter();
 
   /// Data type that represents the RegisterItem element
   static const int DataType = QTreeWidgetItem::UserType + 2;
 
 private:
-  mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
+  const mtca4u::RegisterInfo * _registerMapElement;
   mtca4u::FixedPointConverter _fixedPointConverter;
 
   std::vector<int> fetchElementsFromCard(TableWidgetData const& tabledata);
@@ -224,13 +225,13 @@ public:
   MultiplexedAreaItem(
       boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
           accessor,
-      const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo,
+      const mtca4u::RegisterInfo* registerInfo,
       const QString& text_, QTreeWidgetItem* parent_ = 0);
 
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
-  virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+  virtual const mtca4u::RegisterInfo * getRegisterMapElement();
   /// return the dmux data accessor.
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
   getAccessor();
@@ -240,7 +241,7 @@ public:
 
 private:
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > _dataAccessor;
-  mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
+  const mtca4u::RegisterInfo * _registerMapElement;
 };
 
 /**
@@ -251,20 +252,20 @@ public:
   /**
    * Default constructor
    */
-  SequenceDescriptor(const mtca4u::RegisterInfoMap::RegisterInfo& registerInfo,
+  SequenceDescriptor(const mtca4u::RegisterInfo* registerInfo,
                      unsigned int sequenceNumber, const QString& text_,
                      QTreeWidgetItem* parent_ = 0);
   virtual void read(TableWidgetData const& tabledata);
   virtual void write(TableWidgetData const& tabledata);
   virtual void updateRegisterProperties(RegisterPropertyGrpBox const& grpBox);
-  virtual mtca4u::RegisterInfoMap::RegisterInfo const getRegisterMapElement();
+  virtual const mtca4u::RegisterInfo * getRegisterMapElement();
   virtual mtca4u::FixedPointConverter const getFixedPointConverter();
 
   /// Data type that represents the Sequence descriptor element
   static const int DataType = QTreeWidgetItem::UserType + 4;
 
 private:
-  mtca4u::RegisterInfoMap::RegisterInfo _registerMapElement;
+  const mtca4u::RegisterInfo * _registerMapElement;
   mtca4u::FixedPointConverter _fixedPointConverter;
   unsigned int _sequenceNumber;
   boost::shared_ptr<mtca4u::MultiplexedDataAccessor<double> > const&
