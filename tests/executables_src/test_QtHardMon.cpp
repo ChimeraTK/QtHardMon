@@ -129,9 +129,13 @@ struct QtHardmon_populatesRegisterTree_fixture : public QtHardMon_populatesDevic
     deviceNameToSelect(DeviceNameToSelect)
     {
         qtHardMon->_hardMonForm.SortAscendingcheckBox->setCheckState(Sorted ? Qt::Checked : Qt::Unchecked);
+        switchDeviceSelection(deviceNameToSelect);
+    }
+
+    void switchDeviceSelection(const std::string & DeviceNameToSelect) {
         QList<QListWidgetItem *> items =  qtHardMon->_hardMonForm.deviceListWidget->findItems(DeviceNameToSelect.c_str(), Qt::MatchExactly);
         if (items.size() > 0) {
-            std::cout << "Found " << deviceNameToSelect << std::endl;
+            std::cout << "Found " << DeviceNameToSelect << std::endl;
             qtHardMon->_hardMonForm.deviceListWidget->setCurrentItem(items.at(0));
         } else {
             BOOST_FAIL("Device not found...");
@@ -187,8 +191,8 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
 {
     QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
 
-    // There is only APP0 module 
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 1);
+    // There are two modules, APP0 and MODULE1 (we care only for the first one in this test)
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
 
     // APP0 has 4 items, one of them is multiplexed area
     BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
@@ -285,7 +289,19 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
 {
-    
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"MODULE1", "WORD_USER1"});
+    checkRegisterProperties(fixture.qtHardMon, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
+
+    fixture.qtHardMon->_hardMonForm.autoselectPreviousRegisterCheckBox->setCheckState(Qt::Checked);
+    fixture.switchDeviceSelection("NUMDEV_MULT");
+
+    checkRegisterProperties(fixture.qtHardMon, "", "", "", "", "", "", "", "", "");
+
+    fixture.switchDeviceSelection("NUMDEV");
+
+    checkRegisterProperties(fixture.qtHardMon, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
+
+
 }
 
 

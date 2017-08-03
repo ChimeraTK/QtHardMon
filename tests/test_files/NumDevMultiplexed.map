@@ -25,3 +25,4 @@ APP0.SEQUENCE_DAQ0_ADCA_12                                  1         1036      
 APP0.SEQUENCE_DAQ0_ADCA_13                                  1         1040            4     13     32      0    1
 APP0.SEQUENCE_DAQ0_ADCA_14                                  1         1044            4     13     32      0    1
 APP0.SEQUENCE_DAQ0_ADCA_15                                  1         1048            4     13     32      0    0 
+MODULE0.WORD_USER1                0x00000001    0x00000100    0x00000004    0x00000001       18         3
