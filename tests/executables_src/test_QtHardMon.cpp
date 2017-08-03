@@ -168,22 +168,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeUnsorted )
     BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(3)->childCount(), 3);
 }
 
-/*
- * When device with multiplexed registers is selected, the register tree gets populated properly.
-*/
-BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
-{
-    QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
 
-    // There are two modules, APP0 and MODULE1 (we care only for the first one in this test)
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
-
-    // APP0 has 4 items, one of them is multiplexed area
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
-
-    // Multiplexed area has 16 sequence registers
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->child(1)->childCount(), 16);
-}
 
 struct QtHardmon_populatesRegisterProperties_fixture : public QtHardmon_populatesRegisterTree_fixture {
     QTreeWidgetItem * registerToBeFound;
@@ -259,16 +244,6 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
     checkRegisterProperties(fixture.qtHardMon, "MODULE1", "APP0", "1", "32", "2", "8", "32", "0", "1");
 }
 
-/*
- * When selecting sequence register, register properties are properly populated.
- */ 
-BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
-{
-    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
-
-    checkRegisterProperties(fixture.qtHardMon, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "1", "4", "32", "0", "1");
-
-}
 
 /*
  * When toggling autoselect checkbox, previously selected register is properly selected.
@@ -323,16 +298,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTable )
 
 }
 
-/*
- * When selecting sequence register, data table is populated with valid values.
- */ 
-BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTableSequence )
-{
-    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
 
-    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0)}, 4096);
-
-}
 
 // FIXME: This is not working properly - the code invocation does not make the second column (raw hex) be filled.
 // Left for now, but has to be solved.
@@ -414,7 +380,45 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_writesRegister )
 
 }
 
+/*
+ * When device with multiplexed registers is selected, the register tree gets populated properly.
+*/
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
+{
+    QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
 
+    // There are two modules, APP0 and MODULE1 (we care only for the first one in this test)
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
+
+    // APP0 has 4 items, one of them is multiplexed area
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
+
+    // Multiplexed area has 16 sequence registers
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->child(1)->childCount(), 16);
+}
+
+
+/*
+ * When selecting sequence register, register properties are properly populated.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
+{
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
+
+    checkRegisterProperties(fixture.qtHardMon, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "1", "4", "32", "0", "1");
+
+}
+
+/*
+ * When selecting sequence register, data table is populated with valid values.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTableSequence )
+{
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
+
+    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0)}, 4096);
+
+}
 
 /* ================================ SKIPPED ================================= */
 /* 
