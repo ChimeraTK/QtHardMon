@@ -43,7 +43,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
 
 SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
                             src/PlotWindow.cpp src/CustomDelegates.cpp src/HexSpinBox.cpp
-                            src/CustomQTreeItem.cpp src/DeviceElementQTreeItem.cpp src/ModuleQTreeItem.cpp)
+                            src/CustomQTreeItem.cpp src/DeviceElementQTreeItem.cpp 
+                            src/ModuleQTreeItem.cpp src/NumericAddressedRegisterQTreeItem.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
 SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h)
 # All headers, to have the dependencies correct

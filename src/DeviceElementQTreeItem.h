@@ -3,6 +3,8 @@
 
 #include <qtreewidget.h>
 
+#define NO_MODULE_NAME_STRING "[No Module Name]"
+
 enum class DeviceElementDataType {
     ModuleDataType = QTreeWidgetItem::UserType + 1,
     NumAddressedRegisterDataType,
