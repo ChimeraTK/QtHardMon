@@ -210,18 +210,25 @@ struct QtHardmon_populatesRegisterProperties_fixture : public QtHardmon_populate
         qtHardMon->_hardMonForm.registerTreeWidget->findItems(
             registerToSelect.back().c_str(),
             Qt::MatchExactly | Qt::MatchRecursive);
+        registerToSelect.pop_back();
 
+        for (std::vector<std::string>::reverse_iterator nameIter 
+            = registerToSelect.rbegin();
+            nameIter != registerToSelect.rend();
+            ++nameIter
+            ) {
         // Iterate the list until we find the one with the right module
-        for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
-            registerIter != registerList.end(); ++registerIter) {
-            // if we found the right register select it and quit the loop
-            if ((*registerIter)->parent()->text(0) ==
-                registerToSelect.front().c_str()) {
-                registerToBeFound = *registerIter;
-                break;
+            
+            for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+                registerIter != registerList.end(); ++registerIter) {
+                // if we found the right register select it and quit the loop
+                if ((*registerIter)->parent()->text(0) ==
+                    (*nameIter).c_str()) {
+                    registerToBeFound = *registerIter;
+                    break;
+                }
             }
         }
-
         if (!registerToBeFound) {
             BOOST_FAIL("Register not found...");
         } else {
@@ -267,6 +274,10 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
 {
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
+
+    checkRegisterProperties(fixture.qtHardMon, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "1", "4", "32", "0", "1");
+
 }
 
 /*
