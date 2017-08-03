@@ -289,25 +289,48 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
 }
 
 void checkTableData(QtHardMon * qtHardMon,
-                    std::vector<std::tuple<int, int, double>> tableDataValues
+                    std::vector<std::tuple<int, int, double>> tableDataValues,
+                    int size = 0
 ) {
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), tableDataValues.size());
-    
-    for (int i = 0; i < tableDataValues.size(); ++i) {
-        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
-    //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
-        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
+    if (size == 0) {
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), tableDataValues.size());
+        
+        for (int i = 0; i < tableDataValues.size(); ++i) {
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
+        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
+        }
+    } else {
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), size);
+        
+        for (int i = 0; i < size; ++i) {
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(0)));
+        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(0)));
+        }
     }
+    
 }
 
 /*
- * When selecting register, data tables is populated with valid values.
+ * When selecting register, data table is populated with valid values.
  */ 
 BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTable )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
 
     checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
+
+}
+
+/*
+ * When selecting sequence register, data table is populated with valid values.
+ */ 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTableSequence )
+{
+    QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
+
+    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0)}, 4096);
 
 }
 
