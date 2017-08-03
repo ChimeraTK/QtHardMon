@@ -27,3 +27,33 @@ BOOST_AUTO_TEST_CASE ( DeviceElementQTreeItem_QTreeWidgetItem )
 
 }
 
+#include "ModuleQTreeItem.h"
+#include "Exceptions.h"
+
+/*
+ * The module item is properly constructed and returns correct data type.
+*/
+BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_DataType )
+{
+    QTreeWidgetItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL);
+    BOOST_CHECK_EQUAL(moduleItem->type(), static_cast<int>(DeviceElementDataType::ModuleDataType));
+}
+
+/*
+ * The module item cannot be used to read or write.
+*/
+BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_ReadAndWriteThrows )
+{
+    DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL);
+    BOOST_CHECK_THROW(moduleItem->read(), InvalidOperationException);
+    BOOST_CHECK_THROW(moduleItem->write(), InvalidOperationException);
+}
+
+/*
+ * Module item properly fills register properties.
+ */
+BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_fillsRegisterProperties )
+{
+    // RegisterPropertiesWidget * registerPropertiesWidget = new RegisterPropertiesWidget;
+    // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterPropertiesWidget);
+}

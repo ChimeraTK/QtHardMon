@@ -3,6 +3,14 @@
 
 #include <qtreewidget.h>
 
+enum class DeviceElementDataType {
+    ModuleDataType = QTreeWidgetItem::UserType + 1,
+    NumAddressedRegisterDataType,
+    MultiplexedAreaDataType,
+    SequenceDescriptorDataType,
+    GenericRegisterDataType
+};
+
 class DeviceElementQTreeItem : public QTreeWidgetItem {
 
 public:
