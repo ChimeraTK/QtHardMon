@@ -17,7 +17,7 @@ struct DeviceElementQTreeItem_fixtureBase {
 
     DeviceElementQTreeItem_fixtureBase() {
         int argc = 0;
-        char ** argv;
+        char ** argv = nullptr;
         app = new QApplication(argc, argv);
     }
 };
@@ -65,22 +65,29 @@ BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_fillsRegisterProperties )
 
 #include "NumericAddressedRegisterQTreeItem.h"
 
-
-struct NumericAddressedRegisterQTreeItem_fixture : public DeviceElementQTreeItem_fixtureBase {
-    QTreeWidget * treeWidget;
-    DeviceElementQTreeItem * numericAddressedRegisterQTreeItem;
+struct DeviceAccessSetup_fixture {
     mtca4u::Device device;
-    double * transactionVariable = new double;
 
-    NumericAddressedRegisterQTreeItem_fixture(const std::string & dmapFile, const std::string & deviceName, const std::string & registerPath, int initialValue)
-    {
+    DeviceAccessSetup_fixture(const std::string & dmapFile, const std::string & deviceName) {
         mtca4u::BackendFactory::getInstance().setDMapFilePath(dmapFile);
         device.open(deviceName);
+    }
+};
+
+struct NumericAddressedRegisterQTreeItem_fixture : public DeviceAccessSetup_fixture, public DeviceElementQTreeItem_fixtureBase {
+    QTreeWidget * treeWidget;
+    DeviceElementQTreeItem * numericAddressedRegisterQTreeItem;
+    mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor;
+    double * transactionVariable = new double;
+
+    NumericAddressedRegisterQTreeItem_fixture(const std::string & dmapFile, const std::string & deviceName, const std::string & registerPath, int initialValue) :
+    DeviceAccessSetup_fixture(dmapFile, deviceName),
+    oneDRegisterAccessor(device.getOneDRegisterAccessor<double>(mtca4u::RegisterPath(registerPath)))
+    {
         const mtca4u::RegisterCatalogue registerCatalogue = device.getRegisterCatalogue();
         treeWidget = new QTreeWidget;
         numericAddressedRegisterQTreeItem = new NumericAddressedRegisterQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, transactionVariable);
-        
-        mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor = device.getOneDRegisterAccessor<double>(mtca4u::RegisterPath(registerPath));
+    
         oneDRegisterAccessor.read();
         oneDRegisterAccessor[0] = initialValue;
         oneDRegisterAccessor.write();
@@ -120,11 +127,9 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
 
     fixture.numericAddressedRegisterQTreeItem->write();
 
-    mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor = fixture.device.getOneDRegisterAccessor<double>(mtca4u::RegisterPath("APP0/MODULE0"));
+    fixture.oneDRegisterAccessor.read();
 
-    oneDRegisterAccessor.read();
-
-    BOOST_CHECK_EQUAL(oneDRegisterAccessor[0], 8.0);
+    BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[0], 8.0);
 
 }
 

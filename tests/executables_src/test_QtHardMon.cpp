@@ -20,7 +20,7 @@ struct QtHardmon_fixtureBase {
 
     QtHardmon_fixtureBase(bool noPrompts = true) {
         int argc = 0;
-        char ** argv;
+        char ** argv = nullptr;
         app = new QApplication(argc, argv);
         if (!noPrompts) {
             qtHardMon = new QtHardMon;
@@ -270,7 +270,7 @@ void checkTableData(QtHardMon * qtHardMon,
     if (size == 0) {
         BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), tableDataValues.size());
         
-        for (int i = 0; i < tableDataValues.size(); ++i) {
+        for (uint i = 0; i < tableDataValues.size(); ++i) {
             BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
         //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
             BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
@@ -318,7 +318,7 @@ void setTableValue(QtHardMon * qtHardMon, int row, int column,
         } default:
             BOOST_FAIL("Only values 0 or 2 accepted, check test case source code!");
     }
-    bool ok;
+    // bool ok;
     BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(row, 0)->text().toInt(), std::get<0>(dataTuple));
     // BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(row, 1)->text().remove(0,2).toUInt(&ok, 16), std::get<1>(dataTuple));
     BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(row, 2)->text().toDouble(), std::get<2>(dataTuple));
