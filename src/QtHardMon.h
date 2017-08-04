@@ -291,11 +291,11 @@ template <typename T> void QtHardMon::writeCell(int row, int column, T value) {
   QVariant dataVariant;
   dataVariant.setValue(value);
   widgetItem->setData(Qt::DisplayRole, dataVariant);
-  _hardMonForm.valuesTableWidget->setItem(row, column, widgetItem);
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, column, widgetItem);
 }
 
 template <typename T> T QtHardMon::readCell(int row, int column) {
-  return (_hardMonForm.valuesTableWidget->item(row, column)
+  return (_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, column)
               ->data(Qt::DisplayRole)
               .value<T>());
 }

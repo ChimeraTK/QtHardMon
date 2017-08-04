@@ -8,6 +8,7 @@ set(${PROJECT_NAME}_VERSION
   ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION})
 set(${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Set the build type to Release if none is specified
 # Force it into Release if "None" is specified (needed to overrule dkpg_buildpackage)
@@ -38,18 +39,19 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 INCLUDE_DIRECTORIES( SYSTEM ${mtca4u-deviceaccess_INCLUDE_DIRS} )
-
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
 
 SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
                             src/PlotWindow.cpp src/CustomDelegates.cpp src/HexSpinBox.cpp
                             src/CustomQTreeItem.cpp src/DeviceElementQTreeItem.cpp 
-                            src/ModuleQTreeItem.cpp src/NumericAddressedRegisterQTreeItem.cpp)
+                            src/ModuleQTreeItem.cpp src/NumericAddressedRegisterQTreeItem.cpp 
+                            src/RegisterPropertiesWidget.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
-SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h)
+SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h)
 # All headers, to have the dependencies correct
 SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}_QOBJECT_HEADERS src/PlotWindow.h)
-SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui)
+SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui src/RegisterPropertiesWidget.ui)
 SET(${PROJECT_NAME}_RESOURCES src/${PROJECT_NAME}.qrc)
 
 QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})

@@ -84,7 +84,7 @@ void PlotWindow::plot()
 
   //FIXME: use a data vector here. This also overcomes the truncation limitation (wanted?)
   //Use the minimum of rowCount and maxWords. for truncated lists the last entry is invalid
-  for (int row = 0; row < std::min(_hardMon->_hardMonForm.valuesTableWidget->rowCount(),
+  for (int row = 0; row < std::min(_hardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount(),
 				   static_cast<int>(_hardMon->_maxWords));
        ++row)
   {

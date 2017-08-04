@@ -83,10 +83,10 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   connect(_hardMonForm.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)), 
 	  this, SLOT( registerClicked(QTreeWidgetItem *) ) );
 
-  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)),
+  connect(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, SIGNAL(cellChanged(int, int)),
 	  this, SLOT( updateTableEntries(int, int) ) );
 
-  connect(_hardMonForm.valuesTableWidget, SIGNAL(cellChanged(int, int)), 
+  connect(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, SIGNAL(cellChanged(int, int)), 
 	  this, SLOT( changeBackgroundIfModified(int, int) ) );
 
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
@@ -141,7 +141,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
 
   // customize table display
   _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
-  _hardMonForm.valuesTableWidget->setItemDelegate(&_customDelegate);
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItemDelegate(&_customDelegate);
 
   _plotWindow = new PlotWindow(this);
 
@@ -277,7 +277,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   {
   currentDevice_.open(deviceFileName);
     // enable all of the GUI in case it was deactivated before
-    _hardMonForm.valuesTableWidget->setEnabled(true);
+    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
     _hardMonForm.operationsGroupBox->setEnabled(true);
     _hardMonForm.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
@@ -302,7 +302,7 @@ void QtHardMon::closeDevice()
 {
 	if (currentDevice_.isOpened())
 		currentDevice_.close();
-  _hardMonForm.valuesTableWidget->setEnabled(false);
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
   _hardMonForm.operationsGroupBox->setEnabled(false);
   _hardMonForm.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
@@ -346,8 +346,8 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   if (!_autoRead || (registerTreeItem->type() == ModuleItem::DataType)){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
-    _hardMonForm.valuesTableWidget->clearContents();
-    _hardMonForm.valuesTableWidget->setRowCount(0);
+    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
+    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
     _hardMonForm.writeButton->setEnabled(false);
   } else {
     read();
@@ -363,7 +363,7 @@ void QtHardMon::read()
 
   try {
     if (currentDevice_.isOpened()) {
-      TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
+      TableWidgetData tableData(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, _maxWords,
                                 currentDevice_);
       registerTreeItem->read(tableData);
       _hardMonForm.writeButton->setEnabled(true);
@@ -404,7 +404,7 @@ void QtHardMon::write()
 
   try {
     if (currentDevice_.isOpened()) {
-      TableWidgetData tableData(_hardMonForm.valuesTableWidget, _maxWords,
+      TableWidgetData tableData(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, _maxWords,
                                 currentDevice_);
       registerTreeItem->write(tableData);
     }
@@ -944,7 +944,7 @@ void QtHardMon::updateTableEntries(int row, int column) {
 
 void QtHardMon::changeBackgroundIfModified( int row, int column ){
   if (_insideReadOrWrite==0){
-    _hardMonForm.valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
+    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
   }
   else{
     clearRowBackgroundColour(row);
@@ -952,7 +952,7 @@ void QtHardMon::changeBackgroundIfModified( int row, int column ){
 }
 
 void QtHardMon::clearBackground(){
-  int nRows = _hardMonForm.valuesTableWidget->rowCount();
+  int nRows = _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount();
 
   for( int row=0; row < nRows; ++row ){
     clearRowBackgroundColour(row);
@@ -1011,15 +1011,15 @@ mtca4u::FixedPointConverter QtHardMon::getConverter() {
 }
 
 int QtHardMon::getNumberOfColumsInTableWidget() {
-  return (_hardMonForm.valuesTableWidget->columnCount());
+  return (_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->columnCount());
 }
 
 bool QtHardMon::isValidCell(int row, int columnIndex) {
-  return (_hardMonForm.valuesTableWidget->item(row, columnIndex) != NULL);
+  return (_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, columnIndex) != NULL);
 }
 
 void QtHardMon::clearCellBackground(int row, int columnIndex) {
-  _hardMonForm.valuesTableWidget->item(row, columnIndex)
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, columnIndex)
       ->setBackground(_defaultBackgroundBrush);
 }
 
@@ -1087,34 +1087,34 @@ std::string QtHardMon::extractMultiplexedRegionName(
 RegisterPropertyGrpBox QtHardMon::getRegisterPropertyGrpBoxData() {
 
   RegisterPropertyGrpBox grpBoxData;
-  grpBoxData.registerNameDisplay = _hardMonForm.registerNameDisplay;
-  grpBoxData.moduleDisplay = _hardMonForm.moduleDisplay;
-  grpBoxData.registerBarDisplay = _hardMonForm.registerBarDisplay;
-  grpBoxData.registerAddressDisplay = _hardMonForm.registerAddressDisplay;
-  grpBoxData.registerNElementsDisplay = _hardMonForm.registerNElementsDisplay;
-  grpBoxData.registerSizeDisplay = _hardMonForm.registerSizeDisplay;
-  grpBoxData.registerWidthDisplay = _hardMonForm.registerWidthDisplay;
-  grpBoxData.registerFracBitsDisplay = _hardMonForm.registerFracBitsDisplay;
-  grpBoxData.registeSignBitDisplay = _hardMonForm.registeSignBitDisplay;
+  grpBoxData.registerNameDisplay = _hardMonForm.registerPropertiesWidget->ui->registerNameDisplay;
+  grpBoxData.moduleDisplay = _hardMonForm.registerPropertiesWidget->ui->moduleDisplay;
+  grpBoxData.registerBarDisplay = _hardMonForm.registerPropertiesWidget->ui->registerBarDisplay;
+  grpBoxData.registerAddressDisplay = _hardMonForm.registerPropertiesWidget->ui->registerAddressDisplay;
+  grpBoxData.registerNElementsDisplay = _hardMonForm.registerPropertiesWidget->ui->registerNElementsDisplay;
+  grpBoxData.registerSizeDisplay = _hardMonForm.registerPropertiesWidget->ui->registerSizeDisplay;
+  grpBoxData.registerWidthDisplay = _hardMonForm.registerPropertiesWidget->ui->registerWidthDisplay;
+  grpBoxData.registerFracBitsDisplay = _hardMonForm.registerPropertiesWidget->ui->registerFracBitsDisplay;
+  grpBoxData.registeSignBitDisplay = _hardMonForm.registerPropertiesWidget->ui->registeSignBitDisplay;
   return grpBoxData;
 }
 
 void QtHardMon::clearGroupBoxDisplay() {
-  _hardMonForm.registerNameDisplay->setText("");
-  _hardMonForm.moduleDisplay->setText("");
-  _hardMonForm.registerBarDisplay->setText("");
-  _hardMonForm.registerNElementsDisplay->setText("");
-  _hardMonForm.registerAddressDisplay->setText("");
-  _hardMonForm.registerSizeDisplay->setText("");
-  _hardMonForm.registerWidthDisplay->setText("");
-  _hardMonForm.registerFracBitsDisplay->setText("");
-  _hardMonForm.registeSignBitDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerNameDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->moduleDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerBarDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerNElementsDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerAddressDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerSizeDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerWidthDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registerFracBitsDisplay->setText("");
+  _hardMonForm.registerPropertiesWidget->ui->registeSignBitDisplay->setText("");
 }
 
 void QtHardMon::clearAllRowsInTable() {
-  _hardMonForm.valuesTableWidget->clearContents();
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
   int nRows = 0;
-  _hardMonForm.valuesTableWidget->setRowCount(nRows);
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(nRows);
 }
 
 std::string QtHardMon::extractFileNameFromPath(const std::string &fileName) {
@@ -1216,11 +1216,11 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
 }
 
 void QtHardMon::addCopyActionForTableWidget() {
-  QAction *copy = new QAction(tr("&Copy"), _hardMonForm.valuesTableWidget);
+  QAction *copy = new QAction(tr("&Copy"), _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget);
   copy->setShortcuts(QKeySequence::Copy);
   copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
   connect(copy, SIGNAL(triggered()), this, SLOT(copyTableDataToClipBoard()));
-  _hardMonForm.valuesTableWidget->addAction(copy);
+  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->addAction(copy);
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {

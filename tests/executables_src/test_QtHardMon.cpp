@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_emptyUponConstruction )
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.loadBoardsButton->isEnabled(), true);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.SortAscendingcheckBox->isChecked(), true);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked(), false);
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerPropertiesGroupBox->isEnabled(), true);
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), 0);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget->isEnabled(), true);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount(), 0);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.optionsGroupBox->isEnabled(), false);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.operationsGroupBox->isEnabled(), false);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->noPrompts_, false);
@@ -223,15 +223,15 @@ void checkRegisterProperties(QtHardMon * qtHardMon,
                              const std::string & registerFracBits,
                              const std::string & registerSignBit
 ) {
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerNameDisplay->text().toStdString().c_str(), registerName);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.moduleDisplay->text().toStdString().c_str(), moduleName);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerBarDisplay->text().toStdString().c_str(), registerBar);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerAddressDisplay->text().toStdString().c_str(), registerAddress);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerSizeDisplay->text().toStdString().c_str(), registerSize);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerWidthDisplay->text().toStdString().c_str(), registerWidth);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerFracBitsDisplay->text().toStdString().c_str(), registerFracBits);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerNameDisplay->text().toStdString().c_str(), registerName);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->moduleDisplay->text().toStdString().c_str(), moduleName);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerBarDisplay->text().toStdString().c_str(), registerBar);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerAddressDisplay->text().toStdString().c_str(), registerAddress);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerSizeDisplay->text().toStdString().c_str(), registerSize);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerWidthDisplay->text().toStdString().c_str(), registerWidth);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerFracBitsDisplay->text().toStdString().c_str(), registerFracBits);
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
 }
 
 /*
@@ -268,20 +268,20 @@ void checkTableData(QtHardMon * qtHardMon,
                     int size = 0
 ) {
     if (size == 0) {
-        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), tableDataValues.size());
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount(), tableDataValues.size());
         
         for (uint i = 0; i < tableDataValues.size(); ++i) {
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
-        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
+        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
         }
     } else {
-        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->rowCount(), size);
+        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount(), size);
         
         for (int i = 0; i < size; ++i) {
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(0)));
-        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(0)));
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(0)));
+        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
+            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(0)));
         }
     }
     
@@ -307,21 +307,21 @@ void setTableValue(QtHardMon * qtHardMon, int row, int column,
 ) {
     switch (column) {
         case 0: {
-            qtHardMon->_hardMonForm.valuesTableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(std::get<0>(dataTuple))));
+            qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(std::get<0>(dataTuple))));
             break;
         //} case 1: {
-        //    qtHardMon->_hardMonForm.valuesTableWidget->setItem(row, 1, new QTableWidgetItem(QString::number(std::get<1>(dataTuple))));
+        //    qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, 1, new QTableWidgetItem(QString::number(std::get<1>(dataTuple))));
         //    break;
         } case 2: {
-            qtHardMon->_hardMonForm.valuesTableWidget->setItem(row, 2, new QTableWidgetItem(QString::number(std::get<2>(dataTuple))));
+            qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, 2, new QTableWidgetItem(QString::number(std::get<2>(dataTuple))));
             break;
         } default:
             BOOST_FAIL("Only values 0 or 2 accepted, check test case source code!");
     }
     // bool ok;
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(row, 0)->text().toInt(), std::get<0>(dataTuple));
-    // BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(row, 1)->text().remove(0,2).toUInt(&ok, 16), std::get<1>(dataTuple));
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.valuesTableWidget->item(row, 2)->text().toDouble(), std::get<2>(dataTuple));
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, 0)->text().toInt(), std::get<0>(dataTuple));
+    // BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, 1)->text().remove(0,2).toUInt(&ok, 16), std::get<1>(dataTuple));
+    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, 2)->text().toDouble(), std::get<2>(dataTuple));
     
 }
 /*
