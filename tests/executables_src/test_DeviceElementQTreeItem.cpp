@@ -7,6 +7,8 @@
 #include <mtca4u/BackendFactory.h>
 #include <QtGui/QTreeWidget>
 
+#include "TestUtilities.h"
+
 // Evil but awesome
 #define private public
 
@@ -24,29 +26,6 @@ struct DeviceElementQTreeItem_fixtureBase {
         propertiesWidget = new RegisterPropertiesWidget(nullptr);
     }
 };
-
-void checkRegisterProperties(RegisterPropertiesWidget * widget,
-                             const std::string & registerName,
-                             const std::string & moduleName,
-                             const std::string & registerBar,
-                             const std::string & registerAddress,
-                             const std::string & registerNElements,
-                             const std::string & registerSize,
-                             const std::string & registerWidth,
-                             const std::string & registerFracBits,
-                             const std::string & registerSignBit
-) {
-    BOOST_CHECK_EQUAL(widget->ui->registerNameDisplay->text().toStdString().c_str(), registerName);
-    BOOST_CHECK_EQUAL(widget->ui->moduleDisplay->text().toStdString().c_str(), moduleName);
-    BOOST_CHECK_EQUAL(widget->ui->registerBarDisplay->text().toStdString().c_str(), registerBar);
-    BOOST_CHECK_EQUAL(widget->ui->registerAddressDisplay->text().toStdString().c_str(), registerAddress);
-    BOOST_CHECK_EQUAL(widget->ui->registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
-    BOOST_CHECK_EQUAL(widget->ui->registerSizeDisplay->text().toStdString().c_str(), registerSize);
-    BOOST_CHECK_EQUAL(widget->ui->registerWidthDisplay->text().toStdString().c_str(), registerWidth);
-    BOOST_CHECK_EQUAL(widget->ui->registerFracBitsDisplay->text().toStdString().c_str(), registerFracBits);
-    BOOST_CHECK_EQUAL(widget->ui->registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
-}
-
 
 /*
  * The window is properly filled with no data and proper states of particular window components.
@@ -89,11 +68,11 @@ BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_fillsRegisterProperties )
 {
     DeviceElementQTreeItem_fixtureBase fixture;
     DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidget);
-    checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
     moduleItem->updateRegisterProperties();
 
     // FIXME: this test does not determine if the properties widget is properly filled if something was set in between.
-    checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
 
     // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterPropertiesWidget);
 
@@ -156,10 +135,10 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_fillsRegisterProperties
 {
     NumericAddressedRegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0", 5.0);
     
-    checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
     fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties();
 
-    checkRegisterProperties(fixture.propertiesWidget, "MODULE0", "APP0", "1", "16", "2", "8", "32", "0", "1");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "MODULE0", "APP0", "1", "16", "2", "8", "32", "0", "1");
 
     // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterPropertiesWidget);
 }

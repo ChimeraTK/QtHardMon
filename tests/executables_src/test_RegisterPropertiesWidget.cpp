@@ -5,6 +5,8 @@
 #include <type_traits> // std::is_base_of
 #include <QtGui>
 
+#include "TestUtilities.h"
+
 // Evil but awesome
 #define private public
 
@@ -32,28 +34,6 @@ BOOST_AUTO_TEST_CASE ( RegisterPropertiesWidget_QWidget )
 
 }
 
-void checkRegisterProperties(RegisterPropertiesWidget * widget,
-                             const std::string & registerName,
-                             const std::string & moduleName,
-                             const std::string & registerBar,
-                             const std::string & registerAddress,
-                             const std::string & registerNElements,
-                             const std::string & registerSize,
-                             const std::string & registerWidth,
-                             const std::string & registerFracBits,
-                             const std::string & registerSignBit
-) {
-    BOOST_CHECK_EQUAL(widget->ui->registerNameDisplay->text().toStdString().c_str(), registerName);
-    BOOST_CHECK_EQUAL(widget->ui->moduleDisplay->text().toStdString().c_str(), moduleName);
-    BOOST_CHECK_EQUAL(widget->ui->registerBarDisplay->text().toStdString().c_str(), registerBar);
-    BOOST_CHECK_EQUAL(widget->ui->registerAddressDisplay->text().toStdString().c_str(), registerAddress);
-    BOOST_CHECK_EQUAL(widget->ui->registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
-    BOOST_CHECK_EQUAL(widget->ui->registerSizeDisplay->text().toStdString().c_str(), registerSize);
-    BOOST_CHECK_EQUAL(widget->ui->registerWidthDisplay->text().toStdString().c_str(), registerWidth);
-    BOOST_CHECK_EQUAL(widget->ui->registerFracBitsDisplay->text().toStdString().c_str(), registerFracBits);
-    BOOST_CHECK_EQUAL(widget->ui->registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
-}
-
 /*
  * Numeric addressed register item is properly constructed and returns correct data type.
  * The item properly assigns itself to QTreeWidget.
@@ -62,9 +42,9 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_constructor )
 {
     RegisterPropertiesWidget_fixtureBase fixture;
 
-    checkRegisterProperties(fixture.widget, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.widget, "", "", "", "", "", "", "", "", "");
     RegisterPropertiesWidget::RegisterProperties properties("RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
     fixture.widget->setRegisterProperties(properties);
-    checkRegisterProperties(fixture.widget, "RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
+    TestUtilities::checkRegisterProperties(fixture.widget, "RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
 
 }

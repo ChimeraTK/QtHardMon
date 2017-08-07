@@ -2,9 +2,9 @@
 add_dependency(Boost 1.46 system unit_test_framework REQUIRED)
 
 ## If there are any common tests' functionalities, they are compiled into separate library and later linked against each executable.
-# include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-# aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src testSources)
-# add_library( ${PROJECT_NAME}_TEST_LIBRARY ${testSources} )
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src testSources)
+add_library( ${PROJECT_NAME}_TEST_LIBRARY ${testSources} )
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
@@ -17,7 +17,7 @@ foreach( testExecutableSrcFile ${testExecutables})
   add_executable(${executableName} ${testExecutableSrcFile} $<TARGET_OBJECTS:${PROJECT_NAME}_OBJECTS>)
   # target_link_libraries(${executableName} ${PROJECT_NAME} ${PROJECT_NAME}_TEST_LIBRARY ${Boost_LIBRARIES}) 
   target_link_libraries(${executableName} ${Boost_LIBRARIES} ${QT_LIBRARIES} 
-     ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY} )
+     ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY} ${PROJECT_NAME}_TEST_LIBRARY)
   add_test(${executableName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${executableName})
 endforeach(testExecutableSrcFile)
 

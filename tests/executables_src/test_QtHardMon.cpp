@@ -6,6 +6,8 @@
 #include <QtGui>
 #include <tuple> // std::tuple
 
+#include "TestUtilities.h"
+
 // Evil but awesome
 #define private public
 
@@ -212,28 +214,6 @@ struct QtHardmon_populatesRegisterProperties_fixture : public QtHardmon_populate
     }
 };
 
-void checkRegisterProperties(QtHardMon * qtHardMon,
-                             const std::string & registerName,
-                             const std::string & moduleName,
-                             const std::string & registerBar,
-                             const std::string & registerAddress,
-                             const std::string & registerNElements,
-                             const std::string & registerSize,
-                             const std::string & registerWidth,
-                             const std::string & registerFracBits,
-                             const std::string & registerSignBit
-) {
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerNameDisplay->text().toStdString().c_str(), registerName);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->moduleDisplay->text().toStdString().c_str(), moduleName);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerBarDisplay->text().toStdString().c_str(), registerBar);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerAddressDisplay->text().toStdString().c_str(), registerAddress);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerSizeDisplay->text().toStdString().c_str(), registerSize);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerWidthDisplay->text().toStdString().c_str(), registerWidth);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registerFracBitsDisplay->text().toStdString().c_str(), registerFracBits);
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
-}
-
 /*
  * When selecting register, register properties are properly populated.
  */ 
@@ -241,7 +221,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
 
-    checkRegisterProperties(fixture.qtHardMon, "MODULE1", "APP0", "1", "32", "2", "8", "32", "0", "1");
+    TestUtilities::checkRegisterProperties(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, "MODULE1", "APP0", "1", "32", "2", "8", "32", "0", "1");
 }
 
 
@@ -251,41 +231,19 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
 BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"MODULE1", "WORD_USER1"});
-    checkRegisterProperties(fixture.qtHardMon, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
+    TestUtilities::checkRegisterProperties(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
 
     fixture.qtHardMon->_hardMonForm.autoselectPreviousRegisterCheckBox->setCheckState(Qt::Checked);
     fixture.switchDeviceSelection("NUMDEV_MULT");
 
-    checkRegisterProperties(fixture.qtHardMon, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, "", "", "", "", "", "", "", "", "");
 
     fixture.switchDeviceSelection("NUMDEV");
 
-    checkRegisterProperties(fixture.qtHardMon, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
+    TestUtilities::checkRegisterProperties(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
 }
 
-void checkTableData(QtHardMon * qtHardMon,
-                    std::vector<std::tuple<int, int, double>> tableDataValues,
-                    int size = 0
-) {
-    if (size == 0) {
-        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount(), tableDataValues.size());
-        
-        for (uint i = 0; i < tableDataValues.size(); ++i) {
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
-        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
-        }
-    } else {
-        BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount(), size);
-        
-        for (int i = 0; i < size; ++i) {
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(0)));
-        //    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
-            BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(0)));
-        }
-    }
-    
-}
+
 
 /*
  * When selecting register, data table is populated with valid values.
@@ -294,36 +252,11 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTable )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
 
-    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
+    TestUtilities::checkTableData(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, {std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
 
 }
 
 
-
-// FIXME: This is not working properly - the code invocation does not make the second column (raw hex) be filled.
-// Left for now, but has to be solved.
-void setTableValue(QtHardMon * qtHardMon, int row, int column,
-                    std::tuple<int, int, double> dataTuple
-) {
-    switch (column) {
-        case 0: {
-            qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, 0, new QTableWidgetItem(QString::number(std::get<0>(dataTuple))));
-            break;
-        //} case 1: {
-        //    qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, 1, new QTableWidgetItem(QString::number(std::get<1>(dataTuple))));
-        //    break;
-        } case 2: {
-            qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, 2, new QTableWidgetItem(QString::number(std::get<2>(dataTuple))));
-            break;
-        } default:
-            BOOST_FAIL("Only values 0 or 2 accepted, check test case source code!");
-    }
-    // bool ok;
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, 0)->text().toInt(), std::get<0>(dataTuple));
-    // BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, 1)->text().remove(0,2).toUInt(&ok, 16), std::get<1>(dataTuple));
-    BOOST_CHECK_EQUAL(qtHardMon->_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, 2)->text().toDouble(), std::get<2>(dataTuple));
-    
-}
 /*
  * When changing data, rows are properly filled, including conversions.
  */ 
@@ -331,18 +264,18 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_acceptsInsertedData )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
 
-    setTableValue(fixture.qtHardMon, 0, 2, std::make_tuple(10, 10, 10.0));
-    setTableValue(fixture.qtHardMon, 0, 0, std::make_tuple(3, 3, 3.0));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 2, std::make_tuple(10, 10, 10.0));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 0, std::make_tuple(3, 3, 3.0));
 
     fixture.switchRegisterSelection({"MODULE0", "WORD_USER1"});
 
-    setTableValue(fixture.qtHardMon, 0, 2, std::make_tuple(4, 4, 0.5));
-    setTableValue(fixture.qtHardMon, 0, 0, std::make_tuple(12, 12, 1.5));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 2, std::make_tuple(4, 4, 0.5));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 0, std::make_tuple(12, 12, 1.5));
 
     fixture.switchRegisterSelection({"MODULE0", "WORD_USER2"});
 
-    setTableValue(fixture.qtHardMon, 0, 2, std::make_tuple(4, 4, 0.125));
-    setTableValue(fixture.qtHardMon, 0, 0, std::make_tuple(12, 12, 0.375));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 2, std::make_tuple(4, 4, 0.125));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 0, std::make_tuple(12, 12, 0.375));
 }
 
 
@@ -353,11 +286,11 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegister )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
 
-    setTableValue(fixture.qtHardMon, 0, 2, std::make_tuple(10, 10, 10.0));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 2, std::make_tuple(10, 10, 10.0));
 
     fixture.qtHardMon->read();
 
-    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
+    TestUtilities::checkTableData(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, {std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
 
     
 }
@@ -369,14 +302,14 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_writesRegister )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"APP0", "MODULE1"});
 
-    setTableValue(fixture.qtHardMon, 0, 2, std::make_tuple(10, 10, 10.0));
+    TestUtilities::setTableValue(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, 0, 2, std::make_tuple(10, 10, 10.0));
 
     fixture.qtHardMon->write();
 
     fixture.switchRegisterSelection({"MODULE0", "WORD_USER1"});
     fixture.switchRegisterSelection({"APP0", "MODULE1"});
 
-    checkTableData(fixture.qtHardMon, {std::make_tuple(10, 10, 10.0), std::make_tuple(0, 0, 0.0)});
+    TestUtilities::checkTableData(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, {std::make_tuple(10, 10, 10.0), std::make_tuple(0, 0, 0.0)});
 
 }
 
@@ -405,7 +338,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
 
-    checkRegisterProperties(fixture.qtHardMon, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "1", "4", "32", "0", "1");
+    TestUtilities::checkRegisterProperties(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "1", "4", "32", "0", "1");
 
 }
 
@@ -416,7 +349,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTableSequence )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
 
-    checkTableData(fixture.qtHardMon, {std::make_tuple(0, 0, 0.0)}, 4096);
+    TestUtilities::checkTableData(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, {std::make_tuple(0, 0, 0.0)}, 4096);
 
 }
 
