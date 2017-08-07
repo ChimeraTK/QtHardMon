@@ -156,11 +156,13 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
 
     TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0)});
 
-    // fixture.numericAddressedRegisterQTreeItem->write();
+    TestUtilities::setTableValue(fixture.propertiesWidget, 1, 0, std::make_tuple(3, 3, 3.0));
 
-    // fixture.oneDRegisterAccessor.read();
+    fixture.numericAddressedRegisterQTreeItem->write();
 
-    // BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[0], 8.0);
+    fixture.oneDRegisterAccessor.read();
+
+    BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[1], 3.0);
 
 }
 

@@ -55,6 +55,10 @@ void NumericAddressedRegisterQTreeItem::read() {
 }
 
 void NumericAddressedRegisterQTreeItem::write() {
+     QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
+     for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
+      oneDRegisterAccessor_[row] = table->item(row, 2)->data(0).toDouble();
+     }
      oneDRegisterAccessor_.write();
 }
 
