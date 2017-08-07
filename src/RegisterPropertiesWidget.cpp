@@ -16,17 +16,39 @@ RegisterPropertiesWidget::~RegisterPropertiesWidget()
 }
 
 void RegisterPropertiesWidget::clearProperties() {
-    setRegisterProperties();
+    RegisterProperties properties;
+    setRegisterProperties(properties);
 }
 
-void RegisterPropertiesWidget::setRegisterProperties(const std::string & registerName, const std::string & moduleName, int * bar, int * nOfElements, int * address, int * size, int * width, int * fracBits, int * signBit) {
-    ui->registerNameDisplay     ->setText(!registerName.empty() ? QString(registerName.c_str()) : QString(""));
-    ui->moduleDisplay           ->setText(!moduleName.empty()   ? QString(moduleName.c_str())   : QString(""));
-    ui->registerBarDisplay      ->setText(bar                   ? QString::number(*bar)         : QString(""));
-    ui->registerNElementsDisplay->setText(nOfElements           ? QString::number(*nOfElements) : QString(""));
-    ui->registerAddressDisplay  ->setText(address               ? QString::number(*address)     : QString(""));
-    ui->registerSizeDisplay     ->setText(size                  ? QString::number(*size)        : QString(""));
-    ui->registerWidthDisplay    ->setText(width                 ? QString::number(*width)       : QString(""));
-    ui->registerFracBitsDisplay ->setText(fracBits              ? QString::number(*fracBits)    : QString(""));
-    ui->registeSignBitDisplay   ->setText(signBit               ? QString::number(*signBit)     : QString(""));
+void RegisterPropertiesWidget::setRegisterProperties(RegisterProperties properties) {
+    ui->registerNameDisplay     ->setText(properties.registerName);
+    ui->moduleDisplay           ->setText(properties.moduleName);
+    ui->registerBarDisplay      ->setText(properties.bar);
+    ui->registerNElementsDisplay->setText(properties.nOfElements);
+    ui->registerAddressDisplay  ->setText(properties.address);
+    ui->registerSizeDisplay     ->setText(properties.size);
+    ui->registerWidthDisplay    ->setText(properties.width);
+    ui->registerFracBitsDisplay ->setText(properties.fracBits);
+    ui->registeSignBitDisplay   ->setText(properties.signBit);
 }
+
+RegisterPropertiesWidget::RegisterProperties::RegisterProperties(
+QString RegisterName,
+QString ModuleName,
+QString Bar,
+QString Address,
+QString NOfElements,
+QString Size,
+QString Width,
+QString FracBits,
+QString SignBit
+) 
+        : registerName(RegisterName),
+            moduleName(ModuleName),
+            bar(Bar),
+            address(Address),
+            nOfElements(NOfElements),
+            size(Size),
+            width(Width),
+            fracBits(FracBits),
+            signBit(SignBit) {}

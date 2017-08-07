@@ -13,20 +13,35 @@ class RegisterPropertiesWidget : public QWidget
     Q_OBJECT
 
 public:
+    struct RegisterProperties {
+
+    QString registerName;
+    QString moduleName;
+    QString bar;
+    QString address;
+    QString nOfElements;
+    QString size;
+    QString width;
+    QString fracBits;
+    QString signBit;
+
+    RegisterProperties(QString RegisterName = "",
+QString ModuleName = "",
+QString Bar = "",
+QString Address = "",
+QString NOfElements = "",
+QString Size = "",
+QString Width = "",
+QString FracBits = "",
+QString SignBit = "");
+    };
+
+public:
     explicit RegisterPropertiesWidget(QWidget *parent);
     ~RegisterPropertiesWidget();
     
     void clearProperties();
-    void setRegisterProperties(const std::string & registerName = "",
-                               const std::string & moduleName = "", 
-                               int * bar = nullptr, 
-                               int * nOfElements = nullptr, 
-                               int * address = nullptr, 
-                               int * size = nullptr, 
-                               int * width = nullptr, 
-                               int * fracBits = nullptr, 
-                               int * signBit = nullptr
-                              );
+    void setRegisterProperties(RegisterProperties properties);
 
 private slots:
 

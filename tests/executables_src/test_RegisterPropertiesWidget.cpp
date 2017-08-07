@@ -36,8 +36,8 @@ void checkRegisterProperties(RegisterPropertiesWidget * widget,
                              const std::string & registerName,
                              const std::string & moduleName,
                              const std::string & registerBar,
-                             const std::string & registerNElements,
                              const std::string & registerAddress,
+                             const std::string & registerNElements,
                              const std::string & registerSize,
                              const std::string & registerWidth,
                              const std::string & registerFracBits,
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_constructor )
     RegisterPropertiesWidget_fixtureBase fixture;
 
     checkRegisterProperties(fixture.widget, "", "", "", "", "", "", "", "", "");
-
-    fixture.widget->setRegisterProperties("RegName", "ModuleName", new int(10), new int(4), new int(4444), new int(3), new int(18), new int(3), new int(0));
+    RegisterPropertiesWidget::RegisterProperties properties("RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
+    fixture.widget->setRegisterProperties(properties);
     checkRegisterProperties(fixture.widget, "RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
 
 }
