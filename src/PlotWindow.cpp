@@ -88,7 +88,7 @@ void PlotWindow::plot()
 				   static_cast<int>(_hardMon->_maxWords));
        ++row)
   {
-    if (!_hardMon->isValidCell(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN))
+    if (!_hardMon->_hardMonForm.registerPropertiesWidget->isValidCell(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN))
     {
       // strange, this should not happen. print a warning message end stop plotting
       QMessageBox::critical(this, tr("QtHardMon: Error creating plot"), QString("Value in row ")
@@ -96,7 +96,7 @@ void PlotWindow::plot()
       return;
     }
 
-    double value = _hardMon->readCell<double>(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN);
+    double value = _hardMon->_hardMonForm.registerPropertiesWidget->readCell<double>(row, qthardmon::FLOATING_POINT_DISPLAY_COLUMN);
 
     samples.push_back(QPointF(row, value));
   }

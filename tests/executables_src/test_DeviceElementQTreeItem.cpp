@@ -143,24 +143,24 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_fillsRegisterProperties
     // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterPropertiesWidget);
 }
 
-// /*
-//  * Numeric addressed register reads from / writes to device properly.
-// */
-// BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
-// {
-//     NumericAddressedRegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0", 5.0);
+/*
+ * Numeric addressed register reads from / writes to device properly.
+*/
+BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
+{
+    NumericAddressedRegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0", 5.0);
     
-//     fixture.numericAddressedRegisterQTreeItem->read();
+    fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties();
 
-//     //BOOST_CHECK_EQUAL(5.0, *(fixture.transactionVariable));
+    fixture.numericAddressedRegisterQTreeItem->read();
 
-//     //*(fixture.transactionVariable) = 8.0;
+    TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0)});
 
-//     fixture.numericAddressedRegisterQTreeItem->write();
+    // fixture.numericAddressedRegisterQTreeItem->write();
 
-//     fixture.oneDRegisterAccessor.read();
+    // fixture.oneDRegisterAccessor.read();
 
-//     BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[0], 8.0);
+    // BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[0], 8.0);
 
-// }
+}
 

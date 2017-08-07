@@ -12,7 +12,6 @@
 
 #ifndef Q_MOC_RUN
 #include <mtca4u/Device.h>
-#include <mtca4u/FixedPointConverter.h>
 #include <boost/shared_ptr.hpp>
 #endif
 
@@ -91,9 +90,6 @@ class QtHardMon: public QMainWindow
    */
   void saveConfigAs();
 
-  /** Updates the hex value if the dec value changes */
-  void updateTableEntries( int row, int column );
-
   /** Sets the background color of the cell, depending on whether the update is made by read (normal color)
    *  or manually by the user (red).
    */
@@ -131,7 +127,6 @@ class QtHardMon: public QMainWindow
   ////< (used to set background color). It is implemented as a counter because read can be called from write,
   ////< and if read would reset a bool to false, it would be wrong in write. Just adding and subtracting is 
   ///< easier than catching all possible use cases.
-  QBrush _defaultBackgroundBrush; ///< Normal brush color if the item is not modified
   QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
   CustomDelegates _customDelegate;///< provides display customizations for the table widget.
   bool noPrompts_;
@@ -216,27 +211,8 @@ class QtHardMon: public QMainWindow
   // pointer, would require unnecessarily long locking of the mutex.
   friend class PlotWindow;
 
-  /*
-   * Converts the input decimalValue to double. Internally uses
-   * mtca4u::FixedPointConverter
-   */
-  double convertToDouble(int decimalValue);
+ 
 
-  /*
-   * Converts the input doubleValue to Fixed point int. Internally uses
-   * mtca4u::FixedPointConverter
-   */
-  int convertToFixedPoint(double doubleValue);
-
-  template<typename T>
-  void writeCell(int row, int column, T value);
-  template<typename T>
-  T readCell (int row, int column);
-
-  mtca4u::FixedPointConverter getConverter();
-  int getNumberOfColumsInTableWidget();
-  bool isValidCell(int row, int columnIndex);
-  void clearCellBackground(int row, int columnIndex);
   void clearRowBackgroundColour(int row);
   bool isMultiplexedDataRegion(std::string const & registerName);
   bool isSeqDescriptor(std::string const & registerName);
@@ -285,20 +261,6 @@ class QtHardMon: public QMainWindow
                      QString boxText, QString boxInformativeText);
 
 };
-
-template <typename T> void QtHardMon::writeCell(int row, int column, T value) {
-  QTableWidgetItem *widgetItem = new QTableWidgetItem();
-  QVariant dataVariant;
-  dataVariant.setValue(value);
-  widgetItem->setData(Qt::DisplayRole, dataVariant);
-  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItem(row, column, widgetItem);
-}
-
-template <typename T> T QtHardMon::readCell(int row, int column) {
-  return (_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, column)
-              ->data(Qt::DisplayRole)
-              .value<T>());
-}
 
 
 
