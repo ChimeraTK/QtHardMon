@@ -166,3 +166,104 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
 
 }
 
+#include "NumericAddressedMultiplexedAreaQTreeItem.h"
+
+struct NumericAddressedMultiplexedAreaQTreeItem_fixture : public DeviceAccessSetup_fixture, public DeviceElementQTreeItem_fixtureBase {
+    QTreeWidget * treeWidget;
+    DeviceElementQTreeItem * numericAddressedMultiplexedAreaQTreeItem;
+    mtca4u::TwoDRegisterAccessor<double> twoDRegisterAccessor;
+
+    NumericAddressedMultiplexedAreaQTreeItem_fixture(const std::string & dmapFile, const std::string & deviceName, const std::string & registerPath, int initialValue) :
+    DeviceAccessSetup_fixture(dmapFile, deviceName),
+    twoDRegisterAccessor(device.getTwoDRegisterAccessor<double>(mtca4u::RegisterPath(registerPath)))
+    {
+        const mtca4u::RegisterCatalogue registerCatalogue = device.getRegisterCatalogue();
+        treeWidget = new QTreeWidget;
+        mtca4u::RegisterCatalogue::const_iterator firstSequenceItem = registerCatalogue.begin();
+        
+        // Iterating to actual first sequence item of APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA, FIXME: don't hardcode it.
+        for (int i = 0; i < 20; ++i) {
+            ++firstSequenceItem;
+        }
+        
+        numericAddressedMultiplexedAreaQTreeItem = new NumericAddressedMultiplexedAreaQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), registerCatalogue, firstSequenceItem, treeWidget, propertiesWidget);
+        twoDRegisterAccessor.read();
+        twoDRegisterAccessor[0][0] = initialValue;
+        twoDRegisterAccessor.write();
+        twoDRegisterAccessor.read();
+    }
+
+};
+
+/*
+ * Numeric addressed register item is properly constructed and returns correct data type.
+ * The item properly assigns itself to QTreeWidget.
+*/
+BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_constructor )
+{
+    NumericAddressedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 5.0);
+    BOOST_CHECK_EQUAL(fixture.numericAddressedMultiplexedAreaQTreeItem->type(), static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType));
+    BOOST_CHECK_EQUAL(fixture.numericAddressedMultiplexedAreaQTreeItem->text(0).toStdString(), "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA");
+    
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItemCount(), 1);
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->text(0).toStdString(), "APP0");
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->childCount(), 1);
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->child(0)->text(0).toStdString(), "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA");
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->child(0)->childCount(), 16);
+}
+
+#include "NumericAddressedSequenceRegisterQTreeItem.h"
+
+/*
+ * Numeric addressed register properly fills register properties.
+ */
+BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_fillsRegisterProperties )
+{
+    NumericAddressedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 5.0);
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties();
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "APP0", "13", "1000", "", "212992", "", "", "");
+    NumericAddressedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedSequenceRegisterQTreeItem *>(fixture.numericAddressedMultiplexedAreaQTreeItem->child(0));
+    
+    if (!childItem) {
+        BOOST_FAIL("QTreeWidgetItem not casted properly");
+    } else {
+        childItem->updateRegisterProperties();
+    }
+
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "SEQUENCE_DAQ0_ADCA_0", "APP0", "13", "1000", "1", "4", "32", "0", "1");
+}
+
+/*
+ * Numeric addressed register reads from / writes to device properly.
+*/
+BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_ReadAndWrite )
+{
+    NumericAddressedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 0.0);
+    
+    fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties();
+
+    BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->read(), InvalidOperationException);
+    BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->write(), InvalidOperationException);
+
+    NumericAddressedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedSequenceRegisterQTreeItem *>(fixture.numericAddressedMultiplexedAreaQTreeItem->child(0));
+    
+    if (!childItem) {
+        BOOST_FAIL("QTreeWidgetItem not casted properly");
+    } else {
+        childItem->updateRegisterProperties();
+    }
+
+    childItem->read();
+
+    TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(0, 0, 0.0)}, 4096);
+
+    TestUtilities::setTableValue(fixture.propertiesWidget, 0, 0, std::make_tuple(3, 3, 3.0));
+
+    childItem->write();
+
+    fixture.twoDRegisterAccessor.read();
+
+    BOOST_CHECK_EQUAL(fixture.twoDRegisterAccessor[0][0], 3.0);
+
+}

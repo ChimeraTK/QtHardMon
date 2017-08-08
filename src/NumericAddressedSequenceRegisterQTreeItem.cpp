@@ -1,8 +1,10 @@
-#include "NumericAddressedRegisterQTreeItem.h"
+#include "NumericAddressedSequenceRegisterQTreeItem.h"
 
-NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
-: NumericAddressedElementQTreeItem(device, registerInfo, parent, propertiesWidget),
-  oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(registerInfo->getRegisterName())),
+NumericAddressedSequenceRegisterQTreeItem::NumericAddressedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, RegisterPropertiesWidget * propertiesWidget)
+: DeviceElementQTreeItem(QString(registerInfo->getRegisterName().getComponents().back().c_str()),
+static_cast<int>(DeviceElementDataType::SequenceRegisterDataType), parent),
+  twoDRegisterAccessor_(twoDRegisterAccessor),
+  channelNo_(channelNo),
   propertiesWidget_(propertiesWidget)
 {
   mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
@@ -28,13 +30,16 @@ NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Dev
   }
 }
 
-void NumericAddressedRegisterQTreeItem::read() {
-  oneDRegisterAccessor_.read();
+void NumericAddressedSequenceRegisterQTreeItem::read() {
+  twoDRegisterAccessor_.read();
   QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
   table->clearContents();
   table->setRowCount(0);
-  table->setRowCount(oneDRegisterAccessor_.getNElements());
-  for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
+  unsigned int elementsPerChannel = twoDRegisterAccessor_.getNElementsPerChannel();
+  table->setRowCount(elementsPerChannel);
+  
+
+  for(unsigned int row = 0; row < elementsPerChannel; ++row) {
     QTableWidgetItem* dataItem = new QTableWidgetItem();
     QTableWidgetItem* rowItem = new QTableWidgetItem();
 
@@ -43,20 +48,20 @@ void NumericAddressedRegisterQTreeItem::read() {
     rowItem->setText(rowAsText.str().c_str());
     table->setVerticalHeaderItem(row, rowItem);
 
-    dataItem->setData(0, QVariant(oneDRegisterAccessor_[row]));
+    dataItem->setData(0, QVariant(twoDRegisterAccessor_[channelNo_][row]));
     table->setItem(row, 2, dataItem);
   }
 }
 
-void NumericAddressedRegisterQTreeItem::write() {
+void NumericAddressedSequenceRegisterQTreeItem::write() {
      QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
-     for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
-      oneDRegisterAccessor_[row] = table->item(row, 2)->data(0).toDouble();
+     for (unsigned int row = 0; row < twoDRegisterAccessor_.getNElementsPerChannel(); ++row) {
+      twoDRegisterAccessor_[channelNo_][row] = table->item(row, 2)->data(0).toDouble();
      }
-     oneDRegisterAccessor_.write();
+     twoDRegisterAccessor_.write();
 }
 
-void NumericAddressedRegisterQTreeItem::updateRegisterProperties() {
+void NumericAddressedSequenceRegisterQTreeItem::updateRegisterProperties() {
   propertiesWidget_->setRegisterProperties(*properties_);
   propertiesWidget_->setFixedPointConverter(fixedPointConverter_);
 }

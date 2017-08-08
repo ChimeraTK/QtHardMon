@@ -7,6 +7,8 @@
 #include <mtca4u/FixedPointConverter.h> // mtca4u::FixedPointConverter
 #include "RegisterPropertiesWidget.h"
 
+// FIXME: composition over inheritance; the utility of that class should be 
+// included in set of helper classes and/or functions.
 class NumericAddressedElementQTreeItem : public DeviceElementQTreeItem {
 
 public:
@@ -14,16 +16,13 @@ public:
   NumericAddressedElementQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget);
   virtual void read() = 0;
   virtual void write() = 0;
-  virtual void updateRegisterProperties();
+  virtual void updateRegisterProperties() = 0;
 
 protected: // methods
-  QTreeWidgetItem * assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget);
+  QTreeWidgetItem * assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget, RegisterPropertiesWidget * propertiesWidget);
   std::string getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo);
 
 protected: // member fields
-  RegisterPropertiesWidget * propertiesWidget_;
-  RegisterPropertiesWidget::RegisterProperties * properties_;
-  mtca4u::FixedPointConverter * fixedPointConverter_;
 };
 
 #endif // NUMERICADDRESSEDELEMENTQTREEITEM_H

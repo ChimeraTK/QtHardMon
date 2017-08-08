@@ -9,7 +9,7 @@ enum class DeviceElementDataType {
     ModuleDataType = QTreeWidgetItem::UserType + 1,
     NumAddressedRegisterDataType,
     MultiplexedAreaDataType,
-    SequenceDescriptorDataType,
+    SequenceRegisterDataType,
     GenericRegisterDataType
 };
 

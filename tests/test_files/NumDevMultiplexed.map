@@ -2,6 +2,23 @@
 APP0.SOME_REGISTER                                         10            0           40      1     32      0    0
 APP0.ANOTHER_REGISTER                                       1           40            4      1     32      0    0
 
+TEST.AREA_MULTIPLEXED_SEQUENCE_DMA 512 0 128 0xD 16 -2 1
+TEST.SEQUENCE_DMA_0 1 0x00 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_1 1 0x02 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_2 1 0x04 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_3 1 0x06 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_4 1 0x08 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_5 1 0x0A 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_6 1 0x0C 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_7 1 0x0E 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_8 1 0x10 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_9 1 0x12 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_10 1 0x14 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_11 1 0x16 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_12 1 0x18 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_13 1 0x1A 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_14 1 0x1C 2 0xD 16  0 0
+TEST.SEQUENCE_DMA_15 1 0x1E 2 0xD 16  0 0
 #An area with 16 sequences of mixed types. It is supposed to have 4096 samples in each sequence.
 #There are 52 bytes in the sum of all sequences, so there are 212992 bytes (size).
 #The number of elements in the AREA field is just 212992 / 4, because it is just the instruction for the

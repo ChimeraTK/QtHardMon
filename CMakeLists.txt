@@ -47,7 +47,9 @@ SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.c
                             src/CustomQTreeItem.cpp src/DeviceElementQTreeItem.cpp 
                             src/ModuleQTreeItem.cpp 
                             src/NumericAddressedElementQTreeItem.cpp 
-                            src/NumericAddressedRegisterQTreeItem.cpp 
+                            src/NumericAddressedRegisterQTreeItem.cpp
+                            src/NumericAddressedMultiplexedAreaQTreeItem.cpp
+                            src/NumericAddressedSequenceRegisterQTreeItem.cpp 
                             src/RegisterPropertiesWidget.cpp)
 # The headers which contain Q_OBJECTs (need to be processed with moc)
 SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h)
