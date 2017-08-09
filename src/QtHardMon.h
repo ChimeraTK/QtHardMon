@@ -15,8 +15,6 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-#include "CustomQTreeItem.h"
-
 /** The QtHadMon class which implements all the GUI functionality.
  */
 class QtHardMon: public QMainWindow
@@ -216,17 +214,8 @@ class QtHardMon: public QMainWindow
   void clearRowBackgroundColour(int row);
   bool isMultiplexedDataRegion(std::string const & registerName);
   bool isSeqDescriptor(std::string const & registerName);
-  CustomQTreeItem *createAreaDesciptor(
-      DeviceListItem const *deviceListItem,
-      mtca4u::RegisterInfoMap::RegisterInfo const & regInfo);
-
-  CustomQTreeItem *createAreaDescriptorSubtree(
-      CustomQTreeItem *areaDescriptor,
-      mtca4u::RegisterInfoMap::const_iterator &currentIt,
-      mtca4u::RegisterInfoMap::const_iterator finalIterator);
 
   std::string extractMultiplexedRegionName(std::string const & regName);
-  RegisterPropertyGrpBox getRegisterPropertyGrpBoxData();
   void clearGroupBoxDisplay();
   void clearAllRowsInTable();
   std::string extractFileNameFromPath(const std::string &);

@@ -23,7 +23,9 @@
 #include "Exceptions.h"
 using namespace mtca4u;
 
-
+#include "NumericAddressedRegisterQTreeItem.h"
+#include "NumericAddressedMultiplexedAreaQTreeItem.h"
+#include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
 
 // The default maximum for the number of words in a register.
 // This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
@@ -175,6 +177,7 @@ void  QtHardMon::loadBoards()
 
   // set the directory of the dmap file as the current working directory so 
   // relative map file pathes work
+  // (I use c-type because it's shorter syntax and does not matter here).
   QDir::setCurrent( QFileInfo(dmapFileName).absolutePath() );
 
   // The return value is intentionally ignored. Cast to void to suppress compiler warnings.
@@ -322,46 +325,43 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     return;
   }
 
-  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(registerItem);
-  RegisterPropertyGrpBox grpBoxInfo = getRegisterPropertyGrpBoxData();
-  registerTreeItem->updateRegisterProperties(grpBoxInfo);
+  DeviceElementQTreeItem * selectedItem = static_cast<DeviceElementQTreeItem *>(registerItem);
+  selectedItem->updateRegisterProperties();
 
-  // remember that this register has been selected
-  if((registerTreeItem->type() != ModuleItem::DataType) && (registerTreeItem->type() != MultiplexedAreaItem::DataType)){
-    std::vector<std::string> fullRegisterName = registerTreeItem->getRegisterMapElement()->getRegisterName().getComponents();
-    std::string moduleName = NO_MODULE_NAME_STRING;
-    std::string registerName = fullRegisterName.at(0);
-    if (fullRegisterName.size() == 2) {
-      moduleName = fullRegisterName.at(0);
-      registerName = fullRegisterName.at(1);
-    }
-    _currentDeviceListItem->setLastSelectedRegisterName( registerName ) ;
-    _currentDeviceListItem->setLastSelectedModuleName( moduleName ) ;
-  }
+  // // remember that this register has been selected
+  // if((registerTreeItem->type() != ModuleItem::DataType) && (registerTreeItem->type() != MultiplexedAreaItem::DataType)){
+  //   std::vector<std::string> fullRegisterName = registerTreeItem->getRegisterMapElement()->getRegisterName().getComponents();
+  //   std::string moduleName = NO_MODULE_NAME_STRING;
+  //   std::string registerName = fullRegisterName.at(0);
+  //   if (fullRegisterName.size() == 2) {
+  //     moduleName = fullRegisterName.at(0);
+  //     registerName = fullRegisterName.at(1);
+  //   }
+  //   _currentDeviceListItem->setLastSelectedRegisterName( registerName ) ;
+  //   _currentDeviceListItem->setLastSelectedModuleName( moduleName ) ;
+  // }
 
-  if (!_autoRead || (registerTreeItem->type() == ModuleItem::DataType)){
-    // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
-    // In addition the write button is deactivated so the invalid items cannot be written to the register.
-    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
-    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
-    _hardMonForm.writeButton->setEnabled(false);
-  } else {
-    read();
-  }
+  // if (!_autoRead || (registerTreeItem->type() == ModuleItem::DataType)){
+  //   // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
+  //   // In addition the write button is deactivated so the invalid items cannot be written to the register.
+  //   _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
+  //   _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
+  //   _hardMonForm.writeButton->setEnabled(false);
+  // } else {
+  //   read();
+  // }
 }
 
 void QtHardMon::read()
 {
   ++_insideReadOrWrite;
 
-  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
+  DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
 
   try {
     if (currentDevice_.isOpened()) {
-      TableWidgetData tableData(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, _maxWords,
-                                currentDevice_);
-      registerTreeItem->read(tableData);
+      registerTreeItem->read();
       _hardMonForm.writeButton->setEnabled(true);
     }
   }
@@ -395,14 +395,12 @@ void QtHardMon::write()
 {
   ++_insideReadOrWrite;
 
-  CustomQTreeItem *registerTreeItem = static_cast<CustomQTreeItem *>(
+DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *>(
       _hardMonForm.registerTreeWidget->currentItem());
 
   try {
     if (currentDevice_.isOpened()) {
-      TableWidgetData tableData(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, _maxWords,
-                                currentDevice_);
-      registerTreeItem->write(tableData);
+      registerTreeItem->write();
     }
   }
   catch (InvalidOperationException &e) {
@@ -920,8 +918,6 @@ void QtHardMon::clearRowBackgroundColour(int row) {
   }
 }
 
-
-
 bool QtHardMon::isMultiplexedDataRegion(
     const std::string &registerName) {
   if (registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) ==
@@ -929,73 +925,6 @@ bool QtHardMon::isMultiplexedDataRegion(
     return true;
   }
     return false;
-}
-
-bool QtHardMon::isSeqDescriptor(const std::string &registerName) {
-  if (registerName.substr(0, mtca4u::SEQUENCE_PREFIX.size()) ==
-      mtca4u::SEQUENCE_PREFIX) {
-    return true;
-  }
-  return false;
-}
-
-CustomQTreeItem *QtHardMon::createAreaDesciptor(
-    const DeviceListItem *deviceListItem,
-    mtca4u::RegisterInfoMap::RegisterInfo const &regInfo) {
-
-  std::string registerName = regInfo.name;
-  std::string regionName = extractMultiplexedRegionName(registerName);
-  std::string moduleName = regInfo.module;
-  #warning Broken MultiplexedDataAccessor functionality, fix when redesigning
-  // mtca4u::RegisterInfoMapPointer RegisterInfoMap = deviceListItem->getRegisterMapPointer();
-
-  // boost::shared_ptr<MultiplexedDataAccessor<double> > accessor =
-  //     mtca4u::MultiplexedDataAccessor<double>::createInstance(
-  //         regionName, moduleName, _mtcaDevice, RegisterInfoMap);
-
- // return (new MultiplexedAreaItem(accessor, regInfo, registerName.c_str()) );
- return NULL;
-}
-
-CustomQTreeItem *QtHardMon::createAreaDescriptorSubtree(
-    CustomQTreeItem *areaDescriptor, mtca4u::RegisterInfoMap::const_iterator &it,
-    mtca4u::RegisterInfoMap::const_iterator finalIterator) {
-  // FIXME: this is not nice
-  // ++it; // start from the first seq description
-  // for (unsigned int sequenceCount = 0;
-  //      ((it != finalIterator) && isSeqDescriptor(it->name));
-  //      ++it, ++sequenceCount) {
-  //   CustomQTreeItem *seq = new SequenceDescriptor(
-  //       *it, sequenceCount, it->name.c_str());
-  //   areaDescriptor->addChild(seq);
-  // }
-  // --it; // leave the iterator at the last sequence description
-  // return areaDescriptor;
-  return NULL;
-}
-
-std::string QtHardMon::extractMultiplexedRegionName(
-    const std::string &regName) {
-  if (isMultiplexedDataRegion(regName)) {
-    return (regName.substr(mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()));
-  } else {
-    return "";
-  }
-}
-
-RegisterPropertyGrpBox QtHardMon::getRegisterPropertyGrpBoxData() {
-
-  RegisterPropertyGrpBox grpBoxData;
-  grpBoxData.registerNameDisplay = _hardMonForm.registerPropertiesWidget->ui->registerNameDisplay;
-  grpBoxData.moduleDisplay = _hardMonForm.registerPropertiesWidget->ui->moduleDisplay;
-  grpBoxData.registerBarDisplay = _hardMonForm.registerPropertiesWidget->ui->registerBarDisplay;
-  grpBoxData.registerAddressDisplay = _hardMonForm.registerPropertiesWidget->ui->registerAddressDisplay;
-  grpBoxData.registerNElementsDisplay = _hardMonForm.registerPropertiesWidget->ui->registerNElementsDisplay;
-  grpBoxData.registerSizeDisplay = _hardMonForm.registerPropertiesWidget->ui->registerSizeDisplay;
-  grpBoxData.registerWidthDisplay = _hardMonForm.registerPropertiesWidget->ui->registerWidthDisplay;
-  grpBoxData.registerFracBitsDisplay = _hardMonForm.registerPropertiesWidget->ui->registerFracBitsDisplay;
-  grpBoxData.registeSignBitDisplay = _hardMonForm.registerPropertiesWidget->ui->registeSignBitDisplay;
-  return grpBoxData;
 }
 
 void QtHardMon::clearGroupBoxDisplay() {
@@ -1034,7 +963,10 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   // the deviceItem actually is a DeviceListItemType. As this is a private slot
   // it is safe to assume this and use a static cast.
   DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
+
   _hardMonForm.registerTreeWidget->clear();
+
+  const mtca4u::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
 
   // get the registerMap and fill the RegisterTreeWidget
   for (RegisterCatalogue::const_iterator registerIter =
@@ -1042,38 +974,17 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
     
-    std::vector<std::string> fullRegisterName = registerIter->getRegisterName().getComponents();
-    QString moduleName = QString(NO_MODULE_NAME_STRING);
-    QString registerName = QString(fullRegisterName.at(0).c_str());
-    #warning Make it so there might be submodules used
-    if (fullRegisterName.size() == 2) {
-      moduleName = QString(fullRegisterName.at(0).c_str());
-      registerName = QString(fullRegisterName.at(1).c_str());
-    }
-    QList<QTreeWidgetItem *> moduleList =
-        _hardMonForm.registerTreeWidget->findItems(moduleName,
-                                                   Qt::MatchExactly);
-
-    QTreeWidgetItem *moduleItem;
-    if (moduleList.empty()) {
-      moduleItem = new ModuleItem(moduleName);
-      _hardMonForm.registerTreeWidget->addTopLevelItem(moduleItem);
+    if (isMultiplexedDataRegion(registerIter->getRegisterName().getComponents().back())) {
+      NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, _hardMonForm.registerTreeWidget, _hardMonForm.registerPropertiesWidget);
     } else {
-      moduleItem = moduleList.front(); // should be safe
-    }
 
-    // if (isMultiplexedDataRegion(registerName)) {
-    //   CustomQTreeItem *areaDescriptor =
-    //       createAreaDesciptor(deviceListItem, *registerIter);
-    //   RegisterInfoMap::const_iterator it_end =
-    //       deviceListItem->getRegisterMapPointer()->end();
-    //   areaDescriptor =
-    //       createAreaDescriptorSubtree(areaDescriptor, registerIter, it_end);
-    //   moduleItem->addChild(dynamic_cast<QTreeWidgetItem*>(areaDescriptor));
-    // } else {
-      moduleItem->addChild(
-          new RegisterItem(&(*registerIter), registerName));
-    // }
+      if (registerCatalogue.getRegister(registerIter->getRegisterName())->getNumberOfChannels() == 1) {
+        NumericAddressedRegisterQTreeItem * newItem = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), _hardMonForm.registerTreeWidget, _hardMonForm.registerPropertiesWidget);
+      } else {
+        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), _hardMonForm.registerTreeWidget, _hardMonForm.registerPropertiesWidget);
+      }
+
+    }
   }
   _hardMonForm.registerTreeWidget->expandAll();
 
@@ -1082,36 +993,36 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   // The user may now opt to not select the last active
   // register (and hence avoid the implicit read on this register when
   // the card is selected)
-  if (_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked()) {
+  // if (_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked()) {
 
-    // Searching a sub-tree does not work in QTreeWidget. So here is the
-    // strategy:
-    // Get a list of all registers with this name.
-    QList<QTreeWidgetItem *> registerList =
-        _hardMonForm.registerTreeWidget->findItems(
-            deviceListItem->getLastSelectedRegisterName().c_str(),
-            Qt::MatchExactly | Qt::MatchRecursive);
+  //   // Searching a sub-tree does not work in QTreeWidget. So here is the
+  //   // strategy:
+  //   // Get a list of all registers with this name.
+  //   QList<QTreeWidgetItem *> registerList =
+  //       _hardMonForm.registerTreeWidget->findItems(
+  //           deviceListItem->getLastSelectedRegisterName().c_str(),
+  //           Qt::MatchExactly | Qt::MatchRecursive);
 
-    // Iterate the list until we find the one with the right module
-    for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
-         registerIter != registerList.end(); ++registerIter) {
-      CustomQTreeItem *registerItem =
-          static_cast<CustomQTreeItem *>(*registerIter);
-      // if we found the right register select it and quit the loop
-      std::vector<std::string> fullRegisterName = registerItem->getRegisterMapElement()->getRegisterName().getComponents();
-      std::string moduleName = NO_MODULE_NAME_STRING;
-      std::string registerName = fullRegisterName.at(0);
-      if (fullRegisterName.size() == 2) {
-        moduleName = fullRegisterName.at(0);
-        registerName = fullRegisterName.at(1);
-      }
-      if (moduleName ==
-          deviceListItem->getLastSelectedModuleName()) {
-        _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
-        break;
-      }
-    } // for registerIter
-  }   // if autoselectPreviousRegister
+  //   // Iterate the list until we find the one with the right module
+  //   for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+  //        registerIter != registerList.end(); ++registerIter) {
+  //     CustomQTreeItem *registerItem =
+  //         static_cast<CustomQTreeItem *>(*registerIter);
+  //     // if we found the right register select it and quit the loop
+  //     std::vector<std::string> fullRegisterName = registerItem->getRegisterMapElement()->getRegisterName().getComponents();
+  //     std::string moduleName = NO_MODULE_NAME_STRING;
+  //     std::string registerName = fullRegisterName.at(0);
+  //     if (fullRegisterName.size() == 2) {
+  //       moduleName = fullRegisterName.at(0);
+  //       registerName = fullRegisterName.at(1);
+  //     }
+  //     if (moduleName ==
+  //         deviceListItem->getLastSelectedModuleName()) {
+  //       _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
+  //       break;
+  //     }
+  //   } // for registerIter
+  // }   // if autoselectPreviousRegister
 }
 
 void QtHardMon::addCopyActionForTableWidget() {
