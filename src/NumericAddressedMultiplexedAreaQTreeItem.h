@@ -7,7 +7,7 @@ class NumericAddressedMultiplexedAreaQTreeItem : public NumericAddressedElementQ
 
 public:
 
-  NumericAddressedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, const mtca4u::RegisterCatalogue & catalogue, mtca4u::RegisterCatalogue::const_iterator firstSequenceItem, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget);
+  NumericAddressedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, const mtca4u::RegisterCatalogue & catalogue, mtca4u::RegisterCatalogue::const_iterator & firstSequenceItem, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget);
   virtual void read();
   virtual void write();
   virtual void updateRegisterProperties();

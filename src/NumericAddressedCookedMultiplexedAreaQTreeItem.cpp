@@ -1,12 +1,12 @@
-#include "NumericAddressedMultiplexedAreaQTreeItem.h"
+#include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
 #include "Exceptions.h"
 #include "ModuleQTreeItem.h"
 #include <iterator>
-#include "NumericAddressedSequenceRegisterQTreeItem.h"
+#include "NumericAddressedCookedSequenceRegisterQTreeItem.h"
 
-NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, const mtca4u::RegisterCatalogue & catalogue, mtca4u::RegisterCatalogue::const_iterator & firstSequenceItem, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
+NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
 : NumericAddressedElementQTreeItem(device, registerInfo, parent, propertiesWidget),
-  twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(getTrimmedRegisterName(registerInfo))),
+  twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(registerInfo->getRegisterName())),
   propertiesWidget_(propertiesWidget)
 {
     unsigned int nOfChannels = twoDRegisterAccessor_.getNChannels();
@@ -16,9 +16,8 @@ NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeIt
     //     );
     // }
 
-    for (int i = 0; i < nOfChannels && firstSequenceItem != catalogue.end(); ++i, ++firstSequenceItem) {
-        boost::shared_ptr<mtca4u::RegisterInfo> currentSequenceItem = catalogue.getRegister(firstSequenceItem->getRegisterName());
-        DeviceElementQTreeItem * sequenceItem = new NumericAddressedSequenceRegisterQTreeItem(currentSequenceItem, twoDRegisterAccessor_, i, this, propertiesWidget);
+    for (int i = 0; i < nOfChannels; ++i) {
+        DeviceElementQTreeItem * sequenceItem = new NumericAddressedCookedSequenceRegisterQTreeItem(registerInfo, twoDRegisterAccessor_, i, this, propertiesWidget);
     }
 
     mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
@@ -40,33 +39,19 @@ NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeIt
     } else {
         // FIXME: the cast was invalid, we have assigned wrong DeviceElementQTreeItem.
     }
-    --firstSequenceItem;
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::read() {
+void NumericAddressedCookedMultiplexedAreaQTreeItem::read() {
 throw InvalidOperationException(
       "You cannot read from a multiplexed area. Select a sequence register.");
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::write() {
+void NumericAddressedCookedMultiplexedAreaQTreeItem::write() {
   throw InvalidOperationException(
       "You cannot write to a multiplexed area. Select a sequence register.");
 }
 
-std::string NumericAddressedMultiplexedAreaQTreeItem::getTrimmedRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo) {
-  std::string regName = registerInfo->getRegisterName().getComponents().back();
-  
-  std::size_t prefixFound = regName.find("AREA_MULTIPLEXED_SEQUENCE_");
-  if (prefixFound == 0) {
-    return registerInfo->getRegisterName().getComponents().front() + "/" + regName.substr(26);
-  } else {
-      throw InternalErrorException(
-      "Cannot determine proper multiplexed area and sequence descriptors.");
-  }
-
-}
-
-void NumericAddressedMultiplexedAreaQTreeItem::updateRegisterProperties() {
+void NumericAddressedCookedMultiplexedAreaQTreeItem::updateRegisterProperties() {
     propertiesWidget_->setRegisterProperties(*properties_);
     propertiesWidget_->setFixedPointConverter(nullptr);
 }

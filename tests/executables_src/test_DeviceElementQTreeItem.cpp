@@ -267,3 +267,99 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_ReadAndWrite )
     BOOST_CHECK_EQUAL(fixture.twoDRegisterAccessor[0][0], 3.0);
 
 }
+
+#include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
+
+struct NumericAddressedCookedMultiplexedAreaQTreeItem_fixture : public DeviceAccessSetup_fixture, public DeviceElementQTreeItem_fixtureBase {
+    QTreeWidget * treeWidget;
+    DeviceElementQTreeItem * numericAddressedCookedMultiplexedAreaQTreeItem;
+    mtca4u::TwoDRegisterAccessor<double> twoDRegisterAccessor;
+
+    NumericAddressedCookedMultiplexedAreaQTreeItem_fixture(const std::string & dmapFile, const std::string & deviceName, const std::string & registerPath, int initialValue) :
+    DeviceAccessSetup_fixture(dmapFile, deviceName),
+    twoDRegisterAccessor(device.getTwoDRegisterAccessor<double>(mtca4u::RegisterPath(registerPath)))
+    {
+        const mtca4u::RegisterCatalogue registerCatalogue = device.getRegisterCatalogue();
+        treeWidget = new QTreeWidget;
+        
+        numericAddressedCookedMultiplexedAreaQTreeItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, propertiesWidget);
+        twoDRegisterAccessor.read();
+        twoDRegisterAccessor[0][0] = initialValue;
+        twoDRegisterAccessor.write();
+        twoDRegisterAccessor.read();
+    }
+
+};
+
+/*
+ * Numeric addressed register item is properly constructed and returns correct data type.
+ * The item properly assigns itself to QTreeWidget.
+*/
+BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_constructor )
+{
+    NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/DAQ0_ADCA", 5.0);
+    BOOST_CHECK_EQUAL(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->type(), static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType));
+    BOOST_CHECK_EQUAL(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->text(0).toStdString(), "DAQ0_ADCA");
+    
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItemCount(), 1);
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->text(0).toStdString(), "APP0");
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->childCount(), 1);
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->child(0)->text(0).toStdString(), "DAQ0_ADCA");
+    BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItem(0)->child(0)->childCount(), 16);
+}
+
+#include "NumericAddressedCookedSequenceRegisterQTreeItem.h"
+
+/*
+ * Numeric addressed register properly fills register properties.
+ */
+BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_fillsRegisterProperties )
+{
+    NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/DAQ0_ADCA", 5.0);
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    fixture.numericAddressedCookedMultiplexedAreaQTreeItem->updateRegisterProperties();
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "DAQ0_ADCA", "APP0", "13", "1000", "", "212992", "", "", "");
+    NumericAddressedCookedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedCookedSequenceRegisterQTreeItem *>(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->child(0));
+    
+    if (!childItem) {
+        BOOST_FAIL("QTreeWidgetItem not casted properly");
+    } else {
+        childItem->updateRegisterProperties();
+    }
+
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "SEQUENCE_DAQ0_ADCA_0", "APP0", "13", "1000", "", "", "", "", "");
+}
+
+/*
+ * Numeric addressed register reads from / writes to device properly.
+*/
+BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_ReadAndWrite )
+{
+    NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/DAQ0_ADCA", 0.0);
+    
+    fixture.numericAddressedCookedMultiplexedAreaQTreeItem->updateRegisterProperties();
+
+    BOOST_CHECK_THROW(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->read(), InvalidOperationException);
+    BOOST_CHECK_THROW(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->write(), InvalidOperationException);
+
+    NumericAddressedCookedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedCookedSequenceRegisterQTreeItem *>(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->child(0));
+    
+    if (!childItem) {
+        BOOST_FAIL("QTreeWidgetItem not casted properly");
+    } else {
+        childItem->updateRegisterProperties();
+    }
+
+    childItem->read();
+
+    TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(0, 0, 0.0)}, 4096);
+
+    TestUtilities::setTableValue(fixture.propertiesWidget, 0, 0, std::make_tuple(3, 3, 3.0));
+
+    childItem->write();
+
+    fixture.twoDRegisterAccessor.read();
+
+    BOOST_CHECK_EQUAL(fixture.twoDRegisterAccessor[0][0], 3.0);
+
+}
