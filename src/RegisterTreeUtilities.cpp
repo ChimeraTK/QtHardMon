@@ -1,15 +1,9 @@
-#include "NumericAddressedElementQTreeItem.h"
-#include "Exceptions.h"
+#include "RegisterTreeUtilities.h"
 #include "ModuleQTreeItem.h"
 
-NumericAddressedElementQTreeItem::NumericAddressedElementQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
-: DeviceElementQTreeItem(QString(getRegisterName(registerInfo).c_str()),
-  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
-  assignToModuleItem(registerInfo, parent, propertiesWidget))
-{
-}
+#define NO_MODULE_NAME_STRING "[No Module Name]"
 
-QTreeWidgetItem * NumericAddressedElementQTreeItem::assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget, RegisterPropertiesWidget * propertiesWidget) {
+QTreeWidgetItem * RegisterTreeUtilities::assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget, RegisterPropertiesWidget * propertiesWidget) {
   
     std::vector<std::string> registerPathComponents = registerInfo->getRegisterName().getComponents();
     std::string moduleName = registerPathComponents.front();
@@ -32,6 +26,6 @@ QTreeWidgetItem * NumericAddressedElementQTreeItem::assignToModuleItem(boost::sh
     return moduleItem;
 }
 
-std::string NumericAddressedElementQTreeItem::getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo) {
+std::string RegisterTreeUtilities::getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo) {
   return registerInfo->getRegisterName().getComponents().back();
 }

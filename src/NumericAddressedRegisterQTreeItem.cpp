@@ -1,7 +1,10 @@
 #include "NumericAddressedRegisterQTreeItem.h"
+#include "RegisterTreeUtilities.h"
 
 NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
-: NumericAddressedElementQTreeItem(device, registerInfo, parent, propertiesWidget),
+: DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
+  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
+  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidget)),
   oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(registerInfo->getRegisterName())),
   propertiesWidget_(propertiesWidget)
 {

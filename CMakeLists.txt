@@ -44,9 +44,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
 
 SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
                             src/PlotWindow.cpp src/CustomDelegates.cpp src/HexSpinBox.cpp
+                            src/RegisterTreeUtilities.cpp
                             src/DeviceElementQTreeItem.cpp 
-                            src/ModuleQTreeItem.cpp 
-                            src/NumericAddressedElementQTreeItem.cpp 
+                            src/ModuleQTreeItem.cpp
                             src/NumericAddressedRegisterQTreeItem.cpp
                             src/NumericAddressedMultiplexedAreaQTreeItem.cpp
                             src/NumericAddressedSequenceRegisterQTreeItem.cpp 

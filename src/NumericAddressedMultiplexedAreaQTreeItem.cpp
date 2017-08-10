@@ -1,11 +1,12 @@
 #include "NumericAddressedMultiplexedAreaQTreeItem.h"
 #include "Exceptions.h"
-#include "ModuleQTreeItem.h"
-#include <iterator>
+#include "RegisterTreeUtilities.h"
 #include "NumericAddressedSequenceRegisterQTreeItem.h"
 
 NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, const mtca4u::RegisterCatalogue & catalogue, mtca4u::RegisterCatalogue::const_iterator & firstSequenceItem, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
-: NumericAddressedElementQTreeItem(device, registerInfo, parent, propertiesWidget),
+: DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
+  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
+  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidget)),
   twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(getTrimmedRegisterName(registerInfo))),
   propertiesWidget_(propertiesWidget)
 {

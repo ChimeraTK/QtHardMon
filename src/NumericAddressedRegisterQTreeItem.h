@@ -1,9 +1,13 @@
 #ifndef NUMERICADDRESSEDREGISTERQTREEITEM_H
 #define NUMERICADDRESSEDREGISTERQTREEITEM_H
 
-#include "NumericAddressedElementQTreeItem.h"
+#include "DeviceElementQTreeItem.h"
+#include <mtca4u/Device.h> // mtca4u::Device
+#include <mtca4u/RegisterInfoMap.h> // mtca4u::RegisterInfoMap::RegisterInfo
+#include <mtca4u/FixedPointConverter.h> // mtca4u::FixedPointConverter
+#include "RegisterPropertiesWidget.h"
 
-class NumericAddressedRegisterQTreeItem : public NumericAddressedElementQTreeItem {
+class NumericAddressedRegisterQTreeItem : public DeviceElementQTreeItem {
 
 public:
 

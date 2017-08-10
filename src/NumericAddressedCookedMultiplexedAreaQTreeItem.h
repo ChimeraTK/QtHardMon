@@ -1,9 +1,12 @@
 #ifndef NUMERICADDRESSEDCOOKEDMULTIPLEXEDAREAQTREEITEM_H
 #define NUMERICADDRESSEDCOOKEDMULTIPLEXEDAREAQTREEITEM_H
 
-#include "NumericAddressedElementQTreeItem.h"
+#include "DeviceElementQTreeItem.h"
+#include <mtca4u/Device.h> // mtca4u::Device
+#include <mtca4u/RegisterInfoMap.h> // mtca4u::RegisterInfoMap::RegisterInfo
+#include "RegisterPropertiesWidget.h"
 
-class NumericAddressedCookedMultiplexedAreaQTreeItem : public NumericAddressedElementQTreeItem {
+class NumericAddressedCookedMultiplexedAreaQTreeItem : public DeviceElementQTreeItem {
 
 public:
 

@@ -3,9 +3,12 @@
 #include "ModuleQTreeItem.h"
 #include <iterator>
 #include "NumericAddressedCookedSequenceRegisterQTreeItem.h"
+#include "RegisterTreeUtilities.h"
 
 NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
-: NumericAddressedElementQTreeItem(device, registerInfo, parent, propertiesWidget),
+: DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
+  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
+  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidget)),
   twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(registerInfo->getRegisterName())),
   propertiesWidget_(propertiesWidget)
 {
