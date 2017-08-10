@@ -202,7 +202,7 @@ void RegisterPropertiesWidget::clearBackground(){
 
 
 void RegisterPropertiesWidget::changeBackgroundIfModified( int row, int column ){
-//   if (_insideReadOrWrite==0){
+//   if (insideReadOrWrite_==0){
 //     ui->valuesTableWidget->item(row, column)->setBackground( modifiedBackgroundBrush_ );
 //   }
 //   else{

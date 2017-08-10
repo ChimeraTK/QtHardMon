@@ -46,6 +46,17 @@ void NumericAddressedRegisterQTreeItem::read() {
     rowItem->setText(rowAsText.str().c_str());
     table->setVerticalHeaderItem(row, rowItem);
 
+    // if (row == maxRow) { // The register is too large to display. Show that it
+    //                      // is truncated and stop reading
+    //   dataItem->setText("truncated");
+    //   dataItem->setFlags(dataItem->flags() & ~Qt::ItemIsSelectable &
+    //                      ~Qt::ItemIsEditable);
+    //   dataItem->setToolTip("List is truncated. You can change the number of "
+    //                        "words displayed in the preferences.");
+    //   table->setItem(row, 0, dataItem);
+    //   break;
+    // }
+
     dataItem->setData(0, QVariant(oneDRegisterAccessor_[row]));
     table->setItem(row, 2, dataItem);
   }

@@ -47,9 +47,9 @@ using namespace mtca4u;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags) 
-  : QMainWindow(parent_, flags),_hardMonForm(),
-    _autoRead(true),
-    _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
+  : QMainWindow(parent_, flags),ui(),
+    autoRead_(true),
+    readOnClick_(true), dmapFileName_(), configFileName_(), insideReadOrWrite_(0),
     _currentDeviceListItem(NULL),
     _plotWindow(NULL),
     noPrompts_(noPrompts)
@@ -57,84 +57,84 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
 
 
 
-  _hardMonForm.setupUi(this);
+  ui.setupUi(this);
 
   setWindowTitle("QtHardMon");
   setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
-  _hardMonForm.logoLabel->setPixmap( QPixmap(":/DESY_logo.png") );
+  ui.logoLabel->setPixmap( QPixmap(":/DESY_logo.png") );
 
   addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
                                         // clipboard
 
-  connect(_hardMonForm.deviceListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
+  connect(ui.deviceListWidget, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 
 	  this, SLOT( deviceSelected(QListWidgetItem *, QListWidgetItem *) ) );
 
-  connect(_hardMonForm.registerTreeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), 
+  connect(ui.registerTreeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), 
 	  this, SLOT( registerSelected(QTreeWidgetItem *, QTreeWidgetItem *) ) );
 
-  connect(_hardMonForm.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)), 
+  connect(ui.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)), 
 	  this, SLOT( registerClicked(QTreeWidgetItem *) ) );
 
 
 
-  connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
+  connect(ui.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
 					       
-  connect(_hardMonForm.readButton, SIGNAL(clicked()),
+  connect(ui.readButton, SIGNAL(clicked()),
 	  this, SLOT(read()));
 
-  connect(_hardMonForm.writeButton, SIGNAL(clicked()),
+  connect(ui.writeButton, SIGNAL(clicked()),
 	  this, SLOT(write()));
 
-  connect(_hardMonForm.aboutQtHardMonAction, SIGNAL(triggered()),
+  connect(ui.aboutQtHardMonAction, SIGNAL(triggered()),
 	  this, SLOT(aboutQtHardMon()));
 
-  connect(_hardMonForm.aboutQtAction, SIGNAL(triggered()),
+  connect(ui.aboutQtAction, SIGNAL(triggered()),
 	  this, SLOT(aboutQt()));
 
-  connect(_hardMonForm.preferencesAction, SIGNAL(triggered()),
+  connect(ui.preferencesAction, SIGNAL(triggered()),
 	  this, SLOT(preferences()));
 
-  connect(_hardMonForm.loadConfigAction, SIGNAL(triggered()),
+  connect(ui.loadConfigAction, SIGNAL(triggered()),
 	  this, SLOT(loadConfig()));
 
-  connect(_hardMonForm.saveConfigAction, SIGNAL(triggered()),
+  connect(ui.saveConfigAction, SIGNAL(triggered()),
 	  this, SLOT(saveConfig()));
 
-  connect(_hardMonForm.saveConfigAsAction, SIGNAL(triggered()),
+  connect(ui.saveConfigAsAction, SIGNAL(triggered()),
 	  this, SLOT(saveConfigAs()));
 
-  connect(_hardMonForm.loadBoardsAction, SIGNAL(triggered()),
+  connect(ui.loadBoardsAction, SIGNAL(triggered()),
 	  this, SLOT(loadBoards()));
 
-  connect(_hardMonForm.quitAction, SIGNAL(triggered()),
+  connect(ui.quitAction, SIGNAL(triggered()),
 	  this, SLOT(close()));
 
-  connect(_hardMonForm.openCloseButton, SIGNAL(clicked()),
+  connect(ui.openCloseButton, SIGNAL(clicked()),
 	  this, SLOT(openCloseDevice()));
 
-  connect(_hardMonForm.SortAscendingcheckBox, SIGNAL(stateChanged(int)),
+  connect(ui.SortAscendingcheckBox, SIGNAL(stateChanged(int)),
 	  this, SLOT(handleSortCheckboxClick(int)));
 
   // The oparations and options group are disabled until a dmap file is loaded and a device has been opened 
-  _hardMonForm.operationsGroupBox->setEnabled(false);
-  _hardMonForm.optionsGroupBox->setEnabled(false);
-  _hardMonForm.deviceStatusGroupBox->setEnabled(false);
-  _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
+  ui.operationsGroupBox->setEnabled(false);
+  ui.optionsGroupBox->setEnabled(false);
+  ui.deviceStatusGroupBox->setEnabled(false);
+  ui.devicePropertiesGroupBox->setEnabled(false);
 
   // The following widgets are diabled because they are not implemented yet
-  _hardMonForm.continuousReadCheckBox->setEnabled(false);
-  _hardMonForm.writeToFileButton->setEnabled(false);
-  _hardMonForm.readFromFileButton->setEnabled(false);
+  ui.continuousReadCheckBox->setEnabled(false);
+  ui.writeToFileButton->setEnabled(false);
+  ui.readFromFileButton->setEnabled(false);
 
   _plotWindow = new PlotWindow(this);
 
   // sorted enabled by default; calling this here will trigger the slot, which
   // sorts the register list.
-  _hardMonForm.SortAscendingcheckBox->setChecked(true);
+  ui.SortAscendingcheckBox->setChecked(true);
 
 
-  connect(_hardMonForm.showPlotWindowCheckBox, SIGNAL(stateChanged(int)),
+  connect(ui.showPlotWindowCheckBox, SIGNAL(stateChanged(int)),
 	  this, SLOT(showPlotWindow(int)));
 
   connect(_plotWindow, SIGNAL(plotWindowClosed()),
@@ -190,51 +190,51 @@ bool  QtHardMon::loadDmapFile( QString const & dmapFileName )
   }
 
   // store the dmap file name for further usage. The variable with the underscore is the class wide variable.
-  _dmapFileName = dmapFileName;
+  dmapFileName_ = dmapFileName;
 
   // clear the device list and the device specific info 
-  _hardMonForm.deviceListWidget->clear();
+  ui.deviceListWidget->clear();
 
   // Set the keyboard focus away from the deviceListWidget. This would trigger the deviceSelected 
   // on the first entry, which we don't want. The focus is set to the registerTreeWidget.
-  _hardMonForm.registerTreeWidget->setFocus(Qt::OtherFocusReason);
+  ui.registerTreeWidget->setFocus(Qt::OtherFocusReason);
 
   for (DeviceInfoMap::iterator deviceIter = dmap->begin();
        deviceIter != dmap->end(); ++deviceIter)
   {
-    _hardMonForm.deviceListWidget->addItem( new DeviceListItem( (*deviceIter), 
+    ui.deviceListWidget->addItem( new DeviceListItem( (*deviceIter), 
 							       (*deviceIter).deviceName.c_str(),
-							       _hardMonForm.deviceListWidget) );
+							       ui.deviceListWidget) );
   }
   return true;
   // on user request: do not automatically load the first device. This might be not accessible and
   // immediately gives an error message.
-  //_hardMonForm.deviceListWidget->setCurrentRow(0);
+  //ui.deviceListWidget->setCurrentRow(0);
 }
 
 void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
                                QListWidgetItem * /*previousDeviceItem */) {
-  _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
+  ui.devicePropertiesGroupBox->setEnabled(true);
 
   // When the deviceListWidget is cleared , the currentItemChanged signal is
   // emitted with a null pointer. We have to catch this here and return. Before
   // returning we clear the device specific display info, close the device and
   // empty the register list.
   if (!deviceItem) {
-    _hardMonForm.deviceNameDisplay->setText("");
-    _hardMonForm.deviceFileDisplay->setText("");
-    _hardMonForm.mapFileDisplay->setText("");
-    _hardMonForm.mapFileDisplay->setToolTip("");
-    _hardMonForm.deviceStatusGroupBox->setEnabled(false);
-    _hardMonForm.devicePropertiesGroupBox->setEnabled(false);
+    ui.deviceNameDisplay->setText("");
+    ui.deviceFileDisplay->setText("");
+    ui.mapFileDisplay->setText("");
+    ui.mapFileDisplay->setToolTip("");
+    ui.deviceStatusGroupBox->setEnabled(false);
+    ui.devicePropertiesGroupBox->setEnabled(false);
     closeDevice();
-    _hardMonForm.registerTreeWidget->clear();
+    ui.registerTreeWidget->clear();
 
     return;
   }
 
-  _hardMonForm.deviceStatusGroupBox->setEnabled(true);
-  _hardMonForm.devicePropertiesGroupBox->setEnabled(true);
+  ui.deviceStatusGroupBox->setEnabled(true);
+  ui.devicePropertiesGroupBox->setEnabled(true);
 
   DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
 
@@ -244,13 +244,13 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   // opening the device enables the gui elements if success
   openDevice(deviceListItem->getDeviceMapElement().deviceName);
 
-  _hardMonForm.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().deviceName.c_str());
-  _hardMonForm.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().uri.c_str());
+  ui.deviceNameDisplay->setText( deviceListItem->getDeviceMapElement().deviceName.c_str());
+  ui.deviceFileDisplay->setText( deviceListItem->getDeviceMapElement().uri.c_str());
 
   std::string absPath = deviceListItem->getDeviceMapElement().mapFileName;
   std::string mapFileName = extractFileNameFromPath(absPath);
-  _hardMonForm.mapFileDisplay->setText(mapFileName.c_str());
-  _hardMonForm.mapFileDisplay->setToolTip(absPath.c_str());
+  ui.mapFileDisplay->setText(mapFileName.c_str());
+  ui.mapFileDisplay->setToolTip(absPath.c_str());
 
   populateRegisterTree(deviceItem);
 }
@@ -262,16 +262,16 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   {
   currentDevice_.open(deviceFileName);
     // enable all of the GUI in case it was deactivated before
-    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
-    _hardMonForm.operationsGroupBox->setEnabled(true);
-    _hardMonForm.optionsGroupBox->setEnabled(true);
+    ui.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
+    ui.operationsGroupBox->setEnabled(true);
+    ui.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
 
-    _hardMonForm.openClosedLabel->setText(
+    ui.openClosedLabel->setText(
 	 QApplication::translate("QtHardMonForm",
 				 "Device is open.", 0,
 				 QApplication::UnicodeUTF8));
-    _hardMonForm.openCloseButton->setText(
+    ui.openCloseButton->setText(
 	 QApplication::translate("QtHardMonForm", "Close", 0,
 				 QApplication::UnicodeUTF8));
   }
@@ -287,17 +287,17 @@ void QtHardMon::closeDevice()
 {
 	if (currentDevice_.isOpened())
 		currentDevice_.close();
-  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
-  _hardMonForm.operationsGroupBox->setEnabled(false);
-  _hardMonForm.optionsGroupBox->setEnabled(false);
+  ui.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
+  ui.operationsGroupBox->setEnabled(false);
+  ui.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
   // If the device is closed then there is no way we can read values from the
   // registers - they are not available anymore. Nothing to show on the table
-  _hardMonForm.registerPropertiesWidget->clearAllRowsInTable();
-  _hardMonForm.openClosedLabel->setText(
+  ui.registerPropertiesWidget->clearAllRowsInTable();
+  ui.openClosedLabel->setText(
   QApplication::translate("QtHardMonForm", "Device is closed.", 0,
         QApplication::UnicodeUTF8));
-  _hardMonForm.openCloseButton->setText(
+  ui.openCloseButton->setText(
   QApplication::translate("QtHardMonForm", "Open", 0,
         QApplication::UnicodeUTF8));
 }
@@ -307,7 +307,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
-    _hardMonForm.registerPropertiesWidget->clearProperties();
+    ui.registerPropertiesWidget->clearProperties();
     return;
   }
 
@@ -319,12 +319,12 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     selectedItem = dynamic_cast<DeviceElementQTreeItem *>(selectedItem->parent());
   }
 
-  if (!_autoRead /*|| (registerTreeItem->type() == ModuleItem::DataType)*/){
+  if (!autoRead_ /*|| (registerTreeItem->type() == ModuleItem::DataType)*/){
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
-    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
-    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
-    _hardMonForm.writeButton->setEnabled(false);
+    ui.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
+    ui.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
+    ui.writeButton->setEnabled(false);
   } else {
     read();
   }
@@ -332,15 +332,15 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 
 void QtHardMon::read()
 {
-  ++_insideReadOrWrite;
+  ++insideReadOrWrite_;
 
   DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *>(
-      _hardMonForm.registerTreeWidget->currentItem());
+      ui.registerTreeWidget->currentItem());
 
   try {
     if (currentDevice_.isOpened()) {
       registerTreeItem->read();
-      _hardMonForm.writeButton->setEnabled(true);
+      ui.writeButton->setEnabled(true);
     }
   }
   catch (InvalidOperationException &e) {
@@ -351,7 +351,7 @@ void QtHardMon::read()
   }
   catch (std::exception &e) {
     closeDevice();
-    _hardMonForm.writeButton->setEnabled(false);
+    ui.writeButton->setEnabled(false);
     // the error message accesses the _currentDeviceListItem. Is
     // this safe? It might be NULL.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"), 
@@ -366,15 +366,15 @@ void QtHardMon::read()
     _plotWindow->plot();
   }
 
-  --_insideReadOrWrite;
+  --insideReadOrWrite_;
 }
 
 void QtHardMon::write()
 {
-  ++_insideReadOrWrite;
+  ++insideReadOrWrite_;
 
 DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *>(
-      _hardMonForm.registerTreeWidget->currentItem());
+      ui.registerTreeWidget->currentItem());
 
   try {
     if (currentDevice_.isOpened()) {
@@ -399,15 +399,15 @@ DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *
     QString("\n\nThe device has been closed."));
   }
 
-  if (  _hardMonForm.readAfterWriteCheckBox->isChecked() )
+  if (  ui.readAfterWriteCheckBox->isChecked() )
   {
     read();
   }
   else{
-    _hardMonForm.registerPropertiesWidget->clearBackground();
+    ui.registerPropertiesWidget->clearBackground();
   }
 
-  --_insideReadOrWrite;
+  --insideReadOrWrite_;
 }
 
 void QtHardMon::preferences()
@@ -422,39 +422,39 @@ void QtHardMon::preferences()
 						      QString::number(0x10000));
 
   preferencesDialogForm.fontSizeSpinBox->setValue(font().pointSize());
-  preferencesDialogForm.autoReadCheckBox->setChecked(_autoRead);
-  preferencesDialogForm.readOnClickCheckBox->setChecked(_readOnClick);
+  preferencesDialogForm.autoReadCheckBox->setChecked(autoRead_);
+  preferencesDialogForm.readOnClickCheckBox->setChecked(readOnClick_);
 
   // set up the current value of maxWords
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
-  preferencesDialogForm.maxWordsSpinBox->setValue( _hardMonForm.registerPropertiesWidget->maxWords_ );
+  preferencesDialogForm.maxWordsSpinBox->setValue( ui.registerPropertiesWidget->maxWords_ );
 
   // set up the floating point display decimal places
   preferencesDialogForm.precisionSpinBox->setMinimum(1); // minimum one decimal place display
   preferencesDialogForm.precisionSpinBox->setMaximum(10);// maximum 10 decimal places
-  preferencesDialogForm.precisionSpinBox->setValue(_hardMonForm.registerPropertiesWidget->floatPrecision_);
+  preferencesDialogForm.precisionSpinBox->setValue(ui.registerPropertiesWidget->floatPrecision_);
 
   int dialogResult = preferencesDialog.exec();
 
   // only set the values if ok has been pressed
   if (dialogResult == QDialog::Accepted )
   {
-    _hardMonForm.registerPropertiesWidget->maxWords_ =  preferencesDialogForm.maxWordsSpinBox->value();
+    ui.registerPropertiesWidget->maxWords_ =  preferencesDialogForm.maxWordsSpinBox->value();
 
     // Read and set precision for delegate class
-    _hardMonForm.registerPropertiesWidget->floatPrecision_ = preferencesDialogForm.precisionSpinBox->value();
-    _hardMonForm.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(_hardMonForm.registerPropertiesWidget->floatPrecision_);
+    ui.registerPropertiesWidget->floatPrecision_ = preferencesDialogForm.precisionSpinBox->value();
+    ui.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(ui.registerPropertiesWidget->floatPrecision_);
 
     // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
     // from the device
-    registerSelected(_hardMonForm.registerTreeWidget->currentItem(),_hardMonForm.registerTreeWidget->currentItem());
+    registerSelected(ui.registerTreeWidget->currentItem(),ui.registerTreeWidget->currentItem());
 
     QFont newFont(this->font());
     newFont.setPointSize(preferencesDialogForm.fontSizeSpinBox->value());
     QApplication::setFont(newFont);
 
-    _readOnClick = preferencesDialogForm.readOnClickCheckBox->isChecked();
-    _autoRead = preferencesDialogForm.autoReadCheckBox->isChecked();
+    readOnClick_ = preferencesDialogForm.readOnClickCheckBox->isChecked();
+    autoRead_ = preferencesDialogForm.autoReadCheckBox->isChecked();
   }
   
 }
@@ -504,7 +504,7 @@ void QtHardMon::loadConfig(QString const & configFileName)
 
   // At this point we considder the config file as successfully loaded, even though it might not contain any
   // valid parameters. But we store the file name.
-  _configFileName = configFileName;
+  configFileName_ = configFileName;
 
   // show message box with parse errors, but just continue normally
   if (!configReader.getBadLines().isEmpty() )
@@ -527,21 +527,21 @@ void QtHardMon::loadConfig(QString const & configFileName)
 
   // first handle all settings that do not depend on opening a device map
 
-  _hardMonForm.registerPropertiesWidget->floatPrecision_ = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->floatPrecision_)); // is check necessary? should display default
-  _hardMonForm.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(_hardMonForm.registerPropertiesWidget->floatPrecision_);
+  ui.registerPropertiesWidget->floatPrecision_ = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(ui.registerPropertiesWidget->floatPrecision_)); // is check necessary? should display default
+  ui.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(ui.registerPropertiesWidget->floatPrecision_);
 
   // store in a local variable for now
-  int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->maxWords_));
+  int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(ui.registerPropertiesWidget->maxWords_));
   // check for validity. Minimum reasonable value is 1.
   if (maxWords >=1)
   {
      //only after checking set the class wide maxWords variable
-    _hardMonForm.registerPropertiesWidget->maxWords_ = static_cast<unsigned int>(maxWords);
+    ui.registerPropertiesWidget->maxWords_ = static_cast<unsigned int>(maxWords);
      // Update the register, so the length of the valuesList is adapted.
      //If another register is loaded from the config this might be repeated.
      //But for an easier logic we take this little overhead.
-     registerSelected(_hardMonForm.registerTreeWidget->currentItem(),
-		      _hardMonForm.registerTreeWidget->currentItem());
+     registerSelected(ui.registerTreeWidget->currentItem(),
+		      ui.registerTreeWidget->currentItem());
   }
   else
   {
@@ -551,13 +551,13 @@ void QtHardMon::loadConfig(QString const & configFileName)
   }
   
   int readAfterWriteFlag = configReader.getValue(READ_AFTER_WRITE_STRING, 
-						 _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0);
+						 ui.readAfterWriteCheckBox->isChecked() ? 1 : 0);
   // we use the implicit conversion 0=false, everyting else is true
-  _hardMonForm.readAfterWriteCheckBox->setChecked( readAfterWriteFlag );
+  ui.readAfterWriteCheckBox->setChecked( readAfterWriteFlag );
 
   int showPlotWindowFlag =  configReader.getValue(SHOW_PLOT_WINDOW_STRING,
-						 _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0);
-  _hardMonForm.showPlotWindowCheckBox->setChecked( showPlotWindowFlag );
+						 ui.showPlotWindowCheckBox->isChecked() ? 1 : 0);
+  ui.showPlotWindowCheckBox->setChecked( showPlotWindowFlag );
 
   int plotAfterReadFlag =  configReader.getValue(PLOT_AFTER_READ_STRING,
 						 _plotWindow->plotAfterReadIsChecked() ? 1 : 0);
@@ -565,12 +565,12 @@ void QtHardMon::loadConfig(QString const & configFileName)
 
    int autoselectPreviousRegisterFlag = configReader.getValue(
        AUTOSELECT_PREVIOUS_REGISTER_STRING,
-       _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
-   _hardMonForm.autoselectPreviousRegisterCheckBox->setChecked(
+       ui.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
+   ui.autoselectPreviousRegisterCheckBox->setChecked(
        autoselectPreviousRegisterFlag);
 
-   _readOnClick = static_cast<bool>( configReader.getValue(READ_ON_CLICK_STRING, _readOnClick ? 1 : 0 ) );
-   _autoRead = static_cast<bool>( configReader.getValue(AUTO_READ_STRING, _autoRead ? 1 : 0 ) );
+   readOnClick_ = static_cast<bool>( configReader.getValue(READ_ON_CLICK_STRING, readOnClick_ ? 1 : 0 ) );
+   autoRead_ = static_cast<bool>( configReader.getValue(AUTO_READ_STRING, autoRead_ ? 1 : 0 ) );
 
    int fontSize = configReader.getValue( FONT_SIZE_STRING, font().pointSize() );
    // Check validity of the font size.
@@ -601,10 +601,10 @@ void QtHardMon::loadConfig(QString const & configFileName)
   }
 
   //loop all devices and try to determine the last used module and register
-  for (int deviceRow = 0; deviceRow < _hardMonForm.deviceListWidget->count(); ++deviceRow)
+  for (int deviceRow = 0; deviceRow < ui.deviceListWidget->count(); ++deviceRow)
   {
     DeviceListItem * deviceListItem =  
-      static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
+      static_cast<DeviceListItem *>(ui.deviceListWidget->item(deviceRow) );
     
     // determine the module and the register 
     std::string deviceRegisterString = deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
@@ -628,7 +628,7 @@ void QtHardMon::loadConfig(QString const & configFileName)
   }
   
   // try to find the device in the list
-  QList<QListWidgetItem *> matchingDevices = _hardMonForm.deviceListWidget->findItems(currentDeviceString.c_str(),
+  QList<QListWidgetItem *> matchingDevices = ui.deviceListWidget->findItems(currentDeviceString.c_str(),
 										      Qt::MatchExactly);
 
   if (matchingDevices.isEmpty())
@@ -647,19 +647,19 @@ void QtHardMon::loadConfig(QString const & configFileName)
   DeviceListItem *deviceListItem = static_cast< DeviceListItem *>(*matchingDevices.begin());
 
   // now we are ready to select the device
-  _hardMonForm.deviceListWidget->setCurrentItem(deviceListItem);
+  ui.deviceListWidget->setCurrentItem(deviceListItem);
 
 }
 
 void QtHardMon::saveConfig()
 {
-  if (_configFileName.isEmpty())
+  if (configFileName_.isEmpty())
   {
     saveConfigAs();
   }
   else
   {
-    writeConfig(_configFileName);
+    writeConfig(configFileName_);
   }
 }
 
@@ -688,7 +688,7 @@ void QtHardMon::saveConfigAs()
   }
 
   // only store the file name upon successful writing (to the class wide variable with the unterscore)
-  _configFileName = configFileName;
+  configFileName_ = configFileName;
 }
 
 void QtHardMon::writeConfig(QString const & fileName)
@@ -698,13 +698,13 @@ void QtHardMon::writeConfig(QString const & fileName)
   // set the variables we want do write to file
 
   // only write the file name when it's not empty, otherwise we get an invalid line
-  if( ! _dmapFileName.isEmpty() )
+  if( ! dmapFileName_.isEmpty() )
   {
-    configWriter.setValue(DMAP_FILE_STRING, _dmapFileName.toStdString());
+    configWriter.setValue(DMAP_FILE_STRING, dmapFileName_.toStdString());
   }
 
   // The device list widget only contains deviceListItems, so it's safe to use a static cast here.
-  DeviceListItem * deviceListItem =  static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->currentItem() );
+  DeviceListItem * deviceListItem =  static_cast<DeviceListItem *>(ui.deviceListWidget->currentItem() );
 
      // the device list might be emtpy, or there is no current item (?, is this possibe?) 
      
@@ -712,13 +712,13 @@ void QtHardMon::writeConfig(QString const & fileName)
   {
     configWriter.setValue( CURRENT_DEVICE_STRING, deviceListItem->getDeviceMapElement().deviceName );
     // writing a register without item does not make sense, so we keep it in the if block
-    //    configWriter.setValue(CURRENT_REGISTER_ROW_STRING, _hardMonForm.registerTreeWidget->currentRow());
+    //    configWriter.setValue(CURRENT_REGISTER_ROW_STRING, ui.registerTreeWidget->currentRow());
   }
   
   // add a value to store the last register for each device
-  for (int deviceRow = 0; deviceRow < _hardMonForm.deviceListWidget->count(); ++deviceRow)
+  for (int deviceRow = 0; deviceRow < ui.deviceListWidget->count(); ++deviceRow)
   {
-    deviceListItem = static_cast<DeviceListItem *>(_hardMonForm.deviceListWidget->item(deviceRow) );
+    deviceListItem = static_cast<DeviceListItem *>(ui.deviceListWidget->item(deviceRow) );
     
     // Only write to the config file if the 'last selected' strings are not empty.
     // Empty strings would cause a parse error, and if the entry is not found it falls back to empty string anyway.
@@ -734,16 +734,16 @@ void QtHardMon::writeConfig(QString const & fileName)
   //   }
   }
 
-  configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->maxWords_));
-  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->floatPrecision_));
-  configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
-  configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
+  configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(ui.registerPropertiesWidget->maxWords_));
+  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(ui.registerPropertiesWidget->floatPrecision_));
+  configWriter.setValue(READ_AFTER_WRITE_STRING,  ui.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
+  configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  ui.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(AUTOSELECT_PREVIOUS_REGISTER_STRING,
-                        _hardMonForm.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
+                        ui.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
   configWriter.setValue(PLOT_AFTER_READ_STRING, _plotWindow->plotAfterReadIsChecked() ? 1 : 0 );
   configWriter.setValue(FONT_SIZE_STRING, font().pointSize());
-  configWriter.setValue(AUTO_READ_STRING, _autoRead ? 1 : 0 );
-  configWriter.setValue(READ_ON_CLICK_STRING, _readOnClick ? 1 : 0 );
+  configWriter.setValue(AUTO_READ_STRING, autoRead_ ? 1 : 0 );
+  configWriter.setValue(READ_ON_CLICK_STRING, readOnClick_ ? 1 : 0 );
 
   // this 
    try{
@@ -777,7 +777,7 @@ void QtHardMon::showPlotWindow(int checkState)
 void QtHardMon::unckeckShowPlotWindow()
 {
   // the plot window just closed. Uncheck the showPlotWindow check box
-  _hardMonForm.showPlotWindowCheckBox->setChecked(false);
+  ui.showPlotWindowCheckBox->setChecked(false);
 }
 
 // The constructor itself is empty. It just calls the construtor of the mother class and the copy
@@ -809,7 +809,7 @@ QtHardMon::DeviceListItem::~DeviceListItem(){}
 void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
   // Do not execute the read if the corresponding flag is off
   // registerSelected method.
-  if (!_readOnClick) {
+  if (!readOnClick_) {
     //    std::cout << "Ignoring click" <<std::endl;
     return;
   }
@@ -882,7 +882,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   // it is safe to assume this and use a static cast.
   DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
 
-  _hardMonForm.registerTreeWidget->clear();
+  ui.registerTreeWidget->clear();
 
   const mtca4u::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
 
@@ -893,25 +893,25 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
        ++registerIter) {
     
     if (isMultiplexedDataRegion(registerIter->getRegisterName().getComponents().back())) {
-      NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, _hardMonForm.registerTreeWidget, _hardMonForm.registerPropertiesWidget);
+      NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, ui.registerTreeWidget, ui.registerPropertiesWidget);
     } else {
 
       if (registerCatalogue.getRegister(registerIter->getRegisterName())->getNumberOfChannels() == 1) {
-        NumericAddressedRegisterQTreeItem * newItem = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), _hardMonForm.registerTreeWidget, _hardMonForm.registerPropertiesWidget);
+        NumericAddressedRegisterQTreeItem * newItem = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, ui.registerPropertiesWidget);
       } else {
-        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), _hardMonForm.registerTreeWidget, _hardMonForm.registerPropertiesWidget);
+        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, ui.registerPropertiesWidget);
       }
 
     }
   }
-  _hardMonForm.registerTreeWidget->expandAll();
+  ui.registerTreeWidget->expandAll();
 
-  if (_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked()) {
+  if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
         // Searching a sub-tree does not work in QTreeWidget. So here is the
     // strategy:
     if (!(deviceListItem->lastSelectedRegister_.empty())) {
     // Get a list of all registers with this name.
-    QList<QTreeWidgetItem *> registerList = _hardMonForm.registerTreeWidget->findItems(
+    QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
       deviceListItem->lastSelectedRegister_.back().c_str(),
     Qt::MatchExactly | Qt::MatchRecursive);
 
@@ -936,7 +936,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
         break;
       }
       if (found) {
-        _hardMonForm.registerTreeWidget->setCurrentItem((*registerIter));
+        ui.registerTreeWidget->setCurrentItem((*registerIter));
         break;
       }
     }
@@ -948,16 +948,16 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {
-  QAction *copy = new QAction(tr("&Copy"), _hardMonForm.registerTreeWidget);
+  QAction *copy = new QAction(tr("&Copy"), ui.registerTreeWidget);
   copy->setShortcuts(QKeySequence::Copy);
   copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
   connect(copy, SIGNAL(triggered()), this,
           SLOT(copyRegisterTreeItemNameToClipBoard()));
-  _hardMonForm.registerTreeWidget->addAction(copy);
+  ui.registerTreeWidget->addAction(copy);
 }
 
 void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
-  QTreeWidgetItem *currentItem = _hardMonForm.registerTreeWidget->currentItem();
+  QTreeWidgetItem *currentItem = ui.registerTreeWidget->currentItem();
   if (currentItem) {
     QClipboard *clipboard = QApplication::clipboard();
 
@@ -975,12 +975,12 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
 
 void QtHardMon::handleSortCheckboxClick(int state) {
   if (state == Qt::Checked) {
-    _hardMonForm.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
-    _hardMonForm.registerTreeWidget->setSortingEnabled(true);
+    ui.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
+    ui.registerTreeWidget->setSortingEnabled(true);
   } else if (state == Qt::Unchecked) {
-    _hardMonForm.registerTreeWidget->setSortingEnabled(false);
+    ui.registerTreeWidget->setSortingEnabled(false);
     // redraw the currently sorted tree to pick up the order from the mapfile.
-    populateRegisterTree(_hardMonForm.deviceListWidget->currentItem());
+    populateRegisterTree(ui.deviceListWidget->currentItem());
   }
 }
 

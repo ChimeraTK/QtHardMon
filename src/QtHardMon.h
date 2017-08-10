@@ -111,16 +111,13 @@ class QtHardMon: public QMainWindow
   void copyRegisterTreeItemNameToClipBoard();
 
  private:
-  Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
+  Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
   mtca4u::Device currentDevice_; ///< The instance of the device which is being accessed.
-  bool _autoRead; ///< Flag whether to automatically read on register change
-  bool _readOnClick; ///< Flag wheter to read on click in the register list
-  QString _dmapFileName; ///< The file name of the last opened dmap file
-  QString _configFileName; ///< Name of the config file (last saved or read)
-  int _insideReadOrWrite; ///< Counter flag to indicate if the read or write function is being executed
-  ////< (used to set background color). It is implemented as a counter because read can be called from write,
-  ////< and if read would reset a bool to false, it would be wrong in write. Just adding and subtracting is 
-  ///< easier than catching all possible use cases.
+  bool autoRead_; ///< Flag whether to automatically read on register change
+  bool readOnClick_; ///< Flag wheter to read on click in the register list
+  QString dmapFileName_; ///< The file name of the last opened dmap file
+  QString configFileName_; ///< Name of the config file (last saved or read)
+  int insideReadOrWrite_; ///< Counter flag to indicate if the read or write function is being executed
   bool noPrompts_;
   /**
    *  Write the config to the given file name.
