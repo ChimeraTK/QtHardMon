@@ -44,12 +44,12 @@ NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexe
     }
 }
 
-void NumericAddressedCookedMultiplexedAreaQTreeItem::read() {
+void NumericAddressedCookedMultiplexedAreaQTreeItem::readData() {
 throw InvalidOperationException(
       "You cannot read from a multiplexed area. Select a sequence register.");
 }
 
-void NumericAddressedCookedMultiplexedAreaQTreeItem::write() {
+void NumericAddressedCookedMultiplexedAreaQTreeItem::writeData() {
   throw InvalidOperationException(
       "You cannot write to a multiplexed area. Select a sequence register.");
 }

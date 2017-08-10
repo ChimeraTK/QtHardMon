@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_ReadAndWriteThrows )
 {
     DeviceElementQTreeItem_fixtureBase fixture;
     DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidget);
-    BOOST_CHECK_THROW(moduleItem->read(), InvalidOperationException);
-    BOOST_CHECK_THROW(moduleItem->write(), InvalidOperationException);
+    BOOST_CHECK_THROW(moduleItem->readData(), InvalidOperationException);
+    BOOST_CHECK_THROW(moduleItem->writeData(), InvalidOperationException);
 }
 
 /*
@@ -152,13 +152,13 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
     
     fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties();
 
-    fixture.numericAddressedRegisterQTreeItem->read();
+    fixture.numericAddressedRegisterQTreeItem->readData();
 
     TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0)});
 
     TestUtilities::setTableValue(fixture.propertiesWidget, 1, 0, std::make_tuple(3, 3, 3.0));
 
-    fixture.numericAddressedRegisterQTreeItem->write();
+    fixture.numericAddressedRegisterQTreeItem->writeData();
 
     fixture.oneDRegisterAccessor.read();
 
@@ -243,8 +243,8 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_ReadAndWrite )
     
     fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties();
 
-    BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->read(), InvalidOperationException);
-    BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->write(), InvalidOperationException);
+    BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->readData(), InvalidOperationException);
+    BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->writeData(), InvalidOperationException);
 
     NumericAddressedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedSequenceRegisterQTreeItem *>(fixture.numericAddressedMultiplexedAreaQTreeItem->child(0));
     
@@ -254,13 +254,13 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_ReadAndWrite )
         childItem->updateRegisterProperties();
     }
 
-    childItem->read();
+    childItem->readData();
 
     TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(0, 0, 0.0)}, 4096);
 
     TestUtilities::setTableValue(fixture.propertiesWidget, 0, 0, std::make_tuple(3, 3, 3.0));
 
-    childItem->write();
+    childItem->writeData();
 
     fixture.twoDRegisterAccessor.read();
 
@@ -339,8 +339,8 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_ReadAndWri
     
     fixture.numericAddressedCookedMultiplexedAreaQTreeItem->updateRegisterProperties();
 
-    BOOST_CHECK_THROW(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->read(), InvalidOperationException);
-    BOOST_CHECK_THROW(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->write(), InvalidOperationException);
+    BOOST_CHECK_THROW(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->readData(), InvalidOperationException);
+    BOOST_CHECK_THROW(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->writeData(), InvalidOperationException);
 
     NumericAddressedCookedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedCookedSequenceRegisterQTreeItem *>(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->child(0));
     
@@ -350,13 +350,13 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_ReadAndWri
         childItem->updateRegisterProperties();
     }
 
-    childItem->read();
+    childItem->readData();
 
     TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(0, 0, 0.0)}, 4096);
 
     TestUtilities::setTableValue(fixture.propertiesWidget, 0, 0, std::make_tuple(3, 3, 3.0));
 
-    childItem->write();
+    childItem->writeData();
 
     fixture.twoDRegisterAccessor.read();
 

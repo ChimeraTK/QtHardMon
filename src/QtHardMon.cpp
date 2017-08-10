@@ -339,7 +339,7 @@ void QtHardMon::read()
 
   try {
     if (currentDevice_.isOpened()) {
-      registerTreeItem->read();
+      registerTreeItem->readData();
       ui.writeButton->setEnabled(true);
     }
   }
@@ -378,7 +378,7 @@ DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *
 
   try {
     if (currentDevice_.isOpened()) {
-      registerTreeItem->write();
+      registerTreeItem->writeData();
     }
   }
   catch (InvalidOperationException &e) {

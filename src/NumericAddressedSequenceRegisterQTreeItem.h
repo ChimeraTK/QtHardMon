@@ -10,8 +10,8 @@ class NumericAddressedSequenceRegisterQTreeItem : public DeviceElementQTreeItem 
 public:
 
   NumericAddressedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, RegisterPropertiesWidget * propertiesWidget);
-  virtual void read();
-  virtual void write();
+  virtual void readData();
+  virtual void writeData();
   virtual void updateRegisterProperties();
 
 private: // methods

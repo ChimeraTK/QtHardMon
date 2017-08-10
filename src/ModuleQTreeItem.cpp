@@ -15,12 +15,12 @@ ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidgetItem * parent,
 {
 }
 
-void ModuleQTreeItem::read() {
+void ModuleQTreeItem::readData() {
   throw InvalidOperationException(
       "You cannot read from a module. Select a register.");
 }
 
-void ModuleQTreeItem::write() {
+void ModuleQTreeItem::writeData() {
   throw InvalidOperationException(
       "You cannot write to a module. Select a register.");    
 }

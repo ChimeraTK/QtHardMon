@@ -12,8 +12,8 @@ public:
 
   ModuleQTreeItem(const QString & text, QTreeWidgetItem * parent, RegisterPropertiesWidget * propertiesWidget);
 
-  virtual void read();
-  virtual void write();
+  virtual void readData();
+  virtual void writeData();
   virtual void updateRegisterProperties();
 
 private: // member fields

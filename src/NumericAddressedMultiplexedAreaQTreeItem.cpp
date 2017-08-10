@@ -44,12 +44,12 @@ NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeIt
     --firstSequenceItem;
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::read() {
+void NumericAddressedMultiplexedAreaQTreeItem::readData() {
 throw InvalidOperationException(
       "You cannot read from a multiplexed area. Select a sequence register.");
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::write() {
+void NumericAddressedMultiplexedAreaQTreeItem::writeData() {
   throw InvalidOperationException(
       "You cannot write to a multiplexed area. Select a sequence register.");
 }

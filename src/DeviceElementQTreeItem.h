@@ -23,8 +23,8 @@ public:
 
   virtual bool operator<(const QTreeWidgetItem& rhs) const;
 
-  virtual void read() = 0;
-  virtual void write() = 0;
+  virtual void readData() = 0;
+  virtual void writeData() = 0;
   virtual void updateRegisterProperties() = 0;
 };
 

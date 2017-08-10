@@ -31,7 +31,7 @@ NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Dev
   }
 }
 
-void NumericAddressedRegisterQTreeItem::read() {
+void NumericAddressedRegisterQTreeItem::readData() {
   oneDRegisterAccessor_.read();
   QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
   table->clearContents();
@@ -62,7 +62,7 @@ void NumericAddressedRegisterQTreeItem::read() {
   }
 }
 
-void NumericAddressedRegisterQTreeItem::write() {
+void NumericAddressedRegisterQTreeItem::writeData() {
      QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
      for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
       oneDRegisterAccessor_[row] = table->item(row, 2)->data(0).toDouble();

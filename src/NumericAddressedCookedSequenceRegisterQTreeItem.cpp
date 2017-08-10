@@ -9,7 +9,7 @@ static_cast<int>(DeviceElementDataType::SequenceRegisterDataType), parent),
 {
 }
 
-void NumericAddressedCookedSequenceRegisterQTreeItem::read() {
+void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
   twoDRegisterAccessor_.read();
   QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
   table->clearContents();
@@ -32,7 +32,7 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::read() {
   }
 }
 
-void NumericAddressedCookedSequenceRegisterQTreeItem::write() {
+void NumericAddressedCookedSequenceRegisterQTreeItem::writeData() {
      QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
      for (unsigned int row = 0; row < twoDRegisterAccessor_.getNElementsPerChannel(); ++row) {
       twoDRegisterAccessor_[channelNo_][row] = table->item(row, 2)->data(0).toDouble();
