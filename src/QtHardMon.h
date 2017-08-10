@@ -91,7 +91,7 @@ class QtHardMon: public QMainWindow
   /** Sets the background color of the cell, depending on whether the update is made by read (normal color)
    *  or manually by the user (red).
    */
-  void changeBackgroundIfModified( int row, int column );
+
 
   /*
    * sort the register tree widget or 'unsort' it by rereading
@@ -100,7 +100,7 @@ class QtHardMon: public QMainWindow
 
   /** Set all background to non modified color.
    */
-  void clearBackground();
+
   /*
    * returns true if the fileName ends with the provided
    * extension else false
@@ -110,13 +110,9 @@ class QtHardMon: public QMainWindow
 
   void copyRegisterTreeItemNameToClipBoard();
 
-  void copyTableDataToClipBoard();
-
  private:
   Ui::QtHardMonForm _hardMonForm; ///< The GUI form which hold all the widgets.
   mtca4u::Device currentDevice_; ///< The instance of the device which is being accessed.
-  unsigned int _maxWords; ///< The maximum number of words displayed in the values list.
-  unsigned int _floatPrecision; ///< Decimal places to be shown for values in the double column
   bool _autoRead; ///< Flag whether to automatically read on register change
   bool _readOnClick; ///< Flag wheter to read on click in the register list
   QString _dmapFileName; ///< The file name of the last opened dmap file
@@ -125,8 +121,6 @@ class QtHardMon: public QMainWindow
   ////< (used to set background color). It is implemented as a counter because read can be called from write,
   ////< and if read would reset a bool to false, it would be wrong in write. Just adding and subtracting is 
   ///< easier than catching all possible use cases.
-  QBrush _modifiedBackgroundBrush; ///< Brush color if the item has been modified
-  CustomDelegates _customDelegate;///< provides display customizations for the table widget.
   bool noPrompts_;
   /**
    *  Write the config to the given file name.
@@ -177,26 +171,10 @@ class QtHardMon: public QMainWindow
        */
       static const int DeviceListItemType = QListWidgetItem::UserType + 1;
 
-      /** Get the name of the last register which had been selected.
-       */
-      std::string getLastSelectedRegisterName() const;
-
-      /** Set the last register which had been selected.
-       */
-      void setLastSelectedRegisterName(std::string const & registerName);
-
-      /** Get the name of the last register's module which had been selected.
-       */
-      std::string getLastSelectedModuleName() const;
-
-      /** Set the module of the last register which had been selected.
-       */
-      void setLastSelectedModuleName(std::string const & moduleName);
-
     private:
       mtca4u::DeviceInfoMap::DeviceInfo _deviceMapElement; ///< The instance of the DeviceMapElement
-      std::string _lastSelectedRegisterName; ///< The last selected register before the item was deselected
-      std::string _lastSelectedModuleName; ///< The last selected register's module before the item was deselected
+    public:
+      std::vector<std::string> lastSelectedRegister_; ///< The last selected register before the item was deselected
   };
 
   DeviceListItem * _currentDeviceListItem; ///< Pointer to the currently selected deviceListItem
@@ -209,15 +187,11 @@ class QtHardMon: public QMainWindow
   // pointer, would require unnecessarily long locking of the mutex.
   friend class PlotWindow;
 
- 
-
-  void clearRowBackgroundColour(int row);
   bool isMultiplexedDataRegion(std::string const & registerName);
   bool isSeqDescriptor(std::string const & registerName);
 
   std::string extractMultiplexedRegionName(std::string const & regName);
-  void clearGroupBoxDisplay();
-  void clearAllRowsInTable();
+
   std::string extractFileNameFromPath(const std::string &);
   private:
 
@@ -231,12 +205,6 @@ class QtHardMon: public QMainWindow
   *  deviceItem is NULL pointer
   */
   void populateRegisterTree(QListWidgetItem *deviceItem);
-
-  /**
-   *   Ctrl+c support TableWidget. alls slot copyTableDataToClipBoard (Currently
-   *   slot is not implemented)
-   */
-  void addCopyActionForTableWidget();
 
   // Disable copy constructor and assignment operator
   // This is the main class and it should'nt need copying

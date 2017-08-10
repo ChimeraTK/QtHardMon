@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_fillsRegis
         childItem->updateRegisterProperties();
     }
 
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "SEQUENCE_DAQ0_ADCA_0", "APP0", "13", "1000", "", "", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "DAQ0_ADCA", "APP0", "13", "1000", "", "212992", "", "", "");
 }
 
 /*

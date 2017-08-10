@@ -13,7 +13,6 @@
 
 #include <mtca4u/Exception.h>
 #include <mtca4u/DMapFileParser.h>
-#include <mtca4u/NumericAddressedBackendMuxedRegisterAccessor.h>
 #include <mtca4u/PcieBackendException.h>
 #include <mtca4u/BackendFactory.h>
 
@@ -27,10 +26,6 @@ using namespace mtca4u;
 #include "NumericAddressedMultiplexedAreaQTreeItem.h"
 #include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
 
-// The default maximum for the number of words in a register.
-// This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
-// memory is requested.
-static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
@@ -52,11 +47,9 @@ static const size_t DEFAULT_MAX_WORDS = 0x10000;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags) 
-  : QMainWindow(parent_, flags),_hardMonForm(), _maxWords( DEFAULT_MAX_WORDS ),
-    _floatPrecision(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),_autoRead(true),
+  : QMainWindow(parent_, flags),_hardMonForm(),
+    _autoRead(true),
     _readOnClick(true), _dmapFileName(), _configFileName(), _insideReadOrWrite(0),
-    _modifiedBackgroundBrush( QColor( 255, 100, 100, 255 ) ), // red, not too dark
-    _customDelegate(),
     _currentDeviceListItem(NULL),
     _plotWindow(NULL),
     noPrompts_(noPrompts)
@@ -70,8 +63,6 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
   _hardMonForm.logoLabel->setPixmap( QPixmap(":/DESY_logo.png") );
 
-  // This brings in support for Ctrl + c for copying data to the clipboard.
-  addCopyActionForTableWidget(); // Ctrl + c dosent do anything for now
   addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
                                         // clipboard
 
@@ -84,8 +75,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   connect(_hardMonForm.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)), 
 	  this, SLOT( registerClicked(QTreeWidgetItem *) ) );
 
-  connect(_hardMonForm.registerPropertiesWidget->ui->valuesTableWidget, SIGNAL(cellChanged(int, int)), 
-	  this, SLOT( changeBackgroundIfModified(int, int) ) );
+
 
   connect(_hardMonForm.loadBoardsButton, SIGNAL(clicked()),
 	  this, SLOT(loadBoards()));
@@ -136,10 +126,6 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   _hardMonForm.continuousReadCheckBox->setEnabled(false);
   _hardMonForm.writeToFileButton->setEnabled(false);
   _hardMonForm.readFromFileButton->setEnabled(false);
-
-  // customize table display
-  _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
-  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setItemDelegate(&_customDelegate);
 
   _plotWindow = new PlotWindow(this);
 
@@ -307,7 +293,7 @@ void QtHardMon::closeDevice()
   _plotWindow->setEnabled(false);
   // If the device is closed then there is no way we can read values from the
   // registers - they are not available anymore. Nothing to show on the table
-  clearAllRowsInTable();
+  _hardMonForm.registerPropertiesWidget->clearAllRowsInTable();
   _hardMonForm.openClosedLabel->setText(
   QApplication::translate("QtHardMonForm", "Device is closed.", 0,
         QApplication::UnicodeUTF8));
@@ -321,35 +307,27 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
-    clearGroupBoxDisplay();
+    _hardMonForm.registerPropertiesWidget->clearProperties();
     return;
   }
 
   DeviceElementQTreeItem * selectedItem = static_cast<DeviceElementQTreeItem *>(registerItem);
   selectedItem->updateRegisterProperties();
+  _currentDeviceListItem->lastSelectedRegister_.clear();
+  while (selectedItem && !dynamic_cast<QTreeWidget* >(selectedItem)) {
+    _currentDeviceListItem->lastSelectedRegister_.insert(_currentDeviceListItem->lastSelectedRegister_.begin(),selectedItem->text(0).toStdString());
+    selectedItem = dynamic_cast<DeviceElementQTreeItem *>(selectedItem->parent());
+  }
 
-  // // remember that this register has been selected
-  // if((registerTreeItem->type() != ModuleItem::DataType) && (registerTreeItem->type() != MultiplexedAreaItem::DataType)){
-  //   std::vector<std::string> fullRegisterName = registerTreeItem->getRegisterMapElement()->getRegisterName().getComponents();
-  //   std::string moduleName = NO_MODULE_NAME_STRING;
-  //   std::string registerName = fullRegisterName.at(0);
-  //   if (fullRegisterName.size() == 2) {
-  //     moduleName = fullRegisterName.at(0);
-  //     registerName = fullRegisterName.at(1);
-  //   }
-  //   _currentDeviceListItem->setLastSelectedRegisterName( registerName ) ;
-  //   _currentDeviceListItem->setLastSelectedModuleName( moduleName ) ;
-  // }
-
-  // if (!_autoRead || (registerTreeItem->type() == ModuleItem::DataType)){
-  //   // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
-  //   // In addition the write button is deactivated so the invalid items cannot be written to the register.
-  //   _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
-  //   _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
-  //   _hardMonForm.writeButton->setEnabled(false);
-  // } else {
-  //   read();
-  // }
+  if (!_autoRead /*|| (registerTreeItem->type() == ModuleItem::DataType)*/){
+    // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
+    // In addition the write button is deactivated so the invalid items cannot be written to the register.
+    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
+    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
+    _hardMonForm.writeButton->setEnabled(false);
+  } else {
+    read();
+  }
 }
 
 void QtHardMon::read()
@@ -426,7 +404,7 @@ DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *
     read();
   }
   else{
-    clearBackground();
+    _hardMonForm.registerPropertiesWidget->clearBackground();
   }
 
   --_insideReadOrWrite;
@@ -441,7 +419,7 @@ void QtHardMon::preferences()
   preferencesDialogForm.maxWordsWarningLabel->setText(QString("WARNING:")+
 						      " Setting this value too high can exhaust your memory, "+
 						      "which will lead to a segmentation fault. Default value is "+
-						      QString::number(DEFAULT_MAX_WORDS));
+						      QString::number(0x10000));
 
   preferencesDialogForm.fontSizeSpinBox->setValue(font().pointSize());
   preferencesDialogForm.autoReadCheckBox->setChecked(_autoRead);
@@ -449,23 +427,23 @@ void QtHardMon::preferences()
 
   // set up the current value of maxWords
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
-  preferencesDialogForm.maxWordsSpinBox->setValue( _maxWords );
+  preferencesDialogForm.maxWordsSpinBox->setValue( _hardMonForm.registerPropertiesWidget->maxWords_ );
 
   // set up the floating point display decimal places
   preferencesDialogForm.precisionSpinBox->setMinimum(1); // minimum one decimal place display
   preferencesDialogForm.precisionSpinBox->setMaximum(10);// maximum 10 decimal places
-  preferencesDialogForm.precisionSpinBox->setValue(_floatPrecision);
+  preferencesDialogForm.precisionSpinBox->setValue(_hardMonForm.registerPropertiesWidget->floatPrecision_);
 
   int dialogResult = preferencesDialog.exec();
 
   // only set the values if ok has been pressed
   if (dialogResult == QDialog::Accepted )
   {
-    _maxWords =  preferencesDialogForm.maxWordsSpinBox->value();
+    _hardMonForm.registerPropertiesWidget->maxWords_ =  preferencesDialogForm.maxWordsSpinBox->value();
 
     // Read and set precision for delegate class
-    _floatPrecision = preferencesDialogForm.precisionSpinBox->value();
-    _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
+    _hardMonForm.registerPropertiesWidget->floatPrecision_ = preferencesDialogForm.precisionSpinBox->value();
+    _hardMonForm.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(_hardMonForm.registerPropertiesWidget->floatPrecision_);
 
     // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
     // from the device
@@ -549,16 +527,16 @@ void QtHardMon::loadConfig(QString const & configFileName)
 
   // first handle all settings that do not depend on opening a device map
 
-  _floatPrecision = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision)); // is check necessary? should display default
-  _customDelegate.setDoubleSpinBoxPrecision(_floatPrecision);
+  _hardMonForm.registerPropertiesWidget->floatPrecision_ = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->floatPrecision_)); // is check necessary? should display default
+  _hardMonForm.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(_hardMonForm.registerPropertiesWidget->floatPrecision_);
 
   // store in a local variable for now
-  int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
+  int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->maxWords_));
   // check for validity. Minimum reasonable value is 1.
   if (maxWords >=1)
   {
      //only after checking set the class wide maxWords variable
-    _maxWords = static_cast<unsigned int>(maxWords);
+    _hardMonForm.registerPropertiesWidget->maxWords_ = static_cast<unsigned int>(maxWords);
      // Update the register, so the length of the valuesList is adapted.
      //If another register is loaded from the config this might be repeated.
      //But for an easier logic we take this little overhead.
@@ -635,8 +613,8 @@ void QtHardMon::loadConfig(QString const & configFileName)
     std::string deviceModuleString = deviceListItem->getDeviceMapElement().deviceName + MODULE_EXTENSION_STRING;
     std::string moduleName = configReader.getValue(deviceModuleString, std::string() );
     
-    deviceListItem->setLastSelectedRegisterName(registerName);
-    deviceListItem->setLastSelectedModuleName(moduleName);
+    //deviceListItem->setLastSelectedRegisterName(registerName);
+    //deviceListItem->setLastSelectedModuleName(moduleName);
   }// for deviceRow
   
 
@@ -744,20 +722,20 @@ void QtHardMon::writeConfig(QString const & fileName)
     
     // Only write to the config file if the 'last selected' strings are not empty.
     // Empty strings would cause a parse error, and if the entry is not found it falls back to empty string anyway.
-    if( !deviceListItem->getLastSelectedRegisterName().empty() ){
-      std::string deviceRegisterString 
-	= deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
-      configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterName());
-    }
+  //   if( !deviceListItem->getLastSelectedRegisterName().empty() ){
+  //     std::string deviceRegisterString 
+	// = deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
+  //     configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterName());
+  //   }
 
-    if( !deviceListItem->getLastSelectedModuleName().empty() ){
-      std::string deviceModuleString = deviceListItem->getDeviceMapElement().deviceName + MODULE_EXTENSION_STRING;
-      configWriter.setValue(deviceModuleString, deviceListItem->getLastSelectedModuleName());
-    }
+  //   if( !deviceListItem->getLastSelectedModuleName().empty() ){
+  //     std::string deviceModuleString = deviceListItem->getDeviceMapElement().deviceName + MODULE_EXTENSION_STRING;
+  //     configWriter.setValue(deviceModuleString, deviceListItem->getLastSelectedModuleName());
+  //   }
   }
 
-  configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_maxWords));
-  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(_floatPrecision));
+  configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->maxWords_));
+  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(_hardMonForm.registerPropertiesWidget->floatPrecision_));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  _hardMonForm.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  _hardMonForm.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(AUTOSELECT_PREVIOUS_REGISTER_STRING,
@@ -806,22 +784,19 @@ void QtHardMon::unckeckShowPlotWindow()
 // constructors of the data members
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement,
 					   QListWidget * parent_ )
-  : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _lastSelectedRegisterName(),_lastSelectedModuleName()
+  : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement( device_map_emlement )
   
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement,
 					   const QString & text_, QListWidget * parent_ )
-  : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement ),
-    _lastSelectedRegisterName(),_lastSelectedModuleName()
+  : QListWidgetItem(text_, parent_, DeviceListItemType), _deviceMapElement( device_map_emlement )
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem( mtca4u::DeviceInfoMap::DeviceInfo const & device_map_emlement,
 					   const QIcon & icon_, const QString & text_, QListWidget * parent_ )
   : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
-    _deviceMapElement( device_map_emlement ),
-    _lastSelectedRegisterName(),_lastSelectedModuleName()
+    _deviceMapElement( device_map_emlement )
 {}
 
 QtHardMon::DeviceListItem::~DeviceListItem(){}
@@ -829,26 +804,6 @@ QtHardMon::DeviceListItem::~DeviceListItem(){}
  mtca4u::DeviceInfoMap::DeviceInfo const & QtHardMon::DeviceListItem::getDeviceMapElement() const
 {
   return _deviceMapElement;
-}
-
-std::string QtHardMon::DeviceListItem::getLastSelectedRegisterName() const
-{
-  return _lastSelectedRegisterName;
-}
-
-void QtHardMon::DeviceListItem::setLastSelectedRegisterName(std::string const & registerName)
-{
-  _lastSelectedRegisterName = registerName;
-}
-
-std::string QtHardMon::DeviceListItem::getLastSelectedModuleName() const
-{
-  return _lastSelectedModuleName;
-}
-
-void QtHardMon::DeviceListItem::setLastSelectedModuleName(std::string const & moduleName)
-{
-  _lastSelectedModuleName = moduleName;
 }
 
 void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
@@ -871,22 +826,8 @@ void QtHardMon::openCloseDevice(){
 
 }
 
-void QtHardMon::changeBackgroundIfModified( int row, int column ){
-  if (_insideReadOrWrite==0){
-    _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->item(row, column)->setBackground( _modifiedBackgroundBrush );
-  }
-  else{
-    clearRowBackgroundColour(row);
-  }
-}
 
-void QtHardMon::clearBackground(){
-  int nRows = _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->rowCount();
 
-  for( int row=0; row < nRows; ++row ){
-    clearRowBackgroundColour(row);
-  }
-}
 
 void QtHardMon::parseArgument(QString const &fileName) {
   if (checkExtension(fileName, ".dmap") == true) {
@@ -909,41 +850,18 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
 
 
 
-void QtHardMon::clearRowBackgroundColour(int row) {
-  int numberOfColumns = _hardMonForm.registerPropertiesWidget->getNumberOfColumsInTableWidget();
-  for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-    if (_hardMonForm.registerPropertiesWidget->isValidCell(row, columnIndex)) {
-      _hardMonForm.registerPropertiesWidget->clearCellBackground(row, columnIndex);
-    }
-  }
-}
+
 
 bool QtHardMon::isMultiplexedDataRegion(
     const std::string &registerName) {
-  if (registerName.substr(0, mtca4u::MULTIPLEXED_SEQUENCE_PREFIX.size()) ==
-      mtca4u::MULTIPLEXED_SEQUENCE_PREFIX) {
+  if (registerName.substr(0, std::string("AREA_MULTIPLEXED_SEQUENCE_").size()) ==
+      "AREA_MULTIPLEXED_SEQUENCE_") {
     return true;
   }
     return false;
 }
 
-void QtHardMon::clearGroupBoxDisplay() {
-  _hardMonForm.registerPropertiesWidget->ui->registerNameDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->moduleDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registerBarDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registerNElementsDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registerAddressDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registerSizeDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registerWidthDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registerFracBitsDisplay->setText("");
-  _hardMonForm.registerPropertiesWidget->ui->registeSignBitDisplay->setText("");
-}
 
-void QtHardMon::clearAllRowsInTable() {
-  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
-  int nRows = 0;
-  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(nRows);
-}
 
 std::string QtHardMon::extractFileNameFromPath(const std::string &fileName) {
   std::string extractedName = fileName;
@@ -988,49 +906,45 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   }
   _hardMonForm.registerTreeWidget->expandAll();
 
-  // In case the read on select option is enabled, selecting the previously
-  // active register on the device triggers an implicit read as well.
-  // The user may now opt to not select the last active
-  // register (and hence avoid the implicit read on this register when
-  // the card is selected)
-  // if (_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked()) {
+  if (_hardMonForm.autoselectPreviousRegisterCheckBox->isChecked()) {
+        // Searching a sub-tree does not work in QTreeWidget. So here is the
+    // strategy:
+    if (!(deviceListItem->lastSelectedRegister_.empty())) {
+    // Get a list of all registers with this name.
+    QList<QTreeWidgetItem *> registerList = _hardMonForm.registerTreeWidget->findItems(
+      deviceListItem->lastSelectedRegister_.back().c_str(),
+    Qt::MatchExactly | Qt::MatchRecursive);
 
-  //   // Searching a sub-tree does not work in QTreeWidget. So here is the
-  //   // strategy:
-  //   // Get a list of all registers with this name.
-  //   QList<QTreeWidgetItem *> registerList =
-  //       _hardMonForm.registerTreeWidget->findItems(
-  //           deviceListItem->getLastSelectedRegisterName().c_str(),
-  //           Qt::MatchExactly | Qt::MatchRecursive);
+    deviceListItem->lastSelectedRegister_.pop_back();    
 
-  //   // Iterate the list until we find the one with the right module
-  //   for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
-  //        registerIter != registerList.end(); ++registerIter) {
-  //     CustomQTreeItem *registerItem =
-  //         static_cast<CustomQTreeItem *>(*registerIter);
-  //     // if we found the right register select it and quit the loop
-  //     std::vector<std::string> fullRegisterName = registerItem->getRegisterMapElement()->getRegisterName().getComponents();
-  //     std::string moduleName = NO_MODULE_NAME_STRING;
-  //     std::string registerName = fullRegisterName.at(0);
-  //     if (fullRegisterName.size() == 2) {
-  //       moduleName = fullRegisterName.at(0);
-  //       registerName = fullRegisterName.at(1);
-  //     }
-  //     if (moduleName ==
-  //         deviceListItem->getLastSelectedModuleName()) {
-  //       _hardMonForm.registerTreeWidget->setCurrentItem(registerItem);
-  //       break;
-  //     }
-  //   } // for registerIter
-  // }   // if autoselectPreviousRegister
+     // Iterate the list until we find the one with the right module
+    for (QList<QTreeWidgetItem *>::iterator registerIter = registerList.begin();
+         registerIter != registerList.end(); ++registerIter) {
+    std::vector<std::string> copyOfSelectedRegister = deviceListItem->lastSelectedRegister_;
+    QTreeWidgetItem * temp = (*registerIter);
+    // Since we might have selected a module (one item in the vector), we assume
+    // initially, that we have found our selection - but loop might change that.
+    bool found = true;
+    while (!(copyOfSelectedRegister.empty())) {
+      QTreeWidgetItem * parentCast = dynamic_cast<QTreeWidgetItem *>(temp->parent());
+      if (parentCast) {
+        copyOfSelectedRegister.pop_back();
+        temp = parentCast;
+      } else {
+        // That's not the one, move on
+        found = false;
+        break;
+      }
+      if (found) {
+        _hardMonForm.registerTreeWidget->setCurrentItem((*registerIter));
+        break;
+      }
+    }
+  }
+    }
+
 }
 
-void QtHardMon::addCopyActionForTableWidget() {
-  QAction *copy = new QAction(tr("&Copy"), _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget);
-  copy->setShortcuts(QKeySequence::Copy);
-  copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-  connect(copy, SIGNAL(triggered()), this, SLOT(copyTableDataToClipBoard()));
-  _hardMonForm.registerPropertiesWidget->ui->valuesTableWidget->addAction(copy);
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {
@@ -1058,9 +972,6 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
   return;
 }
 
-void QtHardMon::copyTableDataToClipBoard(){
-	//TODO: SOmething for later. Not Implemented yet
-}
 
 void QtHardMon::handleSortCheckboxClick(int state) {
   if (state == Qt::Checked) {

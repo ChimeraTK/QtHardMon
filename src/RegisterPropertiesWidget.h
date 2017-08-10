@@ -54,6 +54,8 @@ public:
 
 private slots:
     void updateTableEntries( int row, int column );
+      void changeBackgroundIfModified( int row, int column );
+      void copyTableDataToClipBoard();
 private:
     int getNumberOfColumsInTableWidget();
     bool isValidCell(int row, int columnIndex);
@@ -62,13 +64,20 @@ private:
     void writeCell(int row, int column, T value);
     template<typename T>
     T readCell (int row, int column);
+  void clearAllRowsInTable();
+  void clearRowBackgroundColour(int row);
+  void addCopyActionForTableWidget();
+    void clearBackground();
+
 
 public:
     Ui::RegisterPropertiesWidget *ui;
     CustomDelegates customDelegate_;
     QBrush defaultBackgroundBrush_;
+    QBrush modifiedBackgroundBrush_;
     mtca4u::FixedPointConverter * converter_;
-
+    unsigned int maxWords_;
+    unsigned int floatPrecision_;
 
     friend class QtHardMon;
     friend class PlotWindow;

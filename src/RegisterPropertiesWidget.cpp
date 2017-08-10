@@ -1,10 +1,19 @@
 #include "RegisterPropertiesWidget.h"
 #include "Constants.h"
 
+
+// The default maximum for the number of words in a register.
+// This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
+// memory is requested.
+static const size_t DEFAULT_MAX_WORDS = 0x10000;
+
 RegisterPropertiesWidget::RegisterPropertiesWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::RegisterPropertiesWidget),
-    defaultBackgroundBrush_( Qt::transparent )
+    defaultBackgroundBrush_( Qt::transparent ),
+    modifiedBackgroundBrush_( QColor( 255, 100, 100, 255 ) ), // red, not too dark
+    floatPrecision_(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),
+     maxWords_( DEFAULT_MAX_WORDS )
 {
     ui->setupUi(this);
 
@@ -12,8 +21,12 @@ RegisterPropertiesWidget::RegisterPropertiesWidget(QWidget *parent) :
 
     connect(ui->valuesTableWidget, SIGNAL(cellChanged(int, int)),
     this, SLOT( updateTableEntries(int, int) ) );
-
+      connect(ui->valuesTableWidget, SIGNAL(cellChanged(int, int)), 
+	  this, SLOT( changeBackgroundIfModified(int, int) ) );
+  customDelegate_.setDoubleSpinBoxPrecision(floatPrecision_);
     ui->valuesTableWidget->setItemDelegate(&customDelegate_);
+
+    addCopyActionForTableWidget(); // Ctrl + c dosent do anything for now
 
 }
 
@@ -154,4 +167,50 @@ int RegisterPropertiesWidget::convertToFixedPoint(double doubleValue) {
 
 void RegisterPropertiesWidget::setFixedPointConverter(mtca4u::FixedPointConverter * converter) {
     converter_ = converter;
+}
+
+void RegisterPropertiesWidget::clearAllRowsInTable() {
+  ui->valuesTableWidget->clearContents();
+  int nRows = 0;
+  ui->valuesTableWidget->setRowCount(nRows);
+}
+
+void RegisterPropertiesWidget::clearRowBackgroundColour(int row) {
+  int numberOfColumns = getNumberOfColumsInTableWidget();
+  for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+    if (isValidCell(row, columnIndex)) {
+      clearCellBackground(row, columnIndex);
+    }
+  }
+}
+
+void RegisterPropertiesWidget::addCopyActionForTableWidget() {
+  QAction *copy = new QAction(tr("&Copy"), ui->valuesTableWidget);
+  copy->setShortcuts(QKeySequence::Copy);
+  copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  connect(copy, SIGNAL(triggered()), this, SLOT(copyTableDataToClipBoard()));
+  ui->valuesTableWidget->addAction(copy);
+}
+
+void RegisterPropertiesWidget::clearBackground(){
+  int nRows = ui->valuesTableWidget->rowCount();
+
+  for( int row=0; row < nRows; ++row ){
+    clearRowBackgroundColour(row);
+  }
+}
+
+
+void RegisterPropertiesWidget::changeBackgroundIfModified( int row, int column ){
+//   if (_insideReadOrWrite==0){
+//     ui->valuesTableWidget->item(row, column)->setBackground( modifiedBackgroundBrush_ );
+//   }
+//   else{
+//     clearRowBackgroundColour(row);
+//   }
+}
+
+
+void RegisterPropertiesWidget::copyTableDataToClipBoard(){
+	//TODO: SOmething for later. Not Implemented yet
 }

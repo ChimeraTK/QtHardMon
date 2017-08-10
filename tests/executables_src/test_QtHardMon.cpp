@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_defaultSettings )
 {
     QtHardmon_fixtureBase fixture;
 
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->_maxWords, 0x10000);
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->_floatPrecision, CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget->maxWords_, 0x10000);
+    BOOST_CHECK_EQUAL(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget->floatPrecision_, CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
     BOOST_CHECK_EQUAL(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION, 4);
     
     // Not passing via ssh connection due to different font size.
@@ -121,7 +121,6 @@ struct QtHardmon_populatesRegisterTree_fixture : public QtHardMon_populatesDevic
     void switchDeviceSelection(const std::string & DeviceNameToSelect) {
         QList<QListWidgetItem *> items =  qtHardMon->_hardMonForm.deviceListWidget->findItems(DeviceNameToSelect.c_str(), Qt::MatchExactly);
         if (items.size() > 0) {
-            std::cout << "Found " << DeviceNameToSelect << std::endl;
             qtHardMon->_hardMonForm.deviceListWidget->setCurrentItem(items.at(0));
         } else {
             BOOST_FAIL("Device not found...");
@@ -231,6 +230,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterProperties )
 BOOST_AUTO_TEST_CASE ( QtHardMon_autoselectsRegister )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV", {"MODULE1", "WORD_USER1"});
+    
     TestUtilities::checkRegisterProperties(fixture.qtHardMon->_hardMonForm.registerPropertiesWidget, "WORD_USER1", "MODULE1", "1", "32", "1", "4", "16", "3", "1");
 
     fixture.qtHardMon->_hardMonForm.autoselectPreviousRegisterCheckBox->setCheckState(Qt::Checked);
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
     QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
 
     // There are two modules, APP0 and MODULE1 (we care only for the first one in this test)
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 2);
+    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItemCount(), 3);
 
     // APP0 has 4 items, one of them is multiplexed area
     BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->_hardMonForm.registerTreeWidget->topLevelItem(0)->childCount(), 4);
