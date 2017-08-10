@@ -21,6 +21,8 @@ public:
   DeviceElementQTreeItem(const QString & text, const int type, 
                         QTreeWidgetItem * parent);
 
+  virtual bool operator<(const QTreeWidgetItem& rhs) const;
+
   virtual void read() = 0;
   virtual void write() = 0;
   virtual void updateRegisterProperties() = 0;
