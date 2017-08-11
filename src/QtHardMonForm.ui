@@ -229,42 +229,87 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>1</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="RegisterPropertiesWidget" name="registerPropertiesWidget" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <property name="rightMargin">
-          <number>10</number>
-         </property>
-        </layout>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QStackedWidget" name="propertiesStackedWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="Page1" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>1</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="RegisterPropertiesWidget" name="registerPropertiesWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+          </layout>Stacked
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0">
+        <item>
+         <spacer name="horizontalSpacer_1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>1</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="ModulePropertiesWidget" name="modulePropertiesWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+          </layout>Stacked
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
     <item>
      <layout class="QVBoxLayout" name="optionsColumnLayout">
@@ -464,6 +509,12 @@
    <class>RegisterPropertiesWidget</class>
    <extends>QWidget</extends>
    <header>RegisterPropertiesWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ModulePropertiesWidget</class>
+   <extends>QWidget</extends>
+   <header>ModulePropertiesWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

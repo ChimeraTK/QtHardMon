@@ -14,18 +14,21 @@
 
 #include "DeviceElementQTreeItem.h"
 #include "RegisterPropertiesWidget.h"
+#include "ModulePropertiesWidget.h"
 
 struct DeviceElementQTreeItem_fixtureBase {
     QApplication * app;
     PropertiesWidgetProvider propertiesWidgetProvider;
     RegisterPropertiesWidget * propertiesWidget;
+    ModulePropertiesWidget * modulePropertiesWidget;
     DeviceElementQTreeItem_fixtureBase() {
         int argc = 0;
         char ** argv = nullptr;
         app = new QApplication(argc, argv);
 
         propertiesWidget = new RegisterPropertiesWidget(nullptr);
-        propertiesWidgetProvider.registerWidget(DeviceElementDataType::ModuleDataType, propertiesWidget);
+        modulePropertiesWidget = new ModulePropertiesWidget(nullptr);
+        propertiesWidgetProvider.registerWidget(DeviceElementDataType::ModuleDataType, modulePropertiesWidget);
         propertiesWidgetProvider.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, propertiesWidget);
         propertiesWidgetProvider.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, propertiesWidget);
         propertiesWidgetProvider.registerWidget(DeviceElementDataType::SequenceRegisterDataType, propertiesWidget);
@@ -74,11 +77,11 @@ BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_fillsRegisterProperties )
 {
     DeviceElementQTreeItem_fixtureBase fixture;
     DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidgetProvider);
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkModuleProperties(fixture.modulePropertiesWidget, "", "");
     moduleItem->updateRegisterProperties();
 
     // FIXME: this test does not determine if the properties widget is properly filled if something was set in between.
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
+    TestUtilities::checkModuleProperties(fixture.modulePropertiesWidget, "testing", "0");
 
     // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterpropertiesWidgetProvider);
 

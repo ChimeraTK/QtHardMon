@@ -4,6 +4,7 @@
 #define private public
 
 #include "RegisterPropertiesWidget.h"
+#include "ModulePropertiesWidget.h"
 
 class TestUtilities
 {
@@ -18,6 +19,11 @@ public:
                              const std::string & registerWidth,
                              const std::string & registerFracBits,
                              const std::string & registerSignBit
+);
+
+    static void checkModuleProperties(ModulePropertiesWidget * widget,
+                             const std::string & moduleName,
+                             const std::string & registerNElements
 );
 
     static void setTableValue(RegisterPropertiesWidget * widget, int row, int column,

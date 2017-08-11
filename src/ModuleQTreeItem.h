@@ -15,9 +15,6 @@ public:
   virtual void readData();
   virtual void writeData();
   virtual void updateRegisterProperties();
-
-private: // member fields
-  RegisterPropertiesWidget::RegisterProperties * properties_;
 };
 
 #endif // MODULEQTREEITEM_H

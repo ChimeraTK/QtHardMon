@@ -53,13 +53,16 @@ SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.c
                             src/NumericAddressedCookedMultiplexedAreaQTreeItem.cpp
                             src/NumericAddressedCookedSequenceRegisterQTreeItem.cpp 
                             src/RegisterPropertiesWidget.cpp
+                            src/ModulePropertiesWidget.cpp
                             src/PropertiesWidgetProvider.cpp
-                            src/PropertiesWidget.cpp)
+                            src/PropertiesWidget.cpp
+                            src/RegisterQTreeItem.cpp
+                            )
 # The headers which contain Q_OBJECTs (need to be processed with moc)
-SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h)
+SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h ${CMAKE_SOURCE_DIR}/src/ModulePropertiesWidget.h)
 # All headers, to have the dependencies correct
 SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}_QOBJECT_HEADERS src/PlotWindow.h)
-SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui src/RegisterPropertiesWidget.ui)
+SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui src/RegisterPropertiesWidget.ui src/ModulePropertiesWidget.ui)
 SET(${PROJECT_NAME}_RESOURCES src/${PROJECT_NAME}.qrc)
 
 QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})

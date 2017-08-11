@@ -3,14 +3,12 @@
 #include "RegisterPropertiesWidget.h"
 
 ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidget * parent,PropertiesWidgetProvider & propertiesWidgetProvider)
-: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider),
-  properties_(new RegisterPropertiesWidget::RegisterProperties())
+: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider)
 {
 }
 
 ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
-: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider),
-  properties_(new RegisterPropertiesWidget::RegisterProperties())
+: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider)
 {
 }
 
@@ -25,5 +23,7 @@ void ModuleQTreeItem::writeData() {
 }
 
 void ModuleQTreeItem::updateRegisterProperties() {
-  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
+  getPropertiesWidget()->clearFields();
+  getPropertiesWidget()->setNames({text(0).toStdString()});
+  getPropertiesWidget()->setSize(childCount());
 }

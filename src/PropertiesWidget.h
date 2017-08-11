@@ -9,7 +9,7 @@ public:
     PropertiesWidget(QWidget * parent);
 
     virtual void clearFields() = 0;
-    virtual void setSize(int nOfElements, int nOfChannels) = 0;
+    virtual void setSize(int nOfElements, int size = 1) = 0;
     virtual void setNames(std::vector<std::string> components) = 0;
 
     // Numerical addressed -only methods of the interface

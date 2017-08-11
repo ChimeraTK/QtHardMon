@@ -25,6 +25,15 @@ void TestUtilities::checkRegisterProperties(RegisterPropertiesWidget * widget,
     BOOST_CHECK_EQUAL(widget->ui->registeSignBitDisplay->text().toStdString().c_str(), registerSignBit);
 }
 
+void TestUtilities::checkModuleProperties(ModulePropertiesWidget * widget,
+                             const std::string & moduleName,
+                             const std::string & registerNElements
+) {
+    BOOST_CHECK_EQUAL(widget->ui->moduleDisplay->text().toStdString().c_str(), moduleName);
+    BOOST_CHECK_EQUAL(widget->ui->registerNElementsDisplay->text().toStdString().c_str(), registerNElements);
+}
+
+
 void TestUtilities::checkTableData(RegisterPropertiesWidget * widget,
                     std::vector<std::tuple<int, int, double>> tableDataValues,
                     int size
