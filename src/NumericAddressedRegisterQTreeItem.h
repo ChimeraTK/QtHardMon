@@ -11,7 +11,7 @@ class NumericAddressedRegisterQTreeItem : public DeviceElementQTreeItem {
 
 public:
 
-  NumericAddressedRegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget);
+  NumericAddressedRegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
   virtual void readData();
   virtual void writeData();
   virtual void updateRegisterProperties();
@@ -20,7 +20,6 @@ private: // methods
 
 private: // member fields
   mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor_;
-  RegisterPropertiesWidget * propertiesWidget_;
   RegisterPropertiesWidget::RegisterProperties * properties_;
   mtca4u::FixedPointConverter * fixedPointConverter_;
 };

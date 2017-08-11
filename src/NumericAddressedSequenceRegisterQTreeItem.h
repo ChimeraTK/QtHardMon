@@ -9,7 +9,7 @@ class NumericAddressedSequenceRegisterQTreeItem : public DeviceElementQTreeItem 
 
 public:
 
-  NumericAddressedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, RegisterPropertiesWidget * propertiesWidget);
+  NumericAddressedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
   virtual void readData();
   virtual void writeData();
   virtual void updateRegisterProperties();
@@ -19,7 +19,6 @@ private: // methods
 private: // member fields
   mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor_;
   unsigned int channelNo_;
-  RegisterPropertiesWidget * propertiesWidget_;
   RegisterPropertiesWidget::RegisterProperties * properties_;
   mtca4u::FixedPointConverter * fixedPointConverter_;
 };

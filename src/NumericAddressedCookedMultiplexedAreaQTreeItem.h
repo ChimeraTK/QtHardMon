@@ -10,14 +10,13 @@ class NumericAddressedCookedMultiplexedAreaQTreeItem : public DeviceElementQTree
 
 public:
 
-  NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget);
+  NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
   virtual void readData();
   virtual void writeData();
   virtual void updateRegisterProperties();
 
 private: // member fields
   mtca4u::TwoDRegisterAccessor<double> twoDRegisterAccessor_;
-  RegisterPropertiesWidget * propertiesWidget_;
   RegisterPropertiesWidget::RegisterProperties * properties_;
 };
 

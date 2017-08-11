@@ -48,3 +48,11 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_constructor )
     TestUtilities::checkRegisterProperties(fixture.widget, "RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
 
 }
+
+// TODO:     virtual void setSize(int nOfElements, int nOfChannels);
+//     virtual void setNames(std::vector<std::string> components);
+//     virtual void setFixedPointInfo(int width, int fracBits, int signBit);
+//     virtual void setAddress(int bar, int address);
+
+// PropertiesWidgetProvider
+

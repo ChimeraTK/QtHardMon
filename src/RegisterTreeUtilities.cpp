@@ -3,7 +3,7 @@
 
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
-QTreeWidgetItem * RegisterTreeUtilities::assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget, RegisterPropertiesWidget * propertiesWidget) {
+QTreeWidgetItem * RegisterTreeUtilities::assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget, PropertiesWidgetProvider & propertiesWidgetProvider) {
   
     std::vector<std::string> registerPathComponents = registerInfo->getRegisterName().getComponents();
     std::string moduleName = registerPathComponents.front();
@@ -18,7 +18,7 @@ QTreeWidgetItem * RegisterTreeUtilities::assignToModuleItem(boost::shared_ptr<mt
 
     QTreeWidgetItem * moduleItem;
     if (moduleList.empty()) {
-      moduleItem = new ModuleQTreeItem(QString(moduleName.c_str()), treeWidget, propertiesWidget);
+      moduleItem = new ModuleQTreeItem(QString(moduleName.c_str()), treeWidget, propertiesWidgetProvider);
     } else {
       moduleItem = moduleList.front();
     }

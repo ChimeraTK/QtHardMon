@@ -1,14 +1,14 @@
 #include "DeviceElementQTreeItem.h"
 
 DeviceElementQTreeItem::DeviceElementQTreeItem(const QString & text, 
-const int type, QTreeWidget * parent)
-: QTreeWidgetItem(parent, QStringList(text), type) 
+const int type, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
+: QTreeWidgetItem(parent, QStringList(text), type), propertiesWidgetProvider_(propertiesWidgetProvider)
 {   
 }
 
 DeviceElementQTreeItem::DeviceElementQTreeItem(const QString & text, 
-const int type, QTreeWidgetItem * parent)
-: QTreeWidgetItem(parent, QStringList(text), type) 
+const int type, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
+: QTreeWidgetItem(parent, QStringList(text), type), propertiesWidgetProvider_(propertiesWidgetProvider)
 {
 }
 
@@ -33,4 +33,8 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
     int rhsNumericalPart = rhsName.mid(rhsIndex).toInt();
     return lhsNumericalPart < rhsNumericalPart;
   }
+}
+
+PropertiesWidget * DeviceElementQTreeItem::getPropertiesWidget() {
+  return propertiesWidgetProvider_.get(this->type());
 }

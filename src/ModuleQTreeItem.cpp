@@ -1,16 +1,15 @@
 #include "ModuleQTreeItem.h"
 #include "Exceptions.h"
+#include "RegisterPropertiesWidget.h"
 
-ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidget * parent,RegisterPropertiesWidget * propertiesWidget)
-: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent),
-  propertiesWidget_(propertiesWidget),
+ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidget * parent,PropertiesWidgetProvider & propertiesWidgetProvider)
+: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider),
   properties_(new RegisterPropertiesWidget::RegisterProperties())
 {
 }
 
-ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidgetItem * parent, RegisterPropertiesWidget * propertiesWidget)
-: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent),
-  propertiesWidget_(propertiesWidget),
+ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
+: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider),
   properties_(new RegisterPropertiesWidget::RegisterProperties())
 {
 }
@@ -26,5 +25,5 @@ void ModuleQTreeItem::writeData() {
 }
 
 void ModuleQTreeItem::updateRegisterProperties() {
-  propertiesWidget_->setRegisterProperties(*properties_);
+  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
 }

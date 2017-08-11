@@ -8,7 +8,7 @@
 static const size_t DEFAULT_MAX_WORDS = 0x10000;
 
 RegisterPropertiesWidget::RegisterPropertiesWidget(QWidget *parent) :
-    QWidget(parent),
+    PropertiesWidget(parent),
     ui(new Ui::RegisterPropertiesWidget),
     defaultBackgroundBrush_( Qt::transparent ),
     modifiedBackgroundBrush_( QColor( 255, 100, 100, 255 ) ), // red, not too dark
@@ -17,7 +17,7 @@ RegisterPropertiesWidget::RegisterPropertiesWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    clearProperties();
+    clearFields();
 
     connect(ui->valuesTableWidget, SIGNAL(cellChanged(int, int)),
     this, SLOT( updateTableEntries(int, int) ) );
@@ -35,7 +35,7 @@ RegisterPropertiesWidget::~RegisterPropertiesWidget()
     delete ui;
 }
 
-void RegisterPropertiesWidget::clearProperties() {
+void RegisterPropertiesWidget::clearFields() {
     RegisterProperties properties;
     setRegisterProperties(properties);
 }
@@ -213,4 +213,34 @@ void RegisterPropertiesWidget::changeBackgroundIfModified( int row, int column )
 
 void RegisterPropertiesWidget::copyTableDataToClipBoard(){
 	//TODO: SOmething for later. Not Implemented yet
+}
+
+
+void RegisterPropertiesWidget::setSize(int nOfElements, int size) {
+    ui->registerNElementsDisplay->setText(QString::number(nOfElements));
+    ui->registerSizeDisplay->setText(QString::number(size));
+}
+
+void RegisterPropertiesWidget::setNames(std::vector<std::string> components) {
+    if (components.size() < 2) {
+        // FIXME: throw - we do not have enough components but we should have.
+        // Not throwing at the moment as RegisterPropertiesWidget is a fallback
+        // PropertiesWidget.
+        ui->moduleDisplay->setText(components.front().c_str());
+        ui->registerNameDisplay->setText("");
+    } else {
+        ui->registerNameDisplay->setText(components.back().c_str());
+        ui->moduleDisplay->setText(components.front().c_str());
+    }
+}
+
+void RegisterPropertiesWidget::setFixedPointInfo(int width, int fracBits, int signBit) {
+    ui->registerWidthDisplay->setText(QString::number(width));
+    ui->registerFracBitsDisplay->setText(QString::number(fracBits));
+    ui->registeSignBitDisplay->setText(QString::number(signBit));
+}
+
+void RegisterPropertiesWidget::setAddress(int bar, int address) {
+    ui->registerBarDisplay->setText(QString::number(bar));
+    ui->registerAddressDisplay->setText(QString::number(address));
 }

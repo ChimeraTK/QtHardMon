@@ -3,29 +3,29 @@
 
 #include <qtreewidget.h>
 
-enum class DeviceElementDataType {
-    ModuleDataType = QTreeWidgetItem::UserType + 1,
-    NumAddressedRegisterDataType,
-    MultiplexedAreaDataType,
-    SequenceRegisterDataType,
-    GenericRegisterDataType
-};
+#include "Constants.h"
+#include "PropertiesWidgetProvider.h"
 
 class DeviceElementQTreeItem : public QTreeWidgetItem {
 
 public:
 
   DeviceElementQTreeItem(const QString& text, const int type, 
-                        QTreeWidget* parent);
+                        QTreeWidget* parent, PropertiesWidgetProvider & propertiesWidgetProvider);
 
   DeviceElementQTreeItem(const QString & text, const int type, 
-                        QTreeWidgetItem * parent);
+                        QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
 
   virtual bool operator<(const QTreeWidgetItem& rhs) const;
 
   virtual void readData() = 0;
   virtual void writeData() = 0;
   virtual void updateRegisterProperties() = 0;
+
+  virtual PropertiesWidget * getPropertiesWidget();
+
+private:
+  PropertiesWidgetProvider & propertiesWidgetProvider_;
 };
 
 #endif // DEVICEELEMENTQTREEITEM_H

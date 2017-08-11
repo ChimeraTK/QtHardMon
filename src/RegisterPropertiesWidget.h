@@ -1,16 +1,17 @@
 #ifndef REGISTERPROPERTIESWIDGET_H
 #define REGISTERPROPERTIESWIDGET_H
 
-#include <QWidget>
+#include "PropertiesWidget.h"
 #include "ui_RegisterPropertiesWidget.h"
 #include "CustomDelegates.h"
 
 #include <mtca4u/FixedPointConverter.h>
+
 namespace Ui {
 class RegisterPropertiesWidget;
 }
 
-class RegisterPropertiesWidget : public QWidget
+class RegisterPropertiesWidget : public PropertiesWidget
 {
     Q_OBJECT
 
@@ -42,7 +43,11 @@ public:
     explicit RegisterPropertiesWidget(QWidget *parent);
     ~RegisterPropertiesWidget();
     
-    void clearProperties();
+    virtual void clearFields();
+    virtual void setSize(int nOfElements, int nOfChannels);
+    virtual void setNames(std::vector<std::string> components);
+    virtual void setFixedPointInfo(int width, int fracBits, int signBit);
+    virtual void setAddress(int bar, int address);
     void setRegisterProperties(RegisterProperties properties);
 
 

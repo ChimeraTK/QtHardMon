@@ -2,6 +2,15 @@
 #ifndef SOURCE_DIRECTORY__CONSTANTS_H_
 #define SOURCE_DIRECTORY__CONSTANTS_H_
 
+#include <qtreewidget.h>
+
+enum class DeviceElementDataType {
+    ModuleDataType = QTreeWidgetItem::UserType + 1,
+    NumAddressedRegisterDataType,
+    MultiplexedAreaDataType,
+    SequenceRegisterDataType,
+    GenericRegisterDataType
+};
 
 // Constants
 namespace qthardmon {

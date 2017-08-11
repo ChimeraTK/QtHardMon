@@ -1,17 +1,16 @@
 #include "NumericAddressedCookedSequenceRegisterQTreeItem.h"
 
-NumericAddressedCookedSequenceRegisterQTreeItem::NumericAddressedCookedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, RegisterPropertiesWidget * propertiesWidget)
+NumericAddressedCookedSequenceRegisterQTreeItem::NumericAddressedCookedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString((std::string("SEQUENCE_") + std::to_string(channelNo)).c_str()),
-static_cast<int>(DeviceElementDataType::SequenceRegisterDataType), parent),
+static_cast<int>(DeviceElementDataType::SequenceRegisterDataType), parent, propertiesWidgetProvider),
   twoDRegisterAccessor_(twoDRegisterAccessor),
-  channelNo_(channelNo),
-  propertiesWidget_(propertiesWidget)
+  channelNo_(channelNo)
 {
 }
 
 void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
   twoDRegisterAccessor_.read();
-  QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
+  QTableWidget* table = dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
   table->clearContents();
   table->setRowCount(0);
   unsigned int elementsPerChannel = twoDRegisterAccessor_.getNElementsPerChannel();
@@ -33,7 +32,7 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
 }
 
 void NumericAddressedCookedSequenceRegisterQTreeItem::writeData() {
-     QTableWidget* table = propertiesWidget_->ui->valuesTableWidget;
+     QTableWidget* table = dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
      for (unsigned int row = 0; row < twoDRegisterAccessor_.getNElementsPerChannel(); ++row) {
       twoDRegisterAccessor_[channelNo_][row] = table->item(row, 2)->data(0).toDouble();
      }

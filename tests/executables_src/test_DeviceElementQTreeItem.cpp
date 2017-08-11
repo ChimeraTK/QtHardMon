@@ -17,6 +17,7 @@
 
 struct DeviceElementQTreeItem_fixtureBase {
     QApplication * app;
+    PropertiesWidgetProvider propertiesWidgetProvider;
     RegisterPropertiesWidget * propertiesWidget;
     DeviceElementQTreeItem_fixtureBase() {
         int argc = 0;
@@ -24,6 +25,11 @@ struct DeviceElementQTreeItem_fixtureBase {
         app = new QApplication(argc, argv);
 
         propertiesWidget = new RegisterPropertiesWidget(nullptr);
+        propertiesWidgetProvider.registerWidget(DeviceElementDataType::ModuleDataType, propertiesWidget);
+        propertiesWidgetProvider.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, propertiesWidget);
+        propertiesWidgetProvider.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, propertiesWidget);
+        propertiesWidgetProvider.registerWidget(DeviceElementDataType::SequenceRegisterDataType, propertiesWidget);
+
     }
 };
 
@@ -46,7 +52,7 @@ BOOST_AUTO_TEST_CASE ( DeviceElementQTreeItem_QTreeWidgetItem )
 BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_DataType )
 {   
     DeviceElementQTreeItem_fixtureBase fixture;
-    QTreeWidgetItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidget);
+    QTreeWidgetItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidgetProvider);
     BOOST_CHECK_EQUAL(moduleItem->type(), static_cast<int>(DeviceElementDataType::ModuleDataType));
 }
 
@@ -56,7 +62,7 @@ BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_DataType )
 BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_ReadAndWriteThrows )
 {
     DeviceElementQTreeItem_fixtureBase fixture;
-    DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidget);
+    DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidgetProvider);
     BOOST_CHECK_THROW(moduleItem->readData(), InvalidOperationException);
     BOOST_CHECK_THROW(moduleItem->writeData(), InvalidOperationException);
 }
@@ -67,14 +73,14 @@ BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_ReadAndWriteThrows )
 BOOST_AUTO_TEST_CASE ( ModuleQTreeItem_fillsRegisterProperties )
 {
     DeviceElementQTreeItem_fixtureBase fixture;
-    DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidget);
+    DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, fixture.propertiesWidgetProvider);
     TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
     moduleItem->updateRegisterProperties();
 
     // FIXME: this test does not determine if the properties widget is properly filled if something was set in between.
     TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
 
-    // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterPropertiesWidget);
+    // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterpropertiesWidgetProvider);
 
 
 }
@@ -102,7 +108,7 @@ struct NumericAddressedRegisterQTreeItem_fixture : public DeviceAccessSetup_fixt
     {
         const mtca4u::RegisterCatalogue registerCatalogue = device.getRegisterCatalogue();
         treeWidget = new QTreeWidget;
-        numericAddressedRegisterQTreeItem = new NumericAddressedRegisterQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, propertiesWidget);
+        numericAddressedRegisterQTreeItem = new NumericAddressedRegisterQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, propertiesWidgetProvider);
         oneDRegisterAccessor.read();
         oneDRegisterAccessor[0] = initialValue;
         oneDRegisterAccessor.write();
@@ -186,7 +192,7 @@ struct NumericAddressedMultiplexedAreaQTreeItem_fixture : public DeviceAccessSet
             ++firstSequenceItem;
         }
         
-        numericAddressedMultiplexedAreaQTreeItem = new NumericAddressedMultiplexedAreaQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), registerCatalogue, firstSequenceItem, treeWidget, propertiesWidget);
+        numericAddressedMultiplexedAreaQTreeItem = new NumericAddressedMultiplexedAreaQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), registerCatalogue, firstSequenceItem, treeWidget, propertiesWidgetProvider);
         twoDRegisterAccessor.read();
         twoDRegisterAccessor[0][0] = initialValue;
         twoDRegisterAccessor.write();
@@ -282,7 +288,7 @@ struct NumericAddressedCookedMultiplexedAreaQTreeItem_fixture : public DeviceAcc
         const mtca4u::RegisterCatalogue registerCatalogue = device.getRegisterCatalogue();
         treeWidget = new QTreeWidget;
         
-        numericAddressedCookedMultiplexedAreaQTreeItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, propertiesWidget);
+        numericAddressedCookedMultiplexedAreaQTreeItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, propertiesWidgetProvider);
         twoDRegisterAccessor.read();
         twoDRegisterAccessor[0][0] = initialValue;
         twoDRegisterAccessor.write();

@@ -3,12 +3,11 @@
 #include "RegisterTreeUtilities.h"
 #include "NumericAddressedSequenceRegisterQTreeItem.h"
 
-NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, const mtca4u::RegisterCatalogue & catalogue, mtca4u::RegisterCatalogue::const_iterator & firstSequenceItem, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
+NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, const mtca4u::RegisterCatalogue & catalogue, mtca4u::RegisterCatalogue::const_iterator & firstSequenceItem, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
   static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
-  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidget)),
-  twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(getTrimmedRegisterName(registerInfo))),
-  propertiesWidget_(propertiesWidget)
+  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidgetProvider), propertiesWidgetProvider),
+  twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(getTrimmedRegisterName(registerInfo)))
 {
     unsigned int nOfChannels = twoDRegisterAccessor_.getNChannels();
     // if (std::distance(firstSequenceItem, catalogue.end()) < nOfChannels) {
@@ -19,7 +18,7 @@ NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeIt
 
     for (int i = 0; i < nOfChannels && firstSequenceItem != catalogue.end(); ++i, ++firstSequenceItem) {
         boost::shared_ptr<mtca4u::RegisterInfo> currentSequenceItem = catalogue.getRegister(firstSequenceItem->getRegisterName());
-        DeviceElementQTreeItem * sequenceItem = new NumericAddressedSequenceRegisterQTreeItem(currentSequenceItem, twoDRegisterAccessor_, i, this, propertiesWidget);
+        DeviceElementQTreeItem * sequenceItem = new NumericAddressedSequenceRegisterQTreeItem(currentSequenceItem, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
     }
 
     mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
@@ -68,6 +67,6 @@ std::string NumericAddressedMultiplexedAreaQTreeItem::getTrimmedRegisterName(boo
 }
 
 void NumericAddressedMultiplexedAreaQTreeItem::updateRegisterProperties() {
-    propertiesWidget_->setRegisterProperties(*properties_);
-    propertiesWidget_->setFixedPointConverter(nullptr);
+    dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
+    dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setFixedPointConverter(nullptr);
 }

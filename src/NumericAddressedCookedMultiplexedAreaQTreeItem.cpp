@@ -5,13 +5,12 @@
 #include "NumericAddressedCookedSequenceRegisterQTreeItem.h"
 #include "RegisterTreeUtilities.h"
 
-NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, RegisterPropertiesWidget * propertiesWidget)
+NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
   static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
-  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidget)),
-  twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(registerInfo->getRegisterName())),
-  propertiesWidget_(propertiesWidget)
-{
+  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidgetProvider), propertiesWidgetProvider),
+  twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(registerInfo->getRegisterName()))
+  {
     unsigned int nOfChannels = twoDRegisterAccessor_.getNChannels();
     // if (std::distance(firstSequenceItem, catalogue.end()) < nOfChannels) {
     //     throw InternalErrorException(
@@ -20,7 +19,7 @@ NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexe
     // }
 
     for (int i = 0; i < nOfChannels; ++i) {
-        DeviceElementQTreeItem * sequenceItem = new NumericAddressedCookedSequenceRegisterQTreeItem(registerInfo, twoDRegisterAccessor_, i, this, propertiesWidget);
+        DeviceElementQTreeItem * sequenceItem = new NumericAddressedCookedSequenceRegisterQTreeItem(registerInfo, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
     }
 
     mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
@@ -55,6 +54,6 @@ void NumericAddressedCookedMultiplexedAreaQTreeItem::writeData() {
 }
 
 void NumericAddressedCookedMultiplexedAreaQTreeItem::updateRegisterProperties() {
-    propertiesWidget_->setRegisterProperties(*properties_);
-    propertiesWidget_->setFixedPointConverter(nullptr);
+    dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
+    dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setFixedPointConverter(nullptr);
 }

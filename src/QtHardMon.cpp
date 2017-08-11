@@ -142,6 +142,12 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
 
   // also the plot window dfunctions are only enabled when a device is opened.
    _plotWindow->setEnabled(false);
+
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::ModuleDataType, ui.registerPropertiesWidget);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, ui.registerPropertiesWidget);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, ui.registerPropertiesWidget);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::SequenceRegisterDataType, ui.registerPropertiesWidget);
+
 }
 
 QtHardMon::~QtHardMon()
@@ -307,7 +313,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
-    ui.registerPropertiesWidget->clearProperties();
+    ui.registerPropertiesWidget->clearFields();
     return;
   }
 
@@ -893,13 +899,13 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
        ++registerIter) {
     
     if (isMultiplexedDataRegion(registerIter->getRegisterName().getComponents().back())) {
-      NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, ui.registerTreeWidget, ui.registerPropertiesWidget);
+      NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, ui.registerTreeWidget, propertiesWidgetProvider_);
     } else {
 
       if (registerCatalogue.getRegister(registerIter->getRegisterName())->getNumberOfChannels() == 1) {
-        NumericAddressedRegisterQTreeItem * newItem = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, ui.registerPropertiesWidget);
+        NumericAddressedRegisterQTreeItem * newItem = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
       } else {
-        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, ui.registerPropertiesWidget);
+        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
       }
 
     }

@@ -9,6 +9,7 @@
 #include <QStyledItemDelegate>
 #include <QMessageBox>
 #include <qclipboard.h>
+#include "PropertiesWidgetProvider.h"
 
 #ifndef Q_MOC_RUN
 #include <mtca4u/Device.h>
@@ -119,6 +120,7 @@ class QtHardMon: public QMainWindow
   QString configFileName_; ///< Name of the config file (last saved or read)
   int insideReadOrWrite_; ///< Counter flag to indicate if the read or write function is being executed
   bool noPrompts_;
+  PropertiesWidgetProvider propertiesWidgetProvider_;
   /**
    *  Write the config to the given file name.
    */
