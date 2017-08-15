@@ -313,7 +313,9 @@ void QtHardMon::closeDevice()
 
 void QtHardMon::activatePropertiesWidget(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
 {
-  ui.propertiesStackedWidget->setCurrentIndex(propertiesWidgetProvider_.pageOf(registerItem->type()));
+  if (registerItem != NULL) {
+    ui.propertiesStackedWidget->setCurrentIndex(propertiesWidgetProvider_.pageOf(registerItem->type()));
+  }
 }
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)

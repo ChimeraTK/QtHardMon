@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeSorted )
     QtHardmon_populatesRegisterTree_fixture fixtureSorted("test_QtHardMon_valid_dummy.dmap", "NUMDEV");
 
     // Expecting BOARD, APP0, MODULE0 and MODULE1 modules
-    BOOST_CHECK_EQUAL(fixtureSorted.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 4);
+    BOOST_REQUIRE_EQUAL(fixtureSorted.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 4);
     // Modules are initially sorted, so APP0, BOARD, MODULE0, MODULE1
 
     // APP0 has 4 items
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeUnsorted )
     QtHardmon_populatesRegisterTree_fixture fixtureUnsorted("test_QtHardMon_valid_dummy.dmap", "NUMDEV", false);
 
     // Expecting BOARD, APP0, MODULE0 and MODULE1 modules
-    BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 4);
+    BOOST_REQUIRE_EQUAL(fixtureUnsorted.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 4);
     // Modules are not sorted, so BOARD, APP0, MODULE0, MODULE1
     // BOARD has 2 items
     BOOST_CHECK_EQUAL(fixtureUnsorted.qtHardMon->ui.registerTreeWidget->topLevelItem(0)->childCount(), 2);
@@ -321,10 +321,10 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeMultiplexed )
     QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
 
     // There are two modules, APP0 and MODULE1 (we care only for the first one in this test)
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 3);
+    BOOST_REQUIRE_EQUAL(fixtureMultiplexed.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 3);
 
     // APP0 has 4 items, one of them is multiplexed area
-    BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->ui.registerTreeWidget->topLevelItem(0)->childCount(), 4);
+    BOOST_REQUIRE_EQUAL(fixtureMultiplexed.qtHardMon->ui.registerTreeWidget->topLevelItem(0)->childCount(), 4);
 
     // Multiplexed area has 16 sequence registers
     BOOST_CHECK_EQUAL(fixtureMultiplexed.qtHardMon->ui.registerTreeWidget->topLevelItem(0)->child(1)->childCount(), 16);
