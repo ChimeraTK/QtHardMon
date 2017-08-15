@@ -65,7 +65,7 @@ class QtHardMon: public QMainWindow
    */
   void registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */ = NULL);
   void registerClicked(QTreeWidgetItem * registerItem); ///< Executed if a register is clicked
-
+  void activatePropertiesWidget(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */);
   void aboutQtHardMon(); ///< Show the aboutQtHardMon
   void aboutQt(); ///< Show the aboutQt dialog
 

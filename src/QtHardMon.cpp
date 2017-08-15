@@ -72,6 +72,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   connect(ui.registerTreeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), 
 	  this, SLOT( registerSelected(QTreeWidgetItem *, QTreeWidgetItem *) ) );
 
+  connect(ui.registerTreeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), 
+	  this, SLOT( activatePropertiesWidget(QTreeWidgetItem *, QTreeWidgetItem *) ) );
+
   connect(ui.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)), 
 	  this, SLOT( registerClicked(QTreeWidgetItem *) ) );
 
@@ -143,10 +146,10 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   // also the plot window dfunctions are only enabled when a device is opened.
    _plotWindow->setEnabled(false);
 
-  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::ModuleDataType, ui.registerPropertiesWidget);
-  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, ui.registerPropertiesWidget);
-  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, ui.registerPropertiesWidget);
-  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::SequenceRegisterDataType, ui.registerPropertiesWidget);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::ModuleDataType, ui.modulePropertiesWidget, 1);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, ui.registerPropertiesWidget, 0);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, ui.registerPropertiesWidget, 0);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::SequenceRegisterDataType, ui.registerPropertiesWidget, 0);
 
 }
 
@@ -306,6 +309,11 @@ void QtHardMon::closeDevice()
   ui.openCloseButton->setText(
   QApplication::translate("QtHardMonForm", "Open", 0,
         QApplication::UnicodeUTF8));
+}
+
+void QtHardMon::activatePropertiesWidget(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)
+{
+  ui.propertiesStackedWidget->setCurrentIndex(propertiesWidgetProvider_.pageOf(registerItem->type()));
 }
 
 void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem * /*previousRegisterItem */)

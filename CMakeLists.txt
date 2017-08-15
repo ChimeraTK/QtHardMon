@@ -38,6 +38,9 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 #turn on the rpath so libmtca4u-deviceaccess.so is found
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+#use -DCMAKE_BUILD_TYPE=Debug in your cmake command to turn on the coverage option
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage")
+
 INCLUDE_DIRECTORIES( SYSTEM ${mtca4u-deviceaccess_INCLUDE_DIRS} )
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
@@ -57,12 +60,13 @@ SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.c
                             src/PropertiesWidgetProvider.cpp
                             src/PropertiesWidget.cpp
                             src/RegisterQTreeItem.cpp
+                            src/GenericRegisterPropertiesWidget.cpp
                             )
 # The headers which contain Q_OBJECTs (need to be processed with moc)
-SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h ${CMAKE_SOURCE_DIR}/src/ModulePropertiesWidget.h)
+SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h ${CMAKE_SOURCE_DIR}/src/ModulePropertiesWidget.h src/GenericRegisterPropertiesWidget.h)
 # All headers, to have the dependencies correct
 SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}_QOBJECT_HEADERS src/PlotWindow.h)
-SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui src/RegisterPropertiesWidget.ui src/ModulePropertiesWidget.ui)
+SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui src/RegisterPropertiesWidget.ui src/ModulePropertiesWidget.ui src/GenericRegisterPropertiesWidget.ui)
 SET(${PROJECT_NAME}_RESOURCES src/${PROJECT_NAME}.qrc)
 
 QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})
@@ -94,6 +98,11 @@ ADD_EXECUTABLE(${PROJECT_NAME} $<TARGET_OBJECTS:${PROJECT_NAME}_OBJECTS> src/mai
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_LIBRARIES} 
      ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
+
+  IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  # enable code coverate report
+  include(cmake/enable_code_coverage_report.cmake)
+  ENDIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)

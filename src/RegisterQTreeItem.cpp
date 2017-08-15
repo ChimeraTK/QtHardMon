@@ -3,7 +3,7 @@
 
 RegisterQTreeItem::RegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
-  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
+  static_cast<int>(DeviceElementDataType::GenericRegisterDataType), 
   RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidgetProvider), propertiesWidgetProvider),
   oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(registerInfo->getRegisterName()))
 {
