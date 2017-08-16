@@ -180,12 +180,13 @@ void GenericRegisterPropertiesWidget::setSize(int nOfElements, int size) {
 
 void GenericRegisterPropertiesWidget::setNames(std::vector<std::string> components) {
     std::string moduleName;
-    if (components.size() > 2) {
+    if (components.size() >= 2) {
         for (int i = 0; i < components.size() - 1; ++i) {
             moduleName += "/" + components[i];
         }
-    } else
-        moduleName = components.front();
+        moduleName = moduleName.substr(1);
+    } else 
+        moduleName = "";
 
     ui->registerNameDisplay->setText(components.back().c_str());
     ui->moduleDisplay->setText(moduleName.c_str());

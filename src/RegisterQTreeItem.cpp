@@ -1,5 +1,6 @@
 #include "RegisterQTreeItem.h"
 #include "RegisterTreeUtilities.h"
+#include "GenericRegisterPropertiesWidget.h"
 
 RegisterQTreeItem::RegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
@@ -7,23 +8,12 @@ RegisterQTreeItem::RegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<
   RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidgetProvider), propertiesWidgetProvider),
   oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(registerInfo->getRegisterName()))
 {
-    QString registerName = QString(registerInfo->getRegisterName().getComponents().back().c_str());
-    QString moduleName = QString(registerInfo->getRegisterName().getComponents().front().c_str());
-    QString bar = QString("");
-    QString nOfElements = QString::number(registerInfo->getNumberOfElements());
-    QString address = QString("");
-    QString size = QString("");
-    QString width = QString("");
-    QString fracBits = QString("");
-    QString signFlag = QString("");
-
-    properties_ = new RegisterPropertiesWidget::RegisterProperties(registerName, 
-    moduleName, bar, address, nOfElements, size, width, fracBits, signFlag);
+    name_ = registerInfo->getRegisterName().getComponents();
 }
 
 void RegisterQTreeItem::readData() {
   oneDRegisterAccessor_.read();
-  QTableWidget* table = dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
+  QTableWidget* table = dynamic_cast<GenericRegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
   table->clearContents();
   table->setRowCount(0);
   table->setRowCount(oneDRegisterAccessor_.getNElements());
@@ -53,7 +43,7 @@ void RegisterQTreeItem::readData() {
 }
 
 void RegisterQTreeItem::writeData() {
-     QTableWidget* table = dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
+     QTableWidget* table = dynamic_cast<GenericRegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
      for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
       oneDRegisterAccessor_[row] = table->item(row, 2)->data(0).toDouble();
      }
@@ -61,6 +51,7 @@ void RegisterQTreeItem::writeData() {
 }
 
 void RegisterQTreeItem::updateRegisterProperties() {
-  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
-  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setFixedPointConverter(nullptr);
+    getPropertiesWidget()->clearFields();
+    getPropertiesWidget()->setNames(name_);
+    getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements());
 }

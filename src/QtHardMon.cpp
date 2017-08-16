@@ -25,6 +25,7 @@ using namespace mtca4u;
 #include "NumericAddressedRegisterQTreeItem.h"
 #include "NumericAddressedMultiplexedAreaQTreeItem.h"
 #include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
+#include "RegisterQTreeItem.h"
 
 
 // Some variables to avoid duplication and possible inconsistencies in the code.
@@ -150,6 +151,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, ui.registerPropertiesWidget, 0);
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, ui.registerPropertiesWidget, 0);
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::SequenceRegisterDataType, ui.registerPropertiesWidget, 0);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::GenericRegisterDataType, ui.genericRegisterPropertiesWidget, 2);
 
 }
 
@@ -272,6 +274,7 @@ void QtHardMon::openDevice( std::string const & deviceFileName ) //Change name t
   currentDevice_.open(deviceFileName);
     // enable all of the GUI in case it was deactivated before
     ui.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
+    ui.genericRegisterPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
     ui.operationsGroupBox->setEnabled(true);
     ui.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
@@ -297,6 +300,7 @@ void QtHardMon::closeDevice()
 	if (currentDevice_.isOpened())
 		currentDevice_.close();
   ui.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
+  ui.genericRegisterPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
   ui.operationsGroupBox->setEnabled(false);
   ui.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
@@ -342,11 +346,11 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     ui.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
     ui.writeButton->setEnabled(false);
   } else {
-    read();
+    read(true);
   }
 }
 
-void QtHardMon::read()
+void QtHardMon::read(bool autoRead)
 {
   ++insideReadOrWrite_;
 
@@ -360,12 +364,14 @@ void QtHardMon::read()
     }
   }
   catch (InvalidOperationException &e) {
-    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
-    QString("QtHardMon read error "), 
-    QString("Info: An exception was thrown:") + e.what());
-    return;
+    if (!autoRead) {
+      showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
+      QString("QtHardMon read error "), 
+      QString("Info: An exception was thrown:") + e.what());
+    }
   }
   catch (std::exception &e) {
+    if (!autoRead) {
     closeDevice();
     ui.writeButton->setEnabled(false);
     // the error message accesses the _currentDeviceListItem. Is
@@ -375,6 +381,7 @@ void QtHardMon::read()
     _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".", 
     QString("Info: An exception was thrown:") + e.what() +
     QString("\n\nThe device has been closed."));
+    }
   }
 
   // check if plotting after reading is requested
@@ -908,7 +915,12 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
     
-    if (isMultiplexedDataRegion(registerIter->getRegisterName().getComponents().back())) {
+    mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerCatalogue.getRegister(registerIter->getRegisterName()).get());
+
+
+    if (!numericAddressedRegisterInfo) {
+      RegisterQTreeItem * newItem = new RegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
+    } else if (isMultiplexedDataRegion(registerIter->getRegisterName().getComponents().back())) {
       NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, ui.registerTreeWidget, propertiesWidgetProvider_);
     } else {
 

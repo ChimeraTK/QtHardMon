@@ -145,12 +145,33 @@ BOOST_AUTO_TEST_CASE ( RegisterQTreeItem_fillsRegisterProperties )
 {
     RegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0", 5.0);
     
-    // TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
-    // fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties();
+    TestUtilities::checkRegisterProperties(fixture.genericRegisterPropertiesWidget, "", "", "");
+    fixture.registerQTreeItem->updateRegisterProperties();
 
-    // TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "MODULE0", "APP0", "1", "16", "2", "8", "32", "0", "1");
+    TestUtilities::checkRegisterProperties(fixture.genericRegisterPropertiesWidget, "MODULE0", "APP0", "2");
+}
 
-    // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing", (QTreeWidget *) NULL, RegisterPropertiesWidget);
+/*
+ * Numeric addressed register reads from / writes to device properly.
+*/
+BOOST_AUTO_TEST_CASE ( RegisterQTreeItem_ReadAndWrite )
+{
+    RegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0", 5.0);
+    
+    fixture.registerQTreeItem->updateRegisterProperties();
+
+    fixture.registerQTreeItem->readData();
+
+    TestUtilities::checkTableData(fixture.genericRegisterPropertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0)});
+
+    TestUtilities::setTableValue(fixture.genericRegisterPropertiesWidget, 1, 0, std::make_tuple(3, 3, 3.0));
+    
+    fixture.registerQTreeItem->writeData();
+
+    fixture.oneDRegisterAccessor.read();
+
+    BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[1], 3.0);
+
 }
 
 #include "NumericAddressedRegisterQTreeItem.h"
@@ -219,15 +240,15 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_ReadAndWrite )
 
     fixture.numericAddressedRegisterQTreeItem->readData();
 
-    TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0)});
+    TestUtilities::checkTableData(fixture.propertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(3, 30, 3.0)});
 
-    TestUtilities::setTableValue(fixture.propertiesWidget, 1, 0, std::make_tuple(3, 3, 3.0));
+    TestUtilities::setTableValue(fixture.propertiesWidget, 1, 0, std::make_tuple(4, 4, 4.0));
 
     fixture.numericAddressedRegisterQTreeItem->writeData();
 
     fixture.oneDRegisterAccessor.read();
 
-    BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[1], 3.0);
+    BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[1], 4.0);
 
 }
 

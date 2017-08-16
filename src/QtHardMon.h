@@ -52,7 +52,7 @@ class QtHardMon: public QMainWindow
 
   void unckeckShowPlotWindow();///< Slot with void argument to uncheck the check box.
 
-  void read();///< Read register from device.
+  void read(bool autoRead = false);///< Read register from device.
   void write();///< Read register to device.
   void loadBoards();///< Read a dmap file
 

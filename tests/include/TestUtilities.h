@@ -5,6 +5,7 @@
 
 #include "RegisterPropertiesWidget.h"
 #include "ModulePropertiesWidget.h"
+#include "GenericRegisterPropertiesWidget.h"
 
 class TestUtilities
 {
@@ -26,10 +27,23 @@ public:
                              const std::string & registerNElements
 );
 
+    static void checkRegisterProperties(GenericRegisterPropertiesWidget * widget,
+                             const std::string & registerName,
+                             const std::string & moduleName,
+                             const std::string & registerNElements
+);
+
     static void setTableValue(RegisterPropertiesWidget * widget, int row, int column,
                     std::tuple<int, int, double> dataTuple);
 
     static void checkTableData(RegisterPropertiesWidget * widget,
+                    std::vector<std::tuple<int, int, double>> tableDataValues,
+                    int size = 0);
+
+        static void setTableValue(GenericRegisterPropertiesWidget * widget, int row, int column,
+                    std::tuple<int, int, double> dataTuple);
+
+    static void checkTableData(GenericRegisterPropertiesWidget * widget,
                     std::vector<std::tuple<int, int, double>> tableDataValues,
                     int size = 0);
 };

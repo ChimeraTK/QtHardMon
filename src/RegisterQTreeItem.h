@@ -20,7 +20,7 @@ private: // methods
 
 private: // member fields
   mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor_;
-  RegisterPropertiesWidget::RegisterProperties * properties_;
+  std::vector<std::string> name_;
 };
 
 #endif // REGISTERQTREEITEM_H
