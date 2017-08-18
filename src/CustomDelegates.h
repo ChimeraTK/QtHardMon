@@ -8,9 +8,9 @@
 #ifndef TABLESPINBOXDELEGATE_H_
 #define TABLESPINBOXDELEGATE_H_
 
-#include <QStyledItemDelegate>
-#include <QObject>
 #include "HexSpinBox.h"
+#include <QObject>
+#include <QStyledItemDelegate>
 
 /**
  * CustomDelegates provides  custom implemented delegates

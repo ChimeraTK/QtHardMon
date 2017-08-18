@@ -9,23 +9,24 @@
 class DeviceElementQTreeItem : public QTreeWidgetItem {
 
 public:
+  DeviceElementQTreeItem(const QString &text, const int type,
+                         QTreeWidget *parent,
+                         PropertiesWidgetProvider &propertiesWidgetProvider);
 
-  DeviceElementQTreeItem(const QString& text, const int type, 
-                        QTreeWidget* parent, PropertiesWidgetProvider & propertiesWidgetProvider);
+  DeviceElementQTreeItem(const QString &text, const int type,
+                         QTreeWidgetItem *parent,
+                         PropertiesWidgetProvider &propertiesWidgetProvider);
 
-  DeviceElementQTreeItem(const QString & text, const int type, 
-                        QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
-
-  virtual bool operator<(const QTreeWidgetItem& rhs) const;
+  virtual bool operator<(const QTreeWidgetItem &rhs) const;
 
   virtual void readData() = 0;
   virtual void writeData() = 0;
   virtual void updateRegisterProperties() = 0;
 
-  virtual PropertiesWidget * getPropertiesWidget();
+  virtual PropertiesWidget *getPropertiesWidget();
 
 private:
-  PropertiesWidgetProvider & propertiesWidgetProvider_;
+  PropertiesWidgetProvider &propertiesWidgetProvider_;
 };
 
 #endif // DEVICEELEMENTQTREEITEM_H

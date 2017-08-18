@@ -5,19 +5,22 @@
 #include "RegisterPropertiesWidget.h"
 #include <mtca4u/Device.h>
 
-class NumericAddressedCookedSequenceRegisterQTreeItem : public DeviceElementQTreeItem {
+class NumericAddressedCookedSequenceRegisterQTreeItem
+    : public DeviceElementQTreeItem {
 
 public:
-
-  NumericAddressedCookedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
+  NumericAddressedCookedSequenceRegisterQTreeItem(
+      boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
+      mtca4u::TwoDRegisterAccessor<double> &twoDRegisterAccessor,
+      unsigned int channelNo, QTreeWidgetItem *parent,
+      PropertiesWidgetProvider &propertiesWidgetProvider);
   virtual void readData();
   virtual void writeData();
   virtual void updateRegisterProperties();
 
 private: // methods
-
 private: // member fields
-  mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor_;
+  mtca4u::TwoDRegisterAccessor<double> &twoDRegisterAccessor_;
   unsigned int channelNo_;
 };
 

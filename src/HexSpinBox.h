@@ -27,7 +27,7 @@ public:
    * Holds the entered value (for which we need the hex representation)
    */
   double value;
-  HexData() : value(0) {};
+  HexData() : value(0){};
 };
 
 /*
@@ -41,13 +41,13 @@ Q_DECLARE_METATYPE(HexData)
  */
 class HexSpinBox : public QSpinBox {
   Q_OBJECT
-  QRegExpValidator* _validator;
+  QRegExpValidator *_validator;
 
 public:
   /**
    * The class can register itself with a parent widget through the constructor.
    */
-  HexSpinBox(QWidget* parent_ = 0);
+  HexSpinBox(QWidget *parent_ = 0);
 
 private:
   // Disable copy constructor and assignment operator
@@ -66,13 +66,13 @@ protected:
    * Defines how the user input text (in the spinbox) is converted into the
    * corresponding integer value
    */
-  int valueFromText(const QString& text_) const;
+  int valueFromText(const QString &text_) const;
 
   /**
    * Code is used to restrict user input (in the spinbox) to valid hexadecimal
    * characters.
    */
-  QValidator::State validate(QString& text_, int& pos_) const;
+  QValidator::State validate(QString &text_, int &pos_) const;
 };
 
 #endif /* SOURCE_DIRECTORY__HEXSPINBOX_H_ */

@@ -1,40 +1,42 @@
 #include "NumericDataTableMixin.h"
-#include "Exceptions.h"
 #include "Constants.h"
+#include "Exceptions.h"
 #include "PreferencesProvider.h"
 
-NumericDataTableMixin::NumericDataTableMixin() : 
-defaultBackgroundBrush_(Qt::transparent),
-modifiedBackgroundBrush_(QColor(255, 100, 100, 255))
-{
-    PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
-    int floatPrecision;
-    try {
-        floatPrecision = preferencesProvider.getValue<int>("floatPrecision");
-    } catch(InvalidOperationException & e) {
-        floatPrecision = static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
-        preferencesProvider.setValue("floatPrecision", floatPrecision);
-    }
-    customDelegate_.setDoubleSpinBoxPrecision(floatPrecision);
+NumericDataTableMixin::NumericDataTableMixin()
+    : defaultBackgroundBrush_(Qt::transparent),
+      modifiedBackgroundBrush_(QColor(255, 100, 100, 255)) {
+  PreferencesProvider &preferencesProvider =
+      PreferencesProviderSingleton::Instance();
+  int floatPrecision;
+  try {
+    floatPrecision = preferencesProvider.getValue<int>("floatPrecision");
+  } catch (InvalidOperationException &e) {
+    floatPrecision =
+        static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
+    preferencesProvider.setValue("floatPrecision", floatPrecision);
+  }
+  customDelegate_.setDoubleSpinBoxPrecision(floatPrecision);
 }
 
-void NumericDataTableMixin::setTableWidget(QTableWidget * widget) {
-    tableWidget_ = widget;
-    tableWidget_->setItemDelegate(&customDelegate_);
+void NumericDataTableMixin::setTableWidget(QTableWidget *widget) {
+  tableWidget_ = widget;
+  tableWidget_->setItemDelegate(&customDelegate_);
 }
 
-QTableWidget * NumericDataTableMixin::getTableWidget() {
-    if (!tableWidget_) {
-        throw InternalErrorException (
-            "DataTableWidget was not set properly. Report a bug to developers."
-        );
-    } else
-        return tableWidget_;
+QTableWidget *NumericDataTableMixin::getTableWidget() {
+  if (!tableWidget_) {
+    throw InternalErrorException(
+        "DataTableWidget was not set properly. Report a bug to developers.");
+  } else
+    return tableWidget_;
 }
 
 void NumericDataTableMixin::updateTableEntries(int row, int column) {
-    PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
-    customDelegate_.setDoubleSpinBoxPrecision(preferencesProvider.getValue<int>("floatPrecision"));
+  PreferencesProvider &preferencesProvider =
+      PreferencesProviderSingleton::Instance();
+  customDelegate_.setDoubleSpinBoxPrecision(
+      preferencesProvider.getValue<int>("floatPrecision"));
   // We have two editable fields - The decimal field and double field.
   // The values reflect each other and to avoid an infinite
   // loop  situation,  corresponding column cells are updated
@@ -94,48 +96,50 @@ void NumericDataTableMixin::updateTableEntries(int row, int column) {
       if (userUpdatedValueInCell == currentValueInFixedPointCell)
         return;
     }
-    writeCell<int>(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN, userUpdatedValueInCell);
+    writeCell<int>(row, qthardmon::FIXED_POINT_DISPLAY_COLUMN,
+                   userUpdatedValueInCell);
   }
 
   //   if (insideReadOrWrite_==0){
-//     getTableWidget()->item(row, column)->setBackground( modifiedBackgroundBrush_ );
-//   }
-//   else{
-//     clearRowBackgroundColour(row);
-//   }
+  //     getTableWidget()->item(row, column)->setBackground(
+  //     modifiedBackgroundBrush_ );
+  //   }
+  //   else{
+  //     clearRowBackgroundColour(row);
+  //   }
 }
-
 
 int NumericDataTableMixin::getNumberOfColumsInTableWidget() {
   return (getTableWidget()->columnCount());
 }
-
 
 bool NumericDataTableMixin::isValidCell(int row, int columnIndex) {
   return (getTableWidget()->item(row, columnIndex) != NULL);
 }
 
 void NumericDataTableMixin::clearCellBackground(int row, int columnIndex) {
-  getTableWidget()->item(row, columnIndex)
+  getTableWidget()
+      ->item(row, columnIndex)
       ->setBackground(defaultBackgroundBrush_);
 }
 
 double NumericDataTableMixin::convertToDouble(int decimalValue) {
-    if (converter_)
-        return converter_->toDouble(decimalValue);
-    else 
-        return (double) decimalValue;
+  if (converter_)
+    return converter_->toDouble(decimalValue);
+  else
+    return (double)decimalValue;
 }
 
 int NumericDataTableMixin::convertToFixedPoint(double doubleValue) {
-    if (converter_)
-        return converter_->toFixedPoint(doubleValue);
-    else 
-        return (int) doubleValue;
+  if (converter_)
+    return converter_->toFixedPoint(doubleValue);
+  else
+    return (int)doubleValue;
 }
 
-void NumericDataTableMixin::setFixedPointConverter(mtca4u::FixedPointConverter * converter) {
-    converter_ = converter;
+void NumericDataTableMixin::setFixedPointConverter(
+    mtca4u::FixedPointConverter *converter) {
+  converter_ = converter;
 }
 
 void NumericDataTableMixin::clearAllRowsInTable() {
@@ -154,17 +158,18 @@ void NumericDataTableMixin::clearRowBackgroundColour(int row) {
 }
 
 void NumericDataTableMixin::addCopyActionForTableWidget() {
-//   QAction *copy = new QAction("&Copy", getTableWidget());
-//   copy->setShortcuts(QKeySequence::Copy);
-//   copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-//   connect(copy, SIGNAL(triggered()), this, SLOT(copyTableDataToClipBoard()));
-//   getTableWidget()->addAction(copy);
+  //   QAction *copy = new QAction("&Copy", getTableWidget());
+  //   copy->setShortcuts(QKeySequence::Copy);
+  //   copy->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  //   connect(copy, SIGNAL(triggered()), this,
+  //   SLOT(copyTableDataToClipBoard()));
+  //   getTableWidget()->addAction(copy);
 }
 
-void NumericDataTableMixin::clearBackground(){
+void NumericDataTableMixin::clearBackground() {
   int nRows = getTableWidget()->rowCount();
 
-  for( int row=0; row < nRows; ++row ){
+  for (int row = 0; row < nRows; ++row) {
     clearRowBackgroundColour(row);
   }
 }

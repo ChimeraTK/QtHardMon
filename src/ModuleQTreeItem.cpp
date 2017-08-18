@@ -2,15 +2,19 @@
 #include "Exceptions.h"
 #include "RegisterPropertiesWidget.h"
 
-ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidget * parent,PropertiesWidgetProvider & propertiesWidgetProvider)
-: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider)
-{
-}
+ModuleQTreeItem::ModuleQTreeItem(
+    const QString &text, QTreeWidget *parent,
+    PropertiesWidgetProvider &propertiesWidgetProvider)
+    : DeviceElementQTreeItem(
+          text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent,
+          propertiesWidgetProvider) {}
 
-ModuleQTreeItem::ModuleQTreeItem(const QString & text, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
-: DeviceElementQTreeItem(text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent, propertiesWidgetProvider)
-{
-}
+ModuleQTreeItem::ModuleQTreeItem(
+    const QString &text, QTreeWidgetItem *parent,
+    PropertiesWidgetProvider &propertiesWidgetProvider)
+    : DeviceElementQTreeItem(
+          text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent,
+          propertiesWidgetProvider) {}
 
 void ModuleQTreeItem::readData() {
   throw InvalidOperationException(
@@ -19,7 +23,7 @@ void ModuleQTreeItem::readData() {
 
 void ModuleQTreeItem::writeData() {
   throw InvalidOperationException(
-      "You cannot write to a module. Select a register.");    
+      "You cannot write to a module. Select a register.");
 }
 
 void ModuleQTreeItem::updateRegisterProperties() {

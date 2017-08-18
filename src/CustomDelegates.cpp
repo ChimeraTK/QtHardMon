@@ -13,8 +13,7 @@
 
 const unsigned int CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION;
 
-
-CustomDelegates::CustomDelegates(QObject* parent_)
+CustomDelegates::CustomDelegates(QObject *parent_)
     : QStyledItemDelegate(parent_),
       _doubleSpinBoxPrecision(DOUBLE_SPINBOX_DEFAULT_PRECISION) {}
 
@@ -24,8 +23,8 @@ CustomDelegates::CustomDelegates(QObject* parent_)
  * (precision) can be specified by setting
  * _doubleSpinBoxPrecision
  */
-QString CustomDelegates::displayText(const QVariant& value,
-                                     const QLocale& locale) const {
+QString CustomDelegates::displayText(const QVariant &value,
+                                     const QLocale &locale) const {
   if (value.type() == QVariant::Double) { // frame and return a formatted
                                           // QString if handling a cell with
                                           // double value
@@ -34,7 +33,8 @@ QString CustomDelegates::displayText(const QVariant& value,
     // The hex type is the only defined type at this point so this check should
     // be OK
 
-    HexData hexValue = value.value<HexData>(); // get the datatype stored in this cell
+    HexData hexValue =
+        value.value<HexData>(); // get the datatype stored in this cell
     // QString::number has a bug and gives negative values as 64 bit hex.
     // So we have to do it manually.
     int intValue = hexValue.value; // covert the value to 32 bit int
@@ -52,26 +52,26 @@ QString CustomDelegates::displayText(const QVariant& value,
  * Use a customized QDoubleSpinbox to modify cells with double value. The
  * spinbox supports a precision specified by _doubleSpinBoxPrecision.
  */
-QWidget* CustomDelegates::createEditor(QWidget* parent_,
-                                       const QStyleOptionViewItem& option,
-                                       const QModelIndex& index) const {
+QWidget *CustomDelegates::createEditor(QWidget *parent_,
+                                       const QStyleOptionViewItem &option,
+                                       const QModelIndex &index) const {
 
   if (index.data(Qt::EditRole).type() ==
       QVariant::Double) { // create spinbox with custom precision
                           // for cells in the double column
-    QDoubleSpinBox* doubleSpinBox = new QDoubleSpinBox(parent_);
+    QDoubleSpinBox *doubleSpinBox = new QDoubleSpinBox(parent_);
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
     doubleSpinBox->setRange(INT_MIN, INT_MAX);
     return doubleSpinBox;
   } else if (index.data(Qt::EditRole).type() == QVariant::Int) {
     // Want to customize the decimal spin boxes to limit the max and minimum
     // value they can display
-    QSpinBox* decimalSpinbox = new QSpinBox(parent_);
+    QSpinBox *decimalSpinbox = new QSpinBox(parent_);
     decimalSpinbox->setRange(INT_MIN, INT_MAX);
     return decimalSpinbox;
   } else if (index.data(Qt::EditRole).type() == QVariant::UserType) {
     // TODO: make the check above specific to our custom HexDataType
-    HexSpinBox* hexSpinBox = new HexSpinBox(parent_);
+    HexSpinBox *hexSpinBox = new HexSpinBox(parent_);
     hexSpinBox->setRange(INT_MIN, INT_MAX);
     return hexSpinBox;
   } else {
@@ -79,21 +79,21 @@ QWidget* CustomDelegates::createEditor(QWidget* parent_,
   }
 }
 
-void CustomDelegates::setEditorData(QWidget* editor,
-                                    const QModelIndex& index) const {
+void CustomDelegates::setEditorData(QWidget *editor,
+                                    const QModelIndex &index) const {
   if (index.data(Qt::EditRole).type() == QVariant::UserType) {
     HexData hexData = index.data(Qt::EditRole).value<HexData>();
-    HexSpinBox* spinBox = static_cast<HexSpinBox*>(editor);
+    HexSpinBox *spinBox = static_cast<HexSpinBox *>(editor);
     spinBox->setValue(hexData.value);
   } else {
     QStyledItemDelegate::setEditorData(editor, index);
   }
 }
 
-void CustomDelegates::setModelData(QWidget* editor, QAbstractItemModel* model,
-                                   const QModelIndex& index) const {
+void CustomDelegates::setModelData(QWidget *editor, QAbstractItemModel *model,
+                                   const QModelIndex &index) const {
   if (index.data(Qt::EditRole).type() == QVariant::UserType) {
-    HexSpinBox* spinBox = static_cast<HexSpinBox*>(editor);
+    HexSpinBox *spinBox = static_cast<HexSpinBox *>(editor);
     spinBox->interpretText();
     double value = spinBox->value();
     HexData hexData;
@@ -110,4 +110,3 @@ void CustomDelegates::setDoubleSpinBoxPrecision(
     unsigned int doubleSpinBoxPrecision) {
   _doubleSpinBoxPrecision = static_cast<int>(doubleSpinBoxPrecision);
 }
-

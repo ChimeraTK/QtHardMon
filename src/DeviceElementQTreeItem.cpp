@@ -1,18 +1,18 @@
 #include "DeviceElementQTreeItem.h"
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(const QString & text, 
-const int type, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
-: QTreeWidgetItem(parent, QStringList(text), type), propertiesWidgetProvider_(propertiesWidgetProvider)
-{   
-}
+DeviceElementQTreeItem::DeviceElementQTreeItem(
+    const QString &text, const int type, QTreeWidget *parent,
+    PropertiesWidgetProvider &propertiesWidgetProvider)
+    : QTreeWidgetItem(parent, QStringList(text), type),
+      propertiesWidgetProvider_(propertiesWidgetProvider) {}
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(const QString & text, 
-const int type, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
-: QTreeWidgetItem(parent, QStringList(text), type), propertiesWidgetProvider_(propertiesWidgetProvider)
-{
-}
+DeviceElementQTreeItem::DeviceElementQTreeItem(
+    const QString &text, const int type, QTreeWidgetItem *parent,
+    PropertiesWidgetProvider &propertiesWidgetProvider)
+    : QTreeWidgetItem(parent, QStringList(text), type),
+      propertiesWidgetProvider_(propertiesWidgetProvider) {}
 
-bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
+bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   QRegExp checkForNumAtEnd("[0-9]+$");
 
   QString lhsName = this->text(0);
@@ -35,6 +35,6 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
   }
 }
 
-PropertiesWidget * DeviceElementQTreeItem::getPropertiesWidget() {
+PropertiesWidget *DeviceElementQTreeItem::getPropertiesWidget() {
   return propertiesWidgetProvider_.get(this->type());
 }

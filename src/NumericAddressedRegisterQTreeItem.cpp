@@ -1,13 +1,20 @@
 #include "NumericAddressedRegisterQTreeItem.h"
 #include "RegisterTreeUtilities.h"
 
-NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
-: DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
-  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
-  RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidgetProvider), propertiesWidgetProvider),
-  oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(registerInfo->getRegisterName()))
-{
-  mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
+NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(
+    mtca4u::Device &device,
+    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget *parent,
+    PropertiesWidgetProvider &propertiesWidgetProvider)
+    : DeviceElementQTreeItem(
+          QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
+          static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType),
+          RegisterTreeUtilities::assignToModuleItem(registerInfo, parent,
+                                                    propertiesWidgetProvider),
+          propertiesWidgetProvider),
+      oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(
+          registerInfo->getRegisterName())) {
+  mtca4u::RegisterInfoMap::RegisterInfo *numericAddressedRegisterInfo =
+      dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
 
   name_ = registerInfo->getRegisterName().getComponents();
 
@@ -19,29 +26,38 @@ NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Dev
     fracBits_ = numericAddressedRegisterInfo->nFractionalBits;
     signFlag_ = numericAddressedRegisterInfo->signedFlag;
 
-    fixedPointConverter_ = new mtca4u::FixedPointConverter(numericAddressedRegisterInfo->getRegisterName().getComponents().back(), numericAddressedRegisterInfo->width, numericAddressedRegisterInfo->nFractionalBits, numericAddressedRegisterInfo->signedFlag);
+    fixedPointConverter_ = new mtca4u::FixedPointConverter(
+        numericAddressedRegisterInfo->getRegisterName().getComponents().back(),
+        numericAddressedRegisterInfo->width,
+        numericAddressedRegisterInfo->nFractionalBits,
+        numericAddressedRegisterInfo->signedFlag);
 
   } else {
-    // FIXME: the cast was invalid, we have assigned wrong DeviceElementQTreeItem.
+    // FIXME: the cast was invalid, we have assigned wrong
+    // DeviceElementQTreeItem.
   }
 }
 
 void NumericAddressedRegisterQTreeItem::readData() {
   oneDRegisterAccessor_.read();
-  QTableWidget* table = dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
+  QTableWidget *table =
+      dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
+          ->ui->valuesTableWidget;
   table->clearContents();
   table->setRowCount(0);
   table->setRowCount(oneDRegisterAccessor_.getNElements());
-  for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
-    QTableWidgetItem* dataItem = new QTableWidgetItem();
-    QTableWidgetItem* rowItem = new QTableWidgetItem();
+  for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements();
+       ++row) {
+    QTableWidgetItem *dataItem = new QTableWidgetItem();
+    QTableWidgetItem *rowItem = new QTableWidgetItem();
 
     std::stringstream rowAsText;
     rowAsText << row;
     rowItem->setText(rowAsText.str().c_str());
     table->setVerticalHeaderItem(row, rowItem);
 
-    // if (row == maxRow) { // The register is too large to display. Show that it
+    // if (row == maxRow) { // The register is too large to display. Show that
+    // it
     //                      // is truncated and stop reading
     //   dataItem->setText("truncated");
     //   dataItem->setFlags(dataItem->flags() & ~Qt::ItemIsSelectable &
@@ -58,11 +74,14 @@ void NumericAddressedRegisterQTreeItem::readData() {
 }
 
 void NumericAddressedRegisterQTreeItem::writeData() {
-     QTableWidget* table = dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->ui->valuesTableWidget;
-     for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements(); ++row) {
-      oneDRegisterAccessor_[row] = table->item(row, 2)->data(0).toDouble();
-     }
-     oneDRegisterAccessor_.write();
+  QTableWidget *table =
+      dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
+          ->ui->valuesTableWidget;
+  for (unsigned int row = 0; row < oneDRegisterAccessor_.getNElements();
+       ++row) {
+    oneDRegisterAccessor_[row] = table->item(row, 2)->data(0).toDouble();
+  }
+  oneDRegisterAccessor_.write();
 }
 
 void NumericAddressedRegisterQTreeItem::updateRegisterProperties() {
@@ -71,5 +90,6 @@ void NumericAddressedRegisterQTreeItem::updateRegisterProperties() {
   getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements(), size_);
   getPropertiesWidget()->setAddress(bar_, address_);
   getPropertiesWidget()->setFixedPointInfo(width_, fracBits_, signFlag_);
-  dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())->setFixedPointConverter(fixedPointConverter_);
+  dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
+      ->setFixedPointConverter(fixedPointConverter_);
 }

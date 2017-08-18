@@ -12,9 +12,9 @@
 #include <string>
 
 #define DEFINE_QTHARDMON_EXCEPTION(NAME)                                       \
-  class NAME : public QtHardMonException {                                              \
+  class NAME : public QtHardMonException {                                     \
   public:                                                                      \
-    NAME(std::string const& message) : QtHardMonException(message) {}                   \
+    NAME(std::string const &message) : QtHardMonException(message) {}          \
   };
 
 /**
@@ -29,9 +29,9 @@ public:
   /**
    * Default constructor
    */
-  QtHardMonException(std::string const& message) : _message(message) {}
+  QtHardMonException(std::string const &message) : _message(message) {}
   /// overload of the default
-  virtual const char* what() const throw() { return _message.c_str(); }
+  virtual const char *what() const throw() { return _message.c_str(); }
 
   virtual ~QtHardMonException() throw() {}
 };

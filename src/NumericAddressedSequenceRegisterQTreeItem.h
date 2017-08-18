@@ -5,19 +5,22 @@
 #include "RegisterPropertiesWidget.h"
 #include <mtca4u/Device.h>
 
-class NumericAddressedSequenceRegisterQTreeItem : public DeviceElementQTreeItem {
+class NumericAddressedSequenceRegisterQTreeItem
+    : public DeviceElementQTreeItem {
 
 public:
-
-  NumericAddressedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider);
+  NumericAddressedSequenceRegisterQTreeItem(
+      boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
+      mtca4u::TwoDRegisterAccessor<double> &twoDRegisterAccessor,
+      unsigned int channelNo, QTreeWidgetItem *parent,
+      PropertiesWidgetProvider &propertiesWidgetProvider);
   virtual void readData();
   virtual void writeData();
   virtual void updateRegisterProperties();
 
 private: // methods
-
 private: // member fields
-  mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor_;
+  mtca4u::TwoDRegisterAccessor<double> &twoDRegisterAccessor_;
   unsigned int channelNo_;
   int bar_;
   int address_;
@@ -26,7 +29,7 @@ private: // member fields
   int fracBits_;
   int signFlag_;
   std::vector<std::string> name_;
-  mtca4u::FixedPointConverter * fixedPointConverter_;
+  mtca4u::FixedPointConverter *fixedPointConverter_;
 };
 
 #endif // NUMERICADDRESSEDSEQUENCEREGISTERQTREEITEM_H
