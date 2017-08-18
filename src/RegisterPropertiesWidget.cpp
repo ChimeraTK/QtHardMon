@@ -47,7 +47,7 @@ void RegisterPropertiesWidget::setSize(int nOfElements, int size) {
 void RegisterPropertiesWidget::setNames(std::vector<std::string> components) {
     std::string moduleName;
     if (components.size() >= 2) {
-        for (int i = 0; i < components.size() - 1; ++i) {
+        for (unsigned int i = 0; i < components.size() - 1; ++i) {
             moduleName += "/" + components[i];
         }
         moduleName = moduleName.substr(1);

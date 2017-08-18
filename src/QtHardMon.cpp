@@ -358,7 +358,6 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 void QtHardMon::read(bool autoRead)
 {
   ++insideReadOrWrite_;
-  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
   DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *>(
       ui.registerTreeWidget->currentItem());
 
@@ -758,16 +757,16 @@ void QtHardMon::writeConfig(QString const & fileName)
     
     // Only write to the config file if the 'last selected' strings are not empty.
     // Empty strings would cause a parse error, and if the entry is not found it falls back to empty string anyway.
-  //   if( !deviceListItem->getLastSelectedRegisterName().empty() ){
-  //     std::string deviceRegisterString 
-	// = deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
-  //     configWriter.setValue(deviceRegisterString, deviceListItem->getLastSelectedRegisterName());
-  //   }
+    if( !deviceListItem->lastSelectedRegister_.empty() ){
+      std::string deviceRegisterString 
+	= deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
+      configWriter.setValue(deviceRegisterString, deviceListItem->lastSelectedRegister_.back());
+    }
 
-  //   if( !deviceListItem->getLastSelectedModuleName().empty() ){
-  //     std::string deviceModuleString = deviceListItem->getDeviceMapElement().deviceName + MODULE_EXTENSION_STRING;
-  //     configWriter.setValue(deviceModuleString, deviceListItem->getLastSelectedModuleName());
-  //   }
+    if( !deviceListItem->lastSelectedRegister_.empty() ){
+      std::string deviceModuleString = deviceListItem->getDeviceMapElement().deviceName + MODULE_EXTENSION_STRING;
+      configWriter.setValue(deviceModuleString, deviceListItem->lastSelectedRegister_.front());
+    }
   }
 
 
@@ -939,15 +938,15 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
 
 
     if (!numericAddressedRegisterInfo) {
-      RegisterQTreeItem * newItem = new RegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
+      RegisterQTreeItem * newItem __attribute__((unused)) = new RegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
     } else if (isMultiplexedDataRegion(registerIter->getRegisterName().getComponents().back())) {
-      NumericAddressedMultiplexedAreaQTreeItem * newItem = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, ui.registerTreeWidget, propertiesWidgetProvider_);
+      NumericAddressedMultiplexedAreaQTreeItem * newItem __attribute__((unused)) = new NumericAddressedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), registerCatalogue, ++registerIter, ui.registerTreeWidget, propertiesWidgetProvider_);
     } else {
 
       if (registerCatalogue.getRegister(registerIter->getRegisterName())->getNumberOfChannels() == 1) {
-        NumericAddressedRegisterQTreeItem * newItem = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
+        NumericAddressedRegisterQTreeItem * newItem __attribute__((unused)) = new NumericAddressedRegisterQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
       } else {
-        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
+        NumericAddressedCookedMultiplexedAreaQTreeItem * newItem __attribute__((unused)) = new NumericAddressedCookedMultiplexedAreaQTreeItem(currentDevice_, registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget, propertiesWidgetProvider_);
       }
 
     }

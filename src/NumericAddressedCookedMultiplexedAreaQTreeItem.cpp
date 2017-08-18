@@ -13,8 +13,8 @@ NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexe
   {
     unsigned int nOfChannels = twoDRegisterAccessor_.getNChannels();
 
-    for (int i = 0; i < nOfChannels; ++i) {
-        DeviceElementQTreeItem * sequenceItem = new NumericAddressedCookedSequenceRegisterQTreeItem(registerInfo, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
+    for (unsigned int i = 0; i < nOfChannels; ++i) {
+        DeviceElementQTreeItem * sequenceItem __attribute__((unused)) = new NumericAddressedCookedSequenceRegisterQTreeItem(registerInfo, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
     }
 
     name_ = registerInfo->getRegisterName().getComponents();

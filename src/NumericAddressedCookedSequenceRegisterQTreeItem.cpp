@@ -1,6 +1,6 @@
 #include "NumericAddressedCookedSequenceRegisterQTreeItem.h"
 
-NumericAddressedCookedSequenceRegisterQTreeItem::NumericAddressedCookedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
+NumericAddressedCookedSequenceRegisterQTreeItem::NumericAddressedCookedSequenceRegisterQTreeItem(boost::shared_ptr<mtca4u::RegisterInfo> /* registerInfo */, mtca4u::TwoDRegisterAccessor<double> & twoDRegisterAccessor, unsigned int channelNo, QTreeWidgetItem * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString((std::string("SEQUENCE_") + std::to_string(channelNo)).c_str()),
 static_cast<int>(DeviceElementDataType::SequenceRegisterDataType), parent, propertiesWidgetProvider),
   twoDRegisterAccessor_(twoDRegisterAccessor),

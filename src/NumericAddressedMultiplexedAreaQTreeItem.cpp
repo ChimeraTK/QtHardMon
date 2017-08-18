@@ -11,9 +11,9 @@ NumericAddressedMultiplexedAreaQTreeItem::NumericAddressedMultiplexedAreaQTreeIt
 {
     unsigned int nOfChannels = twoDRegisterAccessor_.getNChannels();
 
-    for (int i = 0; i < nOfChannels && firstSequenceItem != catalogue.end(); ++i, ++firstSequenceItem) {
+    for (unsigned int i = 0; i < nOfChannels && firstSequenceItem != catalogue.end(); ++i, ++firstSequenceItem) {
         boost::shared_ptr<mtca4u::RegisterInfo> currentSequenceItem = catalogue.getRegister(firstSequenceItem->getRegisterName());
-        DeviceElementQTreeItem * sequenceItem = new NumericAddressedSequenceRegisterQTreeItem(currentSequenceItem, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
+        DeviceElementQTreeItem * sequenceItem __attribute__((unused)) = new NumericAddressedSequenceRegisterQTreeItem(currentSequenceItem, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
     }
 
     name_ = registerInfo->getRegisterName().getComponents();

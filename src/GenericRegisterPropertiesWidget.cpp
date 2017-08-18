@@ -1,12 +1,6 @@
 #include "GenericRegisterPropertiesWidget.h"
 #include "Constants.h"
 
-
-// The default maximum for the number of words in a register.
-// This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
-// memory is requested.
-static const size_t DEFAULT_MAX_WORDS = 0x10000;
-
 GenericRegisterPropertiesWidget::GenericRegisterPropertiesWidget(QWidget *parent) :
     PropertiesWidget(parent),
     ui(new Ui::GenericRegisterPropertiesWidget)
@@ -35,14 +29,14 @@ void GenericRegisterPropertiesWidget::clearFields() {
     ui->registerNElementsDisplay->setText("");
 }
 
-void GenericRegisterPropertiesWidget::setSize(int nOfElements, int size) {
+void GenericRegisterPropertiesWidget::setSize(int nOfElements, int /* size */) {
     ui->registerNElementsDisplay->setText(QString::number(nOfElements));
 }
 
 void GenericRegisterPropertiesWidget::setNames(std::vector<std::string> components) {
     std::string moduleName;
     if (components.size() >= 2) {
-        for (int i = 0; i < components.size() - 1; ++i) {
+        for (unsigned int i = 0; i < components.size() - 1; ++i) {
             moduleName += "/" + components[i];
         }
         moduleName = moduleName.substr(1);
@@ -53,8 +47,8 @@ void GenericRegisterPropertiesWidget::setNames(std::vector<std::string> componen
     ui->moduleDisplay->setText(moduleName.c_str());
 }
 
-void GenericRegisterPropertiesWidget::setFixedPointInfo(int width, int fracBits, int signBit) {
+void GenericRegisterPropertiesWidget::setFixedPointInfo(int /* width */, int /* fracBits */, int /* signBit */) {
 }
 
-void GenericRegisterPropertiesWidget::setAddress(int bar, int address) {
+void GenericRegisterPropertiesWidget::setAddress(int /* bar */, int /* address */) {
 }
