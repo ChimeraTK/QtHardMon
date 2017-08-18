@@ -17,7 +17,10 @@ public:
 
 private: // member fields
   mtca4u::TwoDRegisterAccessor<double> twoDRegisterAccessor_;
-  RegisterPropertiesWidget::RegisterProperties * properties_;
+  int bar_;
+  int address_;
+  int size_;
+  std::vector<std::string> name_;
 };
 
 #endif // NUMERICADDRESSEDCOOKEDMULTIPLEXEDAREAQTREEITEM_H

@@ -28,46 +28,16 @@ RegisterPropertiesWidget::~RegisterPropertiesWidget()
 }
 
 void RegisterPropertiesWidget::clearFields() {
-    RegisterProperties properties;
-    setRegisterProperties(properties);
+    ui->registerNameDisplay     ->setText("");
+    ui->moduleDisplay           ->setText("");
+    ui->registerBarDisplay      ->setText("");
+    ui->registerNElementsDisplay->setText("");
+    ui->registerAddressDisplay  ->setText("");
+    ui->registerSizeDisplay     ->setText("");
+    ui->registerWidthDisplay    ->setText("");
+    ui->registerFracBitsDisplay ->setText("");
+    ui->registeSignBitDisplay   ->setText("");
 }
-
-void RegisterPropertiesWidget::setRegisterProperties(RegisterProperties properties) {
-    ui->registerNameDisplay     ->setText(properties.registerName);
-    ui->moduleDisplay           ->setText(properties.moduleName);
-    ui->registerBarDisplay      ->setText(properties.bar);
-    ui->registerNElementsDisplay->setText(properties.nOfElements);
-    ui->registerAddressDisplay  ->setText(properties.address);
-    ui->registerSizeDisplay     ->setText(properties.size);
-    ui->registerWidthDisplay    ->setText(properties.width);
-    ui->registerFracBitsDisplay ->setText(properties.fracBits);
-    ui->registeSignBitDisplay   ->setText(properties.signBit);
-}
-
-
-RegisterPropertiesWidget::RegisterProperties::RegisterProperties(
-QString RegisterName,
-QString ModuleName,
-QString Bar,
-QString Address,
-QString NOfElements,
-QString Size,
-QString Width,
-QString FracBits,
-QString SignBit
-) 
-        : registerName(RegisterName),
-            moduleName(ModuleName),
-            bar(Bar),
-            address(Address),
-            nOfElements(NOfElements),
-            size(Size),
-            width(Width),
-            fracBits(FracBits),
-            signBit(SignBit) {}
-
-
-
 
 void RegisterPropertiesWidget::setSize(int nOfElements, int size) {
     ui->registerNElementsDisplay->setText(QString::number(nOfElements));
@@ -75,16 +45,17 @@ void RegisterPropertiesWidget::setSize(int nOfElements, int size) {
 }
 
 void RegisterPropertiesWidget::setNames(std::vector<std::string> components) {
-    if (components.size() < 2) {
-        // FIXME: throw - we do not have enough components but we should have.
-        // Not throwing at the moment as RegisterPropertiesWidget is a fallback
-        // PropertiesWidget.
-        ui->moduleDisplay->setText(components.front().c_str());
-        ui->registerNameDisplay->setText("");
-    } else {
-        ui->registerNameDisplay->setText(components.back().c_str());
-        ui->moduleDisplay->setText(components.front().c_str());
-    }
+    std::string moduleName;
+    if (components.size() >= 2) {
+        for (int i = 0; i < components.size() - 1; ++i) {
+            moduleName += "/" + components[i];
+        }
+        moduleName = moduleName.substr(1);
+    } else 
+        moduleName = "";
+
+    ui->registerNameDisplay->setText(components.back().c_str());
+    ui->moduleDisplay->setText(moduleName.c_str());
 }
 
 void RegisterPropertiesWidget::setFixedPointInfo(int width, int fracBits, int signBit) {

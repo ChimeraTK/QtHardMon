@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesSequenceRegisterProperties )
 {
     QtHardmon_populatesRegisterProperties_fixture fixture("test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", {"APP0", "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "SEQUENCE_DAQ0_ADCA_10"});
 
-    TestUtilities::checkRegisterProperties(fixture.qtHardMon->ui.registerPropertiesWidget, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "1", "4", "32", "0", "1");
+    TestUtilities::checkRegisterProperties(fixture.qtHardMon->ui.registerPropertiesWidget, "SEQUENCE_DAQ0_ADCA_10", "APP0", "13", "1028", "4096", "4", "32", "0", "1");
 
 }
 

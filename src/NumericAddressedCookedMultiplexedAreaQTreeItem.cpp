@@ -7,38 +7,28 @@
 
 NumericAddressedCookedMultiplexedAreaQTreeItem::NumericAddressedCookedMultiplexedAreaQTreeItem(mtca4u::Device & device, boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * parent, PropertiesWidgetProvider & propertiesWidgetProvider)
 : DeviceElementQTreeItem(QString(RegisterTreeUtilities::getRegisterName(registerInfo).c_str()),
-  static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType), 
+  static_cast<int>(DeviceElementDataType::MultiplexedAreaDataType), 
   RegisterTreeUtilities::assignToModuleItem(registerInfo, parent, propertiesWidgetProvider), propertiesWidgetProvider),
   twoDRegisterAccessor_(device.getTwoDRegisterAccessor<double>(registerInfo->getRegisterName()))
   {
     unsigned int nOfChannels = twoDRegisterAccessor_.getNChannels();
-    // if (std::distance(firstSequenceItem, catalogue.end()) < nOfChannels) {
-    //     throw InternalErrorException(
-    //         "Cannot determine proper multiplexed area and sequence descriptors."
-    //     );
-    // }
 
     for (int i = 0; i < nOfChannels; ++i) {
         DeviceElementQTreeItem * sequenceItem = new NumericAddressedCookedSequenceRegisterQTreeItem(registerInfo, twoDRegisterAccessor_, i, this, propertiesWidgetProvider);
     }
 
+    name_ = registerInfo->getRegisterName().getComponents();
+
     mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
 
     if (numericAddressedRegisterInfo) {
-        QString registerName = QString(numericAddressedRegisterInfo->getRegisterName().getComponents().back().c_str());
-        QString moduleName = QString(numericAddressedRegisterInfo->getRegisterName().getComponents().front().c_str());
-        QString bar = QString::number(numericAddressedRegisterInfo->bar);
-        QString nOfElements = QString("");
-        QString address = QString::number(numericAddressedRegisterInfo->address);
-        QString size = QString::number(numericAddressedRegisterInfo->nBytes);
-        QString width = QString("");
-        QString fracBits = QString("");
-        QString signFlag = QString("");
-
-        properties_ = new RegisterPropertiesWidget::RegisterProperties(registerName, 
-        moduleName, bar, address, nOfElements, size, width, fracBits, signFlag);
-
+        bar_ = numericAddressedRegisterInfo->bar;
+        address_ = numericAddressedRegisterInfo->address;
+        size_ = numericAddressedRegisterInfo->nBytes;
     } else {
+        bar_ = -1;
+        address_ = -1;
+        size_ = -1;
         // FIXME: the cast was invalid, we have assigned wrong DeviceElementQTreeItem.
     }
 }
@@ -54,6 +44,8 @@ void NumericAddressedCookedMultiplexedAreaQTreeItem::writeData() {
 }
 
 void NumericAddressedCookedMultiplexedAreaQTreeItem::updateRegisterProperties() {
-    dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
-    dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setFixedPointConverter(nullptr);
+    getPropertiesWidget()->clearFields();
+    getPropertiesWidget()->setNames(name_);
+    getPropertiesWidget()->setSize(twoDRegisterAccessor_.getNChannels(), size_);
+    getPropertiesWidget()->setAddress(bar_, address_);
 }

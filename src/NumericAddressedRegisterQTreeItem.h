@@ -20,7 +20,13 @@ private: // methods
 
 private: // member fields
   mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor_;
-  RegisterPropertiesWidget::RegisterProperties * properties_;
+  int bar_;
+  int address_;
+  int size_;
+  int width_;
+  int fracBits_;
+  int signFlag_;
+  std::vector<std::string> name_;
   mtca4u::FixedPointConverter * fixedPointConverter_;
 };
 

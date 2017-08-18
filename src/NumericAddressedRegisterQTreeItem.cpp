@@ -9,19 +9,15 @@ NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(mtca4u::Dev
 {
   mtca4u::RegisterInfoMap::RegisterInfo * numericAddressedRegisterInfo = dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
 
-  if (numericAddressedRegisterInfo) {
-    QString registerName = QString(numericAddressedRegisterInfo->getRegisterName().getComponents().back().c_str());
-    QString moduleName = QString(numericAddressedRegisterInfo->getRegisterName().getComponents().front().c_str());
-    QString bar = QString::number(numericAddressedRegisterInfo->bar);
-    QString nOfElements = QString::number(numericAddressedRegisterInfo->getNumberOfElements());
-    QString address = QString::number(numericAddressedRegisterInfo->address);
-    QString size = QString::number(numericAddressedRegisterInfo->nBytes);
-    QString width = QString::number(numericAddressedRegisterInfo->width);
-    QString fracBits = QString::number(numericAddressedRegisterInfo->nFractionalBits);
-    QString signFlag = QString::number(numericAddressedRegisterInfo->signedFlag);
+  name_ = registerInfo->getRegisterName().getComponents();
 
-    properties_ = new RegisterPropertiesWidget::RegisterProperties(registerName, 
-    moduleName, bar, address, nOfElements, size, width, fracBits, signFlag);
+  if (numericAddressedRegisterInfo) {
+    bar_ = numericAddressedRegisterInfo->bar;
+    address_ = numericAddressedRegisterInfo->address;
+    size_ = numericAddressedRegisterInfo->nBytes;
+    width_ = numericAddressedRegisterInfo->width;
+    fracBits_ = numericAddressedRegisterInfo->nFractionalBits;
+    signFlag_ = numericAddressedRegisterInfo->signedFlag;
 
     fixedPointConverter_ = new mtca4u::FixedPointConverter(numericAddressedRegisterInfo->getRegisterName().getComponents().back(), numericAddressedRegisterInfo->width, numericAddressedRegisterInfo->nFractionalBits, numericAddressedRegisterInfo->signedFlag);
 
@@ -70,6 +66,10 @@ void NumericAddressedRegisterQTreeItem::writeData() {
 }
 
 void NumericAddressedRegisterQTreeItem::updateRegisterProperties() {
-  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setRegisterProperties(*properties_);
-  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setFixedPointConverter(fixedPointConverter_);
+  getPropertiesWidget()->clearFields();
+  getPropertiesWidget()->setNames(name_);
+  getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements(), size_);
+  getPropertiesWidget()->setAddress(bar_, address_);
+  getPropertiesWidget()->setFixedPointInfo(width_, fracBits_, signFlag_);
+  dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())->setFixedPointConverter(fixedPointConverter_);
 }

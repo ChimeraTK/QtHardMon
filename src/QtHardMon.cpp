@@ -152,7 +152,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags)
 
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::ModuleDataType, ui.modulePropertiesWidget, 1);
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::NumAddressedRegisterDataType, ui.registerPropertiesWidget, 0);
-  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, ui.registerPropertiesWidget, 0);
+  propertiesWidgetProvider_.registerWidget(DeviceElementDataType::MultiplexedAreaDataType, ui.multiplexedAreaPropertiesWidget, 3);
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::SequenceRegisterDataType, ui.registerPropertiesWidget, 0);
   propertiesWidgetProvider_.registerWidget(DeviceElementDataType::GenericRegisterDataType, ui.genericRegisterPropertiesWidget, 2);
 
@@ -371,7 +371,7 @@ void QtHardMon::read(bool autoRead)
   catch (InvalidOperationException &e) {
   
 
-  if (preferencesProvider.getValue<bool>("autoRead")) {
+  if (!autoRead) {
       showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
       QString("QtHardMon read error "), 
       QString("Info: An exception was thrown:") + e.what());
@@ -379,7 +379,7 @@ void QtHardMon::read(bool autoRead)
   }
   catch (std::exception &e) {
 
-  if (preferencesProvider.getValue<bool>("autoRead")) {
+  if (!autoRead) {
     closeDevice();
     ui.writeButton->setEnabled(false);
     // the error message accesses the _currentDeviceListItem. Is

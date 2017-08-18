@@ -16,7 +16,6 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
   unsigned int elementsPerChannel = twoDRegisterAccessor_.getNElementsPerChannel();
   table->setRowCount(elementsPerChannel);
   
-
   for(unsigned int row = 0; row < elementsPerChannel; ++row) {
     QTableWidgetItem* dataItem = new QTableWidgetItem();
     QTableWidgetItem* rowItem = new QTableWidgetItem();
@@ -25,9 +24,8 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
     rowAsText << row;
     rowItem->setText(rowAsText.str().c_str());
     table->setVerticalHeaderItem(row, rowItem);
-
     dataItem->setData(0, QVariant(twoDRegisterAccessor_[channelNo_][row]));
-    table->setItem(row, 2, dataItem);
+    table->setItem(row, 2, dataItem);;
   }
 }
 
@@ -40,5 +38,6 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::writeData() {
 }
 
 void NumericAddressedCookedSequenceRegisterQTreeItem::updateRegisterProperties() {
-  dynamic_cast<DeviceElementQTreeItem*>(parent())->updateRegisterProperties();
+  getPropertiesWidget()->clearFields();
+  dynamic_cast<RegisterPropertiesWidget*>(getPropertiesWidget())->setFixedPointConverter(nullptr);
 }

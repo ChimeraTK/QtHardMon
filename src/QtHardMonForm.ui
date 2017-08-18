@@ -347,6 +347,44 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="Page4" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout_y" stretch="0,0">
+        <item>
+         <spacer name="horizontalSpacer_2s">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>1</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="MultiplexedAreaPropertiesWidget" name="multiplexedAreaPropertiesWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_y">
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+          </layout>Stacked
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item>
@@ -559,6 +597,12 @@
    <class>GenericRegisterPropertiesWidget</class>
    <extends>QWidget</extends>
    <header>GenericRegisterPropertiesWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MultiplexedAreaPropertiesWidget</class>
+   <extends>QWidget</extends>
+   <header>MultiplexedAreaPropertiesWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -19,7 +19,10 @@ private: // methods
   std::string getTrimmedRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo);
 private: // member fields
   mtca4u::TwoDRegisterAccessor<double> twoDRegisterAccessor_;
-  RegisterPropertiesWidget::RegisterProperties * properties_;
+  int bar_;
+  int address_;
+  int size_;
+  std::vector<std::string> name_;
 };
 
 #endif // NUMERICADDRESSEDMULTIPLEXEDAREAQTREEITEM_H

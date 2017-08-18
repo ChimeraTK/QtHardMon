@@ -327,7 +327,7 @@ struct NumericAddressedMultiplexedAreaQTreeItem_fixture : public DeviceAccessSet
 BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_constructor )
 {
     NumericAddressedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 5.0);
-    BOOST_CHECK_EQUAL(fixture.numericAddressedMultiplexedAreaQTreeItem->type(), static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType));
+    BOOST_CHECK_EQUAL(fixture.numericAddressedMultiplexedAreaQTreeItem->type(), static_cast<int>(DeviceElementDataType::MultiplexedAreaDataType));
     BOOST_CHECK_EQUAL(fixture.numericAddressedMultiplexedAreaQTreeItem->text(0).toStdString(), "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA");
     
     BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItemCount(), 1);
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_fillsRegisterPro
     NumericAddressedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 5.0);
     TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
     fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties();
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "APP0", "13", "1000", "", "212992", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "APP0", "13", "1000", "16", "212992", "", "", "");
     NumericAddressedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedSequenceRegisterQTreeItem *>(fixture.numericAddressedMultiplexedAreaQTreeItem->child(0));
     
     if (!childItem) {
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedMultiplexedAreaQTreeItem_fillsRegisterPro
         childItem->updateRegisterProperties();
     }
 
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "SEQUENCE_DAQ0_ADCA_0", "APP0", "13", "1000", "1", "4", "32", "0", "1");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "SEQUENCE_DAQ0_ADCA_0", "APP0", "13", "1000", "4096", "4", "32", "0", "1");
 }
 
 /*
@@ -423,7 +423,7 @@ struct NumericAddressedCookedMultiplexedAreaQTreeItem_fixture : public DeviceAcc
 BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_constructor )
 {
     NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/DAQ0_ADCA", 5.0);
-    BOOST_CHECK_EQUAL(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->type(), static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType));
+    BOOST_CHECK_EQUAL(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->type(), static_cast<int>(DeviceElementDataType::MultiplexedAreaDataType));
     BOOST_CHECK_EQUAL(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->text(0).toStdString(), "DAQ0_ADCA");
     
     BOOST_CHECK_EQUAL(fixture.treeWidget->topLevelItemCount(), 1);
@@ -443,7 +443,7 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_fillsRegis
     NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT", "APP0/DAQ0_ADCA", 5.0);
     TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
     fixture.numericAddressedCookedMultiplexedAreaQTreeItem->updateRegisterProperties();
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "DAQ0_ADCA", "APP0", "13", "1000", "", "212992", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "DAQ0_ADCA", "APP0", "13", "1000", "16", "212992", "", "", "");
     NumericAddressedCookedSequenceRegisterQTreeItem * childItem = dynamic_cast<NumericAddressedCookedSequenceRegisterQTreeItem *>(fixture.numericAddressedCookedMultiplexedAreaQTreeItem->child(0));
     
     if (!childItem) {
@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedCookedMultiplexedAreaQTreeItem_fillsRegis
         childItem->updateRegisterProperties();
     }
 
-    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "DAQ0_ADCA", "APP0", "13", "1000", "", "212992", "", "", "");
+    TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "", "", "", "", "", "", "");
 }
 
 /*

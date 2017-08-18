@@ -43,8 +43,10 @@ BOOST_AUTO_TEST_CASE ( NumericAddressedRegisterQTreeItem_constructor )
     RegisterPropertiesWidget_fixtureBase fixture;
 
     TestUtilities::checkRegisterProperties(fixture.widget, "", "", "", "", "", "", "", "", "");
-    RegisterPropertiesWidget::RegisterProperties properties("RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
-    fixture.widget->setRegisterProperties(properties);
+    fixture.widget->setNames({"ModuleName", "RegName"});
+    fixture.widget->setSize(4444, 3);
+    fixture.widget->setAddress(10, 4);
+    fixture.widget->setFixedPointInfo(18, 3, 0);
     TestUtilities::checkRegisterProperties(fixture.widget, "RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
 
 }
