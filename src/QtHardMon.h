@@ -114,12 +114,9 @@ class QtHardMon: public QMainWindow
  private:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
   mtca4u::Device currentDevice_; ///< The instance of the device which is being accessed.
-  bool autoRead_; ///< Flag whether to automatically read on register change
-  bool readOnClick_; ///< Flag wheter to read on click in the register list
   QString dmapFileName_; ///< The file name of the last opened dmap file
   QString configFileName_; ///< Name of the config file (last saved or read)
   int insideReadOrWrite_; ///< Counter flag to indicate if the read or write function is being executed
-  bool noPrompts_;
   PropertiesWidgetProvider propertiesWidgetProvider_;
   /**
    *  Write the config to the given file name.

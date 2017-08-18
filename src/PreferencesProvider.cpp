@@ -3,7 +3,7 @@
 QVariant PreferencesProvider::getRawValue(QString key) {
     if (settings_.count(key) == 0) {
         throw InvalidOperationException (
-            "No setting available under requested key."
+            std::string("No setting available under \"") + key.toStdString() + "\" key."
         );
     }
 

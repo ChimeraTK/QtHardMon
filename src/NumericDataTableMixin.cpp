@@ -1,19 +1,21 @@
 #include "NumericDataTableMixin.h"
 #include "Exceptions.h"
 #include "Constants.h"
-
-// The default maximum for the number of words in a register.
-// This limits the number of rows in the valuesTableWidget to avoid a segmentation fault if too much
-// memory is requested.
-static const size_t DEFAULT_MAX_WORDS = 0x10000;
+#include "PreferencesProvider.h"
 
 NumericDataTableMixin::NumericDataTableMixin() : 
 defaultBackgroundBrush_(Qt::transparent),
-modifiedBackgroundBrush_(QColor(255, 100, 100, 255)),
-floatPrecision_(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION),
-maxWords_(DEFAULT_MAX_WORDS)
+modifiedBackgroundBrush_(QColor(255, 100, 100, 255))
 {
-    customDelegate_.setDoubleSpinBoxPrecision(floatPrecision_);
+    PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+    int floatPrecision;
+    try {
+        floatPrecision = preferencesProvider.getValue<int>("floatPrecision");
+    } catch(InvalidOperationException & e) {
+        floatPrecision = static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
+        preferencesProvider.setValue("floatPrecision", floatPrecision);
+    }
+    customDelegate_.setDoubleSpinBoxPrecision(floatPrecision);
 }
 
 void NumericDataTableMixin::setTableWidget(QTableWidget * widget) {
@@ -31,7 +33,8 @@ QTableWidget * NumericDataTableMixin::getTableWidget() {
 }
 
 void NumericDataTableMixin::updateTableEntries(int row, int column) {
-
+    PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+    customDelegate_.setDoubleSpinBoxPrecision(preferencesProvider.getValue<int>("floatPrecision"));
   // We have two editable fields - The decimal field and double field.
   // The values reflect each other and to avoid an infinite
   // loop  situation,  corresponding column cells are updated

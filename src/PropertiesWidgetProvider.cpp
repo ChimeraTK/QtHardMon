@@ -13,9 +13,14 @@ void PropertiesWidgetProvider::registerWidget(DeviceElementDataType type, Proper
 }
 
 PropertiesWidget * PropertiesWidgetProvider::get(const int type) {
+    currentWidget_ = registeredWidgets_[type];
     return registeredWidgets_[type];
 }
 
 int PropertiesWidgetProvider::pageOf(const int type) {
     return registeredPages_[type];
+}
+
+PropertiesWidget * PropertiesWidgetProvider::getCurrentWidget() {
+    return currentWidget_;
 }

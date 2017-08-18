@@ -26,7 +26,7 @@ using namespace mtca4u;
 #include "NumericAddressedMultiplexedAreaQTreeItem.h"
 #include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
 #include "RegisterQTreeItem.h"
-
+#include "PreferencesProvider.h"
 
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
@@ -49,16 +49,19 @@ using namespace mtca4u;
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget * parent_, Qt::WindowFlags flags) 
   : QMainWindow(parent_, flags),ui(),
-    autoRead_(true),
-    readOnClick_(true), dmapFileName_(), configFileName_(), insideReadOrWrite_(0),
+    dmapFileName_(), configFileName_(), insideReadOrWrite_(0),
     _currentDeviceListItem(NULL),
-    _plotWindow(NULL),
-    noPrompts_(noPrompts)
+    _plotWindow(NULL)
 {
 
-
-
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
   ui.setupUi(this);
+
+  preferencesProvider.setValue("noPrompts", noPrompts);
+  preferencesProvider.setValue("readOnClick", true);
+  preferencesProvider.setValue("autoRead", true);
+  preferencesProvider.setValue("maxWords", 0x10000);
+  preferencesProvider.setValue("floatPrecision", static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION));
 
   setWindowTitle("QtHardMon");
   setWindowIcon(  QIcon(":/DESY_logo_nofade.png") );
@@ -339,7 +342,9 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
     selectedItem = dynamic_cast<DeviceElementQTreeItem *>(selectedItem->parent());
   }
 
-  if (!autoRead_ /*|| (registerTreeItem->type() == ModuleItem::DataType)*/){
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
+  if (!preferencesProvider.getValue<bool>("autoRead")) {
     // If automatic reading is deactivated the widget has to be cleared so all widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot be written to the register.
     ui.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
@@ -353,7 +358,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem * registerItem, QTreeWidgetItem
 void QtHardMon::read(bool autoRead)
 {
   ++insideReadOrWrite_;
-
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
   DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *>(
       ui.registerTreeWidget->currentItem());
 
@@ -364,14 +369,17 @@ void QtHardMon::read(bool autoRead)
     }
   }
   catch (InvalidOperationException &e) {
-    if (!autoRead) {
+  
+
+  if (preferencesProvider.getValue<bool>("autoRead")) {
       showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"), 
       QString("QtHardMon read error "), 
       QString("Info: An exception was thrown:") + e.what());
     }
   }
   catch (std::exception &e) {
-    if (!autoRead) {
+
+  if (preferencesProvider.getValue<bool>("autoRead")) {
     closeDevice();
     ui.writeButton->setEnabled(false);
     // the error message accesses the _currentDeviceListItem. Is
@@ -435,6 +443,8 @@ DeviceElementQTreeItem * registerTreeItem = static_cast<DeviceElementQTreeItem *
 
 void QtHardMon::preferences()
 {
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
   // create a preferences dialog and set the correct warning message with contains the default number for maxWords.
   QDialog preferencesDialog;
   Ui::PreferencesDialogForm preferencesDialogForm;
@@ -445,28 +455,30 @@ void QtHardMon::preferences()
 						      QString::number(0x10000));
 
   preferencesDialogForm.fontSizeSpinBox->setValue(font().pointSize());
-  preferencesDialogForm.autoReadCheckBox->setChecked(autoRead_);
-  preferencesDialogForm.readOnClickCheckBox->setChecked(readOnClick_);
+  preferencesDialogForm.autoReadCheckBox->setChecked(preferencesProvider.getValue<bool>("autoRead"));
+  preferencesDialogForm.readOnClickCheckBox->setChecked(preferencesProvider.getValue<bool>("readOnClick"));
 
   // set up the current value of maxWords
   preferencesDialogForm.maxWordsSpinBox->setMaximum( INT_MAX );
-  preferencesDialogForm.maxWordsSpinBox->setValue( ui.registerPropertiesWidget->maxWords_ );
+  preferencesDialogForm.maxWordsSpinBox->setValue( preferencesProvider.getValue<int>("maxWords") );
 
   // set up the floating point display decimal places
   preferencesDialogForm.precisionSpinBox->setMinimum(1); // minimum one decimal place display
   preferencesDialogForm.precisionSpinBox->setMaximum(10);// maximum 10 decimal places
-  preferencesDialogForm.precisionSpinBox->setValue(ui.registerPropertiesWidget->floatPrecision_);
+  preferencesDialogForm.precisionSpinBox->setValue(preferencesProvider.getValue<int>("floatPrecision"));
 
   int dialogResult = preferencesDialog.exec();
 
   // only set the values if ok has been pressed
   if (dialogResult == QDialog::Accepted )
   {
-    ui.registerPropertiesWidget->maxWords_ =  preferencesDialogForm.maxWordsSpinBox->value();
+    preferencesProvider.setValue("maxWords", preferencesDialogForm.maxWordsSpinBox->value());
 
     // Read and set precision for delegate class
-    ui.registerPropertiesWidget->floatPrecision_ = preferencesDialogForm.precisionSpinBox->value();
-    ui.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(ui.registerPropertiesWidget->floatPrecision_);
+    preferencesProvider.setValue("floatPrecision", preferencesDialogForm.precisionSpinBox->value());
+    
+    // FIXME: this should be done on local level of properties widgets.
+    ui.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(preferencesProvider.getValue<int>("floatPrecision"));
 
     // call registerSelected() so the size of the valuesList is adapted and possible missing values are read
     // from the device
@@ -476,8 +488,8 @@ void QtHardMon::preferences()
     newFont.setPointSize(preferencesDialogForm.fontSizeSpinBox->value());
     QApplication::setFont(newFont);
 
-    readOnClick_ = preferencesDialogForm.readOnClickCheckBox->isChecked();
-    autoRead_ = preferencesDialogForm.autoReadCheckBox->isChecked();
+    preferencesProvider.setValue("readOnClick", preferencesDialogForm.readOnClickCheckBox->isChecked());
+    preferencesProvider.setValue("autoRead", preferencesDialogForm.autoReadCheckBox->isChecked());
   }
   
 }
@@ -548,18 +560,19 @@ void QtHardMon::loadConfig(QString const & configFileName)
   }
 
 
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
   // first handle all settings that do not depend on opening a device map
 
-  ui.registerPropertiesWidget->floatPrecision_ = configReader.getValue(PRECISION_INDICATOR_STRING, static_cast<int>(ui.registerPropertiesWidget->floatPrecision_)); // is check necessary? should display default
-  ui.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(ui.registerPropertiesWidget->floatPrecision_);
-
+  preferencesProvider.setValue("floatPrecision", configReader.getValue(PRECISION_INDICATOR_STRING,preferencesProvider.getValue<int>("floatPrecision")));
+  
   // store in a local variable for now
-  int maxWords = configReader.getValue(MAX_WORDS_STRING, static_cast<int>(ui.registerPropertiesWidget->maxWords_));
+  int maxWords = configReader.getValue(MAX_WORDS_STRING, preferencesProvider.getValue<int>("maxWords"));
   // check for validity. Minimum reasonable value is 1.
   if (maxWords >=1)
   {
      //only after checking set the class wide maxWords variable
-    ui.registerPropertiesWidget->maxWords_ = static_cast<unsigned int>(maxWords);
+    preferencesProvider.setValue("maxWords", maxWords);
      // Update the register, so the length of the valuesList is adapted.
      //If another register is loaded from the config this might be repeated.
      //But for an easier logic we take this little overhead.
@@ -592,8 +605,8 @@ void QtHardMon::loadConfig(QString const & configFileName)
    ui.autoselectPreviousRegisterCheckBox->setChecked(
        autoselectPreviousRegisterFlag);
 
-   readOnClick_ = static_cast<bool>( configReader.getValue(READ_ON_CLICK_STRING, readOnClick_ ? 1 : 0 ) );
-   autoRead_ = static_cast<bool>( configReader.getValue(AUTO_READ_STRING, autoRead_ ? 1 : 0 ) );
+   preferencesProvider.setValue("readOnClick", static_cast<bool>( configReader.getValue(READ_ON_CLICK_STRING, preferencesProvider.getValue<bool>("readOnClick") ? 1 : 0 ) ));
+   preferencesProvider.setValue("autoRead", static_cast<bool>( configReader.getValue(AUTO_READ_STRING,  preferencesProvider.getValue<bool>("autoRead") ? 1 : 0 ) ));
 
    int fontSize = configReader.getValue( FONT_SIZE_STRING, font().pointSize() );
    // Check validity of the font size.
@@ -757,16 +770,19 @@ void QtHardMon::writeConfig(QString const & fileName)
   //   }
   }
 
-  configWriter.setValue(MAX_WORDS_STRING, static_cast<int>(ui.registerPropertiesWidget->maxWords_));
-  configWriter.setValue(PRECISION_INDICATOR_STRING, static_cast<int>(ui.registerPropertiesWidget->floatPrecision_));
+
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
+  configWriter.setValue(MAX_WORDS_STRING, preferencesProvider.getValue<int>("maxWords"));
+  configWriter.setValue(PRECISION_INDICATOR_STRING, preferencesProvider.getValue<int>("floatPrecision"));
   configWriter.setValue(READ_AFTER_WRITE_STRING,  ui.readAfterWriteCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(SHOW_PLOT_WINDOW_STRING,  ui.showPlotWindowCheckBox->isChecked() ? 1 : 0 );
   configWriter.setValue(AUTOSELECT_PREVIOUS_REGISTER_STRING,
                         ui.autoselectPreviousRegisterCheckBox->isChecked() ? 1 : 0);
   configWriter.setValue(PLOT_AFTER_READ_STRING, _plotWindow->plotAfterReadIsChecked() ? 1 : 0 );
   configWriter.setValue(FONT_SIZE_STRING, font().pointSize());
-  configWriter.setValue(AUTO_READ_STRING, autoRead_ ? 1 : 0 );
-  configWriter.setValue(READ_ON_CLICK_STRING, readOnClick_ ? 1 : 0 );
+  configWriter.setValue(AUTO_READ_STRING, preferencesProvider.getValue<bool>("autoRead") ? 1 : 0 );
+  configWriter.setValue(READ_ON_CLICK_STRING, preferencesProvider.getValue<bool>("readOnClick") ? 1 : 0 );
 
   // this 
    try{
@@ -832,7 +848,11 @@ QtHardMon::DeviceListItem::~DeviceListItem(){}
 void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
   // Do not execute the read if the corresponding flag is off
   // registerSelected method.
-  if (!readOnClick_) {
+
+
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
+  if (preferencesProvider.getValue<bool>("readOnClick")) {
     //    std::cout << "Ignoring click" <<std::endl;
     return;
   }
@@ -1013,7 +1033,9 @@ void QtHardMon::handleSortCheckboxClick(int state) {
 }
 
 void QtHardMon::showMessageBox(QMessageBox::Icon boxType, QString boxTitle, QString boxText, QString boxInformativeText) {
-  if (noPrompts_) {
+  PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
+  if (preferencesProvider.getValue<bool>("noPrompts")) {
     std::cout << boxText.toStdString() << " "<< boxInformativeText.toStdString() << std::endl;
   } else {
     QMessageBox messageBox(boxType, boxTitle, boxText, QMessageBox::Ok, this);

@@ -33,8 +33,6 @@ public:
     QBrush defaultBackgroundBrush_;
     QBrush modifiedBackgroundBrush_;
     mtca4u::FixedPointConverter * converter_;
-    unsigned int maxWords_;
-    unsigned int floatPrecision_;
 
     QTableWidget * tableWidget_;
 

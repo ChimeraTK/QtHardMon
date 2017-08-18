@@ -71,6 +71,6 @@ T PreferencesProvider::getValue(QString key) {
 
 #include "SingletonHolder.h"
 
-typedef SingletonHolder<PreferencesProvider, CreateByNew, SingleThread, LifetimeStandard> PreferencesProviderSingleton;
+typedef SingletonHolder<PreferencesProvider, CreateByNew, LifetimeStandard, SingleThread> PreferencesProviderSingleton;
 
 #endif // PREFERENCESPROVIDER_H

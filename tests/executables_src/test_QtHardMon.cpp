@@ -12,6 +12,7 @@
 #define private public
 
 #include "QtHardMon.h"
+#include "PreferencesProvider.h"
 
 /*
  * This base class is used for all of the fixtures in Qt testing due to the necessity of initializing QApplication instance.
@@ -57,7 +58,9 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_emptyUponConstruction )
     BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.registerPropertiesWidget->ui->valuesTableWidget->rowCount(), 0);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.optionsGroupBox->isEnabled(), false);
     BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.operationsGroupBox->isEnabled(), false);
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->noPrompts_, false);
+
+    PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+    BOOST_CHECK_EQUAL(preferencesProvider.getValue<bool>("noPrompts"), false);
     
 }
 
@@ -69,15 +72,19 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_defaultSettings )
 {
     QtHardmon_fixtureBase fixture;
 
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.registerPropertiesWidget->maxWords_, 0x10000);
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.registerPropertiesWidget->floatPrecision_, CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
+    PreferencesProvider & preferencesProvider = PreferencesProviderSingleton::Instance();
+
+    BOOST_CHECK_EQUAL(preferencesProvider.getValue<int>("maxWords"), 0x10000);
+    BOOST_CHECK_EQUAL(preferencesProvider.getValue<int>("floatPrecision"), CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION);
     BOOST_CHECK_EQUAL(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION, 4);
     
     // Not passing via ssh connection due to different font size.
     // BOOST_CHECK_EQUAL(fixture.qtHardMon->font().pointSize(), 11);
 
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->autoRead_, true);
-    BOOST_CHECK_EQUAL(fixture.qtHardMon->readOnClick_, true);
+    BOOST_CHECK_EQUAL(preferencesProvider.getValue<bool>("autoRead"), true);
+    BOOST_CHECK_EQUAL(preferencesProvider.getValue<bool>("readOnClick"), true);
+    
+    BOOST_CHECK_EQUAL(preferencesProvider.getValue<bool>("noPrompts"), true);
 }
 
 

@@ -97,17 +97,17 @@ void TestUtilities::checkTableData(GenericRegisterPropertiesWidget * widget,
                     int size
 ) {
     if (size == 0) {
-        BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->rowCount(), tableDataValues.size());
+        BOOST_REQUIRE_EQUAL(widget->ui->valuesTableWidget->rowCount(), tableDataValues.size());
         
-        for (uint i = 0; i < tableDataValues.size(); ++i) {
+        for (uint i = 0; i < widget->ui->valuesTableWidget->rowCount(); ++i) {
             BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(i)));
         //    BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
             BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(i)));
         }
     } else {
-        BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->rowCount(), size);
+        BOOST_REQUIRE_EQUAL(widget->ui->valuesTableWidget->rowCount(), size);
         
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < widget->ui->valuesTableWidget->rowCount(); ++i) {
             BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->item(i, 0)->text().toInt(), std::get<0>(tableDataValues.at(0)));
         //    BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->item(i, 1)->text().toInt(), std::get<1>(tableDataValues.at(i)));
             BOOST_CHECK_EQUAL(widget->ui->valuesTableWidget->item(i, 2)->text().toDouble(), std::get<2>(tableDataValues.at(0)));

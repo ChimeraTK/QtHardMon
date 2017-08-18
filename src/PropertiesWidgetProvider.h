@@ -10,6 +10,7 @@ class PropertiesWidgetProvider {
 private:
     std::map<const int, PropertiesWidget *> registeredWidgets_;
     std::map<const int, int> registeredPages_;
+    PropertiesWidget * currentWidget_;
 
 public:
     PropertiesWidgetProvider();
@@ -17,6 +18,7 @@ public:
     void registerWidget(DeviceElementDataType type, PropertiesWidget * widget, int page);
     PropertiesWidget * get(const int type);
     int pageOf(const int type);
+    PropertiesWidget * getCurrentWidget();
 };
 
 #endif // PROPERTIESWIDGETPROVIDER_H
