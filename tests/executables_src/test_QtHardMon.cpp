@@ -360,6 +360,20 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTableSequence )
 
 }
 
+BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeNonNumerical)
+{
+    QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV");
+
+    // Expecting MyModule and module, that contains all uncategorized registers
+    BOOST_REQUIRE_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 2);
+    // Uncategorized has 5 items: 2 registers and 2 constants
+    BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItem(0)->childCount(), 4);
+    // MyModule has 1 register and one submodule
+    BOOST_REQUIRE_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItem(1)->childCount(), 2);
+    // Submodule has one register
+    BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItem(1)->child(0)->childCount(), 1);
+}
+
 /* ================================ SKIPPED ================================= */
 /* 
  * Those tests are skipped, as they require changing values on the device side.
@@ -416,18 +430,7 @@ BOOST_AUTO_TEST_CASE ( QtHardMon_populatesDataTableSequence )
  * functionality is implemented.
  */
 
-// BOOST_AUTO_TEST_CASE ( QtHardMon_populatesRegisterTreeNonNumerical)
-// {
-    // QtHardmon_populatesRegisterTree_fixture fixtureNonNumerical("test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV");
 
-    // Expecting MyModule and module, that contains all uncategorized registers
-    // BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItemCount(), 2);
-    // Uncategorized has 5 items: 3 registers and 2 constants
-   //  BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItem(0)->childCount(), 5);
-    // MyModule has two items: 1 register and 1 submodule
-    // BOOST_CHECK_EQUAL(fixtureNonNumerical.qtHardMon->ui.registerTreeWidget->topLevelItem(2)->childCount(), 2);
-
-// }
 
 /*
  * Those tests are skipped since it looks like the buttons invoking the

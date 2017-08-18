@@ -23,9 +23,33 @@ QTreeWidgetItem * RegisterTreeUtilities::assignToModuleItem(boost::shared_ptr<mt
       moduleItem = moduleList.front();
     }
 
-    return moduleItem;
+    // Calling a method, that will handle submodules assignment and generation 
+    // or, in case there are none, will simply return moduleItem.
+    return assignToModuleItem(registerInfo, moduleItem, propertiesWidgetProvider);
 }
 
 std::string RegisterTreeUtilities::getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo) {
   return registerInfo->getRegisterName().getComponents().back();
+}
+
+
+QTreeWidgetItem * RegisterTreeUtilities::assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidgetItem * parentModuleItem, PropertiesWidgetProvider & propertiesWidgetProvider, unsigned int depth) {
+  std::vector<std::string> registerPathComponents = registerInfo->getRegisterName().getComponents();
+  if (registerPathComponents.size() > depth + 2) {
+    std::cout << "What is the meaning of life? " << registerPathComponents.size() << std::endl;
+    QTreeWidgetItem * moduleItem = nullptr;
+
+    for (int i = 0; i < parentModuleItem->childCount(); ++i) {
+      if (parentModuleItem->child(i)->text(0) == QString(registerPathComponents.at(depth + 1).c_str())) {
+        moduleItem = parentModuleItem->child(i);
+        break;
+      }
+    }
+    if (!moduleItem) {
+      moduleItem = new ModuleQTreeItem(QString(registerPathComponents.at(depth + 1).c_str()), parentModuleItem, propertiesWidgetProvider);
+    }
+    return assignToModuleItem(registerInfo, moduleItem, propertiesWidgetProvider, depth + 1);
+  } else {
+    return parentModuleItem;
+  }
 }

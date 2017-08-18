@@ -115,6 +115,7 @@ struct RegisterQTreeItem_fixture : public DeviceAccessSetup_fixture, public Devi
     {
         const mtca4u::RegisterCatalogue registerCatalogue = device.getRegisterCatalogue();
         treeWidget = new QTreeWidget;
+        boost::shared_ptr<mtca4u::RegisterInfo> regInfo = registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath));
         registerQTreeItem = new RegisterQTreeItem(device, registerCatalogue.getRegister(mtca4u::RegisterPath(registerPath)), treeWidget, propertiesWidgetProvider);
         oneDRegisterAccessor.read();
         oneDRegisterAccessor[0] = initialValue;
@@ -163,6 +164,44 @@ BOOST_AUTO_TEST_CASE ( RegisterQTreeItem_ReadAndWrite )
     fixture.registerQTreeItem->readData();
 
     TestUtilities::checkTableData(fixture.genericRegisterPropertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0)});
+
+    TestUtilities::setTableValue(fixture.genericRegisterPropertiesWidget, 1, 0, std::make_tuple(3, 3, 3.0));
+    
+    fixture.registerQTreeItem->writeData();
+
+    fixture.oneDRegisterAccessor.read();
+
+    BOOST_CHECK_EQUAL(fixture.oneDRegisterAccessor[1], 3.0);
+
+}
+
+/*
+ * Numeric addressed register properly fills register properties.
+ */
+BOOST_AUTO_TEST_CASE ( RegisterQTreeItem_fillsRegisterPropertiesNonNumerical )
+{
+    RegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV", "FullArea", 5.0);
+    
+    TestUtilities::checkRegisterProperties(fixture.genericRegisterPropertiesWidget, "", "", "");
+    fixture.registerQTreeItem->updateRegisterProperties();
+
+    TestUtilities::checkRegisterProperties(fixture.genericRegisterPropertiesWidget, "FullArea", "", "10");
+}
+
+/*
+ * Numeric addressed register reads from / writes to device properly.
+*/
+BOOST_AUTO_TEST_CASE ( RegisterQTreeItem_ReadAndWriteNonNumerical )
+{
+    RegisterQTreeItem_fixture fixture("test_files/test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV", "FullArea", 5.0);
+    
+    fixture.registerQTreeItem->updateRegisterProperties();
+
+    fixture.registerQTreeItem->readData();
+
+    TestUtilities::checkTableData(fixture.genericRegisterPropertiesWidget, {std::make_tuple(5, 5, 5.0), std::make_tuple(0, 0, 0.0),
+    std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0),
+    std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0), std::make_tuple(0, 0, 0.0)});
 
     TestUtilities::setTableValue(fixture.genericRegisterPropertiesWidget, 1, 0, std::make_tuple(3, 3, 3.0));
     

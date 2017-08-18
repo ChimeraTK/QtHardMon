@@ -9,6 +9,7 @@ class RegisterTreeUtilities {
 
 public:
     static QTreeWidgetItem * assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget * treeWidget, PropertiesWidgetProvider & propertiesWidgetProvider);
+    static QTreeWidgetItem * assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidgetItem * parentModuleItem, PropertiesWidgetProvider & propertiesWidgetProvider, unsigned int depth = 0);
     static std::string getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo);
 };
 
