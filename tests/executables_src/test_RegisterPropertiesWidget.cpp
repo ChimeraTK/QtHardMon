@@ -7,9 +7,6 @@
 
 #include "TestUtilities.h"
 
-// Evil but awesome
-#define private public
-
 #include "RegisterPropertiesWidget.h"
 
 struct RegisterPropertiesWidget_fixtureBase {

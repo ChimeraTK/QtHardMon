@@ -8,9 +8,6 @@
 
 #include "TestUtilities.h"
 
-// Evil but awesome
-#define private public
-
 #include "PreferencesProvider.h"
 #include "QtHardMon.h"
 

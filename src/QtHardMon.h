@@ -50,15 +50,13 @@ private slots:
   void saveToFile();
   */
   void showPlotWindow(int checkState); ///< Slot to toggle the plot window
-                                       ///visibility. Needs to be int because
-                                       ///the sender slot is int.
+                                       /// visibility. Needs to be int because
+  /// the sender slot is int.
 
   void unckeckShowPlotWindow(); ///< Slot with void argument to uncheck the
-                                ///check box.
+                                /// check box.
 
-  void read(bool autoRead = false); ///< Read register from device.
-  void write();                     ///< Read register to device.
-  void loadBoards();                ///< Read a dmap file
+  void loadBoards(); ///< Read a dmap file
 
   /** The device has changed. Read the meta data for this device and select the
    * last active recister in this
@@ -80,7 +78,7 @@ private slots:
   void aboutQt();        ///< Show the aboutQt dialog
 
   void preferences(); ///< Show the preferences dialog and set the according
-                      ///variables
+                      /// variables
 
   /** Load config from a file. This slot calls a file dialog and then accesses
    *  loadConfig(QString const & filename).
@@ -123,25 +121,31 @@ private slots:
 
   void copyRegisterTreeItemNameToClipBoard();
 
-private:
+public slots:
+  void read(bool autoRead = false); ///< Read register from device.
+  void write();                     ///< Read register to device.
+
+public:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
-  mtca4u::Device
-      currentDevice_; ///< The instance of the device which is being accessed.
-  QString dmapFileName_;   ///< The file name of the last opened dmap file
-  QString configFileName_; ///< Name of the config file (last saved or read)
-  int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
-                           ///function is being executed
-  PropertiesWidgetProvider propertiesWidgetProvider_;
-  /**
-   *  Write the config to the given file name.
-   */
-  void writeConfig(QString const &fileName);
 
   /** Load a dmap file and return whether loading was successful. The return
    * value can safely be ignored
    *  if the information is not required in the programme flow.
    */
   bool loadDmapFile(QString const &dmapFileName);
+
+private:
+  mtca4u::Device
+      currentDevice_; ///< The instance of the device which is being accessed.
+  QString dmapFileName_;   ///< The file name of the last opened dmap file
+  QString configFileName_; ///< Name of the config file (last saved or read)
+  int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
+                           /// function is being executed
+  PropertiesWidgetProvider propertiesWidgetProvider_;
+  /**
+   *  Write the config to the given file name.
+   */
+  void writeConfig(QString const &fileName);
 
   /** Close the device and disable the access buttons.
    */
@@ -193,12 +197,12 @@ private:
         _deviceMapElement; ///< The instance of the DeviceMapElement
   public:
     std::vector<std::string> lastSelectedRegister_; ///< The last selected
-                                                    ///register before the item
-                                                    ///was deselected
+                                                    /// register before the item
+    /// was deselected
   };
 
   DeviceListItem *_currentDeviceListItem; ///< Pointer to the currently selected
-                                          ///deviceListItem
+                                          /// deviceListItem
 
   PlotWindow *_plotWindow; ///< The plot window
 

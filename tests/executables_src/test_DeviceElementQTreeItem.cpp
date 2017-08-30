@@ -9,9 +9,6 @@
 
 #include "TestUtilities.h"
 
-// Evil but awesome
-#define private public
-
 #include "DeviceElementQTreeItem.h"
 #include "GenericRegisterPropertiesWidget.h"
 #include "ModulePropertiesWidget.h"
