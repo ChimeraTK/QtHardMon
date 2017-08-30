@@ -1,8 +1,6 @@
 #ifndef TESTUTILITIES_H
 #define TESTUTILITIES_H
 
-#define private public
-
 #include "GenericRegisterPropertiesWidget.h"
 #include "ModulePropertiesWidget.h"
 #include "RegisterPropertiesWidget.h"
