@@ -90,6 +90,6 @@ void NumericAddressedRegisterQTreeItem::updateRegisterProperties() {
   getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements(), size_);
   getPropertiesWidget()->setAddress(bar_, address_);
   getPropertiesWidget()->setFixedPointInfo(width_, fracBits_, signFlag_);
-  dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
+  dynamic_cast<NumericDataTableMixin *>(getPropertiesWidget())
       ->setFixedPointConverter(fixedPointConverter_);
 }

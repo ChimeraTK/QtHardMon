@@ -67,4 +67,6 @@ void RegisterQTreeItem::updateRegisterProperties() {
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
   getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements());
+  dynamic_cast<NumericDataTableMixin *>(getPropertiesWidget())
+      ->setFixedPointConverter(nullptr);
 }
