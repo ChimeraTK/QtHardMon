@@ -265,8 +265,13 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   std::string mapFileName = extractFileNameFromPath(absPath);
   ui.mapFileDisplay->setText(mapFileName.c_str());
   ui.mapFileDisplay->setToolTip(absPath.c_str());
-
-  populateRegisterTree(deviceItem);
+  try {
+    populateRegisterTree(deviceItem);
+  } catch (...) {
+    // In case anything fails, we would like to catch it and close the device.
+    closeDevice();
+    ui.registerTreeWidget->clear();
+  }
 }
 
 void QtHardMon::openDevice(
@@ -951,105 +956,97 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   DeviceListItem *deviceListItem = static_cast<DeviceListItem *>(deviceItem);
 
   ui.registerTreeWidget->clear();
-  try {
-    const mtca4u::RegisterCatalogue registerCatalogue =
-        currentDevice_.getRegisterCatalogue();
-    // get the registerMap and fill the RegisterTreeWidget
-    for (RegisterCatalogue::const_iterator registerIter =
-             currentDevice_.getRegisterCatalogue().begin();
-         registerIter != currentDevice_.getRegisterCatalogue().end();
-         ++registerIter) {
-      // The QTreeItems are assigned with `unused` attribute, as they are
-      // automatically appended to the tree structure.
-      mtca4u::RegisterInfoMap::RegisterInfo *numericAddressedRegisterInfo =
-          dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(
-              registerCatalogue.getRegister(registerIter->getRegisterName())
-                  .get());
 
-      if (!numericAddressedRegisterInfo) {
-        RegisterQTreeItem *newItem __attribute__((unused)) =
-            new RegisterQTreeItem(
+  const mtca4u::RegisterCatalogue registerCatalogue =
+      currentDevice_.getRegisterCatalogue();
+  // get the registerMap and fill the RegisterTreeWidget
+  for (RegisterCatalogue::const_iterator registerIter =
+           currentDevice_.getRegisterCatalogue().begin();
+       registerIter != currentDevice_.getRegisterCatalogue().end();
+       ++registerIter) {
+    // The QTreeItems are assigned with `unused` attribute, as they are
+    // automatically appended to the tree structure.
+    mtca4u::RegisterInfoMap::RegisterInfo *numericAddressedRegisterInfo =
+        dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(
+            registerCatalogue.getRegister(registerIter->getRegisterName())
+                .get());
+
+    if (!numericAddressedRegisterInfo) {
+      RegisterQTreeItem *newItem __attribute__((unused)) =
+          new RegisterQTreeItem(
+              currentDevice_,
+              registerCatalogue.getRegister(registerIter->getRegisterName()),
+              ui.registerTreeWidget, propertiesWidgetProvider_);
+    } else if (isMultiplexedDataRegion(
+                   registerIter->getRegisterName().getComponents().back())) {
+      NumericAddressedMultiplexedAreaQTreeItem *newItem __attribute__((
+          unused)) =
+          new NumericAddressedMultiplexedAreaQTreeItem(
+              currentDevice_,
+              registerCatalogue.getRegister(registerIter->getRegisterName()),
+              registerCatalogue, ++registerIter, ui.registerTreeWidget,
+              propertiesWidgetProvider_);
+    } else {
+
+      if (registerCatalogue.getRegister(registerIter->getRegisterName())
+              ->getNumberOfChannels() == 1) {
+        NumericAddressedRegisterQTreeItem *newItem __attribute__((unused)) =
+            new NumericAddressedRegisterQTreeItem(
                 currentDevice_,
                 registerCatalogue.getRegister(registerIter->getRegisterName()),
                 ui.registerTreeWidget, propertiesWidgetProvider_);
-      } else if (isMultiplexedDataRegion(
-                     registerIter->getRegisterName().getComponents().back())) {
-        NumericAddressedMultiplexedAreaQTreeItem *newItem __attribute__((
+      } else {
+        NumericAddressedCookedMultiplexedAreaQTreeItem *newItem __attribute__((
             unused)) =
-            new NumericAddressedMultiplexedAreaQTreeItem(
+            new NumericAddressedCookedMultiplexedAreaQTreeItem(
                 currentDevice_,
                 registerCatalogue.getRegister(registerIter->getRegisterName()),
-                registerCatalogue, ++registerIter, ui.registerTreeWidget,
-                propertiesWidgetProvider_);
-      } else {
-
-        if (registerCatalogue.getRegister(registerIter->getRegisterName())
-                ->getNumberOfChannels() == 1) {
-          NumericAddressedRegisterQTreeItem *newItem __attribute__((unused)) =
-              new NumericAddressedRegisterQTreeItem(
-                  currentDevice_,
-                  registerCatalogue.getRegister(
-                      registerIter->getRegisterName()),
-                  ui.registerTreeWidget, propertiesWidgetProvider_);
-        } else {
-          NumericAddressedCookedMultiplexedAreaQTreeItem *newItem
-              __attribute__((unused)) =
-                  new NumericAddressedCookedMultiplexedAreaQTreeItem(
-                      currentDevice_,
-                      registerCatalogue.getRegister(
-                          registerIter->getRegisterName()),
-                      ui.registerTreeWidget, propertiesWidgetProvider_);
-        }
+                ui.registerTreeWidget, propertiesWidgetProvider_);
       }
     }
-    ui.registerTreeWidget->expandAll();
+  }
+  ui.registerTreeWidget->expandAll();
 
-    if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
-      // Searching a sub-tree does not work in QTreeWidget. So here is the
-      // strategy:
-      if (!(deviceListItem->lastSelectedRegister_.empty())) {
-        // Get a list of all registers with this name.
-        QList<QTreeWidgetItem *> registerList =
-            ui.registerTreeWidget->findItems(
-                deviceListItem->lastSelectedRegister_.back().c_str(),
-                Qt::MatchExactly | Qt::MatchRecursive);
+  if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
+    // Searching a sub-tree does not work in QTreeWidget. So here is the
+    // strategy:
+    if (!(deviceListItem->lastSelectedRegister_.empty())) {
+      // Get a list of all registers with this name.
+      QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
+          deviceListItem->lastSelectedRegister_.back().c_str(),
+          Qt::MatchExactly | Qt::MatchRecursive);
 
-        deviceListItem->lastSelectedRegister_.pop_back();
+      deviceListItem->lastSelectedRegister_.pop_back();
 
-        // Iterate the list until we find the one with the right module
-        for (QList<QTreeWidgetItem *>::iterator registerIter =
-                 registerList.begin();
-             registerIter != registerList.end(); ++registerIter) {
-          std::vector<std::string> copyOfSelectedRegister =
-              deviceListItem->lastSelectedRegister_;
-          QTreeWidgetItem *temp = (*registerIter);
-          // Since we might have selected a module (one item in the vector), we
-          // assume initially, that we have found our selection - but loop might
-          // change that.
-          bool found = true;
-          while (!(copyOfSelectedRegister.empty())) {
-            QTreeWidgetItem *parentCast =
-                dynamic_cast<QTreeWidgetItem *>(temp->parent());
-            if (parentCast) {
-              copyOfSelectedRegister.pop_back();
-              temp = parentCast;
-            } else {
-              // That's not the one, move on
-              found = false;
-              break;
-            }
-            if (found) {
-              ui.registerTreeWidget->setCurrentItem((*registerIter));
-              break;
-            }
+      // Iterate the list until we find the one with the right module
+      for (QList<QTreeWidgetItem *>::iterator registerIter =
+               registerList.begin();
+           registerIter != registerList.end(); ++registerIter) {
+        std::vector<std::string> copyOfSelectedRegister =
+            deviceListItem->lastSelectedRegister_;
+        QTreeWidgetItem *temp = (*registerIter);
+        // Since we might have selected a module (one item in the vector), we
+        // assume initially, that we have found our selection - but loop might
+        // change that.
+        bool found = true;
+        while (!(copyOfSelectedRegister.empty())) {
+          QTreeWidgetItem *parentCast =
+              dynamic_cast<QTreeWidgetItem *>(temp->parent());
+          if (parentCast) {
+            copyOfSelectedRegister.pop_back();
+            temp = parentCast;
+          } else {
+            // That's not the one, move on
+            found = false;
+            break;
+          }
+          if (found) {
+            ui.registerTreeWidget->setCurrentItem((*registerIter));
+            break;
           }
         }
       }
     }
-  } catch (...) {
-    // In case anything fails, we would like to catch it and close the device.
-    closeDevice();
-    ui.registerTreeWidget->clear();
   }
 }
 
