@@ -119,9 +119,23 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesDeviceList) {
   QtHardMon_populatesDeviceList_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap");
 
-  BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.deviceListWidget->count(), 2);
+  BOOST_CHECK_EQUAL(fixture.qtHardMon->ui.deviceListWidget->count(), 3);
 }
 
+BOOST_AUTO_TEST_CASE(QtHardMon_properlyCatchesInvalidDeviceSelected) {
+  QtHardMon_populatesDeviceList_fixture fixture(
+      "test_files/test_QtHardMon_valid_dummy.dmap");
+
+  QList<QListWidgetItem *> items =
+      fixture.qtHardMon->ui.deviceListWidget->findItems("INVALID",
+                                                        Qt::MatchExactly);
+  if (items.size() > 0) {
+    BOOST_CHECK_NO_THROW(
+        fixture.qtHardMon->ui.deviceListWidget->setCurrentItem(items.at(0)));
+  } else {
+    BOOST_FAIL("Device \"INVALID\" not found, check test case implementation.");
+  }
+}
 struct QtHardmon_populatesRegisterTree_fixture
     : public QtHardMon_populatesDeviceList_fixture {
 
@@ -378,7 +392,8 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeMultiplexed) {
   QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed(
       "test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
 
-  // There are two modules, APP0 and MODULE1 (we care only for the first one in
+  // There are two modules, APP0 and MODULE1 (we care only for the first one
+  // in
   // this test)
   BOOST_REQUIRE_EQUAL(
       fixtureMultiplexed.qtHardMon->ui.registerTreeWidget->topLevelItemCount(),
@@ -399,7 +414,8 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeMultiplexed) {
 }
 
 /*
- * When selecting sequence register, register properties are properly populated.
+ * When selecting sequence register, register properties are properly
+ * populated.
  */
 BOOST_AUTO_TEST_CASE(QtHardMon_populatesSequenceRegisterProperties) {
   QtHardmon_populatesRegisterProperties_fixture fixture(
@@ -412,7 +428,8 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesSequenceRegisterProperties) {
 }
 
 /*
- * When selecting sequence register, data table is populated with valid values.
+ * When selecting sequence register, data table is populated with valid
+ * values.
  */
 BOOST_AUTO_TEST_CASE(QtHardMon_populatesDataTableSequence) {
   QtHardmon_populatesRegisterProperties_fixture fixture(
@@ -449,9 +466,11 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeNonNumerical) {
       1);
 }
 
-/* ================================ SKIPPED ================================= */
+/* ================================ SKIPPED =================================
+ */
 /*
- * Those tests are skipped, as they require changing values on the device side.
+ * Those tests are skipped, as they require changing values on the device
+ * side.
  * Not very troublesome, but enough to leave them to be implemented someday
  * soon.
  */
@@ -467,7 +486,8 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeNonNumerical) {
 // }
 
 /*
- * When Read Continuously checkbox is checked, the register value is updated in
+ * When Read Continuously checkbox is checked, the register value is updated
+ * in
  * intervals.
  */
 // BOOST_AUTO_TEST_CASE ( QtHardMon_readsRegisterContinuously )
@@ -505,7 +525,8 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeNonNumerical) {
 // }
 
 /*
- * Those tests are made to test new functionality, so they are skipped till the
+ * Those tests are made to test new functionality, so they are skipped till
+ * the
  * functionality is implemented.
  */
 

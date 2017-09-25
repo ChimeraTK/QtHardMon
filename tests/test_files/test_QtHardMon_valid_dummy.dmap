@@ -1,2 +1,3 @@
 NUMDEV   sdm://./dummy=NumDev.map NumDev.map
 NUMDEV_MULT   sdm://./dummy=NumDevMultiplexed.map NumDevMultiplexed.map
+INVALID     sdm://./dummy=InvalidSequences.map InvalidSequences.map
