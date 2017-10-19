@@ -288,10 +288,8 @@ void QtHardMon::openDevice(
     ui.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
 
-    ui.openClosedLabel->setText(QApplication::translate(
-        "QtHardMonForm", "Device is open.", 0, QApplication::UnicodeUTF8));
-    ui.openCloseButton->setText(QApplication::translate(
-        "QtHardMonForm", "Close", 0, QApplication::UnicodeUTF8));
+    ui.openClosedLabel->setText( "Device is open.");
+    ui.openCloseButton->setText("Close");
   } catch (Exception &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
                    QString("Could not create the device ") +
@@ -311,10 +309,8 @@ void QtHardMon::closeDevice() {
   // If the device is closed then there is no way we can read values from the
   // registers - they are not available anymore. Nothing to show on the table
   ui.registerPropertiesWidget->clearAllRowsInTable();
-  ui.openClosedLabel->setText(QApplication::translate(
-      "QtHardMonForm", "Device is closed.", 0, QApplication::UnicodeUTF8));
-  ui.openCloseButton->setText(QApplication::translate(
-      "QtHardMonForm", "Open", 0, QApplication::UnicodeUTF8));
+  ui.openClosedLabel->setText("Device is closed.");
+  ui.openCloseButton->setText("Open");
 }
 
 void QtHardMon::activatePropertiesWidget(

@@ -2,7 +2,7 @@
 #define NUMERICDATATABLEMIXIN_H
 
 #include "CustomDelegates.h"
-#include <QtGui/QTableWidget>
+#include <QTableWidget>
 #include <mtca4u/FixedPointConverter.h>
 
 class NumericDataTableMixin {

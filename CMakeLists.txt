@@ -1,107 +1,63 @@
+cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
+
 PROJECT(QtHardMon)
-cmake_minimum_required(VERSION 2.8)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 00)
-set(${PROJECT_NAME}_MINOR_VERSION 18)
-set(${PROJECT_NAME}_PATCH_VERSION 02)
-set(${PROJECT_NAME}_VERSION
-  ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION})
-set(${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION})
+set(${PROJECT_NAME}_MINOR_VERSION 19)
+set(${PROJECT_NAME}_PATCH_VERSION 00)
 
+# Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc, rcc and uic automatically when needed.
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
-# Set the build type to Release if none is specified
-# Force it into Release if "None" is specified (needed to overrule dkpg_buildpackage)
+## Set additional version-specific variables
+include(${CMAKE_SOURCE_DIR}/cmake/set_version_numbers.cmake)
+## Load custom modules, i.e. FindDOOCS.cmake
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+
+## Set the build type to Release if none is specified
+## Force it into Release if "None" is specified (needed to overrule dkpg_buildpackage)
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
 
-# Quite verbose compiler warnings
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fPIC -Wextra -Wshadow -pedantic -Wuninitialized")
+set(CMAKE_CXX_STANDARD 14)
 
-#needed for findQwt
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
-
-FIND_PACKAGE(Qt4 REQUIRED)
-set(mtca4u-deviceaccess_MIN_VERSION 00.22)
-FIND_PACKAGE(mtca4u-deviceaccess ${mtca4u-deviceaccess_MIN_VERSION} REQUIRED)
-FIND_PACKAGE(Qwt 6)
 include(cmake/add_dependency.cmake)
-
-#boost as such is required for shared pointers e.g.
+add_dependency(mtca4u-deviceaccess 00.22 REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Gui REQUIRED)
 
 FIND_PACKAGE(Boost COMPONENTS REQUIRED system filesystem)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-
-#turn on the rpath so libmtca4u-deviceaccess.so is found
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
 #use -DCMAKE_BUILD_TYPE=Debug in your cmake command to turn on the coverage option
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage")
 
-INCLUDE_DIRECTORIES( SYSTEM ${mtca4u-deviceaccess_INCLUDE_DIRS} )
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${mtca4u-deviceaccess_CXX_FLAGS}")
-
-SET(${PROJECT_NAME}_SOURCES src/${PROJECT_NAME}.cpp src/ConfigFileReaderWriter.cpp 
-                            src/PlotWindow.cpp src/CustomDelegates.cpp src/HexSpinBox.cpp
-                            src/RegisterTreeUtilities.cpp
-                            src/DeviceElementQTreeItem.cpp 
-                            src/ModuleQTreeItem.cpp
-                            src/NumericAddressedRegisterQTreeItem.cpp
-                            src/NumericAddressedMultiplexedAreaQTreeItem.cpp
-                            src/NumericAddressedSequenceRegisterQTreeItem.cpp 
-                            src/NumericAddressedCookedMultiplexedAreaQTreeItem.cpp
-                            src/NumericAddressedCookedSequenceRegisterQTreeItem.cpp 
-                            src/RegisterPropertiesWidget.cpp
-                            src/ModulePropertiesWidget.cpp
-                            src/PropertiesWidgetProvider.cpp
-                            src/PropertiesWidget.cpp
-                            src/RegisterQTreeItem.cpp
-                            src/GenericRegisterPropertiesWidget.cpp
-                            src/NumericDataTableMixin.cpp
-                            src/PreferencesProvider.cpp
-                            src/MultiplexedAreaPropertiesWidget.cpp
-                            src/SequencePropertiesWidget.cpp
-                            )
-# The headers which contain Q_OBJECTs (need to be processed with moc)
-SET(${PROJECT_NAME}_QOBJECT_HEADERS src/${PROJECT_NAME}.h src/PlotWindow.h src/CustomDelegates.h src/HexSpinBox.h ${CMAKE_SOURCE_DIR}/src/RegisterPropertiesWidget.h ${CMAKE_SOURCE_DIR}/src/ModulePropertiesWidget.h src/GenericRegisterPropertiesWidget.h src/SequencePropertiesWidget.h src/MultiplexedAreaPropertiesWidget.h)
-# All headers, to have the dependencies correct
-SET(${PROJECT_NAME}_HEADERS ${PROJECT_NAME}_QOBJECT_HEADERS src/PlotWindow.h)
-SET(${PROJECT_NAME}_FORMS src/${PROJECT_NAME}Form.ui src/PreferencesForm.ui src/PlotWindowForm.ui src/RegisterPropertiesWidget.ui src/ModulePropertiesWidget.ui src/GenericRegisterPropertiesWidget.ui src/SequencePropertiesWidget.ui src/MultiplexedAreaPropertiesWidget.ui)
-SET(${PROJECT_NAME}_RESOURCES src/${PROJECT_NAME}.qrc)
-
-QT4_WRAP_CPP(${PROJECT_NAME}_HEADERS_MOC ${${PROJECT_NAME}_QOBJECT_HEADERS})
-QT4_WRAP_UI(${PROJECT_NAME}_FORMS_HEADERS ${${PROJECT_NAME}_FORMS})
-QT4_ADD_RESOURCES(${PROJECT_NAME}_RESOURCES_RCC ${${PROJECT_NAME}_RESOURCES})
-
-INCLUDE(${QT_USE_FILE})
-INCLUDE_DIRECTORIES(SYSTEM ${QT_INCLUDES})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+include_directories(${CMAKE_SOURCE_DIR}/src)
+aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
+list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${mtca4u-deviceaccess_LIBRARIES} ${Boost_LIBRARIES})
 
 #configure a header file which contains the version information for use in C++
 configure_file(cmake/QtHardMonVersion.h.in
   "${PROJECT_BINARY_DIR}/QtHardMonVersion.h" @ONLY)
 
-#The use of the QWT plotting library is optional
-if(QWT_FOUND)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_QWT=true")
-  INCLUDE_DIRECTORIES( SYSTEM ${QWT_INCLUDE_DIR} )  
-else(QWT_FOUND)
-  SET( QWT_LIBRARY "")
-  message("QWT not found, plotting is disabled in this build.")
-endif(QWT_FOUND)
+SET( QWT_LIBRARY "")
 
-ADD_LIBRARY(${PROJECT_NAME}_OBJECTS OBJECT ${${PROJECT_NAME}_SOURCES}
-  ${${PROJECT_NAME}_HEADERS_MOC}
-  ${${PROJECT_NAME}_FORMS_HEADERS} 
-  ${${PROJECT_NAME}_RESOURCES_RCC})
-ADD_EXECUTABLE(${PROJECT_NAME} $<TARGET_OBJECTS:${PROJECT_NAME}_OBJECTS> src/main.cpp )
-
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${QT_LIBRARIES} 
-     ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY} ${Boost_LIBRARIES})
+# ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp )
+# TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${${PROJECT_NAME}_STATIC} Qt5::Core Qt5::Widgets Qt5::Gui  ${mtca4u-deviceaccess_LIBRARIES} ${Boost_LIBRARIES} )
+ADD_EXECUTABLE(${PROJECT_NAME} ${app_sources} src/main.cpp )
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES} ${mtca4u-deviceaccess_LIBRARIES})
 
   IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
   # enable code coverate report
@@ -128,17 +84,9 @@ endif(DOXYGEN_FOUND)
 # guide has been written for (it most probably is outdated)
 INSTALL(FILES doc/user_guide/QtHardMon_user_guide.pdf DESTINATION share/doc/${PROJECT_NAME})
 
-# asking compiler to treat the generate ui_ files as system files (these have
-# warnings in them and we cannot do much because these headers are automatically
-# generated?)
-INCLUDE_DIRECTORIES(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
-
 install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
   )
-
-# The instructions to create a debian package are loaded from a separate file
-include(${CMAKE_SOURCE_DIR}/cmake/prepare_debian_package.cmake)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   enable_testing()

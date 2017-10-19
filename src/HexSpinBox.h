@@ -8,8 +8,8 @@
 #ifndef SOURCE_DIRECTORY__HEXSPINBOX_H_
 #define SOURCE_DIRECTORY__HEXSPINBOX_H_
 
-#include <qspinbox.h>
-#include <qvalidator.h>
+#include <QSpinBox>
+#include <QValidator>
 
 /**
  * The HexData class is the custom datatype that we have introduced to represent
