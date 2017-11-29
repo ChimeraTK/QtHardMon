@@ -48,16 +48,26 @@ list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
 add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${mtca4u-deviceaccess_LIBRARIES} ${Boost_LIBRARIES})
 
+#CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
+#To make the headers generated from the ui files of the library available to the executable and the test,
+#we have to include it explicitly.
+#Note: from cmake 3.9.6 this is configurable, but we want to support all version.
+#CMake before 3.7 puts the generated files to the build folder, which wer also include at a different place.
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_STATIC_autogen/include)
+
 #configure a header file which contains the version information for use in C++
 configure_file(cmake/QtHardMonVersion.h.in
   "${PROJECT_BINARY_DIR}/QtHardMonVersion.h" @ONLY)
 
 SET( QWT_LIBRARY "")
 
-# ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp )
-# TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${${PROJECT_NAME}_STATIC} Qt5::Core Qt5::Widgets Qt5::Gui  ${mtca4u-deviceaccess_LIBRARIES} ${Boost_LIBRARIES} )
-ADD_EXECUTABLE(${PROJECT_NAME} ${app_sources} src/main.cpp )
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES} ${mtca4u-deviceaccess_LIBRARIES})
+ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp )
+#The static library as well as its auto-generated headers are needed to compile main
+if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
+  ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
+endif()
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${mtca4u-deviceaccess_LIBRARIES})
 
   IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
   # enable code coverate report
@@ -88,7 +98,5 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
   )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  enable_testing()
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+enable_testing()
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
