@@ -1044,6 +1044,12 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
       }
     }
   }
+  if (ui.registerTreeWidget->currentItem() == 0) // if no item is selected
+  { //select first item, if list is not empty.
+    QTreeWidgetItemIterator it(ui.registerTreeWidget);
+    if (*it)
+      ui.registerTreeWidget->setCurrentItem(*it);
+  }
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {
