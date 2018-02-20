@@ -13,9 +13,10 @@ public:
   ModuleQTreeItem(const QString &text, QTreeWidgetItem *parent,
                   PropertiesWidgetProvider &propertiesWidgetProvider);
 
-  virtual void readData();
-  virtual void writeData();
-  virtual void updateRegisterProperties();
+  virtual void readData(mtca4u::Device &device);
+  virtual void writeData(mtca4u::Device &device);
+  virtual void updateRegisterProperties(mtca4u::Device &device);
+
 };
 
 #endif // MODULEQTREEITEM_H

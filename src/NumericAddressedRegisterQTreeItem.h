@@ -14,9 +14,10 @@ public:
       mtca4u::Device &device,
       boost::shared_ptr<mtca4u::RegisterInfo> registerInfo, QTreeWidget *parent,
       PropertiesWidgetProvider &propertiesWidgetProvider);
-  virtual void readData();
-  virtual void writeData();
-  virtual void updateRegisterProperties();
+  virtual void updateRegisterProperties(mtca4u::Device &device);
+  virtual void readData(mtca4u::Device &device);
+  void writeData(mtca4u::Device &device);
+  void getRegisterInfo(mtca4u::Device &device);
 
 private: // methods
 private: // member fields

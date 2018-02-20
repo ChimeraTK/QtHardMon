@@ -36,8 +36,8 @@ NumericAddressedSequenceRegisterQTreeItem::
     // DeviceElementQTreeItem.
   }
 }
-
-void NumericAddressedSequenceRegisterQTreeItem::readData() {
+void NumericAddressedSequenceRegisterQTreeItem::readData(mtca4u::Device &device) {
+  //todo ... build accessor on item selection
   twoDRegisterAccessor_.read();
   QTableWidget *table =
       dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
@@ -62,7 +62,8 @@ void NumericAddressedSequenceRegisterQTreeItem::readData() {
   }
 }
 
-void NumericAddressedSequenceRegisterQTreeItem::writeData() {
+void NumericAddressedSequenceRegisterQTreeItem::writeData(mtca4u::Device &device) {
+	//todo ... build accessor on item selection
   QTableWidget *table =
       dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
           ->ui->valuesTableWidget;
@@ -74,7 +75,8 @@ void NumericAddressedSequenceRegisterQTreeItem::writeData() {
   twoDRegisterAccessor_.write();
 }
 
-void NumericAddressedSequenceRegisterQTreeItem::updateRegisterProperties() {
+void NumericAddressedSequenceRegisterQTreeItem::updateRegisterProperties(mtca4u::Device &device) {
+	//todo ... build accessor on item selection
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
   getPropertiesWidget()->setSize(twoDRegisterAccessor_.getNElementsPerChannel(),

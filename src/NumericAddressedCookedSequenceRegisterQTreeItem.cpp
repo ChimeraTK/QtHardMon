@@ -10,10 +10,14 @@ NumericAddressedCookedSequenceRegisterQTreeItem::
           QString(
               (std::string("SEQUENCE_") + std::to_string(channelNo)).c_str()),
           static_cast<int>(DeviceElementDataType::SequenceRegisterDataType),
-          parent, propertiesWidgetProvider),
-      twoDRegisterAccessor_(twoDRegisterAccessor), channelNo_(channelNo) {}
+          parent, propertiesWidgetProvider)
+	,twoDRegisterAccessor_(twoDRegisterAccessor), channelNo_(channelNo) {}
 
-void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
+
+
+
+void NumericAddressedCookedSequenceRegisterQTreeItem::readData(mtca4u::Device &device) {
+	//todo ... build accessor on item selection
   twoDRegisterAccessor_.read();
   QTableWidget *table =
       dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
@@ -38,7 +42,8 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::readData() {
   }
 }
 
-void NumericAddressedCookedSequenceRegisterQTreeItem::writeData() {
+void NumericAddressedCookedSequenceRegisterQTreeItem::writeData(mtca4u::Device &device) {
+	//todo ... build accessor on item selection
   QTableWidget *table =
       dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
           ->ui->valuesTableWidget;
@@ -51,7 +56,7 @@ void NumericAddressedCookedSequenceRegisterQTreeItem::writeData() {
 }
 
 void NumericAddressedCookedSequenceRegisterQTreeItem::
-    updateRegisterProperties() {
+    updateRegisterProperties(mtca4u::Device &device) {
   getPropertiesWidget()->clearFields();
   dynamic_cast<RegisterPropertiesWidget *>(getPropertiesWidget())
       ->setFixedPointConverter(nullptr);

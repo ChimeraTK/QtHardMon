@@ -45,18 +45,20 @@ NumericAddressedCookedMultiplexedAreaQTreeItem::
   }
 }
 
-void NumericAddressedCookedMultiplexedAreaQTreeItem::readData() {
+void NumericAddressedCookedMultiplexedAreaQTreeItem::readData(mtca4u::Device &device) {
   throw InvalidOperationException(
       "You cannot read from a multiplexed area. Select a sequence register.");
 }
 
-void NumericAddressedCookedMultiplexedAreaQTreeItem::writeData() {
+
+void NumericAddressedCookedMultiplexedAreaQTreeItem::writeData(mtca4u::Device &device)
+{
   throw InvalidOperationException(
       "You cannot write to a multiplexed area. Select a sequence register.");
 }
 
 void NumericAddressedCookedMultiplexedAreaQTreeItem::
-    updateRegisterProperties() {
+    updateRegisterProperties(mtca4u::Device &device) {
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
   getPropertiesWidget()->setSize(twoDRegisterAccessor_.getNChannels(), size_);

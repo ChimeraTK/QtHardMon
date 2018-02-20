@@ -267,8 +267,10 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   ui.mapFileDisplay->setToolTip(absPath.c_str());
   try {
     populateRegisterTree(deviceItem);
-  } catch (...) {
+  } catch (Exception &e) {
     // In case anything fails, we would like to catch it and close the device.
+	//todo.. catch exceptions for all registers and show the message only once.
+	std::cout<<"This exception area is still under construction:"<<e.what()<<std::endl;
     closeDevice();
     ui.registerTreeWidget->clear();
   }
@@ -333,7 +335,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
 
   DeviceElementQTreeItem *selectedItem =
       static_cast<DeviceElementQTreeItem *>(registerItem);
-  selectedItem->updateRegisterProperties();
+  selectedItem->updateRegisterProperties(currentDevice_);
   _currentDeviceListItem->lastSelectedRegister_.clear();
   while (selectedItem && !dynamic_cast<QTreeWidget *>(selectedItem)) {
     _currentDeviceListItem->lastSelectedRegister_.insert(
@@ -364,10 +366,24 @@ void QtHardMon::read(bool autoRead) {
   DeviceElementQTreeItem *registerTreeItem =
       static_cast<DeviceElementQTreeItem *>(
           ui.registerTreeWidget->currentItem());
-
+  if (!registerTreeItem)
+  {
+	  showMessageBox(QMessageBox::Information, QString("QtHardMon : Information"),
+	                     QString("No register selected"),QString("Please select a valid register"));
+	  return;
+  }
   try {
     if (currentDevice_.isOpened()) {
-      registerTreeItem->readData();
+      mtca4u::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
+      RegisterCatalogue::iterator registerIter = registerCatalogue.begin();
+      if (registerIter == registerCatalogue.end())
+      {
+    	  showMessageBox( QMessageBox::Critical, QString("QtHardMon : Error"),
+    	          	  	  QString("No Registers found") ,QString("Info: Nothing to display"));
+    	  ++insideReadOrWrite_;
+    	  return;
+      }
+      registerTreeItem->readData(currentDevice_);
       ui.writeButton->setEnabled(true);
     }
   } catch (InvalidOperationException &e) {
@@ -397,20 +413,43 @@ void QtHardMon::read(bool autoRead) {
   if (_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked()) {
     _plotWindow->plot();
   }
-
   --insideReadOrWrite_;
+
 }
 
 void QtHardMon::write() {
   ++insideReadOrWrite_;
-
   DeviceElementQTreeItem *registerTreeItem =
       static_cast<DeviceElementQTreeItem *>(
           ui.registerTreeWidget->currentItem());
 
   try {
     if (currentDevice_.isOpened()) {
-      registerTreeItem->writeData();
+	  mtca4u::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
+	  RegisterCatalogue::iterator registerIter = registerCatalogue.begin();
+	  if (registerIter == registerCatalogue.end())
+	  {
+		  showMessageBox( QMessageBox::Critical, QString("QtHardMon : Error"),
+						  QString("No Registers found") ,QString("Info: Nothing to display"));
+		  ++insideReadOrWrite_;
+		  return;
+	  }
+
+	  QModelIndex index = registerTreeItem->treeWidget()->currentIndex();
+	  if (!index.isValid())
+	  {
+		  std::cout<<"Register tree index not found"<<std::endl;
+	  }
+	  else
+	  {
+		for (int i=0; i<index.row();i++)
+		{
+		  if (registerIter != registerCatalogue.end())
+			  registerIter++;
+		}
+	  }
+	  registerTreeItem->writeData(currentDevice_);
+      //registerTreeItem->writeData();
     }
   } catch (InvalidOperationException &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
@@ -967,6 +1006,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
             registerCatalogue.getRegister(registerIter->getRegisterName())
                 .get());
 
+
     if (!numericAddressedRegisterInfo) {
       RegisterQTreeItem *newItem __attribute__((unused)) =
           new RegisterQTreeItem(
@@ -1002,7 +1042,6 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
     }
   }
   ui.registerTreeWidget->expandAll();
-
   if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
     // Searching a sub-tree does not work in QTreeWidget. So here is the
     // strategy:

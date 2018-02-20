@@ -32,10 +32,8 @@ NumericAddressedMultiplexedAreaQTreeItem::
   }
 
   name_ = registerInfo->getRegisterName().getComponents();
-
   mtca4u::RegisterInfoMap::RegisterInfo *numericAddressedRegisterInfo =
       dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(registerInfo.get());
-
   if (numericAddressedRegisterInfo) {
     bar_ = numericAddressedRegisterInfo->bar;
     address_ = numericAddressedRegisterInfo->address;
@@ -51,12 +49,13 @@ NumericAddressedMultiplexedAreaQTreeItem::
   --firstSequenceItem;
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::readData() {
+void NumericAddressedMultiplexedAreaQTreeItem::readData(mtca4u::Device &device) {
   throw InvalidOperationException(
       "You cannot read from a multiplexed area. Select a sequence register.");
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::writeData() {
+
+void NumericAddressedMultiplexedAreaQTreeItem::writeData(mtca4u::Device &device) {
   throw InvalidOperationException(
       "You cannot write to a multiplexed area. Select a sequence register.");
 }
@@ -75,7 +74,7 @@ std::string NumericAddressedMultiplexedAreaQTreeItem::getTrimmedRegisterName(
   }
 }
 
-void NumericAddressedMultiplexedAreaQTreeItem::updateRegisterProperties() {
+void NumericAddressedMultiplexedAreaQTreeItem::updateRegisterProperties(mtca4u::Device &device) {
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
   getPropertiesWidget()->setSize(twoDRegisterAccessor_.getNChannels(), size_);

@@ -15,9 +15,9 @@ public:
       const mtca4u::RegisterCatalogue &catalogue,
       mtca4u::RegisterCatalogue::const_iterator &firstSequenceItem,
       QTreeWidget *parent, PropertiesWidgetProvider &propertiesWidgetProvider);
-  virtual void readData();
-  virtual void writeData();
-  virtual void updateRegisterProperties();
+  virtual void readData(mtca4u::Device &device);
+  virtual void writeData(mtca4u::Device &device);
+  virtual void updateRegisterProperties(mtca4u::Device &device);
 
 private: // methods
   std::string

@@ -16,17 +16,19 @@ ModuleQTreeItem::ModuleQTreeItem(
           text, static_cast<int>(DeviceElementDataType::ModuleDataType), parent,
           propertiesWidgetProvider) {}
 
-void ModuleQTreeItem::readData() {
-  throw InvalidOperationException(
-      "You cannot read from a module. Select a register.");
+
+void ModuleQTreeItem::readData(mtca4u::Device &device) {
+	throw InvalidOperationException(
+	      "You cannot read from a module. Select a register.");
 }
 
-void ModuleQTreeItem::writeData() {
-  throw InvalidOperationException(
-      "You cannot write to a module. Select a register.");
+void ModuleQTreeItem::writeData(mtca4u::Device &device) {
+	throw InvalidOperationException(
+	      "You cannot write to a module. Select a register.");
 }
 
-void ModuleQTreeItem::updateRegisterProperties() {
+
+void ModuleQTreeItem::updateRegisterProperties(mtca4u::Device &device) {
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames({text(0).toStdString()});
   getPropertiesWidget()->setSize(childCount());

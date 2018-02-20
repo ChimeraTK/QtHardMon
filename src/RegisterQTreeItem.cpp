@@ -11,17 +11,22 @@ RegisterQTreeItem::RegisterQTreeItem(
           static_cast<int>(DeviceElementDataType::GenericRegisterDataType),
           RegisterTreeUtilities::assignToModuleItem(registerInfo, parent,
                                                     propertiesWidgetProvider),
-          propertiesWidgetProvider),
-      oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(
-          registerInfo->getRegisterName())) {
+          propertiesWidgetProvider),oneDRegisterAccessor_(){
+          //,oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(
+          //registerInfo->getRegisterName())) {
+            std::cout<<"RegisterQTreeItem::RegisterQTreeItem"<<std::endl;
   name_ = registerInfo->getRegisterName().getComponents();
 }
 
-void RegisterQTreeItem::readData() {
+
+void RegisterQTreeItem::readData(mtca4u::Device &device) {
+  oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   oneDRegisterAccessor_.read();
+  std::cout<<"RegisterQTreeItem::readData()"<<std::endl;
   QTableWidget *table =
       dynamic_cast<GenericRegisterPropertiesWidget *>(getPropertiesWidget())
           ->ui->valuesTableWidget;
+  std::cout<<"DONE"<<std::endl;
   table->clearContents();
   table->setRowCount(0);
   table->setRowCount(oneDRegisterAccessor_.getNElements());
@@ -52,7 +57,9 @@ void RegisterQTreeItem::readData() {
   }
 }
 
-void RegisterQTreeItem::writeData() {
+
+void RegisterQTreeItem::writeData(mtca4u::Device &device) {
+  oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   QTableWidget *table =
       dynamic_cast<GenericRegisterPropertiesWidget *>(getPropertiesWidget())
           ->ui->valuesTableWidget;
@@ -63,9 +70,11 @@ void RegisterQTreeItem::writeData() {
   oneDRegisterAccessor_.write();
 }
 
-void RegisterQTreeItem::updateRegisterProperties() {
+void RegisterQTreeItem::updateRegisterProperties(mtca4u::Device &device) {
+  oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
+  std::cout<<"I was here"<<std::endl;
   getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements());
   dynamic_cast<NumericDataTableMixin *>(getPropertiesWidget())
       ->setFixedPointConverter(nullptr);
