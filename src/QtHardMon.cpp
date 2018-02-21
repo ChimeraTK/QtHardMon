@@ -271,8 +271,8 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
     // In case anything fails, we would like to catch it and close the device.
 	//todo.. catch exceptions for all registers and show the message only once.
 	std::cout<<"This exception area is still under construction:"<<e.what()<<std::endl;
-    closeDevice();
-    ui.registerTreeWidget->clear();
+    //closeDevice();
+    //ui.registerTreeWidget->clear();
   }
 }
 
