@@ -10,7 +10,15 @@ DeviceElementQTreeItem::DeviceElementQTreeItem(
     const QString &text, const int type, QTreeWidgetItem *parent,
     PropertiesWidgetProvider &propertiesWidgetProvider)
     : QTreeWidgetItem(parent, QStringList(text), type),
-      propertiesWidgetProvider_(propertiesWidgetProvider) {}
+      propertiesWidgetProvider_(propertiesWidgetProvider){}
+
+DeviceElementQTreeItem::DeviceElementQTreeItem(
+    const QString &text, const int type, QTreeWidgetItem *parent,
+    PropertiesWidgetProvider &propertiesWidgetProvider,
+    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo)
+    : QTreeWidgetItem(parent, QStringList(text), type),
+      propertiesWidgetProvider_(propertiesWidgetProvider),
+      registerInfo_(registerInfo) {}
 
 bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   QRegExp checkForNumAtEnd("[0-9]+$");

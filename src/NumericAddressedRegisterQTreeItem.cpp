@@ -10,9 +10,8 @@ NumericAddressedRegisterQTreeItem::NumericAddressedRegisterQTreeItem(
           static_cast<int>(DeviceElementDataType::NumAddressedRegisterDataType),
           RegisterTreeUtilities::assignToModuleItem(registerInfo, parent,
                                                     propertiesWidgetProvider),
-          propertiesWidgetProvider),oneDRegisterAccessor_(){
-	registerInfo_ = registerInfo;
-	name_ = registerInfo->getRegisterName().getComponents();
+          propertiesWidgetProvider,registerInfo),oneDRegisterAccessor_(){
+
 }
 void NumericAddressedRegisterQTreeItem::getRegisterInfo(mtca4u::Device &device)
 {

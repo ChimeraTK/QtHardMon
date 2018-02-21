@@ -19,6 +19,11 @@ public:
                          QTreeWidgetItem *parent,
                          PropertiesWidgetProvider &propertiesWidgetProvider);
 
+  DeviceElementQTreeItem(const QString &text, const int type,
+                           QTreeWidgetItem *parent,
+                           PropertiesWidgetProvider &propertiesWidgetProvider,
+                           boost::shared_ptr<mtca4u::RegisterInfo> registerInfo);
+
   virtual bool operator<(const QTreeWidgetItem &rhs) const;
 
   virtual void readData(mtca4u::Device &device) = 0;

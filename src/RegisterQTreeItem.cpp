@@ -11,10 +11,7 @@ RegisterQTreeItem::RegisterQTreeItem(
           static_cast<int>(DeviceElementDataType::GenericRegisterDataType),
           RegisterTreeUtilities::assignToModuleItem(registerInfo, parent,
                                                     propertiesWidgetProvider),
-          propertiesWidgetProvider),oneDRegisterAccessor_(){
-          //,oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(
-          //registerInfo->getRegisterName())) {
-  name_ = registerInfo->getRegisterName().getComponents();
+          propertiesWidgetProvider,registerInfo),oneDRegisterAccessor_(){
 }
 
 
@@ -56,6 +53,7 @@ void RegisterQTreeItem::readData(mtca4u::Device &device) {
 
 
 void RegisterQTreeItem::writeData(mtca4u::Device &device) {
+  //read is always called before write so this could be removed
   oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   QTableWidget *table =
       dynamic_cast<GenericRegisterPropertiesWidget *>(getPropertiesWidget())
@@ -71,7 +69,6 @@ void RegisterQTreeItem::updateRegisterProperties(mtca4u::Device &device) {
   oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
-  std::cout<<"I was here"<<std::endl;
   getPropertiesWidget()->setSize(oneDRegisterAccessor_.getNElements());
   dynamic_cast<NumericDataTableMixin *>(getPropertiesWidget())
       ->setFixedPointConverter(nullptr);
