@@ -374,16 +374,7 @@ void QtHardMon::read(bool autoRead) {
   }
   try {
     if (currentDevice_.isOpened()) {
-      mtca4u::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
-      RegisterCatalogue::iterator registerIter = registerCatalogue.begin();
-      if (registerIter == registerCatalogue.end())
-      {
-    	  showMessageBox( QMessageBox::Critical, QString("QtHardMon : Error"),
-    	          	  	  QString("No Registers found") ,QString("Info: Nothing to display"));
-    	  ++insideReadOrWrite_;
-    	  return;
-      }
-      registerTreeItem->readData(currentDevice_);
+	  registerTreeItem->readData(currentDevice_);
       ui.writeButton->setEnabled(true);
     }
   } catch (InvalidOperationException &e) {
@@ -425,31 +416,7 @@ void QtHardMon::write() {
 
   try {
     if (currentDevice_.isOpened()) {
-	  mtca4u::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
-	  RegisterCatalogue::iterator registerIter = registerCatalogue.begin();
-	  if (registerIter == registerCatalogue.end())
-	  {
-		  showMessageBox( QMessageBox::Critical, QString("QtHardMon : Error"),
-						  QString("No Registers found") ,QString("Info: Nothing to display"));
-		  ++insideReadOrWrite_;
-		  return;
-	  }
-
-	  QModelIndex index = registerTreeItem->treeWidget()->currentIndex();
-	  if (!index.isValid())
-	  {
-		  std::cout<<"Register tree index not found"<<std::endl;
-	  }
-	  else
-	  {
-		for (int i=0; i<index.row();i++)
-		{
-		  if (registerIter != registerCatalogue.end())
-			  registerIter++;
-		}
-	  }
 	  registerTreeItem->writeData(currentDevice_);
-      //registerTreeItem->writeData();
     }
   } catch (InvalidOperationException &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
