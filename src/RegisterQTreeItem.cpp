@@ -14,7 +14,6 @@ RegisterQTreeItem::RegisterQTreeItem(
           propertiesWidgetProvider),oneDRegisterAccessor_(){
           //,oneDRegisterAccessor_(device.getOneDRegisterAccessor<double>(
           //registerInfo->getRegisterName())) {
-            std::cout<<"RegisterQTreeItem::RegisterQTreeItem"<<std::endl;
   name_ = registerInfo->getRegisterName().getComponents();
 }
 
@@ -22,11 +21,9 @@ RegisterQTreeItem::RegisterQTreeItem(
 void RegisterQTreeItem::readData(mtca4u::Device &device) {
   oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   oneDRegisterAccessor_.read();
-  std::cout<<"RegisterQTreeItem::readData()"<<std::endl;
   QTableWidget *table =
       dynamic_cast<GenericRegisterPropertiesWidget *>(getPropertiesWidget())
           ->ui->valuesTableWidget;
-  std::cout<<"DONE"<<std::endl;
   table->clearContents();
   table->setRowCount(0);
   table->setRowCount(oneDRegisterAccessor_.getNElements());
