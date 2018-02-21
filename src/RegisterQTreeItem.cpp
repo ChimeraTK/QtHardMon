@@ -17,6 +17,7 @@ RegisterQTreeItem::RegisterQTreeItem(
 
 void RegisterQTreeItem::readData(mtca4u::Device &device) {
   oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
+  name_ = registerInfo_->getRegisterName().getComponents();
   oneDRegisterAccessor_.read();
   QTableWidget *table =
       dynamic_cast<GenericRegisterPropertiesWidget *>(getPropertiesWidget())
@@ -53,7 +54,8 @@ void RegisterQTreeItem::readData(mtca4u::Device &device) {
 
 
 void RegisterQTreeItem::writeData(mtca4u::Device &device) {
-  //read is always called before write so this could be removed
+  //read is always called before write so next two lines could be removed
+  name_ = registerInfo_->getRegisterName().getComponents();
   oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   QTableWidget *table =
       dynamic_cast<GenericRegisterPropertiesWidget *>(getPropertiesWidget())
@@ -66,6 +68,7 @@ void RegisterQTreeItem::writeData(mtca4u::Device &device) {
 }
 
 void RegisterQTreeItem::updateRegisterProperties(mtca4u::Device &device) {
+  name_ = registerInfo_->getRegisterName().getComponents();
   oneDRegisterAccessor_.replace(device.getOneDRegisterAccessor<double>(registerInfo_->getRegisterName()));
   getPropertiesWidget()->clearFields();
   getPropertiesWidget()->setNames(name_);
