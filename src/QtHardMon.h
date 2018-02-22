@@ -237,7 +237,7 @@ private:
   // Disable copy constructor and assignment operator
   // This is the main class and it should'nt need copying
   // TODO: confirm this assumption
-  Q_DISABLE_COPY(QtHardMon) // Easy way to get around -Weffc++ warning:
+  Q_DISABLE_COPY(QtHardMon); // Easy way to get around -Weffc++ warning:
                             // class QtHardMon’ has pointer data members -
                             // but does not overide copy constructor and
                             // assignment operator
