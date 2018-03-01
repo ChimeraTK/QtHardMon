@@ -229,109 +229,25 @@
      </layout>
     </item>
     <item>
-     <widget class="QStackedWidget" name="propertiesStackedWidget">
+     <widget class="PropertiesWidget" name="propertiesWidget" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <widget class="QWidget" name="page">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="RegisterPropertiesWidget" name="registerPropertiesWidget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_2">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="ModulePropertiesWidget" name="modulePropertiesWidget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_3">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_7">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_9">
-          <item>
-           <widget class="GenericRegisterPropertiesWidget" name="genericRegisterPropertiesWidget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_4">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_8">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <widget class="MultiplexedAreaPropertiesWidget" name="multiplexedAreaPropertiesWidget" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
+      <property name="minimumSize">
+       <size>
+        <width>421</width>
+        <height>669</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>421</width>
+        <height>669</height>
+       </size>
+      </property>
      </widget>
     </item>
     <item>
@@ -439,7 +355,7 @@
      <x>0</x>
      <y>0</y>
      <width>1102</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -456,7 +372,7 @@
    </widget>
    <widget class="QMenu" name="pluginsMenu">
     <property name="title">
-     <string>Plugins</string>
+     <string>P&amp;lugins</string>
     </property>
    </widget>
    <widget class="QMenu" name="helpMenu">
@@ -468,7 +384,7 @@
    </widget>
    <widget class="QMenu" name="settingsMenu">
     <property name="title">
-     <string>Settings</string>
+     <string>Setti&amp;ngs</string>
     </property>
     <addaction name="preferencesAction"/>
    </widget>
@@ -480,7 +396,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="loadConfigAction">
    <property name="text">
-    <string>Load config</string>
+    <string>&amp;Load config</string>
    </property>
   </action>
   <action name="saveConfigAction">
@@ -488,7 +404,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Save config</string>
+    <string>&amp;Save config</string>
    </property>
   </action>
   <action name="actionExport">
@@ -498,58 +414,40 @@
   </action>
   <action name="aboutQtHardMonAction">
    <property name="text">
-    <string>About QtHardMon</string>
+    <string>&amp;About QtHardMon</string>
    </property>
   </action>
   <action name="aboutQtAction">
    <property name="text">
-    <string>About Qt</string>
+    <string>About &amp;Qt</string>
    </property>
   </action>
   <action name="preferencesAction">
    <property name="text">
-    <string>Preferences</string>
+    <string>&amp;Preferences</string>
    </property>
   </action>
   <action name="saveConfigAsAction">
    <property name="text">
-    <string>Save config as</string>
+    <string>Save &amp;config as</string>
    </property>
   </action>
   <action name="loadBoardsAction">
    <property name="text">
-    <string>Load boards</string>
+    <string>Load &amp;boards</string>
    </property>
   </action>
   <action name="quitAction">
    <property name="text">
-    <string>Quit</string>
+    <string>&amp;Quit</string>
    </property>
   </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RegisterPropertiesWidget</class>
+   <class>PropertiesWidget</class>
    <extends>QWidget</extends>
-   <header>RegisterPropertiesWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ModulePropertiesWidget</class>
-   <extends>QWidget</extends>
-   <header>ModulePropertiesWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GenericRegisterPropertiesWidget</class>
-   <extends>QWidget</extends>
-   <header>GenericRegisterPropertiesWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MultiplexedAreaPropertiesWidget</class>
-   <extends>QWidget</extends>
-   <header>MultiplexedAreaPropertiesWidget.h</header>
+   <header>PropertiesWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
