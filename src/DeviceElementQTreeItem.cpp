@@ -39,6 +39,6 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   }
 }
 
-mtca4u::RegisterInfo const & DeviceElementQTreeItem::getRegisterInfo() {
-  return *registerInfo_;
+boost::shared_ptr<mtca4u::RegisterInfo> DeviceElementQTreeItem::getRegisterInfo() {
+  return registerInfo_;
 }

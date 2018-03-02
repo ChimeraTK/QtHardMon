@@ -21,7 +21,7 @@ public:
 
   bool operator<(const QTreeWidgetItem &rhs) const;
 
-  mtca4u::RegisterInfo const & getRegisterInfo();
+  boost::shared_ptr<mtca4u::RegisterInfo> getRegisterInfo();
 
 protected:
   boost::shared_ptr<mtca4u::RegisterInfo> registerInfo_;

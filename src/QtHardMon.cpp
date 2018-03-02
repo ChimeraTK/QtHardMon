@@ -262,8 +262,7 @@ void QtHardMon::openDevice(
   try {
     currentDevice_.open(deviceFileName);
     // enable all of the GUI in case it was deactivated before
-    ui.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
-    ui.genericRegisterPropertiesWidget->ui->valuesTableWidget->setEnabled(true);
+    ui.propertiesWidget->ui.valuesTableWidget->setEnabled(true);
     ui.operationsGroupBox->setEnabled(true);
     ui.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
@@ -281,14 +280,13 @@ void QtHardMon::openDevice(
 void QtHardMon::closeDevice() {
   if (currentDevice_.isOpened())
     currentDevice_.close();
-  ui.registerPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
-  ui.genericRegisterPropertiesWidget->ui->valuesTableWidget->setEnabled(false);
+  ui.propertiesWidget->ui.valuesTableWidget->setEnabled(false);
   ui.operationsGroupBox->setEnabled(false);
   ui.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
   // If the device is closed then there is no way we can read values from the
   // registers - they are not available anymore. Nothing to show on the table
-  ui.registerPropertiesWidget->clearAllRowsInTable();
+  ui.propertiesWidget->clearFields();
   ui.openClosedLabel->setText("Device is closed.");
   ui.openCloseButton->setText("Open");
 }
@@ -298,14 +296,14 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
-    ui.registerPropertiesWidget->clearFields();
+    ui.propertiesWidget->clearFields();
     return;
   }
 
   // we know that the registerItem is a DeviceElementQTreeItem, so we can static cast.
   DeviceElementQTreeItem *selectedItem =
       static_cast<DeviceElementQTreeItem *>(registerItem);
-  ui.registerPropertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo);
+  ui.propertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo());
 
   _currentDeviceListItem->lastSelectedRegister_.clear();
   while (selectedItem && !dynamic_cast<QTreeWidget *>(selectedItem)) {
@@ -324,8 +322,8 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
     // widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot
     // be written to the register.
-    ui.registerPropertiesWidget->ui->valuesTableWidget->clearContents();
-    ui.registerPropertiesWidget->ui->valuesTableWidget->setRowCount(0);
+    ui.propertiesWidget->ui.valuesTableWidget->clearContents();
+    ui.propertiesWidget->ui.valuesTableWidget->setRowCount(0);
     ui.writeButton->setEnabled(false);
   } else {
     read(true);
@@ -345,7 +343,8 @@ void QtHardMon::read(bool autoRead) {
   }
   try {
     if (currentDevice_.isOpened()) {
-	  registerTreeItem->readData(currentDevice_);
+      ///@todo FIXME I disabled reading when opening a devide. This should not happen anyway.
+      //registerTreeItem->readData(currentDevice_);
       ui.writeButton->setEnabled(true);
     }
   } catch (InvalidOperationException &e) {
@@ -387,7 +386,8 @@ void QtHardMon::write() {
 
   try {
     if (currentDevice_.isOpened()) {
-	  registerTreeItem->writeData(currentDevice_);
+      ///@todo FIXME Writing mechanism has to change. Not implemented
+      //registerTreeItem->writeData(currentDevice_);
     }
   } catch (InvalidOperationException &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
@@ -410,7 +410,7 @@ void QtHardMon::write() {
   if (ui.readAfterWriteCheckBox->isChecked()) {
     read();
   } else {
-    ui.registerPropertiesWidget->clearBackground();
+    ui.propertiesWidget->clearDataWidgetBackground();
   }
 
   --insideReadOrWrite_;
@@ -461,9 +461,10 @@ void QtHardMon::preferences() {
     preferencesProvider.setValue(
         "floatPrecision", preferencesDialogForm.precisionSpinBox->value());
 
-    // FIXME: this should be done on local level of properties widgets.
-    ui.registerPropertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(
-        preferencesProvider.getValue<int>("floatPrecision"));
+    //@todo FIXME: There is no custom delegate at the moment.
+    //@todo FIXME: this should be done on local level of properties widgets.
+    //ui.propertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(
+    //preferencesProvider.getValue<int>("floatPrecision"));
 
     // call registerSelected() so the size of the valuesList is adapted and
     // possible missing values are read
@@ -933,8 +934,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   const mtca4u::RegisterCatalogue registerCatalogue =
       currentDevice_.getRegisterCatalogue();
   // get the registerMap and fill the RegisterTreeWidget
-  for (RegisterCatalogue::const_iterator registerIter =
-           currentDevice_.getRegisterCatalogue().begin();
+  for (RegisterCatalogue::const_iterator registerIter = currentDevice_.getRegisterCatalogue().begin();
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
     // The QTreeItems are assigned with `unused` attribute, as they are
@@ -944,42 +944,9 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
             registerCatalogue.getRegister(registerIter->getRegisterName())
                 .get());
 
-    new DeviceElementQTreeItem(
-    
-
-    if (!numericAddressedRegisterInfo) {
-      RegisterQTreeItem *newItem __attribute__((unused)) =
-          new RegisterQTreeItem(
-              currentDevice_,
-              registerCatalogue.getRegister(registerIter->getRegisterName()),
-              ui.registerTreeWidget);
-    } else if (isMultiplexedDataRegion(
-                   registerIter->getRegisterName().getComponents().back())) {
-      NumericAddressedMultiplexedAreaQTreeItem *newItem __attribute__((
-          unused)) =
-          new NumericAddressedMultiplexedAreaQTreeItem(
-              currentDevice_,
-              registerCatalogue.getRegister(registerIter->getRegisterName()),
-              registerCatalogue, ++registerIter, ui.registerTreeWidget,
-              propertiesWidgetProvider_);
-    } else {
-
-      if (registerCatalogue.getRegister(registerIter->getRegisterName())
-              ->getNumberOfChannels() == 1) {
-        NumericAddressedRegisterQTreeItem *newItem __attribute__((unused)) =
-            new NumericAddressedRegisterQTreeItem(
-                currentDevice_,
-                registerCatalogue.getRegister(registerIter->getRegisterName()),
-                ui.registerTreeWidget, propertiesWidgetProvider_);
-      } else {
-        NumericAddressedCookedMultiplexedAreaQTreeItem *newItem __attribute__((
-            unused)) =
-            new NumericAddressedCookedMultiplexedAreaQTreeItem(
-                currentDevice_,
-                registerCatalogue.getRegister(registerIter->getRegisterName()),
-                ui.registerTreeWidget, propertiesWidgetProvider_);
-      }
-    }
+    new DeviceElementQTreeItem(ui.registerTreeWidget,
+                               registerIter->getRegisterName().getComponents().back().c_str(),
+                               registerCatalogue.getRegister(registerIter->getRegisterName()));
   }
   ui.registerTreeWidget->expandAll();
   if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
