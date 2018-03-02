@@ -1,12 +1,34 @@
 #include "RegisterTreeUtilities.h"
-#include "ModuleQTreeItem.h"
+#include "DeviceElementQTreeItem.h"
 
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
+using namespace mtca4u;
+
+QTreeWidgetItem * getNodeFromTreeWidget(std::string const & nodeName, QTreeWidget *treeWidget){
+  auto nodeList = treeWidget->findItems(nodeName.c_str(), Qt::MatchExactly);
+
+  if (nodeList.empty()) {
+    return nullptr;
+  } else {
+    return nodeList.front();
+  }
+}
+
+QTreeWidgetItem * getNodeFromTreeWidgetItem(std::string const & nodeName, QTreeWidgetItem *parentTreeWidgetItem){
+  for (int i = 0; i < parentTreeWidgetItem->childCount(); ++i) {
+    auto childNode=parentTreeWidgetItem->child(i);
+    if ( childNode->text(0) == QString(nodeName.c_str()) ) {
+      return childNode;
+    }
+  }
+  return nullptr;
+}
+
+
 QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
     boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
-    QTreeWidget *treeWidget,
-    PropertiesWidgetProvider &propertiesWidgetProvider) {
+    QTreeWidget *treeWidget){
 
   std::vector<std::string> registerPathComponents =
       registerInfo->getRegisterName().getComponents();
@@ -22,15 +44,14 @@ QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
 
   QTreeWidgetItem *moduleItem;
   if (moduleList.empty()) {
-    moduleItem = new ModuleQTreeItem(QString(moduleName.c_str()), treeWidget,
-                                     propertiesWidgetProvider);
+    moduleItem = new DeviceElementQTreeItem(treeWidget, moduleName.c_str());
   } else {
     moduleItem = moduleList.front();
   }
 
   // Calling a method, that will handle submodules assignment and generation
   // or, in case there are none, will simply return moduleItem.
-  return assignToModuleItem(registerInfo, moduleItem, propertiesWidgetProvider);
+  return assignToModuleItem(registerInfo, moduleItem);
 }
 
 std::string RegisterTreeUtilities::getRegisterName(
@@ -40,8 +61,7 @@ std::string RegisterTreeUtilities::getRegisterName(
 
 QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
     boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
-    QTreeWidgetItem *parentModuleItem,
-    PropertiesWidgetProvider &propertiesWidgetProvider, unsigned int depth) {
+    QTreeWidgetItem *parentModuleItem, unsigned int depth) {
   std::vector<std::string> registerPathComponents =
       registerInfo->getRegisterName().getComponents();
   if (registerPathComponents.size() > depth + 2) {
@@ -55,12 +75,11 @@ QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
       }
     }
     if (!moduleItem) {
-      moduleItem = new ModuleQTreeItem(
-          QString(registerPathComponents.at(depth + 1).c_str()),
-          parentModuleItem, propertiesWidgetProvider);
+      moduleItem = new DeviceElementQTreeItem(
+        parentModuleItem,
+        registerPathComponents.at(depth + 1).c_str());
     }
-    return assignToModuleItem(registerInfo, moduleItem,
-                              propertiesWidgetProvider, depth + 1);
+    return assignToModuleItem(registerInfo, moduleItem, depth + 1);
   } else {
     return parentModuleItem;
   }

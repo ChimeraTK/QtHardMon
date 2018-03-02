@@ -3,7 +3,6 @@
 
 #include "CustomDelegates.h"
 #include "PlotWindow.h"
-#include "PropertiesWidgetProvider.h"
 #include "ui_QtHardMonForm.h"
 #include <QDir>
 #include <QIcon>
@@ -72,8 +71,6 @@ private slots:
                         QTreeWidgetItem * /*previousRegisterItem */ = NULL);
   void registerClicked(
       QTreeWidgetItem *registerItem); ///< Executed if a register is clicked
-  void activatePropertiesWidget(QTreeWidgetItem *registerItem,
-                                QTreeWidgetItem * /*previousRegisterItem */);
   void aboutQtHardMon(); ///< Show the aboutQtHardMon
   void aboutQt();        ///< Show the aboutQt dialog
 
@@ -141,7 +138,6 @@ private:
   QString configFileName_; ///< Name of the config file (last saved or read)
   int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
                            /// function is being executed
-  PropertiesWidgetProvider propertiesWidgetProvider_;
   /**
    *  Write the config to the given file name.
    */

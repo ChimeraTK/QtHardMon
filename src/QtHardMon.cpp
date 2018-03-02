@@ -22,11 +22,8 @@
 #include <QTextStream>
 using namespace mtca4u;
 
-#include "NumericAddressedCookedMultiplexedAreaQTreeItem.h"
-#include "NumericAddressedMultiplexedAreaQTreeItem.h"
-#include "NumericAddressedRegisterQTreeItem.h"
+#include "DeviceElementQTreeItem.h"
 #include "PreferencesProvider.h"
-#include "RegisterQTreeItem.h"
 
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
@@ -67,7 +64,8 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   setWindowIcon(QIcon(":/DESY_logo_nofade.png"));
   ui.logoLabel->setPixmap(QPixmap(":/DESY_logo.png"));
 
-  addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
+  /// @todo FIXME Re-activate this functionality
+  //  addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
                                         // clipboard
 
   connect(ui.deviceListWidget,
@@ -77,11 +75,6 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   connect(ui.registerTreeWidget,
           SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
           this, SLOT(registerSelected(QTreeWidgetItem *, QTreeWidgetItem *)));
-
-  connect(ui.registerTreeWidget,
-          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
-          this,
-          SLOT(activatePropertiesWidget(QTreeWidgetItem *, QTreeWidgetItem *)));
 
   connect(ui.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)),
           this, SLOT(registerClicked(QTreeWidgetItem *)));
@@ -141,21 +134,6 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
 
   // also the plot window dfunctions are only enabled when a device is opened.
   _plotWindow->setEnabled(false);
-
-  propertiesWidgetProvider_.registerWidget(
-      DeviceElementDataType::ModuleDataType, ui.modulePropertiesWidget, 1);
-  propertiesWidgetProvider_.registerWidget(
-      DeviceElementDataType::NumAddressedRegisterDataType,
-      ui.registerPropertiesWidget, 0);
-  propertiesWidgetProvider_.registerWidget(
-      DeviceElementDataType::MultiplexedAreaDataType,
-      ui.multiplexedAreaPropertiesWidget, 3);
-  propertiesWidgetProvider_.registerWidget(
-      DeviceElementDataType::SequenceRegisterDataType,
-      ui.registerPropertiesWidget, 0);
-  propertiesWidgetProvider_.registerWidget(
-      DeviceElementDataType::GenericRegisterDataType,
-      ui.genericRegisterPropertiesWidget, 2);
 }
 
 QtHardMon::~QtHardMon() {}
@@ -269,7 +247,7 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
     populateRegisterTree(deviceItem);
   } catch (Exception &e) {
     // In case anything fails, we would like to catch it and close the device.
-	//todo.. catch exceptions for all registers and show the message only once.
+	///@todo FIXME catch exceptions for all registers and show the message only once.
 	std::cout<<"This exception area is still under construction:"<<e.what()<<std::endl;
     //closeDevice();
     //ui.registerTreeWidget->clear();
@@ -315,15 +293,6 @@ void QtHardMon::closeDevice() {
   ui.openCloseButton->setText("Open");
 }
 
-void QtHardMon::activatePropertiesWidget(
-    QTreeWidgetItem *registerItem,
-    QTreeWidgetItem * /*previousRegisterItem */) {
-  if (registerItem != NULL) {
-    ui.propertiesStackedWidget->setCurrentIndex(
-        propertiesWidgetProvider_.pageOf(registerItem->type()));
-  }
-}
-
 void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
                                  QTreeWidgetItem * /*previousRegisterItem */) {
   // There is a case when a device entry is clicked in the device list, the slot
@@ -333,9 +302,11 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
     return;
   }
 
+  // we know that the registerItem is a DeviceElementQTreeItem, so we can static cast.
   DeviceElementQTreeItem *selectedItem =
       static_cast<DeviceElementQTreeItem *>(registerItem);
-  selectedItem->updateRegisterProperties(currentDevice_);
+  ui.registerPropertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo);
+
   _currentDeviceListItem->lastSelectedRegister_.clear();
   while (selectedItem && !dynamic_cast<QTreeWidget *>(selectedItem)) {
     _currentDeviceListItem->lastSelectedRegister_.insert(
@@ -973,13 +944,15 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
             registerCatalogue.getRegister(registerIter->getRegisterName())
                 .get());
 
+    new DeviceElementQTreeItem(
+    
 
     if (!numericAddressedRegisterInfo) {
       RegisterQTreeItem *newItem __attribute__((unused)) =
           new RegisterQTreeItem(
               currentDevice_,
               registerCatalogue.getRegister(registerIter->getRegisterName()),
-              ui.registerTreeWidget, propertiesWidgetProvider_);
+              ui.registerTreeWidget);
     } else if (isMultiplexedDataRegion(
                    registerIter->getRegisterName().getComponents().back())) {
       NumericAddressedMultiplexedAreaQTreeItem *newItem __attribute__((

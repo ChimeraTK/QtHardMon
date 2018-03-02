@@ -1,24 +1,20 @@
 #include "DeviceElementQTreeItem.h"
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(
-    const QString &text, const int type, QTreeWidget *parent,
-    PropertiesWidgetProvider &propertiesWidgetProvider)
-    : QTreeWidgetItem(parent, QStringList(text), type),
-      propertiesWidgetProvider_(propertiesWidgetProvider) {}
+DeviceElementQTreeItem::DeviceElementQTreeItem(QTreeWidget *parent,
+                                               const QString &text,
+                                               boost::shared_ptr<mtca4u::RegisterInfo> registerInfo)
+    : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType),
+      registerInfo_(registerInfo)
+    {}
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(
-    const QString &text, const int type, QTreeWidgetItem *parent,
-    PropertiesWidgetProvider &propertiesWidgetProvider)
-    : QTreeWidgetItem(parent, QStringList(text), type),
-      propertiesWidgetProvider_(propertiesWidgetProvider){}
+DeviceElementQTreeItem::DeviceElementQTreeItem(QTreeWidgetItem *parent,
+                                               const QString &text,
+                                               boost::shared_ptr<mtca4u::RegisterInfo> registerInfo)
+    : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType),
+      registerInfo_(registerInfo)
+    {}
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(
-    const QString &text, const int type, QTreeWidgetItem *parent,
-    PropertiesWidgetProvider &propertiesWidgetProvider,
-    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo)
-    : QTreeWidgetItem(parent, QStringList(text), type),
-      propertiesWidgetProvider_(propertiesWidgetProvider),
-      registerInfo_(registerInfo) {}
+
 
 bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   QRegExp checkForNumAtEnd("[0-9]+$");
@@ -43,6 +39,6 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   }
 }
 
-PropertiesWidget *DeviceElementQTreeItem::getPropertiesWidget() {
-  return propertiesWidgetProvider_.get(this->type());
+mtca4u::RegisterInfo const & DeviceElementQTreeItem::getRegisterInfo() {
+  return *registerInfo_;
 }
