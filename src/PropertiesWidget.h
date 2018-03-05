@@ -12,12 +12,6 @@ public:
   PropertiesWidget(QWidget *parent);
 
   void clearFields();
-  void setSize(int nOfElements, int size = 1);
-  void setNames(std::vector<std::string> components);
-
-  // Numerical addressed -only methods of the interface
-  void setFixedPointInfo(int width, int fracBits, int signBit);
-  void setAddress(int bar, int address);
 
   Ui::PropertiesWidgetForm ui;
 
@@ -25,6 +19,14 @@ public:
 
   /// Clear the red cells of the data display widget after writing
   void clearDataWidgetBackground();
+
+
+protected:
+
+  // Numerical addressed -only methods of the interface
+  void setFixedPointInfo(int width, int fracBits, int signBit);
+  void setAddress(int bar, int address, int sizeInBytes);
+
 };
 
 #endif // PROPERTIESWIDGET_H

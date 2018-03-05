@@ -9,9 +9,6 @@
 #include "TestUtilities.h"
 
 #include "DeviceElementQTreeItem.h"
-#include "GenericRegisterPropertiesWidget.h"
-#include "ModulePropertiesWidget.h"
-#include "RegisterPropertiesWidget.h"
 
 struct DeviceElementQTreeItem_fixtureBase {
   QApplication *app;
