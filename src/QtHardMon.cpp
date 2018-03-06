@@ -24,6 +24,7 @@ using namespace mtca4u;
 
 #include "DeviceElementQTreeItem.h"
 #include "PreferencesProvider.h"
+#include "RegisterTreeUtilities.h"
 
 // Some variables to avoid duplication and possible inconsistencies in the code.
 // These strings are used in the config file
@@ -944,7 +945,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
             registerCatalogue.getRegister(registerIter->getRegisterName())
                 .get());
 
-    new DeviceElementQTreeItem(ui.registerTreeWidget,
+    new DeviceElementQTreeItem(RegisterTreeUtilities::assignToModuleItem(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget),
                                registerIter->getRegisterName().getComponents().back().c_str(),
                                registerCatalogue.getRegister(registerIter->getRegisterName()));
   }

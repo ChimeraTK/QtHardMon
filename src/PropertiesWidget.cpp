@@ -14,6 +14,14 @@ void PropertiesWidget::clearFields(){
 }
 
 void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo> const & registerInfo){
+  // There are node elements ("modules") which don't have register information
+  if (!registerInfo){
+    clearFields();
+    setEnabled(false);
+    return;
+  }
+
+  setEnabled(true);
   ui.registerPathDisplay->setText(static_cast<const std::string &>(registerInfo->getRegisterName()).c_str());
   ui.dimensionDisplay->setText(QString::number(registerInfo->getNumberOfDimensions()));
   ui.nElementsDisplay->setText(QString::number(registerInfo->getNumberOfElements()));
