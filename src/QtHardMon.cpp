@@ -945,9 +945,18 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
             registerCatalogue.getRegister(registerIter->getRegisterName())
                 .get());
 
-    new DeviceElementQTreeItem(RegisterTreeUtilities::assignToModuleItem(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget),
-                               registerIter->getRegisterName().getComponents().back().c_str(),
-                               registerCatalogue.getRegister(registerIter->getRegisterName()));
+    // parentNode can be null if there is no parent, i.e. the register is directly in the treeWidget
+    auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget);
+    if (parentNode){
+      new DeviceElementQTreeItem(parentNode,
+                                 registerIter->getRegisterName().getComponents().back().c_str(),
+                                 registerCatalogue.getRegister(registerIter->getRegisterName()));
+    }else{
+      // no parent node. Directly add to the tree widget.
+      new DeviceElementQTreeItem(ui.registerTreeWidget,
+                                 registerIter->getRegisterName().getComponents().back().c_str(),
+                                 registerCatalogue.getRegister(registerIter->getRegisterName()));      
+    }
   }
   ui.registerTreeWidget->expandAll();
   if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {

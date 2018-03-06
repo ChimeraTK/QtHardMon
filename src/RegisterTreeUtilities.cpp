@@ -26,7 +26,7 @@ QTreeWidgetItem * getNodeFromTreeWidgetItem(std::string const & nodeName, QTreeW
 }
 
 
-QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
+QTreeWidgetItem *RegisterTreeUtilities::getDeepestBranchNode(
     boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
     QTreeWidget *treeWidget){
 
@@ -36,7 +36,7 @@ QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
 
   // FIXME: There is a high chance, that there are always two components.
   if (registerPathComponents.size() < 2 || moduleName.empty()) {
-    moduleName = NO_MODULE_NAME_STRING;
+    return nullptr;
   }
 
   QList<QTreeWidgetItem *> moduleList =
@@ -51,7 +51,7 @@ QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
 
   // Calling a method, that will handle submodules assignment and generation
   // or, in case there are none, will simply return moduleItem.
-  return assignToModuleItem(registerInfo, moduleItem);
+  return getDeepestBranchNode(registerInfo, moduleItem);
 }
 
 std::string RegisterTreeUtilities::getRegisterName(
@@ -59,7 +59,7 @@ std::string RegisterTreeUtilities::getRegisterName(
   return registerInfo->getRegisterName().getComponents().back();
 }
 
-QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
+QTreeWidgetItem *RegisterTreeUtilities::getDeepestBranchNode(
     boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
     QTreeWidgetItem *parentModuleItem, unsigned int depth) {
   std::vector<std::string> registerPathComponents =
@@ -79,7 +79,7 @@ QTreeWidgetItem *RegisterTreeUtilities::assignToModuleItem(
         parentModuleItem,
         registerPathComponents.at(depth + 1).c_str());
     }
-    return assignToModuleItem(registerInfo, moduleItem, depth + 1);
+    return getDeepestBranchNode(registerInfo, moduleItem, depth + 1);
   } else {
     return parentModuleItem;
   }

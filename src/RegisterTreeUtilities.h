@@ -13,15 +13,15 @@ QTreeWidgetItem * getParentNodeFromTreeWidgetItem(std::string const & nodeName, 
 class RegisterTreeUtilities {
 
 public:
-  static QTreeWidgetItem *
-  assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
-                     QTreeWidget *treeWidget);
-  static QTreeWidgetItem *
-  assignToModuleItem(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
-                     QTreeWidgetItem *parentModuleItem,
-                     unsigned int depth = 0);
-  static std::string
-  getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo);
+  /// @attention Can return nullptr of the register path has no hierarchy.
+  static QTreeWidgetItem * getDeepestBranchNode(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
+                                                QTreeWidget *treeWidget);
+  
+  static QTreeWidgetItem * getDeepestBranchNode(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
+                                                QTreeWidgetItem *parentModuleItem,
+                                                unsigned int depth = 0);
+
+  static std::string getRegisterName(boost::shared_ptr<mtca4u::RegisterInfo> registerInfo);
 };
 
 
