@@ -31,6 +31,7 @@ void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo
   setShape(registerInfo->getNumberOfDimensions(),
            registerInfo->getNumberOfElements(),
            registerInfo->getNumberOfChannels());
+  setType(registerInfo->getDataDescriptor());
   
   ///@todo FIXME fill numerial and fixed point information
   ui.numericalAddresseGroupBox->hide();
@@ -74,6 +75,36 @@ void PropertiesWidget::setShape(unsigned int nDimensions, unsigned int nChannels
     ui.nChannelsDisplay->setText(QString::number(nChannels));
   }
 }
+
+void PropertiesWidget::setType(ChimeraTK::RegisterInfo::DataDescriptor const & dataDescriptor){
+  switch(dataDescriptor.fundamentalType()){
+  case ChimeraTK::RegisterInfo::FundamentalType::numeric: 	
+    if (dataDescriptor.isIntegral()){
+      if (dataDescriptor.isSigned()){
+        ui.dataTypeDisplay->setText("Signed integer");
+      }else{
+        ui.dataTypeDisplay->setText("Unsingned integer");
+      }
+    }else{
+      ui.dataTypeDisplay->setText("Floating point");
+    }
+    break;
+  case ChimeraTK::RegisterInfo::FundamentalType::string:
+    ui.dataTypeDisplay->setText("String");
+    break;
+  case ChimeraTK::RegisterInfo::FundamentalType::boolean:
+    ui.dataTypeDisplay->setText("Boolean");
+    break;
+  case ChimeraTK::RegisterInfo::FundamentalType::nodata:
+    ui.dataTypeDisplay->setText("No Data");
+    break;
+  case ChimeraTK::RegisterInfo::FundamentalType::undefined:
+    // fall into default, just mentioned for completeness
+  default:
+    ui.dataTypeDisplay->setText("Undefined");
+  }
+}
+
 
 void PropertiesWidget::clearDataWidgetBackground(){
 }

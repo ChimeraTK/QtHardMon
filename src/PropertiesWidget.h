@@ -28,6 +28,7 @@ protected:
   void setAddress(int bar, int address, int sizeInBytes);
   // other internal methods to avoid screens of unstructured code...
   void setShape(unsigned int nDimensions, unsigned int nChannels, unsigned int nElements);
+  void setType(ChimeraTK::RegisterInfo::DataDescriptor const & dataDescriptor);
 };
 
 #endif // PROPERTIESWIDGET_H
