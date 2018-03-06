@@ -2,6 +2,7 @@
 
 PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent) {
   ui.setupUi(this);
+  clearFields();// also hides what should be hidden
 }
 
 void PropertiesWidget::clearFields(){
@@ -11,24 +12,67 @@ void PropertiesWidget::clearFields(){
   ui.nChannelsDisplay->setText("");
   ui.numericalAddresseGroupBox->hide();
   ui.fixedPointGroupBox->hide();
+  ui.nElementsLabel->hide();
+  ui.nElementsDisplay->hide();
+  ui.nChannelsLabel->hide();
+  ui.nChannelsDisplay->hide();
+  setEnabled(false);
 }
 
 void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo> const & registerInfo){
   // There are node elements ("modules") which don't have register information
   if (!registerInfo){
     clearFields();
-    setEnabled(false);
     return;
   }
 
   setEnabled(true);
   ui.registerPathDisplay->setText(static_cast<const std::string &>(registerInfo->getRegisterName()).c_str());
-  ui.dimensionDisplay->setText(QString::number(registerInfo->getNumberOfDimensions()));
-  ui.nElementsDisplay->setText(QString::number(registerInfo->getNumberOfElements()));
-  ui.nChannelsDisplay->setText(QString::number(registerInfo->getNumberOfChannels()));
+  setShape(registerInfo->getNumberOfDimensions(),
+           registerInfo->getNumberOfElements(),
+           registerInfo->getNumberOfChannels());
+  
   ///@todo FIXME fill numerial and fixed point information
   ui.numericalAddresseGroupBox->hide();
   ui.fixedPointGroupBox->hide();
+}
+
+void PropertiesWidget::setShape(unsigned int nDimensions, unsigned int nChannels, unsigned int nElements){
+  switch (nDimensions){
+  case 0:
+    ui.dimensionDisplay->setText("Scalar");
+    ui.nElementsLabel->hide();
+    ui.nElementsDisplay->hide();
+    ui.nChannelsLabel->hide();
+    ui.nChannelsDisplay->hide();
+    break;
+  case 1:
+    ui.dimensionDisplay->setText("1 D");
+    ui.nElementsLabel->show();
+    ui.nElementsDisplay->show();
+    ui.nElementsDisplay->setText(QString::number(nElements));
+    ui.nChannelsLabel->hide();
+    ui.nChannelsDisplay->hide();
+    break;
+  case 2:
+    ui.dimensionDisplay->setText("2 D");
+    ui.nElementsLabel->show();
+    ui.nElementsDisplay->show();
+    ui.nElementsDisplay->setText(QString::number(nElements));
+    ui.nChannelsLabel->show();
+    ui.nChannelsDisplay->show();
+    ui.nChannelsDisplay->setText(QString::number(nChannels));
+    break;
+  default:
+    // we should never run into this, but who hows how device access will develop
+    ui.dimensionDisplay->setText(QString::number(nDimensions));
+    ui.nElementsLabel->show();
+    ui.nElementsDisplay->show();
+    ui.nElementsDisplay->setText(QString::number(nElements));
+    ui.nChannelsLabel->show();
+    ui.nChannelsDisplay->show();
+    ui.nChannelsDisplay->setText(QString::number(nChannels));
+  }
 }
 
 void PropertiesWidget::clearDataWidgetBackground(){
