@@ -216,14 +216,14 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="QLabel" name="registerBarLabel">
+            <widget class="QLabel" name="barLabel">
              <property name="text">
               <string>Bar</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerBarDisplay">
+            <widget class="QLabel" name="barDisplay">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -242,14 +242,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerAddressLabel">
+            <widget class="QLabel" name="addressLabel">
              <property name="text">
               <string>Address</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerAddressDisplay">
+            <widget class="QLabel" name="addressDisplay">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -268,14 +268,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerSizeLabel">
+            <widget class="QLabel" name="sizeLabel">
              <property name="text">
-              <string>Total size</string>
+              <string>Total size (bytes)</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerSizeDisplay">
+            <widget class="QLabel" name="sizeDisplay">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -298,12 +298,18 @@
         </item>
         <item>
          <widget class="QGroupBox" name="fixedPointGroupBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="title">
            <string>Fixed Point Interpretation</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QLabel" name="RegisterwidthLabel">
+            <widget class="QLabel" name="widthLabel">
              <property name="locale">
               <locale language="English" country="UnitedStates"/>
              </property>
@@ -316,7 +322,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerWidthDisplay">
+            <widget class="QLabel" name="widthDisplay">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -344,12 +350,12 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="RegisterFracBitsLabel">
+            <widget class="QLabel" name="nFracBitsLabel">
              <property name="locale">
               <locale language="English" country="UnitedStates"/>
              </property>
              <property name="text">
-              <string>Fractional bits</string>
+              <string> Fractional bits</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -357,7 +363,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registerFracBitsDisplay">
+            <widget class="QLabel" name="nFracBitsDisplay">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -379,12 +385,12 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="SignedBitIndicationLabel">
+            <widget class="QLabel" name="signedFlagLabel">
              <property name="locale">
               <locale language="English" country="UnitedStates"/>
              </property>
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sign bit&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Signed Flag&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -392,7 +398,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="registeSignBitDisplay">
+            <widget class="QLabel" name="signedFlagDisplay">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>

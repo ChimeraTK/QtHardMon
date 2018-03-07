@@ -1,4 +1,5 @@
 #include "PropertiesWidget.h"
+#include <ChimeraTK/RegisterInfoMap.h>
 
 PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent) {
   ui.setupUi(this);
@@ -28,14 +29,20 @@ void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo
 
   setEnabled(true);
   ui.registerPathDisplay->setText(static_cast<const std::string &>(registerInfo->getRegisterName()).c_str());
-  setShape(registerInfo->getNumberOfDimensions(),
-           registerInfo->getNumberOfElements(),
-           registerInfo->getNumberOfChannels());
+  setShape(registerInfo->getNumberOfDimensions(), registerInfo->getNumberOfChannels(), registerInfo->getNumberOfElements());
   setType(registerInfo->getDataDescriptor());
-  
-  ///@todo FIXME fill numerial and fixed point information
-  ui.numericalAddresseGroupBox->hide();
-  ui.fixedPointGroupBox->hide();
+
+  // Try to cast to the old, numeric addressed registerInfo.
+  auto numericAddressedInfo = boost::dynamic_pointer_cast<ChimeraTK::RegisterInfoMap::RegisterInfo>(registerInfo);
+  // If the cast succeeded fill the numeric addressed and fixed point fields. This info only
+  // exists for this type of registers.
+  if(numericAddressedInfo){
+    setAddress(numericAddressedInfo->bar, numericAddressedInfo->address, numericAddressedInfo->nBytes);
+    setFixedPointInfo(numericAddressedInfo->width, numericAddressedInfo->nFractionalBits, numericAddressedInfo->signedFlag, registerInfo->getNumberOfDimensions());
+  }else{ 
+    ui.numericalAddresseGroupBox->hide();
+    ui.fixedPointGroupBox->hide();
+  }
 }
 
 void PropertiesWidget::setShape(unsigned int nDimensions, unsigned int nChannels, unsigned int nElements){
@@ -105,6 +112,26 @@ void PropertiesWidget::setType(ChimeraTK::RegisterInfo::DataDescriptor const & d
   }
 }
 
+void PropertiesWidget::setAddress(int bar, int address, int sizeInBytes){
+  ui.numericalAddresseGroupBox->show();
+  ui.barDisplay->setText(QString::number(bar));
+  ui.addressDisplay->setText(QString::number(address));
+  ui.sizeDisplay->setText(QString::number(sizeInBytes));
+}
+
+void PropertiesWidget::setFixedPointInfo(int width, int nFracBits, bool signedFlag, unsigned int nDimensions){
+  // Fixed point information is only valid for scalar and 1D registers.
+  // In 2D registers it is per channel.
+  if (nDimensions >1){
+    ui.fixedPointGroupBox->hide();
+    return;
+  }
+
+  ui.fixedPointGroupBox->show();   
+  ui.widthDisplay->setText(QString::number(width));
+  ui.nFracBitsDisplay->setText(QString::number(nFracBits));
+  ui.signedFlagDisplay->setText(signedFlag?"1":"0");
+}
 
 void PropertiesWidget::clearDataWidgetBackground(){
 }

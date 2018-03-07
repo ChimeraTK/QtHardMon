@@ -24,7 +24,7 @@ public:
 protected:
 
   // Numerical addressed -only methods of the interface
-  void setFixedPointInfo(int width, int fracBits, int signBit);
+  void setFixedPointInfo(int width, int nFracBits, bool signedFlag, unsigned int nDimensions);
   void setAddress(int bar, int address, int sizeInBytes);
   // other internal methods to avoid screens of unstructured code...
   void setShape(unsigned int nDimensions, unsigned int nChannels, unsigned int nElements);
