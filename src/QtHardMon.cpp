@@ -902,15 +902,6 @@ bool QtHardMon::checkExtension(QString const &fileName, QString extension) {
   return areStringsEqual;
 }
 
-bool QtHardMon::isMultiplexedDataRegion(const std::string &registerName) {
-  if (registerName.substr(0,
-                          std::string("AREA_MULTIPLEXED_SEQUENCE_").size()) ==
-      "AREA_MULTIPLEXED_SEQUENCE_") {
-    return true;
-  }
-  return false;
-}
-
 std::string QtHardMon::extractFileNameFromPath(const std::string &fileName) {
   std::string extractedName = fileName;
   size_t position = fileName.find_last_of('/');

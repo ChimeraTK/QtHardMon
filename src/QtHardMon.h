@@ -211,11 +211,6 @@ private:
   // pointer, would require unnecessarily long locking of the mutex.
   friend class PlotWindow;
 
-  bool isMultiplexedDataRegion(std::string const &registerName);
-  bool isSeqDescriptor(std::string const &registerName);
-
-  std::string extractMultiplexedRegionName(std::string const &regName);
-
   std::string extractFileNameFromPath(const std::string &);
 
 private:

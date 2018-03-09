@@ -4,14 +4,6 @@
 
 #include <qtreewidget.h>
 
-enum class DeviceElementDataType {
-  ModuleDataType = QTreeWidgetItem::UserType + 1,
-  NumAddressedRegisterDataType,
-  MultiplexedAreaDataType,
-  SequenceRegisterDataType,
-  GenericRegisterDataType
-};
-
 // Constants
 namespace qthardmon {
 const int FIXED_POINT_DISPLAY_COLUMN = 0;
