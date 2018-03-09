@@ -938,28 +938,24 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   for (RegisterCatalogue::const_iterator registerIter = currentDevice_.getRegisterCatalogue().begin();
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
-    // The QTreeItems are assigned with `unused` attribute, as they are
-    // automatically appended to the tree structure.
-    mtca4u::RegisterInfoMap::RegisterInfo *numericAddressedRegisterInfo =
-        dynamic_cast<mtca4u::RegisterInfoMap::RegisterInfo *>(
-            registerCatalogue.getRegister(registerIter->getRegisterName())
-                .get());
 
     // parentNode can be null if there is no parent, i.e. the register is directly in the treeWidget
     auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget);
     if (parentNode){
       new DeviceElementQTreeItem(parentNode,
-                                 registerIter->getRegisterName().getComponents().back().c_str(),
-                                 registerCatalogue.getRegister(registerIter->getRegisterName()));
+        registerIter->getRegisterName().getComponents().back().c_str(),
+        registerCatalogue.getRegister(registerIter->getRegisterName()));
     }else{
       // no parent node. Directly add to the tree widget.
       new DeviceElementQTreeItem(ui.registerTreeWidget,
-                                 registerIter->getRegisterName().getComponents().back().c_str(),
-                                 registerCatalogue.getRegister(registerIter->getRegisterName()));      
+        registerIter->getRegisterName().getComponents().back().c_str(),
+        registerCatalogue.getRegister(registerIter->getRegisterName()));      
     }
   }
   ui.registerTreeWidget->expandAll();
+
   if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
+    ///@todo: FIXME: This has to go to open, not when filling the tree
     // Searching a sub-tree does not work in QTreeWidget. So here is the
     // strategy:
     if (!(deviceListItem->lastSelectedRegister_.empty())) {

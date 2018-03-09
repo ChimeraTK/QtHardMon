@@ -9,15 +9,23 @@ PropertiesWidget::PropertiesWidget(QWidget *parent) : QWidget(parent) {
 void PropertiesWidget::clearFields(){
   ui.registerPathDisplay->setText("");
   ui.dimensionDisplay->setText("");
-  ui.nElementsDisplay->setText("");
-  ui.nChannelsDisplay->setText("");
+  // no need to update channels or elements. They are hidden as info of 1D and 2D
   ui.numericalAddresseGroupBox->hide();
   ui.fixedPointGroupBox->hide();
-  ui.nElementsLabel->hide();
-  ui.nElementsDisplay->hide();
-  ui.nChannelsLabel->hide();
-  ui.nChannelsDisplay->hide();
+  setOneDWidgetsVisible(false);
+  setTwoDWidgetsVisible(false);
   setEnabled(false);
+}
+
+void PropertiesWidget::setOneDWidgetsVisible(bool visible){
+  ui.nElementsLabel->setVisible(visible);
+  ui.nElementsDisplay->setVisible(visible);
+}
+
+void PropertiesWidget::setTwoDWidgetsVisible(bool visible){
+  ui.nChannelsLabel->setVisible(visible);
+  ui.nChannelsDisplay->setVisible(visible);
+  ui.channelWidget->setVisible(visible);
 }
 
 void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo> const & registerInfo){
@@ -49,37 +57,33 @@ void PropertiesWidget::setShape(unsigned int nDimensions, unsigned int nChannels
   switch (nDimensions){
   case 0:
     ui.dimensionDisplay->setText("Scalar");
-    ui.nElementsLabel->hide();
-    ui.nElementsDisplay->hide();
-    ui.nChannelsLabel->hide();
-    ui.nChannelsDisplay->hide();
+    setOneDWidgetsVisible(false);
+    setTwoDWidgetsVisible(false);
+    ui.channelSpinBox->setValue(0);
     break;
   case 1:
     ui.dimensionDisplay->setText("1 D");
-    ui.nElementsLabel->show();
-    ui.nElementsDisplay->show();
+    setOneDWidgetsVisible(true);
     ui.nElementsDisplay->setText(QString::number(nElements));
-    ui.nChannelsLabel->hide();
-    ui.nChannelsDisplay->hide();
+    setTwoDWidgetsVisible(false);
+    ui.channelSpinBox->setValue(0);
     break;
   case 2:
     ui.dimensionDisplay->setText("2 D");
-    ui.nElementsLabel->show();
-    ui.nElementsDisplay->show();
+    setOneDWidgetsVisible(true);
     ui.nElementsDisplay->setText(QString::number(nElements));
-    ui.nChannelsLabel->show();
-    ui.nChannelsDisplay->show();
+    setTwoDWidgetsVisible(true);
     ui.nChannelsDisplay->setText(QString::number(nChannels));
+    ui.channelSpinBox->setMaximum(nChannels>0?nChannels-1:0);
     break;
   default:
     // we should never run into this, but who hows how device access will develop
     ui.dimensionDisplay->setText(QString::number(nDimensions));
-    ui.nElementsLabel->show();
-    ui.nElementsDisplay->show();
+    setOneDWidgetsVisible(true);
     ui.nElementsDisplay->setText(QString::number(nElements));
-    ui.nChannelsLabel->show();
-    ui.nChannelsDisplay->show();
+    setTwoDWidgetsVisible(true);
     ui.nChannelsDisplay->setText(QString::number(nChannels));
+    ui.channelSpinBox->setMaximum(nChannels>0?nChannels-1:0);
   }
 }
 

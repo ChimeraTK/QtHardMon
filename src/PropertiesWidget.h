@@ -29,6 +29,9 @@ protected:
   // other internal methods to avoid screens of unstructured code...
   void setShape(unsigned int nDimensions, unsigned int nChannels, unsigned int nElements);
   void setType(ChimeraTK::RegisterInfo::DataDescriptor const & dataDescriptor);
+
+  void setOneDWidgetsVisible(bool visible);
+  void setTwoDWidgetsVisible(bool visible);
 };
 
 #endif // PROPERTIESWIDGET_H
