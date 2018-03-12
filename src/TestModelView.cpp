@@ -1,6 +1,7 @@
 #include "TestModelView.h"
 #include "RegisterAccessorModel.h"
 #include <QtWidgets/QApplication>
+#include "RegisterTypeAbstractorImpl.h"
 
 #include <ChimeraTK/Device.h>
 using namespace ChimeraTK;
@@ -19,7 +20,10 @@ int main(int argc, char *argv[]){
   
   TestModelView tmv;
   //RegisterAccessorModel<int32_t> accessorModel(0);
-  RegisterAccessorModel accessorModel(0, d.getTwoDRegisterAccessor<int32_t>("ADC/WORD_CLK_MUX"));
+  auto accessor = d.getTwoDRegisterAccessor<int32_t>("ADC/WORD_CLK_MUX");
+  auto abstractAccessor = std::make_shared< RegisterTypeAbstractorImpl<int32_t> >(accessor); 
+                                          
+  RegisterAccessorModel accessorModel(0, abstractAccessor);
   tmv.ui.tableView->setModel( &accessorModel );
   tmv.connect(tmv.ui.readButton, SIGNAL(clicked()), &accessorModel, SLOT(read()));
   tmv.show();

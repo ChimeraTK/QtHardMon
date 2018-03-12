@@ -1,14 +1,14 @@
 #include "RegisterAccessorModel.h"
 
-RegisterAccessorModel::RegisterAccessorModel(QObject *parent, ChimeraTK::TwoDRegisterAccessor<int32_t> accessor):
-  _accessor(accessor)
+RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor) :
+  _abstractAccessor(abstractAccessor)
 {
 }
 
 
 int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
-  if (_accessor.isInitialised()){
-    return _accessor.getNElementsPerChannel();
+  if (_abstractAccessor){
+    return _abstractAccessor->nElements();
   }else{
     return 0;
   }
@@ -24,12 +24,12 @@ int RegisterAccessorModel::columnCount(const QModelIndex & /*modelIndex*/) const
 //QVariant RegisterAccessorModel<DATA_TYPE>::data(const QModelIndex &modelIndex, int role) const{
 QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) const{
     if (role == Qt::DisplayRole){
-      return QString::number(_accessor[0][modelIndex.row()]);
+      return _abstractAccessor->data(0,modelIndex.row());
     }
     return QVariant();
 }
 
 void RegisterAccessorModel::read(){
-  _accessor.read();
+  _abstractAccessor->read();
   emit dataChanged(createIndex(0,0),createIndex(rowCount()-1, columnCount()-1));
 }

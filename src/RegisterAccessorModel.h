@@ -4,13 +4,14 @@
 #include <QAbstractTableModel>
 //#include <QString>
 #include <ChimeraTK/Device.h>
+#include "RegisterTypeAbstractor.h"
 
 //template <class DATA_TYPE>
 class RegisterAccessorModel : public QAbstractTableModel
 {
   Q_OBJECT
 public:
-    RegisterAccessorModel(QObject *parent, ChimeraTK::TwoDRegisterAccessor<int32_t> accessor);
+  RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor);
     int rowCount(const QModelIndex &modelIndex = QModelIndex()) const override ;
     int columnCount(const QModelIndex &modelIndex = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -23,7 +24,7 @@ public slots:
     //    void write();
     
  protected:
-    ChimeraTK::TwoDRegisterAccessor<int32_t> _accessor;
+    std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;
     
     //signals:
     //    void editCompleted(const QString &);
