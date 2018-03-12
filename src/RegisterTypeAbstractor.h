@@ -1,6 +1,10 @@
 #ifndef REGISTER_TYPE_ABSTRACTOR_H
 #define REGISTER_TYPE_ABSTRACTOR_H
 
+#include <QVariant>
+#include <memory>
+#include <ChimeraTK/Device.h>
+
 ///Qt objects with signals and slots cannot be template classes.
 ///As we need a container for the user-type templated RegisterAccessors,\
 ///this class is used as a non-templated base class a Qt-compatible interface.
@@ -12,5 +16,7 @@ class RegisterTypeAbstractor{
 
   virtual void read() = 0;
 };
+
+std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::RegisterInfo const & registerInfo, ChimeraTK::Device & device);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_H

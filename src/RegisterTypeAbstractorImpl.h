@@ -42,4 +42,8 @@ void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::read(){
   _accessor.read();
 }
 
+template<>
+QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex, unsigned int elementIndex) const;
+
+
 #endif // REGISTER_TYPE_ABSTRACTOR_IMPL_H

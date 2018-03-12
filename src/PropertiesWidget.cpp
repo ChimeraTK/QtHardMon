@@ -89,15 +89,19 @@ void PropertiesWidget::setShape(unsigned int nDimensions, unsigned int nChannels
 
 void PropertiesWidget::setType(ChimeraTK::RegisterInfo::DataDescriptor const & dataDescriptor){
   switch(dataDescriptor.fundamentalType()){
-  case ChimeraTK::RegisterInfo::FundamentalType::numeric: 	
-    if (dataDescriptor.isIntegral()){
+  case ChimeraTK::RegisterInfo::FundamentalType::numeric:
+    {
+      std::string signedString;
       if (dataDescriptor.isSigned()){
-        ui.dataTypeDisplay->setText("Signed integer");
+        signedString = "Signed";
       }else{
-        ui.dataTypeDisplay->setText("Unsingned integer");
+        signedString = "Unsigned";
       }
-    }else{
-      ui.dataTypeDisplay->setText("Floating point");
+      if (dataDescriptor.isIntegral()){
+        ui.dataTypeDisplay->setText((signedString+" integer").c_str());
+      }else{
+        ui.dataTypeDisplay->setText((signedString+" non-integer").c_str());
+      }
     }
     break;
   case ChimeraTK::RegisterInfo::FundamentalType::string:

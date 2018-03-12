@@ -20,10 +20,10 @@ int main(int argc, char *argv[]){
   
   TestModelView tmv;
   //RegisterAccessorModel<int32_t> accessorModel(0);
-  auto accessor = d.getTwoDRegisterAccessor<int32_t>("ADC/WORD_CLK_MUX");
-  auto abstractAccessor = std::make_shared< RegisterTypeAbstractorImpl<int32_t> >(accessor); 
+  auto accessor = d.getTwoDRegisterAccessor<std::string>("ADC/WORD_CLK_MUX");
+  auto abstractAccessor = std::make_shared< RegisterTypeAbstractorImpl<std::string> >(accessor); 
                                           
-  RegisterAccessorModel accessorModel(0, abstractAccessor);
+  RegisterAccessorModel accessorModel(0, createAbstractAccessor(*(d.getRegisterCatalogue().getRegister("ADC/WORD_CLK_MUX")), d));
   tmv.ui.tableView->setModel( &accessorModel );
   tmv.connect(tmv.ui.readButton, SIGNAL(clicked()), &accessorModel, SLOT(read()));
   tmv.show();
