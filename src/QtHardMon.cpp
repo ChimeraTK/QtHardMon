@@ -47,7 +47,7 @@ using namespace mtca4u;
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
     : QMainWindow(parent_, flags), ui(), dmapFileName_(), configFileName_(),
-      insideReadOrWrite_(0), _currentDeviceListItem(NULL), _plotWindow(NULL) {
+      insideReadOrWrite_(0), currentAccessorModel_(nullptr), _currentDeviceListItem(NULL), _plotWindow(NULL) {
 
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
@@ -263,7 +263,7 @@ void QtHardMon::openDevice(
   try {
     currentDevice_.open(deviceFileName);
     // enable all of the GUI in case it was deactivated before
-    ui.propertiesWidget->ui.valuesTableWidget->setEnabled(true);
+    ui.propertiesWidget->ui.valuesTableView->setEnabled(true);
     ui.operationsGroupBox->setEnabled(true);
     ui.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
@@ -281,7 +281,7 @@ void QtHardMon::openDevice(
 void QtHardMon::closeDevice() {
   if (currentDevice_.isOpened())
     currentDevice_.close();
-  ui.propertiesWidget->ui.valuesTableWidget->setEnabled(false);
+  ui.propertiesWidget->ui.valuesTableView->setEnabled(false);
   ui.operationsGroupBox->setEnabled(false);
   ui.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
@@ -298,6 +298,9 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   // is called with a NULL registerItem
   if (!registerItem) {
     ui.propertiesWidget->clearFields();
+    ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
+    delete currentAccessorModel_;
+    currentAccessorModel_=nullptr;
     return;
   }
 
@@ -305,7 +308,17 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   DeviceElementQTreeItem *selectedItem =
       static_cast<DeviceElementQTreeItem *>(registerItem);
   ui.propertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo());
-
+  if (selectedItem->getRegisterInfo()){
+    // there is valid register information. Create an accessor
+    auto abstractAccessor =  createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
+    currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
+    ui.propertiesWidget->ui.valuesTableView->setModel( currentAccessorModel_ );
+  }else{// no register information. Delete the accessor.
+    ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
+    delete currentAccessorModel_;
+    currentAccessorModel_=nullptr;
+  }
+ 
   _currentDeviceListItem->lastSelectedRegister_.clear();
   while (selectedItem && !dynamic_cast<QTreeWidget *>(selectedItem)) {
     _currentDeviceListItem->lastSelectedRegister_.insert(
@@ -323,8 +336,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
     // widget items are empty.
     // In addition the write button is deactivated so the invalid items cannot
     // be written to the register.
-    ui.propertiesWidget->ui.valuesTableWidget->clearContents();
-    ui.propertiesWidget->ui.valuesTableWidget->setRowCount(0);
+    ///@todo FIXME why should writing be deactivated? 
     ui.writeButton->setEnabled(false);
   } else {
     read(true);
@@ -343,9 +355,13 @@ void QtHardMon::read(bool autoRead) {
 	  return;
   }
   try {
-    if (currentDevice_.isOpened()) {
+    // if no register is selected the accessor model is nullptr.
+    if (currentAccessorModel_){
+      currentAccessorModel_->read();
+      
       ///@todo FIXME I disabled reading when opening a devide. This should not happen anyway.
       //registerTreeItem->readData(currentDevice_);
+      ///@todo FIXME: what does the write button have to do with read??? This should not be here!
       ui.writeButton->setEnabled(true);
     }
   } catch (InvalidOperationException &e) {
@@ -386,9 +402,9 @@ void QtHardMon::write() {
           ui.registerTreeWidget->currentItem());
 
   try {
-    if (currentDevice_.isOpened()) {
-      ///@todo FIXME Writing mechanism has to change. Not implemented
-      //registerTreeItem->writeData(currentDevice_);
+    // if no register is selected this pointer has to be nullptr.
+    if (currentAccessorModel_) {
+      currentAccessorModel_->write();
     }
   } catch (InvalidOperationException &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),

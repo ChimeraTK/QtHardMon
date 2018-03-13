@@ -4,6 +4,7 @@
 #include "CustomDelegates.h"
 #include "PlotWindow.h"
 #include "ui_QtHardMonForm.h"
+#include "RegisterAccessorModel.h"
 #include <QDir>
 #include <QIcon>
 #include <QMessageBox>
@@ -131,13 +132,14 @@ public:
    */
   bool loadDmapFile(QString const &dmapFileName);
 
-private:
-  mtca4u::Device
-      currentDevice_; ///< The instance of the device which is being accessed.
+protected:
+  mtca4u::Device currentDevice_; ///< The instance of the device which is being accessed.
   QString dmapFileName_;   ///< The file name of the last opened dmap file
   QString configFileName_; ///< Name of the config file (last saved or read)
   int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
                            /// function is being executed
+  RegisterAccessorModel * currentAccessorModel_; ///< The accessor model for the current register.
+  
   /**
    *  Write the config to the given file name.
    */

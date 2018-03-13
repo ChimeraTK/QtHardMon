@@ -19,7 +19,7 @@ public:
 public slots:
     //void setChannel(unsigned int channelNumber);
     void read();
-    //    void write();
+    void write(){std::cout << "This is model::write()" << std::endl;}
     
  protected:
     std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;

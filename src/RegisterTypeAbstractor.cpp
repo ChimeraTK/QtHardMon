@@ -18,7 +18,7 @@ std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::Regist
         return createTypedAccessor<uint32_t>(registerInfo, device);
       }
     }else{//not integral, use double
-      return createTypedAccessor<uint32_t>(registerInfo, device);
+      return createTypedAccessor<double>(registerInfo, device);
     }
     break;
   case ChimeraTK::RegisterInfo::FundamentalType::string:
