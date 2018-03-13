@@ -13,6 +13,7 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
   unsigned int nElements() const override;
   QVariant data(unsigned int channelIndex, unsigned int elementIndex) const override;
   void read() override;
+  void write() override;
   
  protected:
   ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> _accessor;
@@ -40,6 +41,11 @@ QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::data(unsigned int channelIn
 template <class USER_DATA_TYPE>
 void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::read(){
   _accessor.read();
+}
+
+template <class USER_DATA_TYPE>
+void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::write(){
+  _accessor.write();
 }
 
 template<>

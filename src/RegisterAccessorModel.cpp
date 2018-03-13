@@ -4,6 +4,7 @@
 RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor) :
   _abstractAccessor(abstractAccessor)
 {
+  _isModified.resize(_abstractAccessor->nElements());
 }
 
 int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
@@ -20,10 +21,10 @@ int RegisterAccessorModel::columnCount(const QModelIndex & /*modelIndex*/) const
 
 QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) const{
   switch (role){
-  case Qt::DisplayRole:
-    return _abstractAccessor->data(0,modelIndex.row());
+    case Qt::DisplayRole:
+      return _abstractAccessor->data(0,modelIndex.row());
     case Qt::BackgroundRole:
-      if (modelIndex.row()%2){  //change background for testing
+      if (_isModified[modelIndex.row()]){  //change background color for modified rows
         return QBrush( QColor( 255, 100, 100, 255 ) ); // a light red
       }
       break;
@@ -31,9 +32,41 @@ QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) co
   return QVariant();
 }
 
+Qt::ItemFlags RegisterAccessorModel::flags(const QModelIndex &modelIndex) const
+{
+    return Qt::ItemIsEditable | QAbstractTableModel::flags(modelIndex);
+}
+
+bool RegisterAccessorModel::setData(const QModelIndex & modelIndex, const QVariant & value, int role){
+  if (role == Qt::EditRole){
+    ///@todo FIXME set the value to the abstract accessor
+    //_abstractAccessor->setData(0,modelIndex.row(), value);
+
+    // set the modified flag
+    _isModified[modelIndex.row()] = true;
+  }
+  return true;
+}
+
 void RegisterAccessorModel::read(){
   _abstractAccessor->read();
+  clearModifiedFlags();
   emit dataChanged(createIndex(0,0),createIndex(rowCount()-1, columnCount()-1));
+}
+
+void RegisterAccessorModel::write(){
+  _abstractAccessor->write();
+  clearModifiedFlags();
+  // emit a data changed to clear the red background colours
+  emit dataChanged(createIndex(0,0),createIndex(rowCount()-1, columnCount()-1));
+}
+
+void RegisterAccessorModel::clearModifiedFlags(){
+  // note: although we modify f we don't have to/can't specify it as auto & f because
+  // _isModified is a vector<bool> which returns a BitReference object which allows to modify it.
+  for (auto f : _isModified){
+    f=false;
+  }
 }
 
 QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientation, int role) const

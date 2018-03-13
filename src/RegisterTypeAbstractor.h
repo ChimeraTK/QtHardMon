@@ -15,6 +15,7 @@ class RegisterTypeAbstractor{
   virtual QVariant data(unsigned int channelIndex, unsigned int elementIndex) const = 0;
 
   virtual void read() = 0;
+  virtual void write() = 0;
 };
 
 std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::RegisterInfo const & registerInfo, ChimeraTK::Device & device);
