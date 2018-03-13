@@ -294,13 +294,15 @@ void QtHardMon::closeDevice() {
 
 void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
                                  QTreeWidgetItem * /*previousRegisterItem */) {
+  // Always clear the old data model. This needed in all use cases below.
+  ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
+  delete currentAccessorModel_;
+  currentAccessorModel_=nullptr;
+ 
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
     ui.propertiesWidget->clearFields();
-    ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
-    delete currentAccessorModel_;
-    currentAccessorModel_=nullptr;
     return;
   }
 
@@ -311,12 +313,13 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   if (selectedItem->getRegisterInfo()){
     // there is valid register information. Create an accessor
     auto abstractAccessor =  createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
-    currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
-    ui.propertiesWidget->ui.valuesTableView->setModel( currentAccessorModel_ );
-  }else{// no register information. Delete the accessor.
-    ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
-    delete currentAccessorModel_;
-    currentAccessorModel_=nullptr;
+    //If the data type is undefined or "noData" there is nothing to display for QtHardMon.
+    //In this case we don't have an accessor (pointer is null) or a data model.
+    if (abstractAccessor){
+      // create a data model if we have an accessor.
+      currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
+      ui.propertiesWidget->ui.valuesTableView->setModel( currentAccessorModel_ );
+    }
   }
  
   _currentDeviceListItem->lastSelectedRegister_.clear();
@@ -946,6 +949,12 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
 
+    ///@todo FIXME Remove the debug leftovers
+//    auto x = registerCatalogue.getRegister(registerIter->getRegisterName());
+//    if ( x->getDataDescriptor().fundamentalType() == ChimeraTK::RegisterInfo::FundamentalType::numeric){
+//      std::cout << x->getRegisterName() << ", is integral "  << x->getDataDescriptor().isIntegral() << " " << registerIter->getDataDescriptor().isIntegral() << std::endl;
+//    }
+  
     // parentNode can be null if there is no parent, i.e. the register is directly in the treeWidget
     auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget);
     if (parentNode){
