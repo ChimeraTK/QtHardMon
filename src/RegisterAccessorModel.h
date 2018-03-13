@@ -20,6 +20,8 @@ public slots:
     //void setChannel(unsigned int channelNumber);
     void read();
     void write(){std::cout << "This is model::write()" << std::endl;}
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     
  protected:
     std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;
