@@ -39,11 +39,13 @@ Qt::ItemFlags RegisterAccessorModel::flags(const QModelIndex &modelIndex) const
 
 bool RegisterAccessorModel::setData(const QModelIndex & modelIndex, const QVariant & value, int role){
   if (role == Qt::EditRole){
-    ///@todo FIXME set the value to the abstract accessor
-    //_abstractAccessor->setData(0,modelIndex.row(), value);
-
-    // set the modified flag
-    _isModified[modelIndex.row()] = true;
+    if ( _abstractAccessor->setData(0,modelIndex.row(), value)){
+      // setting worked, set the modified flag
+      _isModified[modelIndex.row()] = true;
+      return true;
+    }else{
+      return false; // setting not successful
+    }      
   }
   return true;
 }

@@ -29,7 +29,7 @@ endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
 set(CMAKE_CXX_STANDARD 14)
 
 include(cmake/add_dependency.cmake)
-add_dependency(mtca4u-deviceaccess 00.30 REQUIRED)
+add_dependency(mtca4u-deviceaccess 00.31 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED)

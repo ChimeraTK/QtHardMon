@@ -13,11 +13,13 @@ class RegisterTypeAbstractor{
   virtual unsigned int nChannels() const = 0;
   virtual unsigned int nElements() const = 0;
   virtual QVariant data(unsigned int channelIndex, unsigned int elementIndex) const = 0;
-
+  virtual bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value) = 0;
+  
   virtual void read() = 0;
   virtual void write() = 0;
 };
 
+///@attention This function can return a nullptr in case the data type is undefined (or noData)
 std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::RegisterInfo const & registerInfo, ChimeraTK::Device & device);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_H

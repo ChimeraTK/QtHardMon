@@ -12,6 +12,8 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
   unsigned int nChannels() const override;
   unsigned int nElements() const override;
   QVariant data(unsigned int channelIndex, unsigned int elementIndex) const override;
+  bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value) override;
+  
   void read() override;
   void write() override;
   
@@ -51,5 +53,17 @@ void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::write(){
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex, unsigned int elementIndex) const;
 
+// unfortunately we have to write a specialisation for all used data types
+template<>
+bool RegisterTypeAbstractorImpl<std::string>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
+
+template<>
+bool RegisterTypeAbstractorImpl<double>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
+
+template<>
+bool RegisterTypeAbstractorImpl<int32_t>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
+
+template<>
+bool RegisterTypeAbstractorImpl<uint32_t>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_IMPL_H
