@@ -91,9 +91,7 @@ void CustomDelegates::setModelData(QWidget *editor, QAbstractItemModel *model,
   if (index.data(Qt::EditRole).type() == QVariant::UserType) {
     HexSpinBox *spinBox = static_cast<HexSpinBox *>(editor);
     spinBox->interpretText();
-    double value = spinBox->value();
-    HexData hexData;
-    hexData.value = value;
+    HexData hexData(spinBox->value());
     QVariant dataVariant;
     dataVariant.setValue(hexData);
     model->setData(index, dataVariant, Qt::EditRole);

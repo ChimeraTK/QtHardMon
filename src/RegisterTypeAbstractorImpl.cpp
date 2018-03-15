@@ -7,7 +7,7 @@ QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex
 
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
-  // this does not make sense. We could throw, or just return an invalid variant.
+  // String as hex does not make sense. We could throw, or just return an invalid variant.
   return QVariant();
 }
 
@@ -34,10 +34,11 @@ bool RegisterTypeAbstractorImpl<int32_t>::setData(unsigned int channelIndex, uns
   bool isConversionSuccessful=false;
   int32_t convertedValue;
   std::cout << "This is setData with data type " << value.type() << std::endl;
-  std::cout << "value is " << value.toString().toStdString()<< std::endl;
   if (value.type() == QVariant::UserType){ //in the user type the data is hex representation, so
+    isConversionSuccessful = value.canConvert<HexData>();
+    std::cout << "value is " << value.value<HexData>().value << std::endl;
     // we have to tell this to the converter
-    convertedValue = value.toString().toInt(&isConversionSuccessful, 16);
+    convertedValue = value.value<HexData>().value;
   }else{
     convertedValue = value.toInt(&isConversionSuccessful);
   }
@@ -54,10 +55,11 @@ bool RegisterTypeAbstractorImpl<uint32_t>::setData(unsigned int channelIndex, un
   bool isConversionSuccessful=false;
   uint32_t convertedValue;
   std::cout << "This is setData with data type " << value.type() << std::endl;
-  std::cout << "value is " << value.toString().toStdString() << std::endl;
   if (value.type() == QVariant::UserType){ //in the user type the data is hex representation, so
+    isConversionSuccessful = value.canConvert<HexData>();
+    std::cout << "value is " << value.value<HexData>().value << std::endl;
     // we have to tell this to the converter
-    convertedValue = value.toString().toUInt(&isConversionSuccessful, 16);
+    convertedValue = value.value<HexData>().value;
   }else{
     convertedValue = value.toUInt(&isConversionSuccessful);
   }
