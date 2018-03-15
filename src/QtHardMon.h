@@ -139,6 +139,7 @@ protected:
   int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
                            /// function is being executed
   RegisterAccessorModel * currentAccessorModel_; ///< The accessor model for the current register.
+  CustomDelegates customDelegate_; ///< The delegate for the values table view
   
   /**
    *  Write the config to the given file name.

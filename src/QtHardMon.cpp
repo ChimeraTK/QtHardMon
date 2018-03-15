@@ -121,6 +121,10 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   ui.writeToFileButton->setEnabled(false);
   ui.readFromFileButton->setEnabled(false);
 
+  // customize table display
+  //  customDelegate_.setDoubleSpinBoxPrecision(_floatPrecision);
+  ui.propertiesWidget->ui.valuesTableView->setItemDelegate(&customDelegate_);
+
   _plotWindow = new PlotWindow(this);
 
   // sorted enabled by default; calling this here will trigger the slot, which

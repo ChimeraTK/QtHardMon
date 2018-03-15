@@ -13,8 +13,11 @@ class RegisterTypeAbstractor{
   virtual unsigned int nChannels() const = 0;
   virtual unsigned int nElements() const = 0;
   virtual QVariant data(unsigned int channelIndex, unsigned int elementIndex) const = 0;
+  virtual QVariant dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const = 0;
   virtual bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value) = 0;
   
+  virtual bool isIntegral() const = 0;
+
   virtual void read() = 0;
   virtual void write() = 0;
 };

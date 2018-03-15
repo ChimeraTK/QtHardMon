@@ -10,6 +10,7 @@
 #include <QStringBuilder>
 #include <climits> // for the max and min integer values
 #include <sstream>
+#include <iostream>
 
 const unsigned int CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION;
 
@@ -55,26 +56,21 @@ QString CustomDelegates::displayText(const QVariant &value,
 QWidget *CustomDelegates::createEditor(QWidget *parent_,
                                        const QStyleOptionViewItem &option,
                                        const QModelIndex &index) const {
-
+  std::cout << "type is " << index.data(Qt::EditRole).type() << std::endl;
   if (index.data(Qt::EditRole).type() ==
       QVariant::Double) { // create spinbox with custom precision
                           // for cells in the double column
     QDoubleSpinBox *doubleSpinBox = new QDoubleSpinBox(parent_);
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
-    doubleSpinBox->setRange(INT_MIN, INT_MAX);
     return doubleSpinBox;
-  } else if (index.data(Qt::EditRole).type() == QVariant::Int) {
-    // Want to customize the decimal spin boxes to limit the max and minimum
-    // value they can display
-    QSpinBox *decimalSpinbox = new QSpinBox(parent_);
-    decimalSpinbox->setRange(INT_MIN, INT_MAX);
-    return decimalSpinbox;
   } else if (index.data(Qt::EditRole).type() == QVariant::UserType) {
     // TODO: make the check above specific to our custom HexDataType
     HexSpinBox *hexSpinBox = new HexSpinBox(parent_);
     hexSpinBox->setRange(INT_MIN, INT_MAX);
     return hexSpinBox;
   } else {
+    // should work for int, uint, string and bool
+    std::cout << "creating default delegate " << std::endl;
     return QStyledItemDelegate::createEditor(parent_, option, index);
   }
 }

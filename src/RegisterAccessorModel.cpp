@@ -16,13 +16,24 @@ int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
 }
 
 int RegisterAccessorModel::columnCount(const QModelIndex & /*modelIndex*/) const{
-  return 1;
+  if (_abstractAccessor->isIntegral()){
+    // For integers we have an additional column with hex representation
+    return 2;
+  }else{
+    return 1;
+  }
 }
 
 QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) const{
   switch (role){
     case Qt::DisplayRole:
-      return _abstractAccessor->data(0,modelIndex.row());
+    case Qt::EditRole:
+      //@todo FIXME The current assumtion that column 1 is always the hex column will not hold.
+      if (modelIndex.column() == 1){
+        return _abstractAccessor->dataAsHex(0,modelIndex.row());
+      }else{
+        return _abstractAccessor->data(0,modelIndex.row());
+      }
     case Qt::BackgroundRole:
       if (_isModified[modelIndex.row()]){  //change background color for modified rows
         return QBrush( QColor( 255, 100, 100, 255 ) ); // a light red
@@ -77,7 +88,9 @@ QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientat
       if (orientation == Qt::Horizontal){
         switch (section){
           case 0:
-            return QString("Value");
+            return QString("Value")+(_abstractAccessor->isIntegral()?" (dec)":"");
+          case 1:
+            return QString("Value (hex)");
           default:
             return QString::number(section);
         }            

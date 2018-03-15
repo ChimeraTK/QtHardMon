@@ -27,7 +27,7 @@ public:
    * Holds the entered value (for which we need the hex representation)
    */
   double value;
-  HexData() : value(0){};
+  HexData(double v=0) : value(v){};
 };
 
 /*
