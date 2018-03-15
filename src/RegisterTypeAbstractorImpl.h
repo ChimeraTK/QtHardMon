@@ -81,7 +81,7 @@ bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setData(unsigned int channelInd
     if (! data.canConvert<USER_DATA_TYPE>() ){
       return false;
     }
-    _accessor[channelIndex][elementIndex] = data.value<int>();
+    _accessor[channelIndex][elementIndex] = data.value<USER_DATA_TYPE>();
   }
   return true;
 }

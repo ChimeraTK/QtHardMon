@@ -8,7 +8,7 @@
 #include "CustomDelegates.h"
 #include <QDoubleSpinBox>
 #include <QStringBuilder>
-#include <climits> // for the max and min integer values
+#include <limits> 
 #include <sstream>
 #include <iostream>
 
@@ -61,12 +61,13 @@ QWidget *CustomDelegates::createEditor(QWidget *parent_,
       QVariant::Double) { // create spinbox with custom precision
                           // for cells in the double column
     QDoubleSpinBox *doubleSpinBox = new QDoubleSpinBox(parent_);
+    doubleSpinBox->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
     return doubleSpinBox;
   } else if (index.data(Qt::EditRole).type() == QVariant::UserType) {
     // TODO: make the check above specific to our custom HexDataType
     HexSpinBox *hexSpinBox = new HexSpinBox(parent_);
-    hexSpinBox->setRange(INT_MIN, INT_MAX);
+    hexSpinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     return hexSpinBox;
   } else {
     // should work for int, uint, string and bool
