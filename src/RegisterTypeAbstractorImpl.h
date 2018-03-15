@@ -14,7 +14,7 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
   unsigned int nElements() const override;
   QVariant data(unsigned int channelIndex, unsigned int elementIndex) const override;
   QVariant dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const override;
-  bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value) override;
+  bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data) override;
 
   bool isIntegral() const override;
   
@@ -66,24 +66,33 @@ bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::isIntegral() const{
   return std::is_integral<USER_DATA_TYPE>::value;
 }
 
+template<class USER_DATA_TYPE>
+bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
+
+  if (data.type() == QVariant::UserType){ //in the user type the data is hex representation
+    if (! data.canConvert<HexData>() ){
+      return false;
+    }
+    // The variant has a templated function called value() which returns the template type,
+    // HexData in out case. The HexData class itself has a member called value, which holds the
+    // actual value. Phew...
+    _accessor[channelIndex][elementIndex] = data.value<HexData>().value;
+  }else{
+    if (! data.canConvert<USER_DATA_TYPE>() ){
+      return false;
+    }
+    _accessor[channelIndex][elementIndex] = data.value<int>();
+  }
+  return true;
+}
+
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex, unsigned int elementIndex) const;
 
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const;
 
-// unfortunately we have to write a specialisation for all used data types
 template<>
-bool RegisterTypeAbstractorImpl<std::string>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
-
-template<>
-bool RegisterTypeAbstractorImpl<double>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
-
-template<>
-bool RegisterTypeAbstractorImpl<int32_t>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
-
-template<>
-bool RegisterTypeAbstractorImpl<uint32_t>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value);
-
+bool RegisterTypeAbstractorImpl<std::string>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_IMPL_H
