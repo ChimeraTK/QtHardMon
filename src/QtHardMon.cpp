@@ -80,6 +80,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   connect(ui.registerTreeWidget, SIGNAL(itemActivated(QTreeWidgetItem *, int)),
           this, SLOT(registerClicked(QTreeWidgetItem *)));
 
+  connect(ui.propertiesWidget->ui.channelSpinBox, SIGNAL(valueChanged(int)),
+    this, SLOT(channelSelected(int)));
+
   connect(ui.loadBoardsButton, SIGNAL(clicked()), this, SLOT(loadBoards()));
 
   connect(ui.readButton, SIGNAL(clicked()), this, SLOT(read()));
@@ -894,6 +897,12 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
   }
 
   read();
+}
+
+void QtHardMon::channelSelected(int channelNumber){
+  if (currentAccessorModel_){
+    currentAccessorModel_->setChannelNumber(channelNumber);
+  }
 }
 
 void QtHardMon::openCloseDevice() {

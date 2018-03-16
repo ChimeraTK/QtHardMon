@@ -72,6 +72,8 @@ private slots:
                         QTreeWidgetItem * /*previousRegisterItem */ = NULL);
   void registerClicked(
       QTreeWidgetItem *registerItem); ///< Executed if a register is clicked
+  void channelSelected(int channelNumber);
+  
   void aboutQtHardMon(); ///< Show the aboutQtHardMon
   void aboutQt();        ///< Show the aboutQt dialog
 

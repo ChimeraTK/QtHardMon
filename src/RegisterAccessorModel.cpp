@@ -2,9 +2,12 @@
 #include <QBrush>
 
 RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor) :
-  _abstractAccessor(abstractAccessor)
+  _abstractAccessor(abstractAccessor), _channelNumber(0)
 {
-  _isModified.resize(_abstractAccessor->nElements());
+  _isModified.resize(_abstractAccessor->nChannels());
+  for (auto & channelModifiedFlags: _isModified){
+    channelModifiedFlags.resize(_abstractAccessor->nElements());
+  }
 }
 
 int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
@@ -30,12 +33,12 @@ QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) co
     case Qt::EditRole:
       //@todo FIXME The current assumtion that column 1 is always the hex column will not hold.
       if (modelIndex.column() == 1){
-        return _abstractAccessor->dataAsHex(0,modelIndex.row());
+        return _abstractAccessor->dataAsHex(_channelNumber,modelIndex.row());
       }else{
-        return _abstractAccessor->data(0,modelIndex.row());
+        return _abstractAccessor->data(_channelNumber,modelIndex.row());
       }
     case Qt::BackgroundRole:
-      if (_isModified[modelIndex.row()]){  //change background color for modified rows
+      if (_isModified[_channelNumber][modelIndex.row()]){  //change background color for modified rows
         return QBrush( QColor( 255, 100, 100, 255 ) ); // a light red
       }
       break;
@@ -50,15 +53,20 @@ Qt::ItemFlags RegisterAccessorModel::flags(const QModelIndex &modelIndex) const
 
 bool RegisterAccessorModel::setData(const QModelIndex & modelIndex, const QVariant & value, int role){
   if (role == Qt::EditRole){
-    if ( _abstractAccessor->setData(0,modelIndex.row(), value)){
+    if ( _abstractAccessor->setData(_channelNumber,modelIndex.row(), value)){
       // setting worked, set the modified flag
-      _isModified[modelIndex.row()] = true;
+      _isModified[_channelNumber][modelIndex.row()] = true;
       return true;
     }else{
       return false; // setting not successful
     }      
   }
   return true;
+}
+
+void RegisterAccessorModel::setChannelNumber(unsigned int channelNumber){
+  _channelNumber=channelNumber;
+  emit dataChanged(createIndex(0,0),createIndex(rowCount()-1, columnCount()-1));
 }
 
 void RegisterAccessorModel::read(){
@@ -76,9 +84,11 @@ void RegisterAccessorModel::write(){
 
 void RegisterAccessorModel::clearModifiedFlags(){
   // note: although we modify f we don't have to/can't specify it as auto & f because
-  // _isModified is a vector<bool> which returns a BitReference object which allows to modify it.
-  for (auto f : _isModified){
-    f=false;
+  // channelFlags is a vector<bool> which returns a BitReference object which allows to modify it.
+  for (auto & channelFlags : _isModified){
+    for (auto f : channelFlags){
+      f=false;
+    }
   }
 }
 

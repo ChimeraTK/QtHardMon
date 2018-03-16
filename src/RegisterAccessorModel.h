@@ -17,7 +17,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex & modelIndex) const override ;
 
 public slots:
-  //void setChannel(unsigned int channelNumber);
+    void setChannelNumber(unsigned int channelNumber);
     void read();
     void write();
 
@@ -25,12 +25,10 @@ public slots:
     
  protected:
     std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;
-    std::vector<bool> _isModified; // remember if a row has been modified
+    std::vector< std::vector<bool> > _isModified; // remember if a row has been modified per channel
 
     void clearModifiedFlags(); // clear the modified flags
-    
-    //signals:
-    //    void editCompleted(const QString &);
+    unsigned int _channelNumber;
 };
 
 #endif // QTHARDMON_REGISTER_ACCESSOR_MODEL_H
