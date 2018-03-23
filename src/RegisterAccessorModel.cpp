@@ -1,12 +1,29 @@
 #include "RegisterAccessorModel.h"
 #include <QBrush>
+#include <ChimeraTK/SupportedUserTypes.h>
+using namespace ChimeraTK;
 
 RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor) :
-  _abstractAccessor(abstractAccessor), _channelNumber(0)
+  _abstractAccessor(abstractAccessor), _channelNumber(0), _coockedHexColumnIndex(-1), _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1)
 {
   _isModified.resize(_abstractAccessor->nChannels());
   for (auto & channelModifiedFlags: _isModified){
     channelModifiedFlags.resize(_abstractAccessor->nElements());
+  }
+  // show hexadecimal representation for integer data
+  // notice: DataType::isIntegral can only be true if the data type is not none.
+  // we don't have to check this separately
+  if (  _abstractAccessor->isIntegral() &&
+        !_abstractAccessor->rawDataType().isIntegral() ){ // there will be no raw hex column
+    _coockedHexColumnIndex = _nColumns++;
+  }
+  if ( _abstractAccessor->rawDataType() != DataType::none ){
+    // add a raw column if there is a raw data type
+    _rawColumnIndex = _nColumns++;
+    if ( _abstractAccessor->rawDataType().isIntegral() ){
+      // add a raw hex column if the raw data type is an integer
+      _rawHexColumnIndex = _nColumns++;
+    }
   }
 }
 
@@ -19,12 +36,7 @@ int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
 }
 
 int RegisterAccessorModel::columnCount(const QModelIndex & /*modelIndex*/) const{
-  if (_abstractAccessor->isIntegral()){
-    // For integers we have an additional column with hex representation
-    return 2;
-  }else{
-    return 1;
-  }
+  return _nColumns;
 }
 
 QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) const{
@@ -32,7 +44,7 @@ QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) co
     case Qt::DisplayRole:
     case Qt::EditRole:
       //@todo FIXME The current assumtion that column 1 is always the hex column will not hold.
-      if (modelIndex.column() == 1){
+      if (modelIndex.column() == _coockedHexColumnIndex){
         return _abstractAccessor->dataAsHex(_channelNumber,modelIndex.row());
       }else{
         return _abstractAccessor->data(_channelNumber,modelIndex.row());

@@ -4,6 +4,7 @@
 #include <QVariant>
 #include <memory>
 #include <ChimeraTK/Device.h>
+#include <ChimeraTK/SupportedUserTypes.h>
 
 ///Qt objects with signals and slots cannot be template classes.
 ///As we need a container for the user-type templated RegisterAccessors,\
@@ -17,6 +18,7 @@ class RegisterTypeAbstractor{
   virtual bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & value) = 0;
   
   virtual bool isIntegral() const = 0;
+  virtual ChimeraTK::DataType rawDataType() const = 0;
 
   virtual void read() = 0;
   virtual void write() = 0;

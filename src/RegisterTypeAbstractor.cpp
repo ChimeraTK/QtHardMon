@@ -4,7 +4,7 @@ template <class USER_DATA_TYPE>
 std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterInfo const & registerInfo, ChimeraTK::Device & device){
   ///@todo FIXME Create raw or coocked accessor
   auto accessor = device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName());
-  return std::make_shared< RegisterTypeAbstractorImpl<USER_DATA_TYPE> >(accessor); 
+  return std::make_shared< RegisterTypeAbstractorImpl<USER_DATA_TYPE> >(accessor, registerInfo.getDataDescriptor().rawDataType()); 
 }
                                                                
 std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::RegisterInfo const & registerInfo, ChimeraTK::Device & device){

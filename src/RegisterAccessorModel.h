@@ -29,6 +29,21 @@ public slots:
 
     void clearModifiedFlags(); // clear the modified flags
     unsigned int _channelNumber;
+    // If any of the follogin columns is there depends on the register.
+    // If the column is not there, the index is set to -1.
+    // Currently implemented scenarios
+    // (as examples at the time of writing. There might be more when you read this ;-) )
+    //
+    // * Just 1 column coocked (double or string) This column is allways there and the first one,
+    //   so we don't need an indicator for it.
+    // * Only coocked integer as decimal and hex
+    // * Coocked double and integer raw (dec and hex)
+    // * Coocked and raw integer. In this case the coocked hex is not shown (only raw hex)
+    int _coockedHexColumnIndex;
+    int _rawColumnIndex; // Usually a decimal value, but might in future be text or floating point
+    int _rawHexColumnIndex;
+
+    int _nColumns;
 };
 
 #endif // QTHARDMON_REGISTER_ACCESSOR_MODEL_H

@@ -9,7 +9,7 @@
 template <class USER_DATA_TYPE>
 class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
  public:
-  RegisterTypeAbstractorImpl(ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const & accessor);
+  RegisterTypeAbstractorImpl(ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const & accessor, ChimeraTK::DataType const & rawDataType);
   unsigned int nChannels() const override;
   unsigned int nElements() const override;
   QVariant data(unsigned int channelIndex, unsigned int elementIndex) const override;
@@ -17,16 +17,19 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
   bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data) override;
 
   bool isIntegral() const override;
-  
+  ChimeraTK::DataType rawDataType() const override;
+
   void read() override;
   void write() override;
   
  protected:
   ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> _accessor;
+  ChimeraTK::DataType _rawDataType;
 };
 
 template <class USER_DATA_TYPE>
-RegisterTypeAbstractorImpl<USER_DATA_TYPE>::RegisterTypeAbstractorImpl(ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const & accessor) : _accessor(accessor){
+RegisterTypeAbstractorImpl<USER_DATA_TYPE>::RegisterTypeAbstractorImpl(ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const & accessor, ChimeraTK::DataType const & rawDataType)
+ : _accessor(accessor), _rawDataType(rawDataType){
 }
 
 template <class USER_DATA_TYPE>
@@ -64,6 +67,11 @@ void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::write(){
 template <class USER_DATA_TYPE>
 bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::isIntegral() const{
   return std::is_integral<USER_DATA_TYPE>::value;
+}
+
+template <class USER_DATA_TYPE>
+ChimeraTK::DataType RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataType() const{
+  return _rawDataType;
 }
 
 template<class USER_DATA_TYPE>

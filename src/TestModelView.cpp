@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
   TestModelView tmv;
   //RegisterAccessorModel<int32_t> accessorModel(0);
   auto accessor = d.getTwoDRegisterAccessor<std::string>("ADC/WORD_CLK_MUX");
-  auto abstractAccessor = std::make_shared< RegisterTypeAbstractorImpl<std::string> >(accessor); 
+  auto abstractAccessor = std::make_shared< RegisterTypeAbstractorImpl<std::string> >(accessor, DataType()); 
                                           
   RegisterAccessorModel accessorModel(0, createAbstractAccessor(*(d.getRegisterCatalogue().getRegister("ADC/WORD_CLK_MUX")), d));
   tmv.ui.tableView->setModel( &accessorModel );
