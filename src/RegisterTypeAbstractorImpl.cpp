@@ -2,7 +2,7 @@
 
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex, unsigned int elementIndex) const{
-  return QString(_accessor[channelIndex][elementIndex].c_str());
+  return QString(get(channelIndex,elementIndex).c_str());
 }
 
 template<>
@@ -13,6 +13,24 @@ QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channel
 
 template<>
 bool RegisterTypeAbstractorImpl<std::string>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
+  if (! data.canConvert<QString>() ){
+    return false;
+  }
+  _accessor[channelIndex][elementIndex] = data.value<QString>().toStdString();
+  return true;
+}
+
+template<>
+QVariant RegisterTypeAbstractorImpl<std::string>::rawData(unsigned int channelIndex, unsigned int elementIndex) const{
+  return QVariant(_accessor[channelIndex][elementIndex].c_str());
+}
+template<>
+QVariant RegisterTypeAbstractorImpl<std::string>::rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
+  return QVariant();
+}
+
+template<>
+bool RegisterTypeAbstractorImpl<std::string>::setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
   if (! data.canConvert<QString>() ){
     return false;
   }
