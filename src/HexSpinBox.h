@@ -28,6 +28,11 @@ public:
    */
   double value;
   HexData(double v=0) : value(v){};
+  /** Overloaded constructor for std::string to avoid template specialisation as
+   *  there is no implicit conversion from std::string to double.
+   *  Generally this conversion does not make sense, so we initialise class with 0.
+   */
+  HexData(std::string v) : value(0){};
 };
 
 /*

@@ -1,39 +1,22 @@
 #include "RegisterTypeAbstractorImpl.h"
 
 template<>
+std::pair<std::string, bool> qvariantToStandardDataType<std::string>(const QVariant & data){
+  // conversion to string is allways possible, but we have to call toStdString on QString
+  return {data.value<QString>().toStdString(), true};
+}
+
+template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex, unsigned int elementIndex) const{
-  return QString(get(channelIndex,elementIndex).c_str());
+  
+  return QString(_accessor[channelIndex][elementIndex].c_str());
 }
 
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
-  // String as hex does not make sense. We could throw, or just return an invalid variant.
+  // The hex object is an integer representation. It generally does not make sense for
+  // string data to return this object. We could throw, which would have to be caught.
+  // It is simpler to return an empty variant.
   return QVariant();
 }
 
-template<>
-bool RegisterTypeAbstractorImpl<std::string>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
-  if (! data.canConvert<QString>() ){
-    return false;
-  }
-  _accessor[channelIndex][elementIndex] = data.value<QString>().toStdString();
-  return true;
-}
-
-template<>
-QVariant RegisterTypeAbstractorImpl<std::string>::rawData(unsigned int channelIndex, unsigned int elementIndex) const{
-  return QVariant(_accessor[channelIndex][elementIndex].c_str());
-}
-template<>
-QVariant RegisterTypeAbstractorImpl<std::string>::rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
-  return QVariant();
-}
-
-template<>
-bool RegisterTypeAbstractorImpl<std::string>::setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
-  if (! data.canConvert<QString>() ){
-    return false;
-  }
-  _accessor[channelIndex][elementIndex] = data.value<QString>().toStdString();
-  return true;
-}

@@ -4,6 +4,7 @@
 #include "RegisterTypeAbstractor.h"
 #include <ChimeraTK/Device.h>
 #include "HexSpinBox.h"
+#include <utility> // for std::pair
 
 ///The actual, templated implementation of the type abstractor.
 template <class USER_DATA_TYPE>
@@ -28,10 +29,37 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
  protected:
   ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> _accessor;
   ChimeraTK::DataType _rawDataType;
-  USER_DATA_TYPE get(unsigned int channelIndex, unsigned int elementIndex) const;
-  std::pair<USER_DATA_TYPE, bool> toUserType(const QVariant & data) const;
 };
 
+/** A function to convert a QVariant to a standard data type, with special treatment for hex data.
+ *  Needed in several places with
+ *  varying data types (raw or coocked), so it is implemented as a stand-alone template function.
+ * 
+ *  The second argument is the flag reported by the variant whether the conversion was successful.
+ *  If this is not the case, the data type value is DATA_TYPE() (usually 0 or empty string).
+ */
+template<class DATA_TYPE>
+std::pair<DATA_TYPE, bool> qvariantToStandardDataType(const QVariant & data){
+    if (data.type() == QVariant::UserType){ //in the user type the data is hex representation
+    if (! data.canConvert<HexData>() ){
+      return {DATA_TYPE(), false};
+    }
+    // The variant has a templated function called value() which returns the template type,
+    // HexData in our case. The HexData class itself has a member called value, which holds the
+    // actual value. Phew...
+    return {data.value<HexData>().value, true};
+  }else{
+    if (! data.canConvert<DATA_TYPE>() ){
+      return {DATA_TYPE(), false};
+    }
+    return {data.value<DATA_TYPE>(), true};
+  }
+
+}
+
+/*****************************************************************************************************/
+/********** The Implementatons ***********************************************************************/
+/*****************************************************************************************************/
 template <class USER_DATA_TYPE>
 RegisterTypeAbstractorImpl<USER_DATA_TYPE>::RegisterTypeAbstractorImpl(ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const & accessor, ChimeraTK::DataType const & rawDataType)
  : _accessor(accessor), _rawDataType(rawDataType){
@@ -48,38 +76,13 @@ unsigned int RegisterTypeAbstractorImpl<USER_DATA_TYPE>::nElements() const{
 }
 
 template <class USER_DATA_TYPE>
-USER_DATA_TYPE RegisterTypeAbstractorImpl<USER_DATA_TYPE>::get(unsigned int channelIndex, unsigned int elementIndex) const{
-  if (_rawDataType==ChimeraTK::DataType::none){
-    // This is not a raw accessor. Directly access the data
-    return _accessor[channelIndex][elementIndex];
-  }else{
-    // A raw accessor must get the coocked data via the special function of the raw accessor
-    return _accessor.template getAsCoocked<USER_DATA_TYPE>(channelIndex,elementIndex);
-  }
-}
-
-template <class USER_DATA_TYPE>
 QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::data(unsigned int channelIndex, unsigned int elementIndex) const{
-  return QVariant(get(channelIndex,elementIndex));
+  return QVariant(_accessor[channelIndex][elementIndex]);
 }
 
 template <class USER_DATA_TYPE>
 QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
   QVariant returnValue;
-  returnValue.setValue(HexData(get(channelIndex,elementIndex)));
-  return returnValue;
-}
-
-template <class USER_DATA_TYPE>
-QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawData(unsigned int channelIndex, unsigned int elementIndex) const{
-  // Only to be called when it's a raw accessor. Otherwise you will get the coocked data.
-  return QVariant(_accessor[channelIndex][elementIndex]);
-}
-
-template <class USER_DATA_TYPE>
-QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
-  QVariant returnValue;
-  // Only to be called when it's a raw accessor. Otherwise you will get the coocked data.
   returnValue.setValue(HexData(_accessor[channelIndex][elementIndex]));
   return returnValue;
 }
@@ -105,71 +108,49 @@ ChimeraTK::DataType RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataType() co
 }
 
 template<class USER_DATA_TYPE>
-std::pair<USER_DATA_TYPE, bool> RegisterTypeAbstractorImpl<USER_DATA_TYPE>::toUserType(const QVariant & data) const{
-
-  if (data.type() == QVariant::UserType){ //in the user type the data is hex representation
-    if (! data.canConvert<HexData>() ){
-      return {USER_DATA_TYPE(), false};
-    }
-    // The variant has a templated function called value() which returns the template type,
-    // HexData in out case. The HexData class itself has a member called value, which holds the
-    // actual value. Phew...
-    return {data.value<HexData>().value, true};
-  }else{
-    if (! data.canConvert<USER_DATA_TYPE>() ){
-      return {USER_DATA_TYPE(), false};
-    }
-    return {data.value<USER_DATA_TYPE>(), true};
-  }
-}
-
-template<class USER_DATA_TYPE>
 bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
 
-  if (data.type() == QVariant::UserType){ //in the user type the data is hex representation
-    if (! data.canConvert<HexData>() ){
-      return false;
-    }
-    // The variant has a templated function called value() which returns the template type,
-    // HexData in out case. The HexData class itself has a member called value, which holds the
-    // actual value. Phew...
-    _accessor[channelIndex][elementIndex] = data.value<HexData>().value;
-  }else{
-    if (! data.canConvert<USER_DATA_TYPE>() ){
-      return false;
-    }
-    _accessor[channelIndex][elementIndex] = data.value<USER_DATA_TYPE>();
-  }
-  return true;
-}
-template<class USER_DATA_TYPE>
-bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
-
-  auto conversionResult = toUserType(data);
+  auto conversionResult = qvariantToStandardDataType<USER_DATA_TYPE>(data);
   if (conversionResult.second){
-    _accessor[channelIndex][elementIndex] = conversionResult.first;
+    _accessor[channelIndex][elementIndex]=conversionResult.first;
     return true;
   }else{
     return false;
   }
 }
 
+/*****************************************************************************************************/
+/********** (Emtpty) Implementations for Raw Access **************************************************/
+/*****************************************************************************************************/
+
+template<class USER_DATA_TYPE>
+QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawData(unsigned int channelIndex, unsigned int elementIndex) const{
+  // Not useful for this kind of abstractor without raw data. Just return an empty variant.
+  return QVariant();
+}
+
+template<class USER_DATA_TYPE>
+QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
+  // Not useful for this kind of abstractor without raw data. Just return an empty variant.
+  return QVariant();
+}
+
+template<class USER_DATA_TYPE>
+bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data){
+  // Not useful for this kind of abstractor without raw data. Just return false.
+  return false;
+}
+
+/*****************************************************************************************************/
+/********** Template specialisations *****************************************************************/
+/*****************************************************************************************************/
+template<>
+std::pair<std::string, bool> qvariantToStandardDataType<std::string>(const QVariant & data);
+
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex, unsigned int elementIndex) const;
 
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const;
-
-template<>
-bool RegisterTypeAbstractorImpl<std::string>::setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data);
-
-template<>
-QVariant RegisterTypeAbstractorImpl<std::string>::rawData(unsigned int channelIndex, unsigned int elementIndex) const;
-
-template<>
-QVariant RegisterTypeAbstractorImpl<std::string>::rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const;
-
-template<>
-bool RegisterTypeAbstractorImpl<std::string>::setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_IMPL_H
