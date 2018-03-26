@@ -21,7 +21,7 @@ public slots:
     void read();
     void write();
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     
  protected:
     std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;

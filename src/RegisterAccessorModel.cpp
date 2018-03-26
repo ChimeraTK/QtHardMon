@@ -107,16 +107,31 @@ void RegisterAccessorModel::clearModifiedFlags(){
 QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole){
+
       if (orientation == Qt::Horizontal){
-        switch (section){
-          case 0:
-            return QString("Value")+(_abstractAccessor->isIntegral()?" (dec)":"");
-          case 1:
-            return QString("Value (hex)");
-          default:
-            return QString::number(section);
-        }            
-      }
+        if (section ==0){
+          if (_coockedHexColumnIndex != -1){//there is a coocked hex column, so add (dec)
+            return QString("Value (dec)");
+          }else{
+            return QString("Value");            
+          }
+        }
+        if (section==_coockedHexColumnIndex){
+          return QString("Value (hex)");
+        }
+        if (section==_rawColumnIndex){
+          if (_rawHexColumnIndex != -1){//there is a raw hex column, so add (dec)
+            return QString("Raw (dec)");
+          }else{
+            return QString("Raw");            
+          }
+        }
+        if (section==_rawHexColumnIndex){
+          return QString("Raw (hex)");
+        }
+        return QString::number(section);
+      }            
+
       if (orientation == Qt::Vertical){
         return QString::number(section);
       }
