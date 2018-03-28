@@ -85,7 +85,10 @@ void PlotWindow::plot() {
   // In addition, if the coversion to double fails, we get this information and don't display.
   //@todo Get the data type and show a message why data cannot be plotted
   // note: In rowCount we can use an invalid model index.
-  for (int row = 0; row < _hardMon->currentAccessorModel_->rowCount(QModelIndex()); ++row){
+  for (int row = 0;
+       row < std::min(_hardMon->currentAccessorModel_->rowCount(QModelIndex()),
+                      preferencesProvider.getValue<int>("maxWords"));
+       ++row){
     auto dataPoint = _hardMon->currentAccessorModel_->data(  _hardMon->currentAccessorModel_->index(row, 0 /* =coocked data column*/));
 
     // If the conversion cannot be executed, the value is 0. No need to do special handling here.
