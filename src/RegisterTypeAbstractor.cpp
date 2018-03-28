@@ -1,17 +1,22 @@
 #include "RegisterTypeAbstractorRawImpl.h"
+#include "PreferencesProvider.h"
 
 template <class USER_DATA_TYPE>
 std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterInfo const & registerInfo, ChimeraTK::Device & device){
+  // Limit the number of elements in the accessor. Add 1 to be able to diplay accessors with
+  // maxwords elements, and use the last element to show truncated indicator in the model.
+  auto nElements = std::min(PreferencesProviderSingleton::Instance().getValue<unsigned int>("maxWords")+1, registerInfo.getNumberOfElements());
+  
   ///@todo FIXME Use the new stuff from DeviceAccess to loop the whole list of supported data types.
   auto dataDescriptor = registerInfo.getDataDescriptor();
   switch(dataDescriptor.rawDataType()){
     case ChimeraTK::DataType::int32:{
-      auto accessor = device.getTwoDRegisterAccessor<int32_t>(registerInfo.getRegisterName(),0,0,{ChimeraTK::AccessMode::raw});
+      auto accessor = device.getTwoDRegisterAccessor<int32_t>(registerInfo.getRegisterName(),nElements,0,{ChimeraTK::AccessMode::raw});
       return std::make_shared< RegisterTypeAbstractorRawImpl<int32_t, USER_DATA_TYPE> >(accessor, dataDescriptor.rawDataType());
     }
     default:{
       // if there is an unknown raw data type create a normal, coocked accessor
-      auto accessor = device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName());
+      auto accessor = device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(),nElements);
       return std::make_shared<RegisterTypeAbstractorImpl<USER_DATA_TYPE> >(accessor, dataDescriptor.rawDataType());
     }
   }

@@ -3,6 +3,8 @@
 #include <ChimeraTK/SupportedUserTypes.h>
 using namespace ChimeraTK;
 
+#include "PreferencesProvider.h"
+
 RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor) :
   _abstractAccessor(abstractAccessor), _channelNumber(0), _coockedHexColumnIndex(-1), _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1)
 {
@@ -28,8 +30,6 @@ RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<Re
 }
 
 int RegisterAccessorModel::rowCount(const QModelIndex &/*modelIndex*/) const{
-  //@todo FIXME limit the row count. Maybe not even here. Probably the accessor should already be
-  //limited.
   if (_abstractAccessor){
     return _abstractAccessor->nElements();
   }else{
@@ -45,6 +45,12 @@ QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) co
   switch (role){
     case Qt::DisplayRole:
     case Qt::EditRole:
+      if (modelIndex.row() >= PreferencesProviderSingleton::Instance().getValue<int>("maxWords")){
+        // If the row is larger than maxWords show "truncated"
+        // If the size of the accessor is set correctly, it should be maxWords+1, so there
+        // should be only one line with this content.
+        return QString("truncated");
+      }
       if (modelIndex.column() == _coockedHexColumnIndex){
         return _abstractAccessor->dataAsHex(_channelNumber,modelIndex.row());
       }else if (modelIndex.column() == _rawColumnIndex){
