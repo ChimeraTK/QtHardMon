@@ -27,7 +27,9 @@ RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<Re
   }
 }
 
-int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
+int RegisterAccessorModel::rowCount(const QModelIndex &/*modelIndex*/) const{
+  //@todo FIXME limit the row count. Maybe not even here. Probably the accessor should already be
+  //limited.
   if (_abstractAccessor){
     return _abstractAccessor->nElements();
   }else{
