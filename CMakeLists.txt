@@ -45,7 +45,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
-list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/TestModelView.cpp)
 add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${mtca4u-deviceaccess_LIBRARIES} ${Boost_LIBRARIES})
 
@@ -69,11 +68,6 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
 endif()
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${mtca4u-deviceaccess_LIBRARIES})
-
-### FIXME: JUST for playing with model/view
-ADD_EXECUTABLE(testModelView src/TestModelView.cpp)
-TARGET_LINK_LIBRARIES(testModelView ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${mtca4u-deviceaccess_LIBRARIES})
-### END: JUST for playing with model/view
 
 
   IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
