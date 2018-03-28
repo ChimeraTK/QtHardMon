@@ -29,7 +29,7 @@ ELSE(Qwt_INCLUDE_DIRS)
     /sw/include/qwt
     /sw/include/qwt6
     )
-  FIND_LIBRARY(QWT_LIBRARY qwt
+  FIND_LIBRARY(QWT_LIBRARY qwt-qt5
     /usr/lib
     /usr/lib64
     /usr/local/lib

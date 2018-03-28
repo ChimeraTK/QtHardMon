@@ -33,6 +33,7 @@ add_dependency(mtca4u-deviceaccess 00.31 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED)
+find_package(Qwt 6)
 
 FIND_PACKAGE(Boost COMPONENTS REQUIRED system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -59,7 +60,14 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_STATIC_autogen/i
 configure_file(cmake/QtHardMonVersion.h.in
   "${PROJECT_BINARY_DIR}/QtHardMonVersion.h" @ONLY)
 
-SET( QWT_LIBRARY "")
+#The use of the QWT plotting library is optional
+if(QWT_FOUND)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_QWT=true")
+  INCLUDE_DIRECTORIES( SYSTEM ${QWT_INCLUDE_DIR} )  
+else(QWT_FOUND)
+  SET( QWT_LIBRARY "")
+  message("QWT not found, plotting is disabled in this build.")
+endif(QWT_FOUND)
 
 ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp )
 #The static library as well as its auto-generated headers are needed to compile main
@@ -67,7 +75,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
   ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
 endif()
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${mtca4u-deviceaccess_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY})
 
 
   IF(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -89,7 +89,7 @@ bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::setData(un
 
   auto conversionResult = qvariantToStandardDataType<COOCKED_DATA_TYPE>(data);
   if (conversionResult.second) {// conversion successful
-    _accessor[channelIndex][elementIndex].template setAsCoocked<COOCKED_DATA_TYPE>(conversionResult.first);
+    _accessor.template setAsCoocked<COOCKED_DATA_TYPE>(channelIndex, elementIndex, conversionResult.first);
     return true;
   }else{
     return false;

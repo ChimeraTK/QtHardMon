@@ -27,7 +27,9 @@ RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<Re
   }
 }
 
-int RegisterAccessorModel::rowCount(const QModelIndex &modelIndex) const{
+int RegisterAccessorModel::rowCount(const QModelIndex &/*modelIndex*/) const{
+  //@todo FIXME limit the row count. Maybe not even here. Probably the accessor should already be
+  //limited.
   if (_abstractAccessor){
     return _abstractAccessor->nElements();
   }else{
@@ -43,9 +45,12 @@ QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) co
   switch (role){
     case Qt::DisplayRole:
     case Qt::EditRole:
-      //@todo FIXME The current assumtion that column 1 is always the hex column will not hold.
       if (modelIndex.column() == _coockedHexColumnIndex){
         return _abstractAccessor->dataAsHex(_channelNumber,modelIndex.row());
+      }else if (modelIndex.column() == _rawColumnIndex){
+        return _abstractAccessor->rawData(_channelNumber,modelIndex.row());
+      }else if (modelIndex.column() == _rawHexColumnIndex){
+        return _abstractAccessor->rawDataAsHex(_channelNumber,modelIndex.row());
       }else{
         return _abstractAccessor->data(_channelNumber,modelIndex.row());
       }
@@ -65,7 +70,14 @@ Qt::ItemFlags RegisterAccessorModel::flags(const QModelIndex &modelIndex) const
 
 bool RegisterAccessorModel::setData(const QModelIndex & modelIndex, const QVariant & value, int role){
   if (role == Qt::EditRole){
-    if ( _abstractAccessor->setData(_channelNumber,modelIndex.row(), value)){
+    bool settingSuccessful;
+    if ( (modelIndex.column() == _rawColumnIndex) || (modelIndex.column() == _rawHexColumnIndex) ){
+      settingSuccessful = _abstractAccessor->setRawData(_channelNumber, modelIndex.row(), value);
+    }else{
+      settingSuccessful = _abstractAccessor->setData(_channelNumber,modelIndex.row(), value);
+    }
+
+    if ( settingSuccessful ){
       // setting worked, set the modified flag
       _isModified[_channelNumber][modelIndex.row()] = true;
       return true;
@@ -73,7 +85,7 @@ bool RegisterAccessorModel::setData(const QModelIndex & modelIndex, const QVaria
       return false; // setting not successful
     }      
   }
-  return true;
+  return false;
 }
 
 void RegisterAccessorModel::setChannelNumber(unsigned int channelNumber){
