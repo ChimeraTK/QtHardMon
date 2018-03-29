@@ -66,7 +66,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   ui.logoLabel->setPixmap(QPixmap(":/DESY_logo.png"));
 
   /// @todo FIXME Re-activate this functionality
-  //  addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
+  addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
                                         // clipboard
 
   connect(ui.deviceListWidget,
@@ -1048,8 +1048,16 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
     // center mouse click
     clipboard->clear(QClipboard::Selection);
 
-    QString name = currentItem->text(0);
-    clipboard->setText(name);
+    ChimeraTK::RegisterPath registerPath = currentItem->text(0).toStdString();
+    // loop the tree to add the parents
+    QTreeWidgetItem * parent = currentItem->parent();
+    while (parent){
+      registerPath = parent->text(0).toStdString() + registerPath;
+      parent = parent->parent();
+    }
+    // copy to the standard clipboard and the mouse clipboard
+    clipboard->setText(std::string(registerPath).c_str());
+    clipboard->setText(std::string(registerPath).c_str(), QClipboard::Selection);
   }
   return;
 }
