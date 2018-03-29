@@ -20,3 +20,11 @@ QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channel
   return QVariant();
 }
 
+template<>
+QVariant RegisterTypeAbstractorImpl<int64_t>::data(unsigned int channelIndex, unsigned int elementIndex) const{
+  return qlonglong(_accessor[channelIndex][elementIndex]);
+}
+template<>
+QVariant RegisterTypeAbstractorImpl<uint64_t>::data(unsigned int channelIndex, unsigned int elementIndex) const{
+  return qulonglong(_accessor[channelIndex][elementIndex]);
+}

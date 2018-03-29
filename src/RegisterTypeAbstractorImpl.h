@@ -153,4 +153,10 @@ QVariant RegisterTypeAbstractorImpl<std::string>::data(unsigned int channelIndex
 template<>
 QVariant RegisterTypeAbstractorImpl<std::string>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const;
 
+template<>
+QVariant RegisterTypeAbstractorImpl<int64_t>::data(unsigned int channelIndex, unsigned int elementIndex) const;
+template<>
+QVariant RegisterTypeAbstractorImpl<uint64_t>::data(unsigned int channelIndex, unsigned int elementIndex) const;
+
+
 #endif // REGISTER_TYPE_ABSTRACTOR_IMPL_H

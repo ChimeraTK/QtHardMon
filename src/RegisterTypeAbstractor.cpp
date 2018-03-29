@@ -10,14 +10,18 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
   ///@todo FIXME Use the new stuff from DeviceAccess to loop the whole list of supported data types.
   auto dataDescriptor = registerInfo.getDataDescriptor();
   switch(dataDescriptor.rawDataType()){
-    case ChimeraTK::DataType::int32:{
-      auto accessor = device.getTwoDRegisterAccessor<int32_t>(registerInfo.getRegisterName(),nElements,0,{ChimeraTK::AccessMode::raw});
-      return std::make_shared< RegisterTypeAbstractorRawImpl<int32_t, USER_DATA_TYPE> >(accessor, dataDescriptor.rawDataType());
-    }
-    default:{
+    case ChimeraTK::DataType::none:{
       // if there is an unknown raw data type create a normal, coocked accessor
       auto accessor = device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(),nElements);
       return std::make_shared<RegisterTypeAbstractorImpl<USER_DATA_TYPE> >(accessor, dataDescriptor.rawDataType());
+    }
+    default:{
+      std::shared_ptr<RegisterTypeAbstractor>  returnValue;
+      auto rawAccessorCreatorLambda =  [&](auto arg){
+          auto accessor =  device.getTwoDRegisterAccessor<decltype(arg)>(registerInfo.getRegisterName(),nElements,0,{ChimeraTK::AccessMode::raw});
+          returnValue =  std::make_shared< RegisterTypeAbstractorRawImpl<decltype(arg), USER_DATA_TYPE> >(accessor, dataDescriptor.rawDataType()); };
+      callForType(dataDescriptor.rawDataType(), rawAccessorCreatorLambda);
+      return returnValue;
     }
   }
 }

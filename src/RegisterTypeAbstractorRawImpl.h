@@ -45,6 +45,12 @@ QVariant dataToQVariant(DATA_TYPE data){
 template<>
 QVariant dataToQVariant<std::string>(std::string data);
 
+template<>
+QVariant dataToQVariant<int64_t>(int64_t);
+
+template<>
+QVariant dataToQVariant<uint64_t>(uint64_t);
+
 // get the data as coocked and return a QVariant
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::data(unsigned int channelIndex, unsigned int elementIndex) const{
