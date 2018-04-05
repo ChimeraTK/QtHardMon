@@ -23,6 +23,10 @@ public:
 
   boost::shared_ptr<mtca4u::RegisterInfo> getRegisterInfo();
 
+  //Returns the path of the object. Also works for tree items without register info because the
+  //partial register path is obtained from the tree structure.
+  ChimeraTK::RegisterPath getRegisterPath();
+  
 protected:
   boost::shared_ptr<mtca4u::RegisterInfo> registerInfo_;
 

@@ -324,14 +324,8 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
     }
   }
  
-  _currentDeviceListItem->lastSelectedRegister_.clear();
-  while (selectedItem && !dynamic_cast<QTreeWidget *>(selectedItem)) {
-    _currentDeviceListItem->lastSelectedRegister_.insert(
-        _currentDeviceListItem->lastSelectedRegister_.begin(),
-        selectedItem->text(0).toStdString());
-    selectedItem =
-        dynamic_cast<DeviceElementQTreeItem *>(selectedItem->parent());
-  }
+  // remember that this was the last selected register
+  _currentDeviceListItem->lastSelectedRegister = selectedItem->getRegisterPath();
 
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
@@ -644,6 +638,8 @@ void QtHardMon::loadConfig(QString const &configFileName) {
     return;
   }
 
+  ///@todo FIXME Since we have a hierarchy the module/register concept falls short. Make this
+  ///work again!
   // loop all devices and try to determine the last used module and register
   for (int deviceRow = 0; deviceRow < ui.deviceListWidget->count();
        ++deviceRow) {
@@ -662,9 +658,6 @@ void QtHardMon::loadConfig(QString const &configFileName) {
         MODULE_EXTENSION_STRING;
     std::string moduleName =
         configReader.getValue(deviceModuleString, std::string());
-
-    // deviceListItem->setLastSelectedRegisterName(registerName);
-    // deviceListItem->setLastSelectedModuleName(moduleName);
   } // for deviceRow
 
   // search for the device string
@@ -771,25 +764,27 @@ void QtHardMon::writeConfig(QString const &fileName) {
     deviceListItem =
         static_cast<DeviceListItem *>(ui.deviceListWidget->item(deviceRow));
 
+    ///todo FIXME: This is not working. Only if there are exactly two entries it works, in all
+    /// other cases it breaks!
     // Only write to the config file if the 'last selected' strings are not
     // empty.
     // Empty strings would cause a parse error, and if the entry is not found it
     // falls back to empty string anyway.
-    if (!deviceListItem->lastSelectedRegister_.empty()) {
-      std::string deviceRegisterString =
-          deviceListItem->getDeviceMapElement().deviceName +
-          REGISTER_EXTENSION_STRING;
-      configWriter.setValue(deviceRegisterString,
-                            deviceListItem->lastSelectedRegister_.back());
-    }
-
-    if (!deviceListItem->lastSelectedRegister_.empty()) {
-      std::string deviceModuleString =
-          deviceListItem->getDeviceMapElement().deviceName +
-          MODULE_EXTENSION_STRING;
-      configWriter.setValue(deviceModuleString,
-                            deviceListItem->lastSelectedRegister_.front());
-    }
+//    if (!deviceListItem->lastSelectedRegister_.empty()) {
+//      std::string deviceRegisterString =
+//          deviceListItem->getDeviceMapElement().deviceName +
+//          REGISTER_EXTENSION_STRING;
+//      configWriter.setValue(deviceRegisterString,
+//                            deviceListItem->lastSelectedRegister_.back());
+//    }
+//
+//    if (!deviceListItem->lastSelectedRegister_.empty()) {
+//      std::string deviceModuleString =
+//          deviceListItem->getDeviceMapElement().deviceName +
+//          MODULE_EXTENSION_STRING;
+//      configWriter.setValue(deviceModuleString,
+//                            deviceListItem->lastSelectedRegister_.front());
+//    }
   }
 
   PreferencesProvider &preferencesProvider =
@@ -970,45 +965,28 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
     ///@todo: FIXME: This has to go to open, not when filling the tree
     // Searching a sub-tree does not work in QTreeWidget. So here is the
-    // strategy:
-    if (!(deviceListItem->lastSelectedRegister_.empty())) {
+    // strategy: First get all register with the right name from the tree,
+    // then pick the one where the full path matches. Ugly as hell, but easier than writing
+    // an recursive search function ourself.
+    auto registerPathComponents=deviceListItem->lastSelectedRegister.getComponents();
+    if (!(registerPathComponents.empty())) {
+      auto registerName=registerPathComponents.back().c_str();
       // Get a list of all registers with this name.
       QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
-          deviceListItem->lastSelectedRegister_.back().c_str(),
-          Qt::MatchExactly | Qt::MatchRecursive);
+          registerName, Qt::MatchExactly | Qt::MatchRecursive);
 
-      deviceListItem->lastSelectedRegister_.pop_back();
-
-      // Iterate the list until we find the one with the right module
-      for (QList<QTreeWidgetItem *>::iterator registerIter =
-               registerList.begin();
-           registerIter != registerList.end(); ++registerIter) {
-        std::vector<std::string> copyOfSelectedRegister =
-            deviceListItem->lastSelectedRegister_;
-        QTreeWidgetItem *temp = (*registerIter);
-        // Since we might have selected a module (one item in the vector), we
-        // assume initially, that we have found our selection - but loop might
-        // change that.
-        bool found = true;
-        while (!(copyOfSelectedRegister.empty())) {
-          QTreeWidgetItem *parentCast =
-              dynamic_cast<QTreeWidgetItem *>(temp->parent());
-          if (parentCast) {
-            copyOfSelectedRegister.pop_back();
-            temp = parentCast;
-          } else {
-            // That's not the one, move on
-            found = false;
-            break;
-          }
-          if (found) {
-            ui.registerTreeWidget->setCurrentItem((*registerIter));
-            break;
-          }
+      // Iterate the list until we find the right one
+      for (auto reg : registerList) {
+        // we know that there are only DeviceElementQTreeItems in the list, so we can static cast
+        auto deviceElement = static_cast <DeviceElementQTreeItem *>(reg);
+        if (deviceElement->getRegisterPath() == deviceListItem->lastSelectedRegister){
+          ui.registerTreeWidget->setCurrentItem(reg);
+          break;
         }
       }
     }
   }
+
   //do NOT select a register. This is intentional!
   ///@todo FIXME: Restore if "remember previous selection" is turned on!
 }

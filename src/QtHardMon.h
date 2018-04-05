@@ -174,12 +174,6 @@ protected:
                    const QIcon &icon_, const QString &text_,
                    QListWidget *parent_ = 0);
 
-    /* No copy constructor, the default is fine. */
-    // DeviceListItem ( const DeviceListItem & other );
-
-    /* No assignment operator, the default is fine. */
-    // DeviceListItem & operator=( const DeviceListItem & other );
-
     /** The destructor. Currently does nothing because the members go out of
      * scope automatically. */
     virtual ~DeviceListItem();
@@ -197,9 +191,7 @@ protected:
     mtca4u::DeviceInfoMap::DeviceInfo
         _deviceMapElement; ///< The instance of the DeviceMapElement
   public:
-    std::vector<std::string> lastSelectedRegister_; ///< The last selected
-                                                    /// register before the item
-    /// was deselected
+    ChimeraTK::RegisterPath lastSelectedRegister; ///< The last selected register in this device.
   };
 
   DeviceListItem *_currentDeviceListItem; ///< Pointer to the currently selected
