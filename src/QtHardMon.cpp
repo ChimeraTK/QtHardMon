@@ -364,8 +364,6 @@ void QtHardMon::read(bool autoRead) {
     if (currentAccessorModel_){
       currentAccessorModel_->read();
       
-      ///@todo FIXME I disabled reading when opening a devide. This should not happen anyway.
-      //registerTreeItem->readData(currentDevice_);
       ///@todo FIXME: what does the write button have to do with read??? This should not be here!
       ui.writeButton->setEnabled(true);
     }
@@ -483,10 +481,8 @@ void QtHardMon::preferences() {
     preferencesProvider.setValue(
         "floatPrecision", preferencesDialogForm.precisionSpinBox->value());
 
-    //@todo FIXME: There is no custom delegate at the moment.
-    //@todo FIXME: this should be done on local level of properties widgets.
-    //ui.propertiesWidget->customDelegate_.setDoubleSpinBoxPrecision(
-    //preferencesProvider.getValue<int>("floatPrecision"));
+    customDelegate_.setDoubleSpinBoxPrecision(
+      preferencesProvider.getValue<int>("floatPrecision"));
 
     // call registerSelected() so the size of the valuesList is adapted and
     // possible missing values are read
