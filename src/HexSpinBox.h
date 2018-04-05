@@ -1,15 +1,12 @@
-/*
- * HexSpinBox.h
- *
- *  Created on: Feb 12, 2015
- *      Author: varghese
- */
-
 #ifndef SOURCE_DIRECTORY__HEXSPINBOX_H_
 #define SOURCE_DIRECTORY__HEXSPINBOX_H_
 
 #include <QSpinBox>
 #include <QValidator>
+// The HexDataType is defined in a common file together with other types to avoid collisions
+// (although at the time of writing there are no other types)
+#include "VariantUserTypes.h"
+
 
 /**
  * The HexData class is the custom datatype that we have introduced to represent

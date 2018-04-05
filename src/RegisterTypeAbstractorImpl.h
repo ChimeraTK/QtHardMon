@@ -40,7 +40,7 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
  */
 template<class DATA_TYPE>
 std::pair<DATA_TYPE, bool> qvariantToStandardDataType(const QVariant & data){
-    if (data.type() == QVariant::UserType){ //in the user type the data is hex representation
+  if (data.type() == HexDataType){ 
     if (! data.canConvert<HexData>() ){
       return {DATA_TYPE(), false};
     }
