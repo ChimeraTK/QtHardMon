@@ -883,7 +883,6 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
       PreferencesProviderSingleton::Instance();
 
   if (preferencesProvider.getValue<bool>("readOnClick")) {
-    //    std::cout << "Ignoring click" <<std::endl;
     return;
   }
 
@@ -953,12 +952,6 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
 
-    ///@todo FIXME Remove the debug leftovers
-//    auto x = registerCatalogue.getRegister(registerIter->getRegisterName());
-//    if ( x->getDataDescriptor().fundamentalType() == ChimeraTK::RegisterInfo::FundamentalType::numeric){
-//      std::cout << x->getRegisterName() << ", is integral "  << x->getDataDescriptor().isIntegral() << " " << registerIter->getDataDescriptor().isIntegral() << std::endl;
-//    }
-  
     // parentNode can be null if there is no parent, i.e. the register is directly in the treeWidget
     auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget);
     if (parentNode){

@@ -7,7 +7,6 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
   // maxwords elements, and use the last element to show truncated indicator in the model.
   auto nElements = std::min(PreferencesProviderSingleton::Instance().getValue<unsigned int>("maxWords")+1, registerInfo.getNumberOfElements());
   
-  ///@todo FIXME Use the new stuff from DeviceAccess to loop the whole list of supported data types.
   auto dataDescriptor = registerInfo.getDataDescriptor();
   switch(dataDescriptor.rawDataType()){
     case ChimeraTK::DataType::none:{
