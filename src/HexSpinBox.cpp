@@ -31,6 +31,6 @@ int HexSpinBox::valueFromText(const QString &text_) const {
 }
 
 QValidator::State HexSpinBox::validate(QString &text_, int &pos_) const {
-  // TODO: Make the number of hex characters accepted in line with the range
+  ///@todo Make the number of hex characters accepted in line with the range.
   return (_validator->validate(text_, pos_));
 }

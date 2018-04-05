@@ -13,8 +13,6 @@
  * hex values. This class is registered with the Qt framework as a user defined
  * type. The table spinbox delegate class uses the class to identify hex data
  * items and create HexSpinboxes accordingly
- * TODO: extract to a base class and derive custom types from the base class (in
- * case the table needs to support other custom datatypes)
  */
 class HexData {
   static const int dataType = 0;

@@ -65,7 +65,6 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   setWindowIcon(QIcon(":/DESY_logo_nofade.png"));
   ui.logoLabel->setPixmap(QPixmap(":/DESY_logo.png"));
 
-  /// @todo FIXME Re-activate this functionality
   addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
                                         // clipboard
 
