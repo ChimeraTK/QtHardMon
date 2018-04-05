@@ -192,7 +192,7 @@
        </widget>
       </item>
       <item alignment="Qt::AlignLeft">
-       <widget class="QCheckBox" name="SortAscendingcheckBox">
+       <widget class="QCheckBox" name="SortAscendingCheckBox">
         <property name="enabled">
          <bool>true</bool>
         </property>

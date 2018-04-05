@@ -108,7 +108,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
 
   connect(ui.openCloseButton, SIGNAL(clicked()), this, SLOT(openCloseDevice()));
 
-  connect(ui.SortAscendingcheckBox, SIGNAL(stateChanged(int)), this,
+  connect(ui.SortAscendingCheckBox, SIGNAL(stateChanged(int)), this,
           SLOT(handleSortCheckboxClick(int)));
 
   // The oparations and options group are disabled until a dmap file is loaded
@@ -128,10 +128,6 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   ui.propertiesWidget->ui.valuesTableView->setItemDelegate(&customDelegate_);
 
   _plotWindow = new PlotWindow(this);
-
-  // sorted enabled by default; calling this here will trigger the slot, which
-  // sorts the register list.
-  ui.SortAscendingcheckBox->setChecked(true);
 
   connect(ui.showPlotWindowCheckBox, SIGNAL(stateChanged(int)), this,
           SLOT(showPlotWindow(int)));
