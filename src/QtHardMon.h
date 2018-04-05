@@ -231,6 +231,9 @@ private:
 
   void showMessageBox(QMessageBox::Icon boxType, QString boxTitle,
                       QString boxText, QString boxInformativeText);
+
+  /// re-select the last regsiter that was active when this device was opened, if this option is enabled
+  void selectPreviousRegister();
 };
 
 #endif // QT_HARD_MON

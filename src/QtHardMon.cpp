@@ -255,12 +255,42 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
     //closeDevice();
     //ui.registerTreeWidget->clear();
   }
+  selectPreviousRegister();
 }
 
-void QtHardMon::openDevice(
-    std::string const &deviceFileName) // Change name to createAndOpenDevice();
-{
-  // try to open a createa and new device. If this fails disable the buttons and
+void QtHardMon::selectPreviousRegister(){
+  if (!(ui.autoselectPreviousRegisterCheckBox->isChecked())){
+    // don't re-select if this option is not enabled
+    return;
+  }
+  // Searching a sub-tree does not work in QTreeWidget. So here is the
+  // strategy: First get all register with the right name from the tree,
+  // then pick the one where the full path matches. Ugly as hell, but easier than writing
+  // an recursive search function ourself.
+  auto registerPathComponents=_currentDeviceListItem->lastSelectedRegister.getComponents();
+  if (registerPathComponents.empty()){
+    // nothing to be done, no previous register
+    return;
+  }
+    
+  auto registerName=registerPathComponents.back().c_str();
+  // Get a list of all registers with this name.
+  QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
+    registerName, Qt::MatchExactly | Qt::MatchRecursive);
+      
+  // Iterate the list until we find the right one
+  for (auto reg : registerList) {
+    // we know that there are only DeviceElementQTreeItems in the list, so we can static cast
+    auto deviceElement = static_cast <DeviceElementQTreeItem *>(reg);
+    if (deviceElement->getRegisterPath() == _currentDeviceListItem->lastSelectedRegister){
+      ui.registerTreeWidget->setCurrentItem(reg);
+      break;
+    }
+  }
+}
+
+void QtHardMon::openDevice(std::string const &deviceFileName){
+  // try to open a device. If this fails disable the buttons and
   // the registerValues
   try {
     currentDevice_.open(deviceFileName);
@@ -272,6 +302,7 @@ void QtHardMon::openDevice(
 
     ui.openClosedLabel->setText( "Device is open.");
     ui.openCloseButton->setText("Close");
+    
   } catch (Exception &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
                    QString("Could not create the device ") +
@@ -287,9 +318,8 @@ void QtHardMon::closeDevice() {
   ui.operationsGroupBox->setEnabled(false);
   ui.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
-  // If the device is closed then there is no way we can read values from the
-  // registers - they are not available anymore. Nothing to show on the table
-  ui.propertiesWidget->clearFields();
+  // we keep the register tree filled at the moment
+  
   ui.openClosedLabel->setText("Device is closed.");
   ui.openCloseButton->setText("Open");
 }
@@ -895,6 +925,10 @@ void QtHardMon::openCloseDevice() {
     closeDevice();
   } else {
     openDevice(_currentDeviceListItem->getDeviceMapElement().deviceName);
+    // selectPreviousRegister() is not part of openDevice because the register tree is
+    // not populated yet when openDevice is called inside deviceSelected().
+    // So we have to call it explicitly here.
+    selectPreviousRegister();
   }
 }
 
@@ -962,33 +996,8 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   }
   ui.registerTreeWidget->expandAll();
 
-  if (ui.autoselectPreviousRegisterCheckBox->isChecked()) {
-    ///@todo: FIXME: This has to go to open, not when filling the tree
-    // Searching a sub-tree does not work in QTreeWidget. So here is the
-    // strategy: First get all register with the right name from the tree,
-    // then pick the one where the full path matches. Ugly as hell, but easier than writing
-    // an recursive search function ourself.
-    auto registerPathComponents=deviceListItem->lastSelectedRegister.getComponents();
-    if (!(registerPathComponents.empty())) {
-      auto registerName=registerPathComponents.back().c_str();
-      // Get a list of all registers with this name.
-      QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
-          registerName, Qt::MatchExactly | Qt::MatchRecursive);
-
-      // Iterate the list until we find the right one
-      for (auto reg : registerList) {
-        // we know that there are only DeviceElementQTreeItems in the list, so we can static cast
-        auto deviceElement = static_cast <DeviceElementQTreeItem *>(reg);
-        if (deviceElement->getRegisterPath() == deviceListItem->lastSelectedRegister){
-          ui.registerTreeWidget->setCurrentItem(reg);
-          break;
-        }
-      }
-    }
-  }
-
-  //do NOT select a register. This is intentional!
-  ///@todo FIXME: Restore if "remember previous selection" is turned on!
+  //Do NOT select a register. This is intentional!
+  //It happens in 
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {
