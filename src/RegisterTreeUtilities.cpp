@@ -1,8 +1,6 @@
 #include "RegisterTreeUtilities.h"
 #include "DeviceElementQTreeItem.h"
 
-#define NO_MODULE_NAME_STRING "[No Module Name]"
-
 using namespace mtca4u;
 
 QTreeWidgetItem * getNodeFromTreeWidget(std::string const & nodeName, QTreeWidget *treeWidget){
@@ -34,7 +32,6 @@ QTreeWidgetItem *RegisterTreeUtilities::getDeepestBranchNode(
       registerInfo->getRegisterName().getComponents();
   std::string moduleName = registerPathComponents.front();
 
-  // FIXME: There is a high chance, that there are always two components.
   if (registerPathComponents.size() < 2 || moduleName.empty()) {
     return nullptr;
   }
