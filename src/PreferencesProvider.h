@@ -22,7 +22,9 @@ public:
 
 template <typename T> void PreferencesProvider::setValue(QString key, T value) {
   if (settings_.count(key) != 0) {
-    // FIXME: what about implicit casting?
+    // This is a bit conservative. Maybe implicit casting could also lead to
+    // good results. This is safe, and an internal interface anyway. So we
+    // can leave it as it is.
     if (QVariant(value).type() != settings_[key].type()) {
       throw InvalidOperationException(
           "You cannot change the setting type once you insert it.");
