@@ -2,14 +2,14 @@
 
 DeviceElementQTreeItem::DeviceElementQTreeItem(QTreeWidget *parent,
                                                const QString &text,
-                                               boost::shared_ptr<mtca4u::RegisterInfo> registerInfo)
+                                               boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
     : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType),
       registerInfo_(registerInfo)
     {}
 
 DeviceElementQTreeItem::DeviceElementQTreeItem(QTreeWidgetItem *parent,
                                                const QString &text,
-                                               boost::shared_ptr<mtca4u::RegisterInfo> registerInfo)
+                                               boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
     : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType),
       registerInfo_(registerInfo)
     {}
@@ -39,7 +39,7 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   }
 }
 
-boost::shared_ptr<mtca4u::RegisterInfo> DeviceElementQTreeItem::getRegisterInfo() {
+boost::shared_ptr<ChimeraTK::RegisterInfo> DeviceElementQTreeItem::getRegisterInfo() {
   return registerInfo_;
 }
 

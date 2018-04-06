@@ -1,7 +1,7 @@
 #include "RegisterTreeUtilities.h"
 #include "DeviceElementQTreeItem.h"
 
-using namespace mtca4u;
+using namespace ChimeraTK;
 
 QTreeWidgetItem * getNodeFromTreeWidget(std::string const & nodeName, QTreeWidget *treeWidget){
   auto nodeList = treeWidget->findItems(nodeName.c_str(), Qt::MatchExactly);
@@ -25,7 +25,7 @@ QTreeWidgetItem * getNodeFromTreeWidgetItem(std::string const & nodeName, QTreeW
 
 
 QTreeWidgetItem *RegisterTreeUtilities::getDeepestBranchNode(
-    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
+    boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
     QTreeWidget *treeWidget){
 
   std::vector<std::string> registerPathComponents =
@@ -52,12 +52,12 @@ QTreeWidgetItem *RegisterTreeUtilities::getDeepestBranchNode(
 }
 
 std::string RegisterTreeUtilities::getRegisterName(
-    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo) {
+    boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo) {
   return registerInfo->getRegisterName().getComponents().back();
 }
 
 QTreeWidgetItem *RegisterTreeUtilities::getDeepestBranchNode(
-    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
+    boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
     QTreeWidgetItem *parentModuleItem, unsigned int depth) {
   std::vector<std::string> registerPathComponents =
       registerInfo->getRegisterName().getComponents();

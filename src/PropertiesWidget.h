@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "ui_PropertiesWidgetForm.h"
-#include <mtca4u/RegisterInfo.h>
+#include <ChimeraTK/RegisterInfo.h>
 
 class PropertiesWidget : public QWidget {
 //  Q_OBJECT
@@ -15,7 +15,7 @@ public:
 
   Ui::PropertiesWidgetForm ui;
 
-  void updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo> const & registerInfo);
+  void updateRegisterInfo(boost::shared_ptr<ChimeraTK::RegisterInfo> const & registerInfo);
 
   /// Clear the red cells of the data display widget after writing
   void clearDataWidgetBackground();

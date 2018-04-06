@@ -28,7 +28,7 @@ void PropertiesWidget::setTwoDWidgetsVisible(bool visible){
   ui.channelWidget->setVisible(visible);
 }
 
-void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<mtca4u::RegisterInfo> const & registerInfo){
+void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<ChimeraTK::RegisterInfo> const & registerInfo){
   // There are node elements ("modules") which don't have register information
   if (!registerInfo){
     clearFields();

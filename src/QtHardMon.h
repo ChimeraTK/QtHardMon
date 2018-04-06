@@ -13,7 +13,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
-#include <mtca4u/Device.h>
+#include <ChimeraTK/Device.h>
 #endif
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -135,7 +135,7 @@ public:
   bool loadDmapFile(QString const &dmapFileName);
 
 protected:
-  mtca4u::Device currentDevice_; ///< The instance of the device which is being accessed.
+  ChimeraTK::Device currentDevice_; ///< The instance of the device which is being accessed.
   QString dmapFileName_;   ///< The file name of the last opened dmap file
   QString configFileName_; ///< Name of the config file (last saved or read)
   int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
@@ -162,15 +162,15 @@ protected:
   class DeviceListItem : public QListWidgetItem {
   public:
     /** The simplest cvonstructor, no text or icon for the entry*/
-    DeviceListItem(mtca4u::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
                    QListWidget *parent_ = 0);
 
     /** Constructor which sets the text entry in the list. */
-    DeviceListItem(mtca4u::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
                    const QString &text_, QListWidget *parent_ = 0);
 
     /** Constructor which sets the text entry in the list and an icon. */
-    DeviceListItem(mtca4u::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
                    const QIcon &icon_, const QString &text_,
                    QListWidget *parent_ = 0);
 
@@ -180,7 +180,7 @@ protected:
 
     /** Returns a reference to the deviceMapElement, i.e. the device
      * information. */
-    mtca4u::DeviceInfoMap::DeviceInfo const &getDeviceMapElement() const;
+    ChimeraTK::DeviceInfoMap::DeviceInfo const &getDeviceMapElement() const;
 
     /** The type of DeviceListItemType.  It's a user type because it is larger
      * than QListWidgetItem::UserType.
@@ -188,7 +188,7 @@ protected:
     static const int DeviceListItemType = QListWidgetItem::UserType + 1;
 
   private:
-    mtca4u::DeviceInfoMap::DeviceInfo
+    ChimeraTK::DeviceInfoMap::DeviceInfo
         _deviceMapElement; ///< The instance of the DeviceMapElement
   public:
     ChimeraTK::RegisterPath lastSelectedRegister; ///< The last selected register in this device.

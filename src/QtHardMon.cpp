@@ -11,16 +11,16 @@
 #include <QFileDialog>
 #include <qaction.h>
 
-#include <mtca4u/BackendFactory.h>
-#include <mtca4u/DMapFileParser.h>
-#include <mtca4u/Exception.h>
-#include <mtca4u/PcieBackendException.h>
+#include <ChimeraTK/BackendFactory.h>
+#include <ChimeraTK/DMapFileParser.h>
+#include <ChimeraTK/Exception.h>
+#include <ChimeraTK/PcieBackendException.h>
 
 #include "Constants.h"
 #include "Exceptions.h"
 #include <QDebug>
 #include <QTextStream>
-using namespace mtca4u;
+using namespace ChimeraTK;
 
 #include "DeviceElementQTreeItem.h"
 #include "PreferencesProvider.h"
@@ -165,7 +165,7 @@ void QtHardMon::loadBoards() {
 }
 
 bool QtHardMon::loadDmapFile(QString const &dmapFileName) {
-  mtca4u::DMapFileParser fileParser;
+  ChimeraTK::DMapFileParser fileParser;
   DeviceInfoMapPointer dmap;
   try {
     dmap = fileParser.parse(dmapFileName.toStdString());
@@ -855,7 +855,7 @@ void QtHardMon::unckeckShowPlotWindow() {
 // class and the copy
 // constructors of the data members
 QtHardMon::DeviceListItem::DeviceListItem(
-    mtca4u::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+    ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
     QListWidget *parent_)
     : QListWidgetItem(parent_, DeviceListItemType),
       _deviceMapElement(device_map_emlement)
@@ -863,20 +863,20 @@ QtHardMon::DeviceListItem::DeviceListItem(
 {}
 
 QtHardMon::DeviceListItem::DeviceListItem(
-    mtca4u::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+    ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
     const QString &text_, QListWidget *parent_)
     : QListWidgetItem(text_, parent_, DeviceListItemType),
       _deviceMapElement(device_map_emlement) {}
 
 QtHardMon::DeviceListItem::DeviceListItem(
-    mtca4u::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+    ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
     const QIcon &icon_, const QString &text_, QListWidget *parent_)
     : QListWidgetItem(icon_, text_, parent_, DeviceListItemType),
       _deviceMapElement(device_map_emlement) {}
 
 QtHardMon::DeviceListItem::~DeviceListItem() {}
 
-mtca4u::DeviceInfoMap::DeviceInfo const &
+ChimeraTK::DeviceInfoMap::DeviceInfo const &
 QtHardMon::DeviceListItem::getDeviceMapElement() const {
   return _deviceMapElement;
 }
@@ -955,7 +955,7 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
 
   ui.registerTreeWidget->clear();
 
-  const mtca4u::RegisterCatalogue registerCatalogue =
+  const ChimeraTK::RegisterCatalogue registerCatalogue =
       currentDevice_.getRegisterCatalogue();
   // get the registerMap and fill the RegisterTreeWidget
   for (RegisterCatalogue::const_iterator registerIter = currentDevice_.getRegisterCatalogue().begin();
