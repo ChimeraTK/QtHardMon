@@ -81,6 +81,11 @@ void PlotWindow::plot() {
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
 
+  // the plot window might be active while no register is selected. Just don't do anything in this case.
+  if (!(_hardMon->currentAccessorModel_)){
+    return;
+  }
+  
   // We use the data model here. It automatically always gives the coocked data and the right size.
   // In addition, if the coversion to double fails, we get this information and don't display.
   //@todo Get the data type and show a message why data cannot be plotted
