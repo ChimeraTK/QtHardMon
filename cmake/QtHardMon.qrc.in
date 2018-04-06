@@ -1,0 +1,6 @@
+ <!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+     <file alias="DESY_logo.png">@CMAKE_SOURCE_DIR@/res/DESY_logo.png</file>
+     <file alias="DESY_logo_nofade.svg">@CMAKE_SOURCE_DIR@/res/DESY_logo_nofade.svg</file>
+ </qresource>
+ </RCC>

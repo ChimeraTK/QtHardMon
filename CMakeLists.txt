@@ -59,6 +59,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_STATIC_autogen/i
 #configure a header file which contains the version information for use in C++
 configure_file(cmake/QtHardMonVersion.h.in
   "${PROJECT_BINARY_DIR}/QtHardMonVersion.h" @ONLY)
+#configure the resource file which contains the path to the images
+configure_file(cmake/QtHardMon.qrc.in
+  "${PROJECT_BINARY_DIR}/QtHardMon.qrc" @ONLY)
 
 #The use of the QWT plotting library is optional
 if(QWT_FOUND)
@@ -69,7 +72,7 @@ else(QWT_FOUND)
   message("QWT not found, plotting is disabled in this build.")
 endif(QWT_FOUND)
 
-ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp )
+ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp ${PROJECT_BINARY_DIR}/QtHardMon.qrc)
 #The static library as well as its auto-generated headers are needed to compile main
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
   ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)

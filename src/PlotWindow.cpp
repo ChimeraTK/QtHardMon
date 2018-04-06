@@ -28,7 +28,7 @@ PlotWindow::PlotWindow(QtHardMon *hardMon)
 #endif
 {
   _plotWindowForm.setupUi(this);
-  setWindowIcon(QIcon(":/DESY_logo_nofade.png"));
+  setWindowIcon(QIcon(":/DESY_logo_nofade.svg"));
 
   // a layout for the plotFrame
   _plotFrameLayout = new QGridLayout(_plotWindowForm.plotFrame);
