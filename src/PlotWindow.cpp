@@ -16,7 +16,6 @@
 #include <qwt_scale_map.h>
 #endif
 
-#include "Constants.h"
 #include <iostream>
 
 PlotWindow::PlotWindow(QtHardMon *hardMon)

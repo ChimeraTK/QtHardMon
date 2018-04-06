@@ -16,7 +16,6 @@
 #include <ChimeraTK/Exception.h>
 #include <ChimeraTK/PcieBackendException.h>
 
-#include "Constants.h"
 #include "Exceptions.h"
 #include <QDebug>
 #include <QTextStream>

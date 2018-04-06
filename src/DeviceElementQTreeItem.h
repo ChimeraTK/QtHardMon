@@ -4,7 +4,6 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
-#include "Constants.h"
 #include <ChimeraTK/Device.h>              // ChimeraTK::Device
 
 
