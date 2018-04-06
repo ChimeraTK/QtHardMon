@@ -795,27 +795,18 @@ void QtHardMon::writeConfig(QString const &fileName) {
     deviceListItem =
         static_cast<DeviceListItem *>(ui.deviceListWidget->item(deviceRow));
 
-    ///todo FIXME: This is not working. Only if there are exactly two entries it works, in all
-    /// other cases it breaks!
     // Only write to the config file if the 'last selected' strings are not
     // empty.
     // Empty strings would cause a parse error, and if the entry is not found it
     // falls back to empty string anyway.
-//    if (!deviceListItem->lastSelectedRegister_.empty()) {
-//      std::string deviceRegisterString =
-//          deviceListItem->getDeviceMapElement().deviceName +
-//          REGISTER_EXTENSION_STRING;
-//      configWriter.setValue(deviceRegisterString,
-//                            deviceListItem->lastSelectedRegister_.back());
-//    }
-//
-//    if (!deviceListItem->lastSelectedRegister_.empty()) {
-//      std::string deviceModuleString =
-//          deviceListItem->getDeviceMapElement().deviceName +
-//          MODULE_EXTENSION_STRING;
-//      configWriter.setValue(deviceModuleString,
-//                            deviceListItem->lastSelectedRegister_.front());
-//    }
+    if (!deviceListItem->lastSelectedRegister.getComponents().empty()) {
+      std::string deviceRegisterString =
+          deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
+      configWriter.setValue(deviceRegisterString,
+                            std::string(deviceListItem->lastSelectedRegister));
+    }else{
+      std::cout << "getComponents() is empty" << std::endl;
+    }
   }
 
   PreferencesProvider &preferencesProvider =
