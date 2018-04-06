@@ -669,26 +669,17 @@ void QtHardMon::loadConfig(QString const &configFileName) {
     return;
   }
 
-  ///@todo FIXME Since we have a hierarchy the module/register concept falls short. Make this
-  ///work again!
-  // loop all devices and try to determine the last used module and register
+  // loop all devices and try to determine the last used register
   for (int deviceRow = 0; deviceRow < ui.deviceListWidget->count();
        ++deviceRow) {
     DeviceListItem *deviceListItem =
         static_cast<DeviceListItem *>(ui.deviceListWidget->item(deviceRow));
 
-    // determine the module and the register
+    // determine the last register
     std::string deviceRegisterString =
         deviceListItem->getDeviceMapElement().deviceName +
         REGISTER_EXTENSION_STRING;
-    std::string registerName =
-        configReader.getValue(deviceRegisterString, std::string());
-
-    std::string deviceModuleString =
-        deviceListItem->getDeviceMapElement().deviceName +
-        MODULE_EXTENSION_STRING;
-    std::string moduleName =
-        configReader.getValue(deviceModuleString, std::string());
+    deviceListItem->lastSelectedRegister=configReader.getValue(deviceRegisterString, std::string());
   } // for deviceRow
 
   // search for the device string
@@ -804,8 +795,6 @@ void QtHardMon::writeConfig(QString const &fileName) {
           deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
       configWriter.setValue(deviceRegisterString,
                             std::string(deviceListItem->lastSelectedRegister));
-    }else{
-      std::cout << "getComponents() is empty" << std::endl;
     }
   }
 
