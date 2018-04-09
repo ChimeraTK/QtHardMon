@@ -250,10 +250,10 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
     populateRegisterTree(deviceItem);
   } catch (Exception &e) {
     // In case anything fails, we would like to catch it and close the device.
-	///@todo FIXME catch exceptions for all registers and show the message only once.
-	std::cout<<"This exception area is still under construction:"<<e.what()<<std::endl;
-    //closeDevice();
-    //ui.registerTreeWidget->clear();
+    showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
+                   QString("Could not load the list of register for.")+deviceListItem->getDeviceMapElement().deviceName.c_str(),
+                   QString("Info: An exception was thrown:") + e.what());
+    closeDevice();
   }
   selectPreviousRegister();
 }
@@ -360,58 +360,36 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
 
-  if (!preferencesProvider.getValue<bool>("autoRead")) {
-    // If automatic reading is deactivated the widget has to be cleared so all
-    // widget items are empty.
-    // In addition the write button is deactivated so the invalid items cannot
-    // be written to the register.
-    ///@todo FIXME why should writing be deactivated? 
-    ui.writeButton->setEnabled(false);
-  } else {
-    read(true);
+  // Only call autoread for registers (which have a valid accessor model).
+  // Don't call it for modules (where  currentAccessorModel_ == nullptr)
+  if (preferencesProvider.getValue<bool>("autoRead") && currentAccessorModel_) {
+    read();
   }
 }
 
-void QtHardMon::read(bool autoRead) {
+void QtHardMon::read() {
   ++insideReadOrWrite_;
-  DeviceElementQTreeItem *registerTreeItem =
-      static_cast<DeviceElementQTreeItem *>(
-          ui.registerTreeWidget->currentItem());
-  if (!registerTreeItem)
-  {
-	  showMessageBox(QMessageBox::Information, QString("QtHardMon : Information"),
-	                     QString("No register selected"),QString("Please select a valid register"));
-	  return;
+  // if no register is selected the accessor model is nullptr.
+  if (!currentAccessorModel_){
+    showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
+                   QString("No register selected.                 "),
+                   QString("Please select a valid register. (Have you selected a module?)"));
+    return;
   }
   try {
-    // if no register is selected the accessor model is nullptr.
-    if (currentAccessorModel_){
       currentAccessorModel_->read();
-      
-      ///@todo FIXME: what does the write button have to do with read??? This should not be here!
-      ui.writeButton->setEnabled(true);
-    }
-  } catch (InvalidOperationException &e) {
-
-    if (!autoRead) {
-      showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
-                     QString("QtHardMon read error "),
-                     QString("Info: An exception was thrown:") + e.what());
-    }
   } catch (std::exception &e) {
 
-    if (!autoRead) {
-      closeDevice();
-      ui.writeButton->setEnabled(false);
-      // the error message accesses the _currentDeviceListItem. Is
-      // this safe? It might be NULL.
-      showMessageBox(
-          QMessageBox::Critical, QString("QtHardMon : Error"),
+    closeDevice();
+    ///@todo The error message accesses the _currentDeviceListItem. Is
+    /// this safe? It might be NULL. On the other hand read() should only be active
+    /// if a device is opened.
+    showMessageBox(
+          QMessageBox::Critical, QString("QtHardMon Error"),
           QString("Error reading from device ") +
               _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".",
           QString("Info: An exception was thrown:") + e.what() +
               QString("\n\nThe device has been closed."));
-    }
   }
 
   // check if plotting after reading is requested
@@ -424,27 +402,24 @@ void QtHardMon::read(bool autoRead) {
 
 void QtHardMon::write() {
   ++insideReadOrWrite_;
-  DeviceElementQTreeItem *registerTreeItem =
-      static_cast<DeviceElementQTreeItem *>(
-          ui.registerTreeWidget->currentItem());
+  // if no register is selected the accessor model is nullptr.
+  if (!currentAccessorModel_){
+    showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
+                   QString("No register selected.                 "),
+                   QString("Please select a valid register. (Have you selected a module?)"));
+    return;
+  }
 
   try {
-    // if no register is selected this pointer has to be nullptr.
-    if (currentAccessorModel_) {
-      currentAccessorModel_->write();
-    }
-  } catch (InvalidOperationException &e) {
-    showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
-                   QString("QtHardMon write error "),
-                   QString("Info: An exception was thrown:") + e.what());
-    return;
+    currentAccessorModel_->write();
   } catch (std::exception &e) {
     closeDevice();
 
-    // the error message accesses the _currentDeviceListItem. Is this safe? It
-    // might be NULL.
+    ///@todo The error message accesses the _currentDeviceListItem. Is this safe? It
+    /// might be NULL. On the other hand write() should only be active
+    /// if a device is opened.
     showMessageBox(
-        QMessageBox::Critical, QString("QtHardMon : Error"),
+        QMessageBox::Critical, QString("QtHardMon Error"),
         QString("Error writing to device ") +
             _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".",
         QString("Info: An exception was thrown:") + e.what() +

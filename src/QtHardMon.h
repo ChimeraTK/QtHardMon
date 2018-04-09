@@ -122,8 +122,8 @@ private slots:
   void copyRegisterTreeItemNameToClipBoard();
 
 public slots:
-  void read(bool autoRead = false); ///< Read register from device.
-  void write();                     ///< Read register to device.
+  void read();   ///< Read register from device.
+  void write();  ///< Read register to device.
 
 public:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
