@@ -61,9 +61,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
       static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION));
 
   setWindowTitle("QtHardMon");
-  setWindowIcon(QIcon(":/DESY_logo_nofade.svg"));
+  setWindowIcon(QIcon(":/ChimeraTK_Logo_whitebg.png"));
   // we cannot scale the logo when creating a pixmap, so we use a fixed size png
-  ui.logoLabel->setPixmap(QPixmap(":/DESY_logo.png"));
+  ui.logoLabel->setPixmap(QPixmap(":/ChimeraTK_Logo_whitebg.png"));
 
   addCopyActionForRegisterTreeWidget(); // Adds slot to copy qtreeiem's name to
                                         // clipboard

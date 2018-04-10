@@ -1,6 +1,5 @@
  <!DOCTYPE RCC><RCC version="1.0">
  <qresource>
-     <file alias="DESY_logo.png">@CMAKE_SOURCE_DIR@/res/DESY_logo.png</file>
-     <file alias="DESY_logo_nofade.svg">@CMAKE_SOURCE_DIR@/res/DESY_logo_nofade.svg</file>
+   <file alias="ChimeraTK_Logo_whitebg.png">@CMAKE_SOURCE_DIR@/res/ChimeraTK_Logo_whitebg.png</file>
  </qresource>
  </RCC>
