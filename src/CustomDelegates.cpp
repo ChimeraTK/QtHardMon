@@ -53,7 +53,6 @@ QString CustomDelegates::displayText(const QVariant &value,
 QWidget *CustomDelegates::createEditor(QWidget *parent_,
                                        const QStyleOptionViewItem &option,
                                        const QModelIndex &index) const {
-  std::cout << "type is " << index.data(Qt::EditRole).type() << std::endl;
   if (index.data(Qt::EditRole).type() ==
       QVariant::Double) { // create spinbox with custom precision
                           // for cells in the double column
@@ -67,7 +66,6 @@ QWidget *CustomDelegates::createEditor(QWidget *parent_,
     return hexSpinBox;
   } else {
     // should work for int, uint, string and bool
-    std::cout << "creating default delegate " << std::endl;
     return QStyledItemDelegate::createEditor(parent_, option, index);
   }
 }
