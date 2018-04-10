@@ -862,7 +862,7 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
 
-  if (preferencesProvider.getValue<bool>("readOnClick")) {
+  if (!preferencesProvider.getValue<bool>("readOnClick")) {
     return;
   }
 
