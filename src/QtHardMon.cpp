@@ -2,6 +2,7 @@
 #include "ConfigFileReaderWriter.h"
 #include "QtHardMonVersion.h"
 #include "ui_PreferencesForm.h"
+#include <QHostInfo>
 
 #include <iostream>
 #include <limits>
@@ -58,9 +59,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   preferencesProvider.setValue("maxWords", 0x10000);
   preferencesProvider.setValue(
       "floatPrecision",
-      static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION));
+      static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION)); 
 
-  setWindowTitle("QtHardMon");
+  setWindowTitle("QtHardMon@"+QHostInfo::localHostName());
   setWindowIcon(QIcon(":/ChimeraTK_Logo_whitebg.png"));
   // we cannot scale the logo when creating a pixmap, so we use a fixed size png
   ui.logoLabel->setPixmap(QPixmap(":/ChimeraTK_Logo_whitebg.png"));
