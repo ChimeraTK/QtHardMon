@@ -23,24 +23,62 @@
    <enum>Qt::LeftToRight</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="hideDevicesButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>&lt;&gt;</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QLabel" name="deviceLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>Devices:</string>
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="DeviceLayout">
         <item>
          <widget class="QListWidget" name="deviceListWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
+            <verstretch>255</verstretch>
            </sizepolicy>
           </property>
          </widget>
@@ -49,7 +87,7 @@
          <widget class="QGroupBox" name="deviceStatusGroupBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
+            <horstretch>255</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
@@ -92,6 +130,12 @@
         </item>
         <item>
          <widget class="QGroupBox" name="devicePropertiesGroupBox">
+          <property name="minimumSize">
+           <size>
+            <width>255</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="title">
            <string>Device properties</string>
           </property>
@@ -105,6 +149,12 @@
            </item>
            <item>
             <widget class="QLabel" name="deviceNameDisplay">
+             <property name="maximumSize">
+              <size>
+               <width>230</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
              </property>
@@ -125,6 +175,12 @@
            </item>
            <item>
             <widget class="QLabel" name="deviceFileDisplay">
+             <property name="maximumSize">
+              <size>
+               <width>230</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
              </property>
@@ -145,6 +201,12 @@
            </item>
            <item>
             <widget class="QLabel" name="mapFileDisplay">
+             <property name="maximumSize">
+              <size>
+               <width>230</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="frameShape">
               <enum>QFrame::Panel</enum>
              </property>
@@ -159,14 +221,30 @@
           </layout>
          </widget>
         </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="loadBoardsButton">
+          <property name="text">
+           <string>Load Boards</string>
+          </property>
+         </widget>
+        </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QPushButton" name="loadBoardsButton">
-        <property name="text">
-         <string>Load Boards</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>
@@ -181,6 +259,12 @@
       </item>
       <item>
        <widget class="QTreeWidget" name="registerTreeWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <attribute name="headerVisible">
          <bool>false</bool>
         </attribute>
@@ -261,7 +345,7 @@
          <item>
           <widget class="QCheckBox" name="continuousReadCheckBox">
            <property name="text">
-            <string>Continuous read (250 ms)</string>
+            <string>Continuous read</string>
            </property>
           </widget>
          </item>
@@ -452,5 +536,86 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>hideDevicesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>deviceListWidget</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>43</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>43</x>
+     <y>118</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hideDevicesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>deviceStatusGroupBox</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>99</x>
+     <y>325</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hideDevicesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>devicePropertiesGroupBox</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>188</x>
+     <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hideDevicesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>loadBoardsButton</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>37</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>582</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hideDevicesButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>deviceLabel</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>222</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
