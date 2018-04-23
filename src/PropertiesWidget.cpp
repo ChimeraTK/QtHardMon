@@ -10,7 +10,7 @@ void PropertiesWidget::clearFields(){
   ui.registerPathDisplay->setText("");
   ui.dimensionDisplay->setText("");
   // no need to update channels or elements. They are hidden as info of 1D and 2D
-  ui.numericalAddresseGroupBox->hide();
+  ui.numericalAddressGroupBox->hide();
   ui.fixedPointGroupBox->hide();
   setOneDWidgetsVisible(false);
   setTwoDWidgetsVisible(false);
@@ -48,7 +48,7 @@ void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<ChimeraTK::RegisterI
     setAddress(numericAddressedInfo->bar, numericAddressedInfo->address, numericAddressedInfo->nBytes);
     setFixedPointInfo(numericAddressedInfo->width, numericAddressedInfo->nFractionalBits, numericAddressedInfo->signedFlag, registerInfo->getNumberOfDimensions());
   }else{ 
-    ui.numericalAddresseGroupBox->hide();
+    ui.numericalAddressGroupBox->hide();
     ui.fixedPointGroupBox->hide();
   }
 }
@@ -121,7 +121,7 @@ void PropertiesWidget::setType(ChimeraTK::RegisterInfo::DataDescriptor const & d
 }
 
 void PropertiesWidget::setAddress(int bar, int address, int sizeInBytes){
-  ui.numericalAddresseGroupBox->show();
+  ui.numericalAddressGroupBox->show();
   ui.barDisplay->setText(QString::number(bar));
   ui.addressDisplay->setText(QString::number(address));
   ui.sizeDisplay->setText(QString::number(sizeInBytes));
