@@ -109,8 +109,10 @@ void PlotWindow::plot() {
 
   _curve1->setData(_myData);
 
-  _qwtPlot->setAxisAutoScale(0);
-  _qwtPlot->setAxisAutoScale(2);
+  _qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
+  _qwtPlot->setAxisAutoScale(QwtPlot::xBottom);
+  _qwtPlot->setAxisFont(QwtPlot::yLeft, this->font());
+  _qwtPlot->setAxisFont(QwtPlot::xBottom, this->font());
 
   _qwtPlot->replot();
 
