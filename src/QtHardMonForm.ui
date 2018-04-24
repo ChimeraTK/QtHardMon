@@ -153,7 +153,7 @@
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
-            <verstretch>255</verstretch>
+            <verstretch>0</verstretch>
            </sizepolicy>
           </property>
          </widget>
@@ -219,12 +219,6 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>255</width>
-            <height>0</height>
-           </size>
           </property>
           <property name="title">
            <string>Device properties</string>
