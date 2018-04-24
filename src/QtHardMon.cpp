@@ -242,7 +242,11 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
 
   ui.deviceNameDisplay->setText(
       deviceListItem->getDeviceMapElement().deviceName.c_str());
+  ui.deviceNameDisplay->setToolTip(
+      deviceListItem->getDeviceMapElement().deviceName.c_str());
   ui.deviceFileDisplay->setText(
+      deviceListItem->getDeviceMapElement().uri.c_str());
+  ui.deviceFileDisplay->setToolTip(
       deviceListItem->getDeviceMapElement().uri.c_str());
 
   std::string absPath = deviceListItem->getDeviceMapElement().mapFileName;
