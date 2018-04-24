@@ -154,7 +154,7 @@ protected:
 
   /** Open the device and update the GUI accordingly.
    */
-  void openDevice(std::string const &deviceFileName);
+  void openDevice(std::string const &deviceIdentifier);
 
   /** A helper class to store listWidgetItems which also contain the
    * dRegisterInfo and ptrmapFile information.

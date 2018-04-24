@@ -251,14 +251,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="deviceFileLabel">
+            <widget class="QLabel" name="deviceIdentifierLabel">
              <property name="text">
-              <string>Device file</string>
+              <string>Device identifier</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="deviceFileDisplay">
+            <widget class="QLabel" name="deviceIdentifierDisplay">
              <property name="maximumSize">
               <size>
                <width>230</width>

@@ -218,7 +218,7 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   // empty the register list.
   if (!deviceItem) {
     ui.deviceNameDisplay->setText("");
-    ui.deviceFileDisplay->setText("");
+    ui.deviceIdentifierDisplay->setText("");
     ui.mapFileDisplay->setText("");
     ui.mapFileDisplay->setToolTip("");
     ui.deviceStatusGroupBox->setEnabled(false);
@@ -244,9 +244,9 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
       deviceListItem->getDeviceMapElement().deviceName.c_str());
   ui.deviceNameDisplay->setToolTip(
       deviceListItem->getDeviceMapElement().deviceName.c_str());
-  ui.deviceFileDisplay->setText(
+  ui.deviceIdentifierDisplay->setText(
       deviceListItem->getDeviceMapElement().uri.c_str());
-  ui.deviceFileDisplay->setToolTip(
+  ui.deviceIdentifierDisplay->setToolTip(
       deviceListItem->getDeviceMapElement().uri.c_str());
 
   std::string absPath = deviceListItem->getDeviceMapElement().mapFileName;
@@ -296,11 +296,11 @@ void QtHardMon::selectPreviousRegister(){
   }
 }
 
-void QtHardMon::openDevice(std::string const &deviceFileName){
+void QtHardMon::openDevice(std::string const &deviceIdentifier){
   // try to open a device. If this fails disable the buttons and
   // the registerValues
   try {
-    currentDevice_.open(deviceFileName);
+    currentDevice_.open(deviceIdentifier);
     // enable all of the GUI in case it was deactivated before
     ui.propertiesWidget->ui.valuesTableView->setEnabled(true);
     ui.operationsGroupBox->setEnabled(true);
@@ -313,7 +313,7 @@ void QtHardMon::openDevice(std::string const &deviceFileName){
   } catch (Exception &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
                    QString("Could not create the device ") +
-                       deviceFileName.c_str() + ".",
+                       deviceIdentifier.c_str() + ".",
                    QString("Info: An exception was thrown:") + e.what());
   }
 }
