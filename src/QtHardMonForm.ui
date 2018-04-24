@@ -25,22 +25,40 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="showDevicesWidget" native="true">
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
-         <widget class="QPushButton" name="hideDevicesButton">
+         <widget class="QPushButton" name="showDevicesButtom">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
           </property>
           <property name="maximumSize">
            <size>
@@ -49,30 +67,87 @@
            </size>
           </property>
           <property name="text">
-           <string>&lt;&gt;</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
+           <string>&gt;&gt;</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="deviceLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-          <property name="text">
-           <string>Devices:</string>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
           </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="DeviceLayout">
+      </widget>
+      <widget class="QWidget" name="devicesWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="hideDevicesButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>25</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>&lt;&lt;</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="deviceLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Devices:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
         <item>
          <widget class="QListWidget" name="deviceListWidget">
           <property name="sizePolicy">
@@ -103,8 +178,17 @@
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="sizeConstraint">
+              <enum>QLayout::SetDefaultConstraint</enum>
+             </property>
              <item>
               <widget class="QLabel" name="openClosedLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>Device is closed.</string>
                </property>
@@ -130,6 +214,12 @@
         </item>
         <item>
          <widget class="QGroupBox" name="devicePropertiesGroupBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>255</width>
@@ -222,116 +312,119 @@
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Expanding</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QPushButton" name="loadBoardsButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
            <string>Load Boards</string>
           </property>
          </widget>
         </item>
        </layout>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QLabel" name="RegistersLabel">
-        <property name="text">
-         <string>Modules/Registers:</string>
+      </widget>
+      <widget class="QWidget" name="registersWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTreeWidget" name="registerTreeWidget">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="topMargin">
+         <number>0</number>
         </property>
-        <attribute name="headerVisible">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item alignment="Qt::AlignLeft">
-       <widget class="QCheckBox" name="SortAscendingCheckBox">
-        <property name="enabled">
-         <bool>true</bool>
+        <property name="bottomMargin">
+         <number>0</number>
         </property>
-        <property name="focusPolicy">
-         <enum>Qt::StrongFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Sort module/registers in Ascending order</string>
-        </property>
-        <property name="text">
-         <string>Sort Modules/Registers</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item alignment="Qt::AlignLeft|Qt::AlignBottom">
-       <widget class="QCheckBox" name="autoselectPreviousRegisterCheckBox">
-        <property name="toolTip">
-         <string>Automatically select the previously selected register when reopening the device.</string>
-        </property>
-        <property name="accessibleName">
-         <string/>
-        </property>
-        <property name="text">
-         <string>Autoselect previous register</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="PropertiesWidget" name="propertiesWidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>421</width>
-        <height>669</height>
-       </size>
-      </property>
+        <item>
+         <widget class="QLabel" name="RegistersLabel">
+          <property name="text">
+           <string>Modules/Registers:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="registerTreeWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <attribute name="headerVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string notr="true">1</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="SortAscendingCheckBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+          <property name="toolTip">
+           <string>Sort module/registers in Ascending order</string>
+          </property>
+          <property name="text">
+           <string>Sort Modules/Registers</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="autoselectPreviousRegisterCheckBox">
+          <property name="toolTip">
+           <string>Automatically select the previously selected register when reopening the device.</string>
+          </property>
+          <property name="accessibleName">
+           <string/>
+          </property>
+          <property name="text">
+           <string>Autoselect previous register</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="PropertiesWidget" name="propertiesWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>421</width>
+         <height>669</height>
+        </size>
+       </property>
+      </widget>
      </widget>
     </item>
     <item>
@@ -539,81 +632,65 @@
  <connections>
   <connection>
    <sender>hideDevicesButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>deviceListWidget</receiver>
-   <slot>setHidden(bool)</slot>
+   <signal>clicked()</signal>
+   <receiver>showDevicesWidget</receiver>
+   <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>68</x>
-     <y>43</y>
+     <x>193</x>
+     <y>47</y>
     </hint>
     <hint type="destinationlabel">
-     <x>43</x>
-     <y>118</y>
+     <x>69</x>
+     <y>213</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>hideDevicesButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>deviceStatusGroupBox</receiver>
-   <slot>setHidden(bool)</slot>
+   <signal>clicked()</signal>
+   <receiver>devicesWidget</receiver>
+   <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>64</x>
-     <y>48</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>99</x>
-     <y>325</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hideDevicesButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>devicePropertiesGroupBox</receiver>
-   <slot>setHidden(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>54</x>
-     <y>49</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>188</x>
-     <y>390</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hideDevicesButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>loadBoardsButton</receiver>
-   <slot>setHidden(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>70</x>
-     <y>37</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>140</x>
-     <y>582</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>hideDevicesButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>deviceLabel</receiver>
-   <slot>setHidden(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>71</x>
-     <y>49</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>222</x>
+     <x>196</x>
      <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>362</x>
+     <y>29</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>showDevicesButtom</sender>
+   <signal>clicked()</signal>
+   <receiver>showDevicesWidget</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>39</x>
+     <y>156</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>79</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>showDevicesButtom</sender>
+   <signal>clicked()</signal>
+   <receiver>devicesWidget</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>38</x>
+     <y>162</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>331</x>
+     <y>29</y>
     </hint>
    </hints>
   </connection>

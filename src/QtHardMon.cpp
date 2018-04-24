@@ -136,6 +136,8 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   connect(_plotWindow, SIGNAL(plotWindowClosed()), this,
           SLOT(unckeckShowPlotWindow()));
 
+  ui.showDevicesWidget->hide();
+  
   // also the plot window dfunctions are only enabled when a device is opened.
   _plotWindow->setEnabled(false);
 }
