@@ -348,7 +348,7 @@ void QtHardMon::closeDevice() {
 
 void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
                                  QTreeWidgetItem * /*previousRegisterItem */) {
-  // Always clear the old data model. This needed in all use cases below.
+  // Always clear the old data model. This is needed in all use cases below.
   ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
   delete currentAccessorModel_;
   currentAccessorModel_=nullptr;
@@ -366,7 +366,16 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   ui.propertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo());
   if (selectedItem->getRegisterInfo()){
     // there is valid register information. Create an accessor
-    auto abstractAccessor =  createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
+    std::shared_ptr<RegisterTypeAbstractor> abstractAccessor;
+    try{
+      abstractAccessor =  createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
+    }catch(Exception &e) {
+      showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
+                     QString("Could not get register accessor for ") +
+                     static_cast<std::string>(selectedItem->getRegisterInfo()->getRegisterName()).c_str()+ ".",
+                     QString("Info: An exception was thrown:") + e.what());
+      return;
+    }
     //If the data type is undefined or "noData" there is nothing to display for QtHardMon.
     //In this case we don't have an accessor (pointer is null) or a data model.
     if (abstractAccessor){
