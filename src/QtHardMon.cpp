@@ -205,7 +205,6 @@ bool QtHardMon::loadDmapFile(QString const &dmapFileName) {
   // on user request: do not automatically load the first device. This might be
   // not accessible and
   // immediately gives an error message.
-  // ui.deviceListWidget->setCurrentRow(0);
 }
 
 void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
@@ -237,9 +236,14 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   _currentDeviceListItem = deviceListItem;
   // close the previous device. This also disables the relevant GUI elements
   closeDevice();
-  // opening the device enables the gui elements if success
-  openDevice(deviceListItem->getDeviceMapElement().deviceName);
+  // The register tree should be re-poulated. However if the device cannot be opened,
+  // the old content would stay. So we clear it here.
+  ui.registerTreeWidget->clear();
+  // Also replace the device with a fresh one. Otherwise still the old register tree will be picked up.
+  currentDevice_=ChimeraTK::Device();
 
+  // Set the meta data before opening the device. If opening fails at least some information
+  // as the device identifier is displayed.
   ui.deviceNameDisplay->setText(
       deviceListItem->getDeviceMapElement().deviceName.c_str());
   ui.deviceNameDisplay->setToolTip(
@@ -253,13 +257,17 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   std::string mapFileName = extractFileNameFromPath(absPath);
   ui.mapFileDisplay->setText(mapFileName.c_str());
   ui.mapFileDisplay->setToolTip(absPath.c_str());
+  
+  // opening the device enables the gui elements if success
+  openDevice(deviceListItem->getDeviceMapElement().deviceName);
+
   try {
     populateRegisterTree(deviceItem);
   } catch (Exception &e) {
     // In case anything fails, we would like to catch it and close the device.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
-                   QString("Could not load the list of register for.")+deviceListItem->getDeviceMapElement().deviceName.c_str(),
-                   QString("Info: An exception was thrown:") + e.what());
+                   QString("Could not load the list of registers for ")+deviceListItem->getDeviceMapElement().deviceName.c_str(),
+                   QString("Info: An exception was thrown: ") + e.what());
     closeDevice();
   }
   selectPreviousRegister();
@@ -538,7 +546,7 @@ void QtHardMon::loadConfig(QString const &configFileName) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
                    QString("Could not read config file ") + configFileName +
                        ".",
-                   QString("Info: An exception was thrown:") + e.what());
+                   QString("Info: An exception was thrown: ") + e.what());
     return;
   }
 
