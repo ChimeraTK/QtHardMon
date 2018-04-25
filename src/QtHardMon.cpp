@@ -141,10 +141,12 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   // also the plot window dfunctions are only enabled when a device is opened.
   _plotWindow->setEnabled(false);
 
-  // Turn off automatic stretching of the device column.
-  //It can only be done with the splitter handle.
+  // Turn off automatic stretching of the device and content column.
+  // It can only be done with the splitter handle.
+  // Only the register tree is expanding automatically, like before
   ui.splitter->setStretchFactor (0,0); // the "showDevice" column, usually hidden
   ui.splitter->setStretchFactor (1,0); // the device column itself
+  ui.splitter->setStretchFactor (3,0); // the device column itself
 }
 
 QtHardMon::~QtHardMon() {}
