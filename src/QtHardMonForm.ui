@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1102</width>
-    <height>623</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -588,7 +588,6 @@
    <addaction name="settingsMenu"/>
    <addaction name="helpMenu"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="loadConfigAction">
    <property name="text">
     <string>&amp;Load config</string>
