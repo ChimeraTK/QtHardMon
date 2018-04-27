@@ -146,12 +146,13 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   // Only the register tree is expanding automatically, like before
   ui.splitter->setStretchFactor (0,0); // the "showDevice" column, usually hidden
   ui.splitter->setStretchFactor (1,0); // the device column itself
-  ui.splitter->setStretchFactor (3,0); // the device column itself
+  ui.splitter->setStretchFactor (3,0); // the data content column
 }
 
 QtHardMon::~QtHardMon() {}
 
 void QtHardMon::loadBoards() {
+  errorDisplayer.suppressFurtherMessages=false;
   // Show a file dialog to select the dmap file.
   QString dmapFileName = QFileDialog::getOpenFileName(
       this, tr("Open DeviceMap file"), ".",
@@ -216,6 +217,7 @@ bool QtHardMon::loadDmapFile(QString const &dmapFileName) {
 
 void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
                                QListWidgetItem * /*previousDeviceItem */) {
+  errorDisplayer.suppressFurtherMessages=false;
   ui.devicePropertiesGroupBox->setEnabled(true);
 
   // When the deviceListWidget is cleared , the currentItemChanged signal is
@@ -348,6 +350,7 @@ void QtHardMon::closeDevice() {
 
 void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
                                  QTreeWidgetItem * /*previousRegisterItem */) {
+  errorDisplayer.suppressFurtherMessages=false;
   // Always clear the old data model. This is needed in all use cases below.
   ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
   delete currentAccessorModel_;
@@ -399,6 +402,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
 }
 
 void QtHardMon::read() {
+  errorDisplayer.suppressFurtherMessages=false;
   ++insideReadOrWrite_;
   // if no register is selected the accessor model is nullptr.
   if (!currentAccessorModel_){
@@ -432,6 +436,7 @@ void QtHardMon::read() {
 }
 
 void QtHardMon::write() {
+  errorDisplayer.suppressFurtherMessages=false;
   ++insideReadOrWrite_;
   // if no register is selected the accessor model is nullptr.
   if (!currentAccessorModel_){
@@ -843,6 +848,7 @@ void QtHardMon::writeConfig(QString const &fileName) {
 }
 
 void QtHardMon::showPlotWindow(int checkState) {
+  errorDisplayer.suppressFurtherMessages=false;
   if (checkState == Qt::Unchecked) {
     _plotWindow->setVisible(false);
   } else {
@@ -887,6 +893,7 @@ QtHardMon::DeviceListItem::getDeviceMapElement() const {
 }
 
 void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
+  errorDisplayer.suppressFurtherMessages=false;
   // Do not execute the read if the corresponding flag is off
   // registerSelected method.
 
@@ -901,12 +908,16 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
 }
 
 void QtHardMon::channelSelected(int channelNumber){
+  errorDisplayer.suppressFurtherMessages=false;
+
   if (currentAccessorModel_){
     currentAccessorModel_->setChannelNumber(channelNumber);
   }
 }
 
 void QtHardMon::openCloseDevice() {
+  errorDisplayer.suppressFurtherMessages=false;
+
   if (currentDevice_.isOpened()) {
     closeDevice();
   } else {
@@ -1020,6 +1031,7 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
 }
 
 void QtHardMon::handleSortCheckboxClick(int state) {
+  errorDisplayer.suppressFurtherMessages=false;
   if (state == Qt::Checked) {
     ui.registerTreeWidget->sortByColumn(0, Qt::AscendingOrder);
     ui.registerTreeWidget->setSortingEnabled(true);
@@ -1044,3 +1056,5 @@ void QtHardMon::showMessageBox(QMessageBox::Icon boxType, QString boxTitle,
     messageBox.exec();
   }
 }
+
+ErrorDisplayer QtHardMon::errorDisplayer;

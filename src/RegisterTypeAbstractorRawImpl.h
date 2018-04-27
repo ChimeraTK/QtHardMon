@@ -2,6 +2,7 @@
 #define REGISTER_TYPE_ABSTRACTOR_RAW_IMPL_H
 
 #include "RegisterTypeAbstractorImpl.h"
+#include "QtHardMon.h"
 
 /** This is a double templated accessor abstractor with raw and coocked data type.
  *  It is based upon the single-typed RegisterTypeAbstractorImpl with the raw type
@@ -54,7 +55,11 @@ QVariant dataToQVariant<uint64_t>(uint64_t);
 // get the data as coocked and return a QVariant
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::data(unsigned int channelIndex, unsigned int elementIndex) const{
-  return dataToQVariant(_accessor.template getAsCoocked<COOCKED_DATA_TYPE>(channelIndex,elementIndex));
+  try{
+    return dataToQVariant(_accessor.template getAsCoocked<COOCKED_DATA_TYPE>(channelIndex,elementIndex));
+  }catch(ChimeraTK::Exception &e){
+    QtHardMon::errorDisplayer.displayMessage(std::string("Could not read as coocked from raw accessor ")+e.what());
+  }
 }
 
 // Get the data as coocked and put it into the HexData user type. Return this as QVariant.

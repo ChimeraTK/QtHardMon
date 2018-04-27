@@ -5,6 +5,7 @@
 #include "PlotWindow.h"
 #include "ui_QtHardMonForm.h"
 #include "RegisterAccessorModel.h"
+#include "ErrorDisplayer.h"
 #include <QDir>
 #include <QIcon>
 #include <QMessageBox>
@@ -234,6 +235,9 @@ private:
 
   /// re-select the last regsiter that was active when this device was opened, if this option is enabled
   void selectPreviousRegister();
+
+public:
+  static ErrorDisplayer errorDisplayer;
 };
 
 #endif // QT_HARD_MON
