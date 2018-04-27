@@ -11,7 +11,7 @@
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 class RegisterTypeAbstractorRawImpl: public RegisterTypeAbstractorImpl<RAW_DATA_TYPE>{
  public:
-  using RegisterTypeAbstractorImpl<RAW_DATA_TYPE>::RegisterTypeAbstractorImpl;
+  RegisterTypeAbstractorRawImpl(ChimeraTK::TwoDRegisterAccessor<RAW_DATA_TYPE> const & accessor, ChimeraTK::DataType const & rawDataType);
   using RegisterTypeAbstractorImpl<RAW_DATA_TYPE>::_accessor;
 
   /// Override because it returns coocked data while the accessor under the hood is raw.
@@ -27,10 +27,20 @@ class RegisterTypeAbstractorRawImpl: public RegisterTypeAbstractorImpl<RAW_DATA_
   QVariant rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const override;
   /// Override because not implemented in the single types base implementation without raw access
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data) override;
-
+  /// Override to update the cached coocked data after reading
+  void read();
+  
   /// Override because this is for the coocked type while the base implementation would return
   /// for the raw type.
   bool isIntegral() const override;
+ protected:
+
+  /// Cached data for painting. If exceptions occur during data conversion this does not happen every time
+  /// when painting.
+  std::vector<std::vector<COOCKED_DATA_TYPE> > _cachedCoockedData;
+  bool _cachedCoockedDataValid;
+
+  void updateCachedCoockedData();
 };
 
 /// Helper function to abstract that we need special code for QString, which cannot be created
@@ -51,10 +61,24 @@ QVariant dataToQVariant<int64_t>(int64_t);
 template<>
 QVariant dataToQVariant<uint64_t>(uint64_t);
 
+
+template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
+RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::RegisterTypeAbstractorRawImpl(ChimeraTK::TwoDRegisterAccessor<RAW_DATA_TYPE> const & accessor, ChimeraTK::DataType const & rawDataType) : RegisterTypeAbstractorImpl<RAW_DATA_TYPE>(accessor, rawDataType) , _cachedCoockedDataValid(false){
+    _cachedCoockedData.resize(_accessor.getNChannels());
+    for (auto & channelCoockedData : _cachedCoockedData){
+      channelCoockedData.resize(_accessor.getNElementsPerChannel());
+    }
+    updateCachedCoockedData(); 
+}
+
 // get the data as coocked and return a QVariant
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::data(unsigned int channelIndex, unsigned int elementIndex) const{
-  return dataToQVariant(_accessor.template getAsCoocked<COOCKED_DATA_TYPE>(channelIndex,elementIndex));
+  if (_cachedCoockedDataValid){
+    return dataToQVariant(_cachedCoockedData[channelIndex][elementIndex]);
+  }else{
+    return QVariant();
+  }
 }
 
 // Get the data as coocked and put it into the HexData user type. Return this as QVariant.
@@ -65,7 +89,9 @@ QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::data(u
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const{
   QVariant returnValue;
-  returnValue.setValue(HexData(_accessor.template getAsCoocked<COOCKED_DATA_TYPE>(channelIndex,elementIndex)));
+  if (_cachedCoockedDataValid){
+    returnValue.setValue(HexData(_cachedCoockedData[channelIndex][elementIndex]));
+  }
   return returnValue;
 }
 
@@ -83,6 +109,13 @@ QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::rawDat
   return returnValue;
 }
 
+// read and then update the cached coocked data
+template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
+void RegisterTypeAbstractorRawImpl< RAW_DATA_TYPE, COOCKED_DATA_TYPE>::read(){
+  _accessor.read();
+  updateCachedCoockedData();
+}
+
 // Return whether the coocked data type is integral
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::isIntegral() const{
@@ -96,6 +129,7 @@ bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::setData(un
   auto conversionResult = qvariantToStandardDataType<COOCKED_DATA_TYPE>(data);
   if (conversionResult.second) {// conversion successful
     _accessor.template setAsCoocked<COOCKED_DATA_TYPE>(channelIndex, elementIndex, conversionResult.first);
+    updateCachedCoockedData(); 
     return true;
   }else{
     return false;
@@ -109,10 +143,24 @@ bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::setRawData
   auto conversionResult = qvariantToStandardDataType<RAW_DATA_TYPE>(data);
   if (conversionResult.second){
     _accessor[channelIndex][elementIndex] = conversionResult.first;
+    updateCachedCoockedData(); 
     return true;
   }else{
     return false;
   }
 }
+
+template<class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
+void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::updateCachedCoockedData(){
+  _cachedCoockedDataValid = false; // set to false in case something goes wrong during conversion
+  for (size_t channelIndex = 0; channelIndex < _cachedCoockedData.size(); ++channelIndex){
+    auto & coockedChan = _cachedCoockedData[channelIndex];
+    for (size_t elementIndex = 0; elementIndex < coockedChan.size(); ++elementIndex){
+      coockedChan[elementIndex]= _accessor.template getAsCoocked<COOCKED_DATA_TYPE>(channelIndex, elementIndex);
+    }
+  }
+   _cachedCoockedDataValid = true; 
+}
+
 
 #endif // REGISTER_TYPE_ABSTRACTOR_RAW_IMPL_H
