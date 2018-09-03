@@ -1,6 +1,8 @@
 #ifndef PROPERTIESWIDGET_H
 #define PROPERTIESWIDGET_H
 
+#include <boost/shared_ptr.hpp>
+
 #include <QWidget>
 #include "ui_PropertiesWidgetForm.h"
 #include <ChimeraTK/RegisterInfo.h>
