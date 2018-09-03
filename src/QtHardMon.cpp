@@ -15,7 +15,6 @@
 #include <ChimeraTK/BackendFactory.h>
 #include <ChimeraTK/DMapFileParser.h>
 #include <ChimeraTK/Exception.h>
-#include <ChimeraTK/PcieBackendException.h>
 
 #include "Exceptions.h"
 #include <QDebug>
@@ -59,7 +58,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   preferencesProvider.setValue("maxWords", 0x10000);
   preferencesProvider.setValue(
       "floatPrecision",
-      static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION)); 
+      static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION));
 
   setWindowTitle("QtHardMon@"+QHostInfo::localHostName());
   setWindowIcon(QIcon(":/ChimeraTK_Logo_whitebg.png"));
@@ -137,7 +136,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
           SLOT(unckeckShowPlotWindow()));
 
   ui.showDevicesWidget->hide();
-  
+
   // also the plot window dfunctions are only enabled when a device is opened.
   _plotWindow->setEnabled(false);
 
@@ -264,7 +263,7 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   std::string mapFileName = extractFileNameFromPath(absPath);
   ui.mapFileDisplay->setText(mapFileName.c_str());
   ui.mapFileDisplay->setToolTip(absPath.c_str());
-  
+
   // opening the device enables the gui elements if success
   openDevice(deviceListItem->getDeviceMapElement().deviceName);
 
@@ -294,12 +293,12 @@ void QtHardMon::selectPreviousRegister(){
     // nothing to be done, no previous register
     return;
   }
-    
+
   auto registerName=registerPathComponents.back().c_str();
   // Get a list of all registers with this name.
   QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
     registerName, Qt::MatchExactly | Qt::MatchRecursive);
-      
+
   // Iterate the list until we find the right one
   for (auto reg : registerList) {
     // we know that there are only DeviceElementQTreeItems in the list, so we can static cast
@@ -324,7 +323,7 @@ void QtHardMon::openDevice(std::string const &deviceIdentifier){
 
     ui.openClosedLabel->setText( "Device is open.");
     ui.openCloseButton->setText("Close");
-    
+
   } catch (Exception &e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
                    QString("Could not create the device ") +
@@ -341,7 +340,7 @@ void QtHardMon::closeDevice() {
   ui.optionsGroupBox->setEnabled(false);
   _plotWindow->setEnabled(false);
   // we keep the register tree filled at the moment
-  
+
   ui.openClosedLabel->setText("Device is closed.");
   ui.openCloseButton->setText("Open");
 }
@@ -352,7 +351,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
   delete currentAccessorModel_;
   currentAccessorModel_=nullptr;
- 
+
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
   if (!registerItem) {
@@ -384,7 +383,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
       ui.propertiesWidget->ui.valuesTableView->setModel( currentAccessorModel_ );
     }
   }
- 
+
   // remember that this was the last selected register
   _currentDeviceListItem->lastSelectedRegister = selectedItem->getRegisterPath();
 
@@ -977,13 +976,13 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
       // no parent node. Directly add to the tree widget.
       new DeviceElementQTreeItem(ui.registerTreeWidget,
         registerIter->getRegisterName().getComponents().back().c_str(),
-        registerCatalogue.getRegister(registerIter->getRegisterName()));      
+        registerCatalogue.getRegister(registerIter->getRegisterName()));
     }
   }
   ui.registerTreeWidget->expandAll();
 
   //Do NOT select a register. This is intentional!
-  //It happens in 
+  //It happens in
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {
