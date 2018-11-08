@@ -555,7 +555,7 @@
    </property>
    <widget class="QMenu" name="fileMenu">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="loadConfigAction"/>
     <addaction name="saveConfigAction"/>
@@ -592,6 +592,9 @@
    <property name="text">
     <string>&amp;Load config</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="saveConfigAction">
    <property name="enabled">
@@ -599,6 +602,9 @@
    </property>
    <property name="text">
     <string>&amp;Save config</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionExport">
@@ -625,15 +631,24 @@
    <property name="text">
     <string>Save &amp;config as</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
   </action>
   <action name="loadBoardsAction">
    <property name="text">
     <string>Load &amp;boards</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
   </action>
   <action name="quitAction">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>
