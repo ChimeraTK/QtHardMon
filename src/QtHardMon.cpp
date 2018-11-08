@@ -541,7 +541,7 @@ void QtHardMon::aboutQt() { QMessageBox::aboutQt(this, "About Qt"); }
 void QtHardMon::loadConfig() {
   // the local, temporary variable, without underscore
   QString configFileName = QFileDialog::getOpenFileName(
-      this, tr("Open DeviceMap file"), ".",
+      this, tr("Open QtHardMon config file"), ".",
       tr("HardMon config files (*.cfg);; All files (*)"));
 
   if (configFileName.isEmpty()) {
@@ -734,7 +734,7 @@ void QtHardMon::saveConfig() {
 void QtHardMon::saveConfigAs() {
   // the local, temporary variable, without underscore
   QString configFileName = QFileDialog::getSaveFileName(
-      this, tr("Open DeviceMap file"), ".",
+      this, tr("Save QtHardMon configuration"), ".",
       tr("HardMon config files (*.cfg);; All files (*)"));
 
   if (configFileName.isEmpty()) {
