@@ -24,6 +24,7 @@ foreach( testExecutableSrcFile ${testExecutables})
   endif()
   target_link_libraries(${executableName} ${Boost_LIBRARIES} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui
                                           ${mtca4u-deviceaccess_LIBRARIES} ${PROJECT_NAME}_TEST_LIBRARY)
+  set_target_properties(${executableName} PROPERTIES LINK_FLAGS "${ChimeraTK-DeviceAccess_LINKER_FLAGS}")
   add_test(${executableName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${executableName})
 endforeach(testExecutableSrcFile)
 
