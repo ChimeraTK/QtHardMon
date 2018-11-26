@@ -29,7 +29,7 @@ endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
 set(CMAKE_CXX_STANDARD 14)
 
 include(cmake/add_dependency.cmake)
-add_dependency(mtca4u-deviceaccess 00.31 REQUIRED)
+add_dependency(ChimeraTK-DeviceAccess 01.00 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -49,7 +49,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
 add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core  Qt5::Network Qt5::Widgets Qt5::Gui ${mtca4u-deviceaccess_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core  Qt5::Network Qt5::Widgets Qt5::Gui ${ChimeraTK-DeviceAccess_LIBRARIES} ${Boost_LIBRARIES})
 
 #CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
 #To make the headers generated from the ui files of the library available to the executable and the test,
@@ -80,7 +80,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
   ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
 endif()
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${mtca4u-deviceaccess_LIBRARIES} ${QWT_LIBRARY})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${ChimeraTK-DeviceAccess_LIBRARIES} ${QWT_LIBRARY})
 
 
   IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
