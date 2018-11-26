@@ -68,7 +68,7 @@ configure_file(cmake/QtHardMon.qrc.in
 #The use of the QWT plotting library is optional
 if(QWT_FOUND)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_QWT=true")
-  INCLUDE_DIRECTORIES( SYSTEM ${QWT_INCLUDE_DIR} )  
+  INCLUDE_DIRECTORIES( SYSTEM ${QWT_INCLUDE_DIR} )
 else(QWT_FOUND)
   SET( QWT_LIBRARY "")
   message("QWT not found, plotting is disabled in this build.")
@@ -80,8 +80,8 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
   ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
 endif()
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${ChimeraTK-DeviceAccess_LIBRARIES} ${QWT_LIBRARY})
-
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${ChimeraTK-DeviceAccess_LIBRARIES} ${QWT_LIBRARY})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${ChimeraTK-DeviceAccess_LINKER_FLAGS}")
 
   IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
   # enable code coverate report
@@ -103,7 +103,7 @@ else(DOXYGEN_FOUND)
   message("Doxygen not found, documentation will not be build.")
 endif(DOXYGEN_FOUND)
 
-#FIXME: the user guide should be build from source, but we need dependencies defined, 
+#FIXME: the user guide should be build from source, but we need dependencies defined,
 # fix the date to the writing date (not compilation date) and put the version
 # guide has been written for (it most probably is outdated)
 INSTALL(FILES doc/user_guide/QtHardMon_user_guide.pdf DESTINATION share/doc/${PROJECT_NAME})
