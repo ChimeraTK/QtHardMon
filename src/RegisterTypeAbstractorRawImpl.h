@@ -29,7 +29,7 @@ class RegisterTypeAbstractorRawImpl: public RegisterTypeAbstractorImpl<RAW_DATA_
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant & data) override;
   /// Override to update the cached coocked data after reading
   void read();
-  
+
   /// Override because this is for the coocked type while the base implementation would return
   /// for the raw type.
   bool isIntegral() const override;
@@ -68,7 +68,7 @@ RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::RegisterTypeAbs
     for (auto & channelCoockedData : _cachedCoockedData){
       channelCoockedData.resize(_accessor.getNElementsPerChannel());
     }
-    updateCachedCoockedData(); 
+    updateCachedCoockedData();
 }
 
 // get the data as coocked and return a QVariant
@@ -112,6 +112,7 @@ QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::rawDat
 // read and then update the cached coocked data
 template <class RAW_DATA_TYPE, class COOCKED_DATA_TYPE>
 void RegisterTypeAbstractorRawImpl< RAW_DATA_TYPE, COOCKED_DATA_TYPE>::read(){
+  if(!_accessor.isReadable()) return;
   _accessor.read();
   updateCachedCoockedData();
 }
@@ -129,7 +130,7 @@ bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::setData(un
   auto conversionResult = qvariantToStandardDataType<COOCKED_DATA_TYPE>(data);
   if (conversionResult.second) {// conversion successful
     _accessor.template setAsCoocked<COOCKED_DATA_TYPE>(channelIndex, elementIndex, conversionResult.first);
-    updateCachedCoockedData(); 
+    updateCachedCoockedData();
     return true;
   }else{
     return false;
@@ -143,7 +144,7 @@ bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::setRawData
   auto conversionResult = qvariantToStandardDataType<RAW_DATA_TYPE>(data);
   if (conversionResult.second){
     _accessor[channelIndex][elementIndex] = conversionResult.first;
-    updateCachedCoockedData(); 
+    updateCachedCoockedData();
     return true;
   }else{
     return false;
@@ -159,7 +160,7 @@ void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOCKED_DATA_TYPE>::updateCach
       coockedChan[elementIndex]= _accessor.template getAsCoocked<COOCKED_DATA_TYPE>(channelIndex, elementIndex);
     }
   }
-   _cachedCoockedDataValid = true; 
+   _cachedCoockedDataValid = true;
 }
 
 
