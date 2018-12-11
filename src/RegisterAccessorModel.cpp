@@ -89,7 +89,7 @@ bool RegisterAccessorModel::setData(const QModelIndex & modelIndex, const QVaria
       return true;
     }else{
       return false; // setting not successful
-    }      
+    }
   }
   return false;
 }
@@ -131,7 +131,7 @@ QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientat
           if (_coockedHexColumnIndex != -1){//there is a coocked hex column, so add (dec)
             return QString("Value (dec)");
           }else{
-            return QString("Value");            
+            return QString("Value");
           }
         }
         if (section==_coockedHexColumnIndex){
@@ -141,14 +141,14 @@ QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientat
           if (_rawHexColumnIndex != -1){//there is a raw hex column, so add (dec)
             return QString("Raw (dec)");
           }else{
-            return QString("Raw");            
+            return QString("Raw");
           }
         }
         if (section==_rawHexColumnIndex){
           return QString("Raw (hex)");
         }
         return QString::number(section);
-      }            
+      }
 
       if (orientation == Qt::Vertical){
         return QString::number(section);
