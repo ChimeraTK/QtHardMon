@@ -386,8 +386,14 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
   }
 
   // set state of read/write buttons according to the register's capabilities
-  ui.readButton->setEnabled(selectedItem->getRegisterInfo()->isReadable());
-  ui.writeButton->setEnabled(selectedItem->getRegisterInfo()->isWriteable());
+  if(selectedItem->getRegisterInfo()) {
+    ui.readButton->setEnabled(selectedItem->getRegisterInfo()->isReadable());
+    ui.writeButton->setEnabled(selectedItem->getRegisterInfo()->isWriteable());
+  }
+  else {
+    ui.readButton->setEnabled(false);
+    ui.writeButton->setEnabled(false);
+  }
 
   // remember that this was the last selected register
   _currentDeviceListItem->lastSelectedRegister = selectedItem->getRegisterPath();
