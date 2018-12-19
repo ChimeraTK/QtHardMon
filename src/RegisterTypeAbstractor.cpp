@@ -10,7 +10,7 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
   auto dataDescriptor = registerInfo.getDataDescriptor();
   switch(dataDescriptor.rawDataType()){
     case ChimeraTK::DataType::none:{
-      // if there is an unknown raw data type create a normal, coocked accessor
+      // if there is an unknown raw data type create a normal, cooked accessor
       auto accessor = device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(),nElements);
       return std::make_shared<RegisterTypeAbstractorImpl<USER_DATA_TYPE> >(accessor, dataDescriptor.rawDataType());
     }

@@ -6,7 +6,7 @@ using namespace ChimeraTK;
 #include "PreferencesProvider.h"
 
 RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<RegisterTypeAbstractor> const & abstractAccessor) :
-  _abstractAccessor(abstractAccessor), _channelNumber(0), _coockedHexColumnIndex(-1), _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1)
+  _abstractAccessor(abstractAccessor), _channelNumber(0), _cookedHexColumnIndex(-1), _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1)
 {
   _isModified.resize(_abstractAccessor->nChannels());
   for (auto & channelModifiedFlags: _isModified){
@@ -17,7 +17,7 @@ RegisterAccessorModel::RegisterAccessorModel(QObject *parent, std::shared_ptr<Re
   // we don't have to check this separately
   if (  _abstractAccessor->isIntegral() &&
         !_abstractAccessor->rawDataType().isIntegral() ){ // there will be no raw hex column
-    _coockedHexColumnIndex = _nColumns++;
+    _cookedHexColumnIndex = _nColumns++;
   }
   if ( _abstractAccessor->rawDataType() != DataType::none ){
     // add a raw column if there is a raw data type
@@ -51,7 +51,7 @@ QVariant RegisterAccessorModel::data(const QModelIndex &modelIndex, int role) co
         // should be only one line with this content.
         return QString("truncated");
       }
-      if (modelIndex.column() == _coockedHexColumnIndex){
+      if (modelIndex.column() == _cookedHexColumnIndex){
         return _abstractAccessor->dataAsHex(_channelNumber,modelIndex.row());
       }else if (modelIndex.column() == _rawColumnIndex){
         return _abstractAccessor->rawData(_channelNumber,modelIndex.row());
@@ -128,13 +128,13 @@ QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientat
 
       if (orientation == Qt::Horizontal){
         if (section ==0){
-          if (_coockedHexColumnIndex != -1){//there is a coocked hex column, so add (dec)
+          if (_cookedHexColumnIndex != -1){//there is a cooked hex column, so add (dec)
             return QString("Value (dec)");
           }else{
             return QString("Value");
           }
         }
-        if (section==_coockedHexColumnIndex){
+        if (section==_cookedHexColumnIndex){
           return QString("Value (hex)");
         }
         if (section==_rawColumnIndex){

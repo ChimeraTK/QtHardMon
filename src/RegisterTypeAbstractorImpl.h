@@ -33,7 +33,7 @@ class RegisterTypeAbstractorImpl: public RegisterTypeAbstractor{
 
 /** A function to convert a QVariant to a standard data type, with special treatment for hex data.
  *  Needed in several places with
- *  varying data types (raw or coocked), so it is implemented as a stand-alone template function.
+ *  varying data types (raw or cooked), so it is implemented as a stand-alone template function.
  * 
  *  The second argument is the flag reported by the variant whether the conversion was successful.
  *  If this is not the case, the data type value is DATA_TYPE() (usually 0 or empty string).

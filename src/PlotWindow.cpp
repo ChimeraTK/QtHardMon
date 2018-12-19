@@ -85,7 +85,7 @@ void PlotWindow::plot() {
     return;
   }
   
-  // We use the data model here. It automatically always gives the coocked data and the right size.
+  // We use the data model here. It automatically always gives the cooked data and the right size.
   // In addition, if the coversion to double fails, we get this information and don't display.
   //@todo Get the data type and show a message why data cannot be plotted
   // note: In rowCount we can use an invalid model index.
@@ -93,7 +93,7 @@ void PlotWindow::plot() {
        row < std::min(_hardMon->currentAccessorModel_->rowCount(QModelIndex()),
                       preferencesProvider.getValue<int>("maxWords"));
        ++row){
-    auto dataPoint = _hardMon->currentAccessorModel_->data(  _hardMon->currentAccessorModel_->index(row, 0 /* =coocked data column*/));
+    auto dataPoint = _hardMon->currentAccessorModel_->data(  _hardMon->currentAccessorModel_->index(row, 0 /* =cooked data column*/));
 
     // If the conversion cannot be executed, the value is 0. No need to do special handling here.
     // For strings for example canConvert is true, and "3" actually is converted to 3.0,

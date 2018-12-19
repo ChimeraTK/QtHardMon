@@ -34,12 +34,12 @@ public slots:
     // Currently implemented scenarios
     // (as examples at the time of writing. There might be more when you read this ;-) )
     //
-    // * Just 1 column coocked (double or string) This column is allways there and the first one,
+    // * Just 1 column cooked (double or string) This column is allways there and the first one,
     //   so we don't need an indicator for it.
-    // * Only coocked integer as decimal and hex
-    // * Coocked double and integer raw (dec and hex)
-    // * Coocked and raw integer. In this case the coocked hex is not shown (only raw hex)
-    int _coockedHexColumnIndex;
+    // * Only cooked integer as decimal and hex
+    // * Cooked double and integer raw (dec and hex)
+    // * Cooked and raw integer. In this case the cooked hex is not shown (only raw hex)
+    int _cookedHexColumnIndex;
     int _rawColumnIndex; // Usually a decimal value, but might in future be text or floating point
     int _rawHexColumnIndex;
 
