@@ -4,10 +4,10 @@
 #include "ui_PreferencesForm.h"
 #include <QHostInfo>
 
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <sstream>
-#include <fstream>
 
 #include <QDockWidget>
 #include <QFileDialog>
@@ -47,7 +47,8 @@ using namespace ChimeraTK;
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
     : QMainWindow(parent_, flags), ui(), dmapFileName_(), configFileName_(),
-      insideReadOrWrite_(0), currentAccessorModel_(nullptr), _currentDeviceListItem(NULL), _plotWindow(NULL) {
+      insideReadOrWrite_(0), currentAccessorModel_(nullptr),
+      _currentDeviceListItem(NULL), _plotWindow(NULL) {
 
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
@@ -61,7 +62,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
       "floatPrecision",
       static_cast<int>(CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION));
 
-  setWindowTitle("QtHardMon@"+QHostInfo::localHostName());
+  setWindowTitle("QtHardMon@" + QHostInfo::localHostName());
   setWindowIcon(QIcon(":/ChimeraTK_Logo_whitebg.png"));
   // we cannot scale the logo when creating a pixmap, so we use a fixed size png
   ui.logoLabel->setPixmap(QPixmap(":/ChimeraTK_Logo_whitebg.png"));
@@ -81,7 +82,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
           this, SLOT(registerClicked(QTreeWidgetItem *)));
 
   connect(ui.propertiesWidget->ui.channelSpinBox, SIGNAL(valueChanged(int)),
-    this, SLOT(channelSelected(int)));
+          this, SLOT(channelSelected(int)));
 
   connect(ui.loadBoardsButton, SIGNAL(clicked()), this, SLOT(loadBoards()));
 
@@ -144,9 +145,10 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget *parent_, Qt::WindowFlags flags)
   // Turn off automatic stretching of the device and content column.
   // It can only be done with the splitter handle.
   // Only the register tree is expanding automatically, like before
-  ui.splitter->setStretchFactor (0,0); // the "showDevice" column, usually hidden
-  ui.splitter->setStretchFactor (1,0); // the device column itself
-  ui.splitter->setStretchFactor (3,0); // the device column itself
+  ui.splitter->setStretchFactor(0,
+                                0); // the "showDevice" column, usually hidden
+  ui.splitter->setStretchFactor(1, 0); // the device column itself
+  ui.splitter->setStretchFactor(3, 0); // the device column itself
 }
 
 QtHardMon::~QtHardMon() {}
@@ -243,14 +245,15 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   _currentDeviceListItem = deviceListItem;
   // close the previous device. This also disables the relevant GUI elements
   closeDevice();
-  // The register tree should be re-poulated. However if the device cannot be opened,
-  // the old content would stay. So we clear it here.
+  // The register tree should be re-poulated. However if the device cannot be
+  // opened, the old content would stay. So we clear it here.
   ui.registerTreeWidget->clear();
-  // Also replace the device with a fresh one. Otherwise still the old register tree will be picked up.
-  currentDevice_=ChimeraTK::Device();
+  // Also replace the device with a fresh one. Otherwise still the old register
+  // tree will be picked up.
+  currentDevice_ = ChimeraTK::Device();
 
-  // Set the meta data before opening the device. If opening fails at least some information
-  // as the device identifier is displayed.
+  // Set the meta data before opening the device. If opening fails at least some
+  // information as the device identifier is displayed.
   ui.deviceNameDisplay->setText(
       deviceListItem->getDeviceMapElement().deviceName.c_str());
   ui.deviceNameDisplay->setToolTip(
@@ -273,45 +276,49 @@ void QtHardMon::deviceSelected(QListWidgetItem *deviceItem,
   } catch (Exception &e) {
     // In case anything fails, we would like to catch it and close the device.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
-                   QString("Could not load the list of registers for ")+deviceListItem->getDeviceMapElement().deviceName.c_str(),
+                   QString("Could not load the list of registers for ") +
+                       deviceListItem->getDeviceMapElement().deviceName.c_str(),
                    QString("Info: An exception was thrown: ") + e.what());
     closeDevice();
   }
   selectPreviousRegister();
 }
 
-void QtHardMon::selectPreviousRegister(){
-  if (!(ui.autoselectPreviousRegisterCheckBox->isChecked())){
+void QtHardMon::selectPreviousRegister() {
+  if (!(ui.autoselectPreviousRegisterCheckBox->isChecked())) {
     // don't re-select if this option is not enabled
     return;
   }
   // Searching a sub-tree does not work in QTreeWidget. So here is the
   // strategy: First get all register with the right name from the tree,
-  // then pick the one where the full path matches. Ugly as hell, but easier than writing
-  // an recursive search function ourself.
-  auto registerPathComponents=_currentDeviceListItem->lastSelectedRegister.getComponents();
-  if (registerPathComponents.empty()){
+  // then pick the one where the full path matches. Ugly as hell, but easier
+  // than writing an recursive search function ourself.
+  auto registerPathComponents =
+      _currentDeviceListItem->lastSelectedRegister.getComponents();
+  if (registerPathComponents.empty()) {
     // nothing to be done, no previous register
     return;
   }
 
-  auto registerName=registerPathComponents.back().c_str();
+  auto registerName = registerPathComponents.back().c_str();
   // Get a list of all registers with this name.
   QList<QTreeWidgetItem *> registerList = ui.registerTreeWidget->findItems(
-    registerName, Qt::MatchExactly | Qt::MatchRecursive);
+      registerName, Qt::MatchExactly | Qt::MatchRecursive);
 
   // Iterate the list until we find the right one
   for (auto reg : registerList) {
-    // we know that there are only DeviceElementQTreeItems in the list, so we can static cast
-    auto deviceElement = static_cast <DeviceElementQTreeItem *>(reg);
-    if (deviceElement->getRegisterPath() == _currentDeviceListItem->lastSelectedRegister){
+    // we know that there are only DeviceElementQTreeItems in the list, so we
+    // can static cast
+    auto deviceElement = static_cast<DeviceElementQTreeItem *>(reg);
+    if (deviceElement->getRegisterPath() ==
+        _currentDeviceListItem->lastSelectedRegister) {
       ui.registerTreeWidget->setCurrentItem(reg);
       break;
     }
   }
 }
 
-void QtHardMon::openDevice(std::string const &deviceIdentifier){
+void QtHardMon::openDevice(std::string const &deviceIdentifier) {
   // try to open a device. If this fails disable the buttons and
   // the registerValues
   try {
@@ -322,7 +329,7 @@ void QtHardMon::openDevice(std::string const &deviceIdentifier){
     ui.optionsGroupBox->setEnabled(true);
     _plotWindow->setEnabled(true);
 
-    ui.openClosedLabel->setText( "Device is open.");
+    ui.openClosedLabel->setText("Device is open.");
     ui.openCloseButton->setText("Close");
 
   } catch (Exception &e) {
@@ -349,9 +356,9 @@ void QtHardMon::closeDevice() {
 void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
                                  QTreeWidgetItem * /*previousRegisterItem */) {
   // Always clear the old data model. This is needed in all use cases below.
-  ui.propertiesWidget->ui.valuesTableView->setModel( nullptr );
+  ui.propertiesWidget->ui.valuesTableView->setModel(nullptr);
   delete currentAccessorModel_;
-  currentAccessorModel_=nullptr;
+  currentAccessorModel_ = nullptr;
 
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
@@ -360,43 +367,49 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
     return;
   }
 
-  // we know that the registerItem is a DeviceElementQTreeItem, so we can static cast.
+  // we know that the registerItem is a DeviceElementQTreeItem, so we can static
+  // cast.
   DeviceElementQTreeItem *selectedItem =
       static_cast<DeviceElementQTreeItem *>(registerItem);
   ui.propertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo());
-  if (selectedItem->getRegisterInfo()){
+  if (selectedItem->getRegisterInfo()) {
     // there is valid register information. Create an accessor
     std::shared_ptr<RegisterTypeAbstractor> abstractAccessor;
-    try{
-      abstractAccessor =  createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
-    }catch(Exception &e) {
+    try {
+      abstractAccessor = createAbstractAccessor(
+          *(selectedItem->getRegisterInfo()), currentDevice_);
+    } catch (Exception &e) {
       showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
                      QString("Could not get register accessor for ") +
-                     static_cast<std::string>(selectedItem->getRegisterInfo()->getRegisterName()).c_str()+ ".",
+                         static_cast<std::string>(
+                             selectedItem->getRegisterInfo()->getRegisterName())
+                             .c_str() +
+                         ".",
                      QString("Info: An exception was thrown:") + e.what());
       return;
     }
-    //If the data type is undefined or "noData" there is nothing to display for QtHardMon.
-    //In this case we don't have an accessor (pointer is null) or a data model.
-    if (abstractAccessor){
+    // If the data type is undefined or "noData" there is nothing to display for
+    // QtHardMon. In this case we don't have an accessor (pointer is null) or a
+    // data model.
+    if (abstractAccessor) {
       // create a data model if we have an accessor.
       currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
-      ui.propertiesWidget->ui.valuesTableView->setModel( currentAccessorModel_ );
+      ui.propertiesWidget->ui.valuesTableView->setModel(currentAccessorModel_);
     }
   }
 
   // set state of read/write buttons according to the register's capabilities
-  if(selectedItem->getRegisterInfo()) {
+  if (selectedItem->getRegisterInfo()) {
     ui.readButton->setEnabled(selectedItem->getRegisterInfo()->isReadable());
     ui.writeButton->setEnabled(selectedItem->getRegisterInfo()->isWriteable());
-  }
-  else {
+  } else {
     ui.readButton->setEnabled(false);
     ui.writeButton->setEnabled(false);
   }
 
   // remember that this was the last selected register
-  _currentDeviceListItem->lastSelectedRegister = selectedItem->getRegisterPath();
+  _currentDeviceListItem->lastSelectedRegister =
+      selectedItem->getRegisterPath();
 
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
@@ -411,26 +424,28 @@ void QtHardMon::registerSelected(QTreeWidgetItem *registerItem,
 void QtHardMon::read() {
   ++insideReadOrWrite_;
   // if no register is selected the accessor model is nullptr.
-  if (!currentAccessorModel_){
-    showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
-                   QString("No register selected.                 "),
-                   QString("Please select a valid register. (Have you selected a module?)"));
+  if (!currentAccessorModel_) {
+    showMessageBox(
+        QMessageBox::Information, QString("QtHardMon Info"),
+        QString("No register selected.                 "),
+        QString(
+            "Please select a valid register. (Have you selected a module?)"));
     return;
   }
   try {
-      currentAccessorModel_->read();
+    currentAccessorModel_->read();
   } catch (std::exception &e) {
 
     closeDevice();
     ///@todo The error message accesses the _currentDeviceListItem. Is
-    /// this safe? It might be NULL. On the other hand read() should only be active
-    /// if a device is opened.
+    /// this safe? It might be NULL. On the other hand read() should only be
+    /// active if a device is opened.
     showMessageBox(
-          QMessageBox::Critical, QString("QtHardMon Error"),
-          QString("Error reading from device ") +
-              _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".",
-          QString("Info: An exception was thrown:") + e.what() +
-              QString("\n\nThe device has been closed."));
+        QMessageBox::Critical, QString("QtHardMon Error"),
+        QString("Error reading from device ") +
+            _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".",
+        QString("Info: An exception was thrown:") + e.what() +
+            QString("\n\nThe device has been closed."));
   }
 
   // check if plotting after reading is requested
@@ -438,16 +453,17 @@ void QtHardMon::read() {
     _plotWindow->plot();
   }
   --insideReadOrWrite_;
-
 }
 
 void QtHardMon::write() {
   ++insideReadOrWrite_;
   // if no register is selected the accessor model is nullptr.
-  if (!currentAccessorModel_){
-    showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
-                   QString("No register selected.                 "),
-                   QString("Please select a valid register. (Have you selected a module?)"));
+  if (!currentAccessorModel_) {
+    showMessageBox(
+        QMessageBox::Information, QString("QtHardMon Info"),
+        QString("No register selected.                 "),
+        QString(
+            "Please select a valid register. (Have you selected a module?)"));
     return;
   }
 
@@ -456,7 +472,8 @@ void QtHardMon::write() {
   } catch (std::exception &e) {
     closeDevice();
 
-    ///@todo The error message accesses the _currentDeviceListItem. Is this safe? It
+    ///@todo The error message accesses the _currentDeviceListItem. Is this
+    ///safe? It
     /// might be NULL. On the other hand write() should only be active
     /// if a device is opened.
     showMessageBox(
@@ -522,7 +539,7 @@ void QtHardMon::preferences() {
         "floatPrecision", preferencesDialogForm.precisionSpinBox->value());
 
     customDelegate_.setDoubleSpinBoxPrecision(
-      preferencesProvider.getValue<int>("floatPrecision"));
+        preferencesProvider.getValue<int>("floatPrecision"));
 
     // call registerSelected() so the size of the valuesList is adapted and
     // possible missing values are read
@@ -605,10 +622,9 @@ void QtHardMon::loadConfig(QString const &configFileName) {
   // first handle all settings that do not depend on opening a device map
 
   preferencesProvider.setValue(
-      "floatPrecision",
-      configReader.getValue(
-          PRECISION_INDICATOR_STRING,
-          preferencesProvider.getValue<int>("floatPrecision")));
+      "floatPrecision", configReader.getValue(PRECISION_INDICATOR_STRING,
+                                              preferencesProvider.getValue<int>(
+                                                  "floatPrecision")));
 
   // store in a local variable for now
   int maxWords = configReader.getValue(
@@ -694,7 +710,8 @@ void QtHardMon::loadConfig(QString const &configFileName) {
     std::string deviceRegisterString =
         deviceListItem->getDeviceMapElement().deviceName +
         REGISTER_EXTENSION_STRING;
-    deviceListItem->lastSelectedRegister=configReader.getValue(deviceRegisterString, std::string());
+    deviceListItem->lastSelectedRegister =
+        configReader.getValue(deviceRegisterString, std::string());
   } // for deviceRow
 
   // search for the device string
@@ -807,7 +824,8 @@ void QtHardMon::writeConfig(QString const &fileName) {
     // falls back to empty string anyway.
     if (!deviceListItem->lastSelectedRegister.getComponents().empty()) {
       std::string deviceRegisterString =
-          deviceListItem->getDeviceMapElement().deviceName + REGISTER_EXTENSION_STRING;
+          deviceListItem->getDeviceMapElement().deviceName +
+          REGISTER_EXTENSION_STRING;
       configWriter.setValue(deviceRegisterString,
                             std::string(deviceListItem->lastSelectedRegister));
     }
@@ -910,8 +928,8 @@ void QtHardMon::registerClicked(QTreeWidgetItem * /*registerItem*/) {
   read();
 }
 
-void QtHardMon::channelSelected(int channelNumber){
-  if (currentAccessorModel_){
+void QtHardMon::channelSelected(int channelNumber) {
+  if (currentAccessorModel_) {
     currentAccessorModel_->setChannelNumber(channelNumber);
   }
 }
@@ -921,9 +939,9 @@ void QtHardMon::openCloseDevice() {
     closeDevice();
   } else {
     openDevice(_currentDeviceListItem->getDeviceMapElement().deviceName);
-    // selectPreviousRegister() is not part of openDevice because the register tree is
-    // not populated yet when openDevice is called inside deviceSelected().
-    // So we have to call it explicitly here.
+    // selectPreviousRegister() is not part of openDevice because the register
+    // tree is not populated yet when openDevice is called inside
+    // deviceSelected(). So we have to call it explicitly here.
     selectPreviousRegister();
   }
 }
@@ -973,27 +991,33 @@ void QtHardMon::populateRegisterTree(QListWidgetItem *deviceItem) {
   const ChimeraTK::RegisterCatalogue registerCatalogue =
       currentDevice_.getRegisterCatalogue();
   // get the registerMap and fill the RegisterTreeWidget
-  for (RegisterCatalogue::const_iterator registerIter = currentDevice_.getRegisterCatalogue().begin();
+  for (RegisterCatalogue::const_iterator registerIter =
+           currentDevice_.getRegisterCatalogue().begin();
        registerIter != currentDevice_.getRegisterCatalogue().end();
        ++registerIter) {
 
-    // parentNode can be null if there is no parent, i.e. the register is directly in the treeWidget
-    auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(registerCatalogue.getRegister(registerIter->getRegisterName()),ui.registerTreeWidget);
-    if (parentNode){
-      new DeviceElementQTreeItem(parentNode,
-        registerIter->getRegisterName().getComponents().back().c_str(),
-        registerCatalogue.getRegister(registerIter->getRegisterName()));
-    }else{
+    // parentNode can be null if there is no parent, i.e. the register is
+    // directly in the treeWidget
+    auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(
+        registerCatalogue.getRegister(registerIter->getRegisterName()),
+        ui.registerTreeWidget);
+    if (parentNode) {
+      new DeviceElementQTreeItem(
+          parentNode,
+          registerIter->getRegisterName().getComponents().back().c_str(),
+          registerCatalogue.getRegister(registerIter->getRegisterName()));
+    } else {
       // no parent node. Directly add to the tree widget.
-      new DeviceElementQTreeItem(ui.registerTreeWidget,
-        registerIter->getRegisterName().getComponents().back().c_str(),
-        registerCatalogue.getRegister(registerIter->getRegisterName()));
+      new DeviceElementQTreeItem(
+          ui.registerTreeWidget,
+          registerIter->getRegisterName().getComponents().back().c_str(),
+          registerCatalogue.getRegister(registerIter->getRegisterName()));
     }
   }
   ui.registerTreeWidget->expandAll();
 
-  //Do NOT select a register. This is intentional!
-  //It happens in
+  // Do NOT select a register. This is intentional!
+  // It happens in
 }
 
 void QtHardMon::addCopyActionForRegisterTreeWidget() {
@@ -1017,14 +1041,15 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
 
     ChimeraTK::RegisterPath registerPath = currentItem->text(0).toStdString();
     // loop the tree to add the parents
-    QTreeWidgetItem * parent = currentItem->parent();
-    while (parent){
+    QTreeWidgetItem *parent = currentItem->parent();
+    while (parent) {
       registerPath = parent->text(0).toStdString() + registerPath;
       parent = parent->parent();
     }
     // copy to the standard clipboard and the mouse clipboard
     clipboard->setText(std::string(registerPath).c_str());
-    clipboard->setText(std::string(registerPath).c_str(), QClipboard::Selection);
+    clipboard->setText(std::string(registerPath).c_str(),
+                       QClipboard::Selection);
   }
   return;
 }

@@ -1,20 +1,16 @@
 #include "DeviceElementQTreeItem.h"
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(QTreeWidget *parent,
-                                               const QString &text,
-                                               boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
+DeviceElementQTreeItem::DeviceElementQTreeItem(
+    QTreeWidget *parent, const QString &text,
+    boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
     : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType),
-      registerInfo_(registerInfo)
-    {}
+      registerInfo_(registerInfo) {}
 
-DeviceElementQTreeItem::DeviceElementQTreeItem(QTreeWidgetItem *parent,
-                                               const QString &text,
-                                               boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
+DeviceElementQTreeItem::DeviceElementQTreeItem(
+    QTreeWidgetItem *parent, const QString &text,
+    boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
     : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType),
-      registerInfo_(registerInfo)
-    {}
-
-
+      registerInfo_(registerInfo) {}
 
 bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   QRegExp checkForNumAtEnd("[0-9]+$");
@@ -39,18 +35,21 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem &rhs) const {
   }
 }
 
-boost::shared_ptr<ChimeraTK::RegisterInfo> DeviceElementQTreeItem::getRegisterInfo() {
+boost::shared_ptr<ChimeraTK::RegisterInfo>
+DeviceElementQTreeItem::getRegisterInfo() {
   return registerInfo_;
 }
 
-ChimeraTK::RegisterPath DeviceElementQTreeItem::getRegisterPath(){
+ChimeraTK::RegisterPath DeviceElementQTreeItem::getRegisterPath() {
   // start (or actially end) the register path with the text label of this item.
   ChimeraTK::RegisterPath returnValue = text(0).toStdString();
-  // go up the tree until there is no parent, and prepend the parent names to the path
+  // go up the tree until there is no parent, and prepend the parent names to
+  // the path
   auto theParent = this->parent();
-  while (theParent){
-    returnValue = ChimeraTK::RegisterPath(theParent->text(0).toStdString()) / returnValue;
-    theParent=theParent->parent();
+  while (theParent) {
+    returnValue =
+        ChimeraTK::RegisterPath(theParent->text(0).toStdString()) / returnValue;
+    theParent = theParent->parent();
   }
   return returnValue;
 }

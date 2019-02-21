@@ -8,9 +8,9 @@
 #include "CustomDelegates.h"
 #include <QDoubleSpinBox>
 #include <QStringBuilder>
-#include <limits> 
-#include <sstream>
 #include <iostream>
+#include <limits>
+#include <sstream>
 
 const unsigned int CustomDelegates::DOUBLE_SPINBOX_DEFAULT_PRECISION;
 
@@ -57,12 +57,14 @@ QWidget *CustomDelegates::createEditor(QWidget *parent_,
       QVariant::Double) { // create spinbox with custom precision
                           // for cells in the double column
     QDoubleSpinBox *doubleSpinBox = new QDoubleSpinBox(parent_);
-    doubleSpinBox->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+    doubleSpinBox->setRange(std::numeric_limits<double>::lowest(),
+                            std::numeric_limits<double>::max());
     doubleSpinBox->setDecimals(_doubleSpinBoxPrecision);
     return doubleSpinBox;
   } else if (index.data(Qt::EditRole).type() == HexDataType) {
     HexSpinBox *hexSpinBox = new HexSpinBox(parent_);
-    hexSpinBox->setRange(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
+    hexSpinBox->setRange(std::numeric_limits<int>::min(),
+                         std::numeric_limits<int>::max());
     return hexSpinBox;
   } else {
     // should work for int, uint, string and bool

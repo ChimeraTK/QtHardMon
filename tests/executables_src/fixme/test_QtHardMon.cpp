@@ -38,7 +38,7 @@ struct QtHardmon_fixtureBase {
 /*
  * The window is properly filled with no data and proper states of particular
  * window components.
-*/
+ */
 BOOST_AUTO_TEST_CASE(QtHardMon_emptyUponConstruction) {
   QtHardmon_fixtureBase fixture(false);
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(QtHardMon_emptyUponConstruction) {
 
 /*
  * The initial state of settings is set to particular values.
-*/
+ */
 BOOST_AUTO_TEST_CASE(QtHardMon_defaultSettings) {
   QtHardmon_fixtureBase fixture;
 
@@ -114,7 +114,7 @@ struct QtHardMon_populatesDeviceList_fixture : public QtHardmon_fixtureBase {
 /*
  * The devices of various backends are read properly and populate the device
  * list.
-*/
+ */
 BOOST_AUTO_TEST_CASE(QtHardMon_populatesDeviceList) {
   QtHardMon_populatesDeviceList_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap");
@@ -161,7 +161,7 @@ struct QtHardmon_populatesRegisterTree_fixture
 
 /*
  * When device is selected, the register tree gets populated properly, sorted.
-*/
+ */
 BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeSorted) {
   QtHardmon_populatesRegisterTree_fixture fixtureSorted(
       "test_QtHardMon_valid_dummy.dmap", "NUMDEV");
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeSorted) {
 /*
  * When device is selected, the register tree gets populated properly. When
  * autosorting checkbox is unchecked, they are not sorted.
-*/
+ */
 BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeUnsorted) {
   QtHardmon_populatesRegisterTree_fixture fixtureUnsorted(
       "test_QtHardMon_valid_dummy.dmap", "NUMDEV", false);
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(QtHardMon_writesRegister) {
 /*
  * When device with multiplexed registers is selected, the register tree gets
  * populated properly.
-*/
+ */
 BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeMultiplexed) {
   QtHardmon_populatesRegisterTree_fixture fixtureMultiplexed(
       "test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT");
@@ -502,7 +502,7 @@ BOOST_AUTO_TEST_CASE(QtHardMon_populatesRegisterTreeNonNumerical) {
 /*
  * The state of settings after changing them in the settings dialog is set to
  * particular values.
-*/
+ */
 // BOOST_AUTO_TEST_CASE ( QtHardMon_changeSettings )
 // {
 //     QtHardmon_fixtureBase fixture;

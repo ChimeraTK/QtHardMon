@@ -80,26 +80,31 @@ void PlotWindow::plot() {
   PreferencesProvider &preferencesProvider =
       PreferencesProviderSingleton::Instance();
 
-  // the plot window might be active while no register is selected. Just don't do anything in this case.
-  if (!(_hardMon->currentAccessorModel_)){
+  // the plot window might be active while no register is selected. Just don't
+  // do anything in this case.
+  if (!(_hardMon->currentAccessorModel_)) {
     return;
   }
-  
-  // We use the data model here. It automatically always gives the cooked data and the right size.
-  // In addition, if the coversion to double fails, we get this information and don't display.
+
+  // We use the data model here. It automatically always gives the cooked data
+  // and the right size. In addition, if the coversion to double fails, we get
+  // this information and don't display.
   //@todo Get the data type and show a message why data cannot be plotted
   // note: In rowCount we can use an invalid model index.
   for (int row = 0;
        row < std::min(_hardMon->currentAccessorModel_->rowCount(QModelIndex()),
                       preferencesProvider.getValue<int>("maxWords"));
-       ++row){
-    auto dataPoint = _hardMon->currentAccessorModel_->data(  _hardMon->currentAccessorModel_->index(row, 0 /* =cooked data column*/));
+       ++row) {
+    auto dataPoint = _hardMon->currentAccessorModel_->data(
+        _hardMon->currentAccessorModel_->index(row,
+                                               0 /* =cooked data column*/));
 
-    // If the conversion cannot be executed, the value is 0. No need to do special handling here.
-    // For strings for example canConvert is true, and "3" actually is converted to 3.0,
-    // while "hello world" will result in 0. All other currently supported user data types should
-    // be properly convertible to double (void is still to come, we will see).
-    // Anyway, with QVariants default behaviour to return 0 we should be fine.
+    // If the conversion cannot be executed, the value is 0. No need to do
+    // special handling here. For strings for example canConvert is true, and
+    // "3" actually is converted to 3.0, while "hello world" will result in 0.
+    // All other currently supported user data types should be properly
+    // convertible to double (void is still to come, we will see). Anyway, with
+    // QVariants default behaviour to return 0 we should be fine.
     double value = dataPoint.value<double>();
 
     samples.push_back(QPointF(row, value));

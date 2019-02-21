@@ -24,7 +24,7 @@ struct RegisterPropertiesWidget_fixtureBase {
 /*
  * The window is properly filled with no data and proper states of particular
  * window components.
-*/
+ */
 BOOST_AUTO_TEST_CASE(RegisterPropertiesWidget_QWidget) {
   bool qWidgetIsBaseOfRegisterTreeWidget =
       std::is_base_of<QWidget, RegisterPropertiesWidget>::value;
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(RegisterPropertiesWidget_QWidget) {
  * Numeric addressed register item is properly constructed and returns correct
  * data type.
  * The item properly assigns itself to QTreeWidget.
-*/
+ */
 BOOST_AUTO_TEST_CASE(NumericAddressedRegisterQTreeItem_constructor) {
   RegisterPropertiesWidget_fixtureBase fixture;
 

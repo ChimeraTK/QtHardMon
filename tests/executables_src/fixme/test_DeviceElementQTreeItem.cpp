@@ -44,7 +44,7 @@ struct DeviceElementQTreeItem_fixtureBase {
 /*
  * The window is properly filled with no data and proper states of particular
  * window components.
-*/
+ */
 BOOST_AUTO_TEST_CASE(DeviceElementQTreeItem_QTreeWidgetItem) {
   bool qTreeWidgetItemIsBaseOfDeviceElementQTreeItem =
       std::is_base_of<QTreeWidgetItem, DeviceElementQTreeItem>::value;
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(DeviceElementQTreeItem_QTreeWidgetItem) {
 
 /*
  * Module item is properly constructed and returns correct data type.
-*/
+ */
 BOOST_AUTO_TEST_CASE(ModuleQTreeItem_DataType) {
   DeviceElementQTreeItem_fixtureBase fixture;
   QTreeWidgetItem *moduleItem = new ModuleQTreeItem(
@@ -67,14 +67,14 @@ BOOST_AUTO_TEST_CASE(ModuleQTreeItem_DataType) {
 
 /*
  * Mdule item cannot be used to read or write.
-*/
+ */
 BOOST_AUTO_TEST_CASE(ModuleQTreeItem_ReadAndWriteThrows) {
   DeviceElementQTreeItem_fixtureBase fixture;
   DeviceElementQTreeItem *moduleItem = new ModuleQTreeItem(
       "testing", (QTreeWidget *)NULL, fixture.propertiesWidgetProvider);
-  //you need a valid device before you can read, disabling these test for now
-  //BOOST_CHECK_THROW(moduleItem->readData(), InvalidOperationException);
-  //BOOST_CHECK_THROW(moduleItem->writeData(), InvalidOperationException);
+  // you need a valid device before you can read, disabling these test for now
+  // BOOST_CHECK_THROW(moduleItem->readData(), InvalidOperationException);
+  // BOOST_CHECK_THROW(moduleItem->writeData(), InvalidOperationException);
 }
 
 /*
@@ -85,12 +85,12 @@ BOOST_AUTO_TEST_CASE(ModuleQTreeItem_fillsRegisterProperties) {
   DeviceElementQTreeItem *moduleItem = new ModuleQTreeItem(
       "testing", (QTreeWidget *)NULL, fixture.propertiesWidgetProvider);
   TestUtilities::checkModuleProperties(fixture.modulePropertiesWidget, "", "");
-  //you need a valid device before you can read, disabling this test for now
-  //moduleItem->updateRegisterProperties();
+  // you need a valid device before you can read, disabling this test for now
+  // moduleItem->updateRegisterProperties();
 
   // FIXME: this test does not determine if the properties widget is properly
   // filled if something was set in between.
-  //TestUtilities::checkModuleProperties(fixture.modulePropertiesWidget,
+  // TestUtilities::checkModuleProperties(fixture.modulePropertiesWidget,
   //                                     "testing", "0");
 
   // DeviceElementQTreeItem * moduleItem = new ModuleQTreeItem("testing",
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(RegisterQTreeItem_fillsRegisterProperties) {
 
 /*
  * Numeric addressed register reads from / writes to device properly.
-*/
+ */
 BOOST_AUTO_TEST_CASE(RegisterQTreeItem_ReadAndWrite) {
   RegisterQTreeItem_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0",
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(RegisterQTreeItem_fillsRegisterPropertiesNonNumerical) {
 
 /*
  * Numeric addressed register reads from / writes to device properly.
-*/
+ */
 BOOST_AUTO_TEST_CASE(RegisterQTreeItem_ReadAndWriteNonNumerical) {
   RegisterQTreeItem_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy_lmap.dmap", "LMAPDEV", "FullArea",
@@ -278,7 +278,7 @@ struct NumericAddressedRegisterQTreeItem_fixture
  * Numeric addressed register item is properly constructed and returns correct
  * data type.
  * The item properly assigns itself to QTreeWidget.
-*/
+ */
 BOOST_AUTO_TEST_CASE(NumericAddressedRegisterQTreeItem_constructor) {
   NumericAddressedRegisterQTreeItem_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0",
@@ -310,7 +310,8 @@ BOOST_AUTO_TEST_CASE(
 
   TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "",
                                          "", "", "", "", "", "");
-  fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties(fixture.device);
+  fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties(
+      fixture.device);
 
   TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "MODULE0",
                                          "APP0", "1", "16", "2", "8", "32", "0",
@@ -322,13 +323,14 @@ BOOST_AUTO_TEST_CASE(
 
 /*
  * Numeric addressed register reads from / writes to device properly.
-*/
+ */
 BOOST_AUTO_TEST_CASE(NumericAddressedRegisterQTreeItem_ReadAndWrite) {
   NumericAddressedRegisterQTreeItem_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV", "APP0/MODULE0",
       5.0);
 
-  fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties(fixture.device);
+  fixture.numericAddressedRegisterQTreeItem->updateRegisterProperties(
+      fixture.device);
 
   fixture.numericAddressedRegisterQTreeItem->readData(fixture.device);
 
@@ -390,7 +392,7 @@ struct NumericAddressedMultiplexedAreaQTreeItem_fixture
  * Numeric addressed register item is properly constructed and returns correct
  * data type.
  * The item properly assigns itself to QTreeWidget.
-*/
+ */
 BOOST_AUTO_TEST_CASE(NumericAddressedMultiplexedAreaQTreeItem_constructor) {
   NumericAddressedMultiplexedAreaQTreeItem_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT",
@@ -425,7 +427,8 @@ BOOST_AUTO_TEST_CASE(
       "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 5.0);
   TestUtilities::checkRegisterProperties(fixture.propertiesWidget, "", "", "",
                                          "", "", "", "", "", "");
-  fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties(fixture.device);
+  fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties(
+      fixture.device);
   TestUtilities::checkRegisterProperties(
       fixture.propertiesWidget, "AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", "APP0",
       "13", "1000", "16", "212992", "", "", "");
@@ -446,20 +449,21 @@ BOOST_AUTO_TEST_CASE(
 
 /*
  * Numeric addressed register reads from / writes to device properly.
-*/
+ */
 BOOST_AUTO_TEST_CASE(NumericAddressedMultiplexedAreaQTreeItem_ReadAndWrite) {
   NumericAddressedMultiplexedAreaQTreeItem_fixture fixture(
       "test_files/test_QtHardMon_valid_dummy.dmap", "NUMDEV_MULT",
       "APP0/AREA_MULTIPLEXED_SEQUENCE_DAQ0_ADCA", 0.0);
 
-  fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties(fixture.device);
+  fixture.numericAddressedMultiplexedAreaQTreeItem->updateRegisterProperties(
+      fixture.device);
 
-  BOOST_CHECK_THROW(
-      fixture.numericAddressedMultiplexedAreaQTreeItem->readData(fixture.device),
-      InvalidOperationException);
-  BOOST_CHECK_THROW(
-      fixture.numericAddressedMultiplexedAreaQTreeItem->writeData(fixture.device),
-      InvalidOperationException);
+  BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->readData(
+                        fixture.device),
+                    InvalidOperationException);
+  BOOST_CHECK_THROW(fixture.numericAddressedMultiplexedAreaQTreeItem->writeData(
+                        fixture.device),
+                    InvalidOperationException);
 
   NumericAddressedSequenceRegisterQTreeItem *childItem =
       dynamic_cast<NumericAddressedSequenceRegisterQTreeItem *>(
@@ -521,7 +525,7 @@ struct NumericAddressedCookedMultiplexedAreaQTreeItem_fixture
  * Numeric addressed register item is properly constructed and returns correct
  * data type.
  * The item properly assigns itself to QTreeWidget.
-*/
+ */
 BOOST_AUTO_TEST_CASE(
     NumericAddressedCookedMultiplexedAreaQTreeItem_constructor) {
   NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture(
@@ -579,7 +583,7 @@ BOOST_AUTO_TEST_CASE(
 
 /*
  * Numeric addressed register reads from / writes to device properly.
-*/
+ */
 BOOST_AUTO_TEST_CASE(
     NumericAddressedCookedMultiplexedAreaQTreeItem_ReadAndWrite) {
   NumericAddressedCookedMultiplexedAreaQTreeItem_fixture fixture(
@@ -590,10 +594,12 @@ BOOST_AUTO_TEST_CASE(
       ->updateRegisterProperties(fixture.device);
 
   BOOST_CHECK_THROW(
-      fixture.numericAddressedCookedMultiplexedAreaQTreeItem->readData(fixture.device),
+      fixture.numericAddressedCookedMultiplexedAreaQTreeItem->readData(
+          fixture.device),
       InvalidOperationException);
   BOOST_CHECK_THROW(
-      fixture.numericAddressedCookedMultiplexedAreaQTreeItem->writeData(fixture.device),
+      fixture.numericAddressedCookedMultiplexedAreaQTreeItem->writeData(
+          fixture.device),
       InvalidOperationException);
 
   NumericAddressedCookedSequenceRegisterQTreeItem *childItem =

@@ -3,8 +3,8 @@
 
 #include "CustomDelegates.h"
 #include "PlotWindow.h"
-#include "ui_QtHardMonForm.h"
 #include "RegisterAccessorModel.h"
+#include "ui_QtHardMonForm.h"
 #include <QDir>
 #include <QIcon>
 #include <QMessageBox>
@@ -12,8 +12,8 @@
 #include <qclipboard.h>
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <ChimeraTK/Device.h>
+#include <boost/shared_ptr.hpp>
 #endif
 
 /** The QtHadMon class which implements all the GUI functionality.
@@ -73,7 +73,7 @@ private slots:
   void registerClicked(
       QTreeWidgetItem *registerItem); ///< Executed if a register is clicked
   void channelSelected(int channelNumber);
-  
+
   void aboutQtHardMon(); ///< Show the aboutQtHardMon
   void aboutQt();        ///< Show the aboutQt dialog
 
@@ -122,8 +122,8 @@ private slots:
   void copyRegisterTreeItemNameToClipBoard();
 
 public slots:
-  void read();   ///< Read register from device.
-  void write();  ///< Read register to device.
+  void read();  ///< Read register from device.
+  void write(); ///< Read register to device.
 
 public:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
@@ -135,14 +135,16 @@ public:
   bool loadDmapFile(QString const &dmapFileName);
 
 protected:
-  ChimeraTK::Device currentDevice_; ///< The instance of the device which is being accessed.
+  ChimeraTK::Device
+      currentDevice_; ///< The instance of the device which is being accessed.
   QString dmapFileName_;   ///< The file name of the last opened dmap file
   QString configFileName_; ///< Name of the config file (last saved or read)
   int insideReadOrWrite_;  ///< Counter flag to indicate if the read or write
                            /// function is being executed
-  RegisterAccessorModel * currentAccessorModel_; ///< The accessor model for the current register.
+  RegisterAccessorModel
+      *currentAccessorModel_; ///< The accessor model for the current register.
   CustomDelegates customDelegate_; ///< The delegate for the values table view
-  
+
   /**
    *  Write the config to the given file name.
    */
@@ -162,17 +164,19 @@ protected:
   class DeviceListItem : public QListWidgetItem {
   public:
     /** The simplest cvonstructor, no text or icon for the entry*/
-    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
-                   QListWidget *parent_ = 0);
+    DeviceListItem(
+        ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+        QListWidget *parent_ = 0);
 
     /** Constructor which sets the text entry in the list. */
-    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
-                   const QString &text_, QListWidget *parent_ = 0);
+    DeviceListItem(
+        ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+        const QString &text_, QListWidget *parent_ = 0);
 
     /** Constructor which sets the text entry in the list and an icon. */
-    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
-                   const QIcon &icon_, const QString &text_,
-                   QListWidget *parent_ = 0);
+    DeviceListItem(
+        ChimeraTK::DeviceInfoMap::DeviceInfo const &device_map_emlement,
+        const QIcon &icon_, const QString &text_, QListWidget *parent_ = 0);
 
     /** The destructor. Currently does nothing because the members go out of
      * scope automatically. */
@@ -191,7 +195,8 @@ protected:
     ChimeraTK::DeviceInfoMap::DeviceInfo
         _deviceMapElement; ///< The instance of the DeviceMapElement
   public:
-    ChimeraTK::RegisterPath lastSelectedRegister; ///< The last selected register in this device.
+    ChimeraTK::RegisterPath
+        lastSelectedRegister; ///< The last selected register in this device.
   };
 
   DeviceListItem *_currentDeviceListItem; ///< Pointer to the currently selected
@@ -225,14 +230,15 @@ private:
   // Disable copy constructor and assignment operator
   // This is the main class and it should'nt need copying
   Q_DISABLE_COPY(QtHardMon); // Easy way to get around -Weffc++ warning:
-                            // class QtHardMon’ has pointer data members -
-                            // but does not overide copy constructor and
-                            // assignment operator
+                             // class QtHardMon’ has pointer data members -
+                             // but does not overide copy constructor and
+                             // assignment operator
 
   void showMessageBox(QMessageBox::Icon boxType, QString boxTitle,
                       QString boxText, QString boxInformativeText);
 
-  /// re-select the last regsiter that was active when this device was opened, if this option is enabled
+  /// re-select the last regsiter that was active when this device was opened,
+  /// if this option is enabled
   void selectPreviousRegister();
 };
 

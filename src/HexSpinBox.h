@@ -3,10 +3,9 @@
 
 #include <QSpinBox>
 #include <QValidator>
-// The HexDataType is defined in a common file together with other types to avoid collisions
-// (although at the time of writing there are no other types)
+// The HexDataType is defined in a common file together with other types to
+// avoid collisions (although at the time of writing there are no other types)
 #include "VariantUserTypes.h"
-
 
 /**
  * The HexData class is the custom datatype that we have introduced to represent
@@ -22,10 +21,11 @@ public:
    * Holds the entered value (for which we need the hex representation)
    */
   double value;
-  HexData(double v=0) : value(v){};
+  HexData(double v = 0) : value(v){};
   /** Overloaded constructor for std::string to avoid template specialisation as
    *  there is no implicit conversion from std::string to double.
-   *  Generally this conversion does not make sense, so we initialise class with 0.
+   *  Generally this conversion does not make sense, so we initialise class with
+   * 0.
    */
   HexData(std::string v) : value(0){};
 };
