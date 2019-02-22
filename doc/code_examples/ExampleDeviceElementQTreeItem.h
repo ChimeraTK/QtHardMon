@@ -8,18 +8,18 @@
 #include <mtca4u/RegisterInfoMap.h>     // mtca4u::RegisterInfoMap::RegisterInfo
 
 class RegisterQTreeItem : public DeviceElementQTreeItem {
+ public:
+  RegisterQTreeItem(mtca4u::Device& device,
+      boost::shared_ptr<mtca4u::RegisterInfo>
+          registerInfo,
+      QTreeWidget* parent,
+      PropertiesWidgetProvider& propertiesWidgetProvider);
+  virtual void readData(mtca4u::Device& device);
+  virtual void writeData(mtca4u::Device& device);
+  virtual void updateRegisterProperties(mtca4u::Device& device);
 
-public:
-  RegisterQTreeItem(mtca4u::Device &device,
-                    boost::shared_ptr<mtca4u::RegisterInfo> registerInfo,
-                    QTreeWidget *parent,
-                    PropertiesWidgetProvider &propertiesWidgetProvider);
-  virtual void readData(mtca4u::Device &device);
-  virtual void writeData(mtca4u::Device &device);
-  virtual void updateRegisterProperties(mtca4u::Device &device);
-
-private: // methods
-private: // member fields
+ private: // methods
+ private: // member fields
   mtca4u::OneDRegisterAccessor<double> oneDRegisterAccessor_;
   std::vector<std::string> name_;
 };

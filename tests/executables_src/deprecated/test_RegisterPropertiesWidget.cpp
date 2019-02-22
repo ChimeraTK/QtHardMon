@@ -10,11 +10,11 @@
 #include "RegisterPropertiesWidget.h"
 
 struct RegisterPropertiesWidget_fixtureBase {
-  QApplication *app;
-  RegisterPropertiesWidget *widget;
+  QApplication* app;
+  RegisterPropertiesWidget* widget;
   RegisterPropertiesWidget_fixtureBase() {
     int argc = 0;
-    char **argv = nullptr;
+    char** argv = nullptr;
     app = new QApplication(argc, argv);
 
     widget = new RegisterPropertiesWidget(NULL);
@@ -26,8 +26,7 @@ struct RegisterPropertiesWidget_fixtureBase {
  * window components.
  */
 BOOST_AUTO_TEST_CASE(RegisterPropertiesWidget_QWidget) {
-  bool qWidgetIsBaseOfRegisterTreeWidget =
-      std::is_base_of<QWidget, RegisterPropertiesWidget>::value;
+  bool qWidgetIsBaseOfRegisterTreeWidget = std::is_base_of<QWidget, RegisterPropertiesWidget>::value;
   BOOST_CHECK_EQUAL(qWidgetIsBaseOfRegisterTreeWidget, true);
 }
 
@@ -39,15 +38,13 @@ BOOST_AUTO_TEST_CASE(RegisterPropertiesWidget_QWidget) {
 BOOST_AUTO_TEST_CASE(NumericAddressedRegisterQTreeItem_constructor) {
   RegisterPropertiesWidget_fixtureBase fixture;
 
-  TestUtilities::checkRegisterProperties(fixture.widget, "", "", "", "", "", "",
-                                         "", "", "");
+  TestUtilities::checkRegisterProperties(fixture.widget, "", "", "", "", "", "", "", "", "");
   fixture.widget->setNames({"ModuleName", "RegName"});
   fixture.widget->setSize(4444, 3);
   fixture.widget->setAddress(10, 4);
   fixture.widget->setFixedPointInfo(18, 3, 0);
-  TestUtilities::checkRegisterProperties(fixture.widget, "RegName",
-                                         "ModuleName", "10", "4", "4444", "3",
-                                         "18", "3", "0");
+  TestUtilities::checkRegisterProperties(
+      fixture.widget, "RegName", "ModuleName", "10", "4", "4444", "3", "18", "3", "0");
 }
 
 // TODO:     virtual void setSize(int nOfElements, int nOfChannels);

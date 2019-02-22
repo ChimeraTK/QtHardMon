@@ -20,7 +20,7 @@
  */
 class CustomDelegates : public QStyledItemDelegate {
   Q_OBJECT
-public:
+ public:
   // Constants
 
   /**
@@ -32,7 +32,7 @@ public:
   /**
    * Default constructor
    */
-  CustomDelegates(QObject *parent_ = 0);
+  CustomDelegates(QObject* parent_ = 0);
 
   /**
    * This method is used to specify the number of decimal places that
@@ -46,30 +46,28 @@ public:
    *  cell. Overriding the base class version of this method enables
    *  customization of the displayed data format.
    */
-  QString displayText(const QVariant &value, const QLocale &locale) const;
+  QString displayText(const QVariant& value, const QLocale& locale) const;
 
   /**
    * This delegate is called when a cell is double clicked/selected  to
    * modify its value. Overriding this delegate lets us customize the
    * type of editor widget displayed in the cell when clicked for editing
    */
-  QWidget *createEditor(QWidget *parent_, const QStyleOptionViewItem &option,
-                        const QModelIndex &index) const;
+  QWidget* createEditor(QWidget* parent_, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
   /**
    * This delegate is responsible for the initial data displayed inside the
    * spinbox when the user selects/clicks the cell (to create a spinbox).
    */
-  void setEditorData(QWidget *editor, const QModelIndex &index) const;
+  void setEditorData(QWidget* editor, const QModelIndex& index) const;
 
   /**
    * This method handles how the user entered  data is picked up from the cell
    * and put into the custom data type that was introduced.
    */
-  void setModelData(QWidget *editor, QAbstractItemModel *model,
-                    const QModelIndex &index) const;
+  void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
 
-private:
+ private:
   int _doubleSpinBoxPrecision;
 };
 

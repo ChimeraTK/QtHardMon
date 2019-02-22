@@ -7,30 +7,24 @@
 
 class RegisterAccessorModel : public QAbstractTableModel {
   Q_OBJECT
-public:
-  RegisterAccessorModel(
-      QObject *parent,
-      std::shared_ptr<RegisterTypeAbstractor> const &abstractAccessor);
-  int rowCount(const QModelIndex &modelIndex = QModelIndex()) const override;
-  int columnCount(const QModelIndex &modelIndex = QModelIndex()) const override;
-  QVariant data(const QModelIndex &modelIndex,
-                int role = Qt::DisplayRole) const override;
-  bool setData(const QModelIndex &modelIndex, const QVariant &value,
-               int role = Qt::EditRole) override;
-  Qt::ItemFlags flags(const QModelIndex &modelIndex) const override;
+ public:
+  RegisterAccessorModel(QObject* parent, std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor);
+  int rowCount(const QModelIndex& modelIndex = QModelIndex()) const override;
+  int columnCount(const QModelIndex& modelIndex = QModelIndex()) const override;
+  QVariant data(const QModelIndex& modelIndex, int role = Qt::DisplayRole) const override;
+  bool setData(const QModelIndex& modelIndex, const QVariant& value, int role = Qt::EditRole) override;
+  Qt::ItemFlags flags(const QModelIndex& modelIndex) const override;
 
-public slots:
+ public slots:
   void setChannelNumber(unsigned int channelNumber);
   void read();
   void write();
 
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-protected:
+ protected:
   std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;
-  std::vector<std::vector<bool>>
-      _isModified; // remember if a row has been modified per channel
+  std::vector<std::vector<bool>> _isModified; // remember if a row has been modified per channel
 
   void clearModifiedFlags(); // clear the modified flags
   unsigned int _channelNumber;

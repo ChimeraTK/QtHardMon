@@ -7,17 +7,14 @@
 #include <ChimeraTK/Device.h> // ChimeraTK::Device
 
 class DeviceElementQTreeItem : public QTreeWidgetItem {
-
-public:
+ public:
   DeviceElementQTreeItem(
-      QTreeWidget *parent, QString const &name,
-      boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo = nullptr);
+      QTreeWidget* parent, QString const& name, boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo = nullptr);
 
   DeviceElementQTreeItem(
-      QTreeWidgetItem *parent, QString const &name,
-      boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo = nullptr);
+      QTreeWidgetItem* parent, QString const& name, boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo = nullptr);
 
-  bool operator<(const QTreeWidgetItem &rhs) const;
+  bool operator<(const QTreeWidgetItem& rhs) const;
 
   boost::shared_ptr<ChimeraTK::RegisterInfo> getRegisterInfo();
 
@@ -25,7 +22,7 @@ public:
   // info because the partial register path is obtained from the tree structure.
   ChimeraTK::RegisterPath getRegisterPath();
 
-protected:
+ protected:
   boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo_;
 };
 

@@ -4,17 +4,16 @@
 
 #include <fstream>
 
-ConfigFileReaderWriter::ConfigFileReaderWriter(std::string const &fileName)
-    : _intValues(), _doubleValues(), _stringValues(), _fileName(), _badLines() {
+ConfigFileReaderWriter::ConfigFileReaderWriter(std::string const& fileName)
+: _intValues(), _doubleValues(), _stringValues(), _fileName(), _badLines() {
   read(fileName);
 }
 
 ConfigFileReaderWriter::ConfigFileReaderWriter()
-    : _intValues(), _doubleValues(), _stringValues(), _fileName(),
-      _badLines() { /*currently empty*/
+: _intValues(), _doubleValues(), _stringValues(), _fileName(), _badLines() { /*currently empty*/
 }
 
-void ConfigFileReaderWriter::read(std::string const &fileName) {
+void ConfigFileReaderWriter::read(std::string const& fileName) {
   std::ifstream inFileStream;
   // turn on the throwing of exceptions in case of failure
   inFileStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -27,7 +26,7 @@ void ConfigFileReaderWriter::read(std::string const &fileName) {
   // clear the list of bad lines
   _badLines.clear();
 
-  while (!inFileStream.eof()) {
+  while(!inFileStream.eof()) {
     std::string lineString;
     std::getline(inFileStream, lineString);
 
@@ -35,8 +34,7 @@ void ConfigFileReaderWriter::read(std::string const &fileName) {
     QString qLineString(lineString.c_str());
     // split at one ore more whitespace characters as separator
     // This will also remove whitespace characters in front of the first token
-    QStringList tokens =
-        qLineString.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    QStringList tokens = qLineString.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 
     // debug output
     //    std::cout << "line is ";
@@ -47,18 +45,18 @@ void ConfigFileReaderWriter::read(std::string const &fileName) {
     //    }
     //    std::cout << std::endl;
 
-    if (tokens.size() == 0) {
+    if(tokens.size() == 0) {
       // it's an empty line, just continue
       continue;
     }
 
     // check for comment line
-    if (tokens.begin()->startsWith("#")) {
+    if(tokens.begin()->startsWith("#")) {
       // it's a comment, just continue
       continue;
     }
 
-    if (tokens.size() < 3) {
+    if(tokens.size() < 3) {
       // it's a bad line, add it to the list n empty line and continue parsing
       _badLines.append(qLineString);
       continue;
@@ -70,10 +68,11 @@ void ConfigFileReaderWriter::read(std::string const &fileName) {
     QString variableType = *(tokenIter++);
     QString variableValue = *(tokenIter);
 
-    if (variableType == "string") {
+    if(variableType == "string") {
       // value is a string, just add it
       _stringValues[variableName.toStdString()] = variableValue.toStdString();
-    } else if (variableType == "int") {
+    }
+    else if(variableType == "int") {
       // check if conversion to int works
       bool conversionOk;
 
@@ -81,23 +80,27 @@ void ConfigFileReaderWriter::read(std::string const &fileName) {
       // and 0NNN as octal.
       int intValue = variableValue.toInt(&conversionOk, 0);
 
-      if (conversionOk) {
+      if(conversionOk) {
         _intValues[variableName.toStdString()] = intValue;
-      } else {
+      }
+      else {
         _badLines.append(qLineString);
       }
-    } else if (variableType == "double") {
+    }
+    else if(variableType == "double") {
       // check if conversion to int works
       bool conversionOk;
 
       double doubleValue = variableValue.toDouble(&conversionOk);
 
-      if (conversionOk) {
+      if(conversionOk) {
         _doubleValues[variableName.toStdString()] = doubleValue;
-      } else {
+      }
+      else {
         _badLines.append(qLineString);
       }
-    } else {
+    }
+    else {
       // unknown type, this is a bad line
       _badLines.append(qLineString);
     }
@@ -116,7 +119,7 @@ void ConfigFileReaderWriter::read(std::string const &fileName) {
   // write("debug.cfg");
 }
 
-void ConfigFileReaderWriter::write(std::string const &fileName) const {
+void ConfigFileReaderWriter::write(std::string const& fileName) const {
   std::ofstream outFileStream;
   // turn on the throwing of exceptions in case of failure
   outFileStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -132,24 +135,23 @@ void ConfigFileReaderWriter::write(std::string const &fileName) const {
                 << "#where type can be either int, double or string\n\n";
 
   // now write the data members. Loop all the maps, starting with the strings.
-  for (std::map<std::string, std::string>::const_iterator stringIter =
-           _stringValues.begin();
-       stringIter != _stringValues.end(); ++stringIter) {
+  for(std::map<std::string, std::string>::const_iterator stringIter = _stringValues.begin();
+      stringIter != _stringValues.end();
+      ++stringIter) {
     outFileStream << stringIter->first << "\t"   // The variable name
                   << "string\t"                  // the type
                   << stringIter->second << "\n"; // the value
   }
 
-  for (std::map<std::string, int>::const_iterator intIter = _intValues.begin();
-       intIter != _intValues.end(); ++intIter) {
+  for(std::map<std::string, int>::const_iterator intIter = _intValues.begin(); intIter != _intValues.end(); ++intIter) {
     outFileStream << intIter->first << "\t"   // The variable name
                   << "int\t"                  // the type
                   << intIter->second << "\n"; // the value
   }
 
-  for (std::map<std::string, double>::const_iterator doubleIter =
-           _doubleValues.begin();
-       doubleIter != _doubleValues.end(); ++doubleIter) {
+  for(std::map<std::string, double>::const_iterator doubleIter = _doubleValues.begin();
+      doubleIter != _doubleValues.end();
+      ++doubleIter) {
     outFileStream << doubleIter->first << "\t"   // The variable name
                   << "double\t"                  // the type
                   << doubleIter->second << "\n"; // the value
@@ -160,6 +162,6 @@ void ConfigFileReaderWriter::write(std::string const &fileName) const {
   outFileStream.close();
 }
 
-QStringList const &ConfigFileReaderWriter::getBadLines() const {
+QStringList const& ConfigFileReaderWriter::getBadLines() const {
   return _badLines;
 }

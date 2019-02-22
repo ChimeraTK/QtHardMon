@@ -7,24 +7,18 @@
 #include <memory>
 
 /// Qt objects with signals and slots cannot be template classes.
-///  As we need a container for the user-type templated RegisterAccessors,\
+///   As we need a container for the user-type templated RegisterAccessors,\
 ///this class is used as a non-templated base class a Qt-compatible interface.
 class RegisterTypeAbstractor {
-public:
+ public:
   virtual unsigned int nChannels() const = 0;
   virtual unsigned int nElements() const = 0;
-  virtual QVariant data(unsigned int channelIndex,
-                        unsigned int elementIndex) const = 0;
-  virtual QVariant dataAsHex(unsigned int channelIndex,
-                             unsigned int elementIndex) const = 0;
-  virtual bool setData(unsigned int channelIndex, unsigned int elementIndex,
-                       const QVariant &value) = 0;
-  virtual QVariant rawData(unsigned int channelIndex,
-                           unsigned int elementIndex) const = 0;
-  virtual QVariant rawDataAsHex(unsigned int channelIndex,
-                                unsigned int elementIndex) const = 0;
-  virtual bool setRawData(unsigned int channelIndex, unsigned int elementIndex,
-                          const QVariant &value) = 0;
+  virtual QVariant data(unsigned int channelIndex, unsigned int elementIndex) const = 0;
+  virtual QVariant dataAsHex(unsigned int channelIndex, unsigned int elementIndex) const = 0;
+  virtual bool setData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& value) = 0;
+  virtual QVariant rawData(unsigned int channelIndex, unsigned int elementIndex) const = 0;
+  virtual QVariant rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const = 0;
+  virtual bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& value) = 0;
 
   virtual bool isIntegral() const = 0;
   virtual ChimeraTK::DataType rawDataType() const = 0;
@@ -34,9 +28,8 @@ public:
 };
 
 ///@attention This function can return a nullptr in case the data type is
-///undefined (or noData)
-std::shared_ptr<RegisterTypeAbstractor>
-createAbstractAccessor(ChimeraTK::RegisterInfo const &registerInfo,
-                       ChimeraTK::Device &device);
+/// undefined (or noData)
+std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::RegisterInfo const& registerInfo,
+    ChimeraTK::Device& device);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_H

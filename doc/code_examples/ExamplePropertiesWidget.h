@@ -6,29 +6,27 @@
 #include "ui_ExamplePropertiesWidget.h"
 
 namespace Ui {
-class ExamplePropertiesWidget;
+  class ExamplePropertiesWidget;
 }
 
-class ExamplePropertiesWidget : public PropertiesWidget,
-                                public NumericDataTableMixin {
+class ExamplePropertiesWidget : public PropertiesWidget, public NumericDataTableMixin {
   Q_OBJECT
 
-public:
-  explicit ExamplePropertiesWidget(QWidget *parent);
+ public:
+  explicit ExamplePropertiesWidget(QWidget* parent);
   ~ExamplePropertiesWidget();
 
   virtual void clearFields();
   virtual void setSize(int nOfElements, int size = 0);
   virtual void setNames(std::vector<std::string> components);
-  virtual void setFixedPointInfo(int width = 0, int fracBits = 0,
-                                 int signBit) = 0;
+  virtual void setFixedPointInfo(int width = 0, int fracBits = 0, int signBit) = 0;
   virtual void setAddress(int bar = 0, int address = 0);
 
-private slots:
+ private slots:
   void updateTable(int row, int column);
 
-public:
-  Ui::ExamplePropertiesWidget *ui;
+ public:
+  Ui::ExamplePropertiesWidget* ui;
 };
 
 #endif // EXAMPLEPROPERTIESWIDGET_H

@@ -6,28 +6,21 @@
 #include <boost/shared_ptr.hpp>
 #include <qtreewidget.h>
 
-QTreeWidgetItem *getParentNodeFromTreeWidget(std::string const &nodeName,
-                                             QTreeWidget *treeWidget);
+QTreeWidgetItem* getParentNodeFromTreeWidget(std::string const& nodeName, QTreeWidget* treeWidget);
 
-QTreeWidgetItem *
-getParentNodeFromTreeWidgetItem(std::string const &nodeName,
-                                QTreeWidgetItem *parentTreeWidgetItem);
+QTreeWidgetItem* getParentNodeFromTreeWidgetItem(std::string const& nodeName, QTreeWidgetItem* parentTreeWidgetItem);
 
 class RegisterTreeUtilities {
-
-public:
+ public:
   /// @attention Can return nullptr of the register path has no hierarchy.
-  static QTreeWidgetItem *
-  getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
-                       QTreeWidget *treeWidget);
+  static QTreeWidgetItem* getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
+      QTreeWidget* treeWidget);
 
-  static QTreeWidgetItem *
-  getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
-                       QTreeWidgetItem *parentModuleItem,
-                       unsigned int depth = 0);
+  static QTreeWidgetItem* getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
+      QTreeWidgetItem* parentModuleItem,
+      unsigned int depth = 0);
 
-  static std::string
-  getRegisterName(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo);
+  static std::string getRegisterName(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo);
 };
 
 #endif // REGISTERTREEUTILITIES_H

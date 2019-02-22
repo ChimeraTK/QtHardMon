@@ -11,27 +11,27 @@
 #include <exception>
 #include <string>
 
-#define DEFINE_QTHARDMON_EXCEPTION(NAME)                                       \
-  class NAME : public QtHardMonException {                                     \
-  public:                                                                      \
-    NAME(std::string const &message) : QtHardMonException(message) {}          \
+#define DEFINE_QTHARDMON_EXCEPTION(NAME)                                                                               \
+  class NAME : public QtHardMonException {                                                                             \
+   public:                                                                                                             \
+    NAME(std::string const& message) : QtHardMonException(message) {}                                                  \
   };
 
 /**
  * Custom exceptions for the helper methods
  */
 class QtHardMonException : public std::exception {
-protected:
+ protected:
   /// The error message for your exception
   std::string const _message;
 
-public:
+ public:
   /**
    * Default constructor
    */
-  QtHardMonException(std::string const &message) : _message(message) {}
+  QtHardMonException(std::string const& message) : _message(message) {}
   /// overload of the default
-  virtual const char *what() const throw() { return _message.c_str(); }
+  virtual const char* what() const throw() { return _message.c_str(); }
 
   virtual ~QtHardMonException() throw() {}
 };
