@@ -168,7 +168,7 @@ bool QtHardMon::loadDmapFile(QString const& dmapFileName) {
     dmap = fileParser.parse(dmapFileName.toStdString());
     BackendFactory::getInstance().setDMapFilePath(dmapFileName.toStdString());
   }
-  catch(Exception& e) {
+  catch(ChimeraTK::logic_error& e) {
     showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
         QString("Could not load DeviceMap file " + dmapFileName + "."),
         QString("Info: An exception was thrown:") + e.what());
