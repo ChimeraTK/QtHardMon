@@ -171,7 +171,7 @@ bool QtHardMon::loadDmapFile(QString const& dmapFileName) {
   catch(ChimeraTK::logic_error& e) {
     showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
         QString("Could not load DeviceMap file " + dmapFileName + "."),
-        QString("Info: An exception was thrown:") + e.what());
+        QString("Info: An exception was thrown:\n") + e.what());
 
     // We just return after displaying the message and leave the deviceList as
     // it was.
@@ -260,7 +260,7 @@ void QtHardMon::deviceSelected(QListWidgetItem* deviceItem, QListWidgetItem* /*p
     // In case anything fails, we would like to catch it and close the device.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
         QString("Could not load the list of registers for ") + deviceListItem->getDeviceMapElement().deviceName.c_str(),
-        QString("Info: An exception was thrown: ") + e.what());
+        QString("Info: An exception was thrown:\n ") + e.what());
     closeDevice();
   }
   selectPreviousRegister();
@@ -315,7 +315,7 @@ void QtHardMon::openDevice(std::string const& deviceIdentifier) {
   catch(Exception& e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
         QString("Could not create the device ") + deviceIdentifier.c_str() + ".",
-        QString("Info: An exception was thrown:") + e.what());
+        QString("Info: An exception was thrown:\n") + e.what());
   }
 }
 
@@ -359,7 +359,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
       showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
           QString("Could not get register accessor for ") +
               static_cast<std::string>(selectedItem->getRegisterInfo()->getRegisterName()).c_str() + ".",
-          QString("Info: An exception was thrown:") + e.what());
+          QString("Info: An exception was thrown:\n") + e.what());
       return;
     }
     // If the data type is undefined or "noData" there is nothing to display for
@@ -405,8 +405,8 @@ void QtHardMon::read() {
   // if no register is selected the accessor model is nullptr.
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
-        QString("No register selected.                 "),
-        QString("Please select a valid register. (Have you selected a module?)"));
+        QString("No register selected.                 ") +
+        QString("Please select a valid register. (Have you selected a module?)"), "");
     return;
   }
   try {
@@ -419,7 +419,7 @@ void QtHardMon::read() {
     /// active if a device is opened.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
         QString("Error reading from device ") + _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".",
-        QString("Info: An exception was thrown:") + e.what() + QString("\n\nThe device has been closed."));
+        QString("Info: An exception was thrown:\n") + e.what() + QString("\n\nThe device has been closed."));
   }
 
   // check if plotting after reading is requested
@@ -434,8 +434,8 @@ void QtHardMon::write() {
   // if no register is selected the accessor model is nullptr.
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
-        QString("No register selected.                 "),
-        QString("Please select a valid register. (Have you selected a module?)"));
+        QString("No register selected.                 \n") +
+        QString("Please select a valid register. (Have you selected a module?)"), "");
     return;
   }
 
@@ -451,7 +451,7 @@ void QtHardMon::write() {
     /// if a device is opened.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
         QString("Error writing to device ") + _currentDeviceListItem->getDeviceMapElement().uri.c_str() + ".",
-        QString("Info: An exception was thrown:") + e.what() + QString("\n\nThe device has been closed."));
+        QString("Info: An exception was thrown:\n") + e.what() + QString("\n\nThe device has been closed."));
   }
 
   if(ui.readAfterWriteCheckBox->isChecked()) {
@@ -544,7 +544,7 @@ void QtHardMon::loadConfig(QString const& configFileName) {
   catch(std::ifstream::failure& e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
         QString("Could not read config file ") + configFileName + ".",
-        QString("Info: An exception was thrown: ") + e.what());
+        QString("Info: An exception was thrown:\n ") + e.what());
     return;
   }
 
@@ -780,7 +780,7 @@ void QtHardMon::writeConfig(QString const& fileName) {
   // exception
   catch(std::ifstream::failure& e) {
     showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
-        QString("Could not write config file ") + fileName + ".", QString("Info: An exception was thrown:") + e.what());
+        QString("Could not write config file ") + fileName + ".", QString("Info: An exception was thrown:\n") + e.what());
 
     // rethrow the exception so the calling code knows that writing failed.
     throw;
@@ -976,7 +976,7 @@ void QtHardMon::showMessageBox(
   }
   else {
     QMessageBox messageBox(boxType, boxTitle, boxText, QMessageBox::Ok, this);
-    messageBox.setInformativeText(boxInformativeText);
+    messageBox.setDetailedText(boxInformativeText);
     messageBox.exec();
   }
 }
