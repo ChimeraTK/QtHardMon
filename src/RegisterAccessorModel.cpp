@@ -7,8 +7,9 @@ using namespace ChimeraTK;
 
 RegisterAccessorModel::RegisterAccessorModel(QObject* parent,
     std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor)
-: _abstractAccessor(abstractAccessor), _channelNumber(0), _cookedHexColumnIndex(-1), _rawColumnIndex(-1),
+  : QAbstractTableModel(parent), _abstractAccessor(abstractAccessor), _channelNumber(0), _cookedHexColumnIndex(-1), _rawColumnIndex(-1),
   _rawHexColumnIndex(-1), _nColumns(1) {
+
   _isModified.resize(_abstractAccessor->nChannels());
   for(auto& channelModifiedFlags : _isModified) {
     channelModifiedFlags.resize(_abstractAccessor->nElements());
