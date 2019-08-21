@@ -25,6 +25,8 @@ class RegisterTypeAbstractor {
 
   virtual void read() = 0;
   virtual void write() = 0;
+
+  virtual bool writable() = 0;
 };
 
 ///@attention This function can return a nullptr in case the data type is

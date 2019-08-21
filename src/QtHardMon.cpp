@@ -334,6 +334,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   ui.propertiesWidget->ui.valuesTableView->setModel(nullptr);
   delete currentAccessorModel_;
   currentAccessorModel_ = nullptr;
+  bool accessorWritable = false;
 
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
@@ -363,6 +364,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
     // QtHardMon. In this case we don't have an accessor (pointer is null) or a
     // data model.
     if(abstractAccessor) {
+      accessorWritable = abstractAccessor->writable();
       // create a data model if we have an accessor.
       currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
       ui.propertiesWidget->ui.valuesTableView->setModel(currentAccessorModel_);
@@ -372,7 +374,12 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   // set state of read/write buttons according to the register's capabilities
   if(selectedItem->getRegisterInfo()) {
     ui.readButton->setEnabled(selectedItem->getRegisterInfo()->isReadable());
-    ui.writeButton->setEnabled(selectedItem->getRegisterInfo()->isWriteable());
+    ui.writeButton->setEnabled(selectedItem->getRegisterInfo()->isWriteable() || accessorWritable);
+    if (selectedItem->getRegisterInfo()->isWriteable() != accessorWritable) {
+      ui.writeButton->setText(tr("Write (dummy register)"));
+    } else {
+      ui.writeButton->setText(tr("Write"));
+    }
   }
   else {
     ui.readButton->setEnabled(false);
