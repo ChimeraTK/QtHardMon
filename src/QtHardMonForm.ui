@@ -495,6 +495,12 @@
          </item>
          <item>
           <widget class="QPushButton" name="writeButton">
+           <property name="minimumSize">
+            <size>
+             <width>166</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
             <string>Write</string>
            </property>
