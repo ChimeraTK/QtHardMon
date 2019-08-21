@@ -248,8 +248,10 @@ void QtHardMon::deviceSelected(QListWidgetItem* deviceItem, QListWidgetItem* /*p
   ui.mapFileDisplay->setText(mapFileName.c_str());
   ui.mapFileDisplay->setToolTip(absPath.c_str());
 
+  QGuiApplication::setOverrideCursor(Qt::BusyCursor);
   // opening the device enables the gui elements if success
   openDevice(deviceListItem->getDeviceMapElement().deviceName);
+  QGuiApplication::restoreOverrideCursor();
 
   try {
     populateRegisterTree(deviceItem);
