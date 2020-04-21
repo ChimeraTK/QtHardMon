@@ -256,7 +256,7 @@ void QtHardMon::deviceSelected(QListWidgetItem* deviceItem, QListWidgetItem* /*p
   try {
     populateRegisterTree(deviceItem);
   }
-  catch(Exception& e) {
+  catch(std::exception& e) {
     // In case anything fails, we would like to catch it and close the device.
     showMessageBox(QMessageBox::Critical, QString("QtHardMon Error"),
         QString("Could not load the list of registers for ") + deviceListItem->getDeviceMapElement().deviceName.c_str(),
@@ -312,7 +312,7 @@ void QtHardMon::openDevice(std::string const& deviceIdentifier) {
     ui.openClosedLabel->setText("Device is open.");
     ui.openCloseButton->setText("Close");
   }
-  catch(Exception& e) {
+  catch(std::exception& e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
         QString("Could not create the device ") + deviceIdentifier.c_str() + ".",
         QString("Info: An exception was thrown:\n") + e.what());
@@ -355,7 +355,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
     try {
       abstractAccessor = createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
     }
-    catch(Exception& e) {
+    catch(std::exception& e) {
       showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
           QString("Could not get register accessor for ") +
               static_cast<std::string>(selectedItem->getRegisterInfo()->getRegisterName()).c_str() + ".",
