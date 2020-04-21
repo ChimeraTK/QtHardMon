@@ -47,7 +47,7 @@ using namespace ChimeraTK;
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 : QMainWindow(parent_, flags), ui(), dmapFileName_(), configFileName_(), insideReadOrWrite_(0),
-  currentAccessorModel_(nullptr), _currentDeviceListItem(NULL), _plotWindow(NULL) {
+  currentAccessorModel_(nullptr), _currentDeviceListItem(nullptr), _plotWindow(nullptr) {
   PreferencesProvider& preferencesProvider = PreferencesProviderSingleton::Instance();
   ui.setupUi(this);
 
@@ -708,7 +708,7 @@ void QtHardMon::saveConfigAs() {
   try {
     writeConfig(configFileName);
   }
-  catch(std::ifstream::failure& e) {
+  catch(std::ifstream::failure&) {
     // a message box with the error warning has already been displayed. Nothing
     // more to do but quit.
     return;
@@ -886,14 +886,9 @@ std::string QtHardMon::extractFileNameFromPath(const std::string& fileName) {
 }
 
 void QtHardMon::populateRegisterTree(QListWidgetItem* deviceItem) {
-  if(deviceItem == NULL) {
+  if(deviceItem == nullptr) {
     return;
   }
-
-  // the deviceItem actually is a DeviceListItemType. As this is a private slot
-  // it is safe to assume this and use a static cast.
-  DeviceListItem* deviceListItem = static_cast<DeviceListItem*>(deviceItem);
-
   ui.registerTreeWidget->clear();
 
   const ChimeraTK::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
