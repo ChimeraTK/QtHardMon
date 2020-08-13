@@ -41,10 +41,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Network_INCLUDE_DIRS})
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
-#use -DCMAKE_BUILD_TYPE=Debug in your cmake command to turn on the coverage option
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+include(${CMAKE_SOURCE_DIR}/cmake/set_default_build_to_release.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
