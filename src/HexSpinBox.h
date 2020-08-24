@@ -21,13 +21,13 @@ class HexData {
    * Holds the entered value (for which we need the hex representation)
    */
   double value;
-  HexData(double v = 0) : value(v){};
+  HexData(double = 0) : value() {}
   /** Overloaded constructor for std::string to avoid template specialisation as
    *  there is no implicit conversion from std::string to double.
    *  Generally this conversion does not make sense, so we initialise class with
    * 0.
    */
-  HexData(std::string v) : value(0){};
+  HexData(std::string) : value(0) {}
 };
 
 /*

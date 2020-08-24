@@ -8,7 +8,7 @@
 #include "HexSpinBox.h"
 #include <sstream>
 
-HexSpinBox::HexSpinBox(QWidget* parent_) : QSpinBox(parent_), _validator(NULL) {
+HexSpinBox::HexSpinBox(QWidget* parent_) : QSpinBox(parent_), _validator(nullptr) {
   // right now the hex spin box accepts [1,7] characters
   QString regex("[0-9A-Fa-f]{1,8}");
   _validator = new QRegExpValidator(QRegExp(regex), this);
@@ -28,7 +28,7 @@ QString HexSpinBox::textFromValue(int value_) const {
 
 int HexSpinBox::valueFromText(const QString& text_) const {
   bool conversionStatus = false;
-  int convertedValue = text_.toUInt(&conversionStatus, 16);
+  int convertedValue = static_cast<int>(text_.toUInt(&conversionStatus, 16));
   return convertedValue;
 }
 

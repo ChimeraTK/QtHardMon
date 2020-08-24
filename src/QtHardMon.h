@@ -23,7 +23,7 @@ class QtHardMon : public QMainWindow {
 
  public:
   /** The constructor */
-  QtHardMon(bool noPrompts = false, QWidget* parent_ = 0, Qt::WindowFlags flags = 0);
+  QtHardMon(bool noPrompts = false, QWidget* parent_ = nullptr, Qt::WindowFlags flags = nullptr);
   /* The destructor. Need not be virtual because we have no virtual functions */
   ~QtHardMon();
 
@@ -66,7 +66,7 @@ class QtHardMon : public QMainWindow {
    * an auto-read if this is
    *  activated.
    */
-  void registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem* /*previousRegisterItem */ = NULL);
+  void registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem* /*previousRegisterItem */ = nullptr);
   void registerClicked(QTreeWidgetItem* registerItem); ///< Executed if a register is clicked
   void channelSelected(int channelNumber);
 
@@ -158,15 +158,15 @@ class QtHardMon : public QMainWindow {
   class DeviceListItem : public QListWidgetItem {
    public:
     /** The simplest cvonstructor, no text or icon for the entry*/
-    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const& device_map_emlement, QListWidget* parent_ = 0);
+    DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const& device_map_emlement, QListWidget* parent_ = nullptr);
 
     /** Constructor which sets the text entry in the list. */
     DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const& device_map_emlement, const QString& text_,
-        QListWidget* parent_ = 0);
+        QListWidget* parent_ = nullptr);
 
     /** Constructor which sets the text entry in the list and an icon. */
     DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const& device_map_emlement, const QIcon& icon_,
-        const QString& text_, QListWidget* parent_ = 0);
+        const QString& text_, QListWidget* parent_ = nullptr);
 
     /** The destructor. Currently does nothing because the members go out of
      * scope automatically. */
@@ -215,12 +215,8 @@ class QtHardMon : public QMainWindow {
    */
   void populateRegisterTree(QListWidgetItem* deviceItem);
 
-  // Disable copy constructor and assignment operator
-  // This is the main class and it should'nt need copying
-  Q_DISABLE_COPY(QtHardMon); // Easy way to get around -Weffc++ warning:
-                             // class QtHardMon’ has pointer data members -
-                             // but does not overide copy constructor and
-                             // assignment operator
+  QtHardMon(QtHardMon&) = delete;
+  QtHardMon& operator=(QtHardMon&) = delete;
 
   void showMessageBox(QMessageBox::Icon boxType, QString boxTitle, QString boxText, QString boxInformativeText);
 

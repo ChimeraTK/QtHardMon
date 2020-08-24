@@ -10,8 +10,8 @@
 template<class USER_DATA_TYPE>
 class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
  public:
-  RegisterTypeAbstractorImpl(ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const& accessor,
-      ChimeraTK::DataType const& rawDataType);
+  RegisterTypeAbstractorImpl(
+      ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const& accessor, ChimeraTK::DataType const& rawDataType);
   unsigned int nChannels() const override;
   unsigned int nElements() const override;
   QVariant data(unsigned int channelIndex, unsigned int elementIndex) const override;
@@ -67,8 +67,7 @@ std::pair<DATA_TYPE, bool> qvariantToStandardDataType(const QVariant& data) {
 /*****************************************************************************************************/
 template<class USER_DATA_TYPE>
 RegisterTypeAbstractorImpl<USER_DATA_TYPE>::RegisterTypeAbstractorImpl(
-    ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const& accessor,
-    ChimeraTK::DataType const& rawDataType)
+    ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> const& accessor, ChimeraTK::DataType const& rawDataType)
 : _accessor(accessor), _rawDataType(rawDataType) {}
 
 template<class USER_DATA_TYPE>
@@ -135,6 +134,9 @@ bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setData(
 template<class USER_DATA_TYPE>
 QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawData(
     unsigned int channelIndex, unsigned int elementIndex) const {
+  std::ignore = channelIndex;
+  std::ignore = elementIndex;
+
   // Not useful for this kind of abstractor without raw data. Just return an
   // empty variant.
   return QVariant();
@@ -143,6 +145,9 @@ QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawData(
 template<class USER_DATA_TYPE>
 QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataAsHex(
     unsigned int channelIndex, unsigned int elementIndex) const {
+  std::ignore = channelIndex;
+  std::ignore = elementIndex;
+
   // Not useful for this kind of abstractor without raw data. Just return an
   // empty variant.
   return QVariant();
@@ -151,6 +156,10 @@ QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataAsHex(
 template<class USER_DATA_TYPE>
 bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setRawData(
     unsigned int channelIndex, unsigned int elementIndex, const QVariant& data) {
+  std::ignore = channelIndex;
+  std::ignore = elementIndex;
+  std::ignore = data;
+
   // Not useful for this kind of abstractor without raw data. Just return false.
   return false;
 }
