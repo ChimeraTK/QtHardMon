@@ -18,16 +18,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/set_version_numbers.cmake)
 ## Load custom modules, i.e. FindDOOCS.cmake
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-## Set the build type to Release if none is specified
-## Force it into Release if "None" is specified (needed to overrule dkpg_buildpackage)
-if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
-      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
-
-set(CMAKE_CXX_STANDARD 14)
-
 include(cmake/add_dependency.cmake)
 add_dependency(ChimeraTK-DeviceAccess 01.04 REQUIRED)
 find_package(Qt5Core REQUIRED)
@@ -83,25 +73,8 @@ endif()
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${ChimeraTK-DeviceAccess_LIBRARIES} ${QWT_LIBRARY})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${ChimeraTK-DeviceAccess_LINKER_FLAGS}")
 
-  IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  # enable code coverate report
-  include(cmake/enable_code_coverage_report.cmake)
-  ENDIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-# add a target to generate API documentation with Doxygen
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  add_custom_target(doc ALL
-    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating API documentation with Doxygen" VERBATIM
-    )
-  # do not install the developer information
-  #install(DIRECTORY ${CMAKE_BINARY_DIR}/doc/ DESTINATION share/doc/${PROJECT_NAME})
-else(DOXYGEN_FOUND)
-  message("Doxygen not found, documentation will not be build.")
-endif(DOXYGEN_FOUND)
+include(cmake/enable_code_coverage_report.cmake)
+include(cmake/enable_doxygen_documentation.cmake)
 
 #FIXME: the user guide should be build from source, but we need dependencies defined,
 # fix the date to the writing date (not compilation date) and put the version
