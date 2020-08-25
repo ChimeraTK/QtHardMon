@@ -11,8 +11,8 @@
 template<class RAW_DATA_TYPE, class COOKED_DATA_TYPE>
 class RegisterTypeAbstractorRawImpl : public RegisterTypeAbstractorImpl<RAW_DATA_TYPE> {
  public:
-  RegisterTypeAbstractorRawImpl(ChimeraTK::TwoDRegisterAccessor<RAW_DATA_TYPE> const& accessor,
-      ChimeraTK::DataType const& rawDataType);
+  RegisterTypeAbstractorRawImpl(
+      ChimeraTK::TwoDRegisterAccessor<RAW_DATA_TYPE> const& accessor, ChimeraTK::DataType const& rawDataType);
   using RegisterTypeAbstractorImpl<RAW_DATA_TYPE>::_accessor;
 
   /// Override because it returns cooked data while the accessor under the hood
@@ -35,7 +35,7 @@ class RegisterTypeAbstractorRawImpl : public RegisterTypeAbstractorImpl<RAW_DATA
   /// without raw access
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& data) override;
   /// Override to update the cached cooked data after reading
-  void read();
+  void read() override;
 
   /// Override because this is for the cooked type while the base implementation
   /// would return for the raw type.
@@ -71,8 +71,7 @@ QVariant dataToQVariant<uint64_t>(uint64_t);
 
 template<class RAW_DATA_TYPE, class COOKED_DATA_TYPE>
 RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::RegisterTypeAbstractorRawImpl(
-    ChimeraTK::TwoDRegisterAccessor<RAW_DATA_TYPE> const& accessor,
-    ChimeraTK::DataType const& rawDataType)
+    ChimeraTK::TwoDRegisterAccessor<RAW_DATA_TYPE> const& accessor, ChimeraTK::DataType const& rawDataType)
 : RegisterTypeAbstractorImpl<RAW_DATA_TYPE>(accessor, rawDataType), _cachedCookedDataValid(false) {
   _cachedCookedData.resize(_accessor.getNChannels());
   for(auto& channelCookedData : _cachedCookedData) {

@@ -23,7 +23,7 @@ class QtHardMon : public QMainWindow {
 
  public:
   /** The constructor */
-  QtHardMon(bool noPrompts = false, QWidget* parent_ = nullptr, Qt::WindowFlags flags = nullptr);
+  QtHardMon(bool noPrompts = false, QWidget* parent_ = nullptr, Qt::WindowFlags flags = {});
   /* The destructor. Need not be virtual because we have no virtual functions */
   ~QtHardMon();
 
