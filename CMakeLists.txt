@@ -35,6 +35,11 @@ include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include(${CMAKE_SOURCE_DIR}/cmake/set_default_build_to_release.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
 
+# setting this manually here. You might have to adapt the standard version in future. Having it in set_default_flags.cmake is giving too much trouble in other projects.
+if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
+  set(CMAKE_CXX_STANDARD 17)
+endif()    
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
