@@ -3,6 +3,7 @@
 
 PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent) {
   ui.setupUi(this);
+  ui.registerPathDisplay->setTextInteractionFlags(Qt::TextSelectableByMouse);
   clearFields(); // also hides what should be hidden
 }
 
