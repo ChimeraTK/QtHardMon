@@ -251,7 +251,6 @@ void QtHardMon::deviceSelected(QListWidgetItem* deviceItem, QListWidgetItem* /*p
   QGuiApplication::setOverrideCursor(Qt::BusyCursor);
   // opening the device enables the gui elements if success
   openDevice(deviceListItem->getDeviceMapElement().deviceName);
-  QGuiApplication::restoreOverrideCursor();
 
   try {
     populateRegisterTree(deviceItem);
@@ -263,6 +262,7 @@ void QtHardMon::deviceSelected(QListWidgetItem* deviceItem, QListWidgetItem* /*p
         QString("Info: An exception was thrown:\n ") + e.what());
     closeDevice();
   }
+  QGuiApplication::restoreOverrideCursor();
   selectPreviousRegister();
 }
 
