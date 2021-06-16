@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 PROJECT(QtHardMon)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 01)
-set(${PROJECT_NAME}_MINOR_VERSION 03)
-set(${PROJECT_NAME}_PATCH_VERSION 01)
+set(${PROJECT_NAME}_MINOR_VERSION 04)
+set(${PROJECT_NAME}_PATCH_VERSION 00)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -38,7 +38,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
 # setting this manually here. You might have to adapt the standard version in future. Having it in set_default_flags.cmake is giving too much trouble in other projects.
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
   set(CMAKE_CXX_STANDARD 17)
-endif()    
+endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
