@@ -6,6 +6,9 @@
 #include <QVariant>
 #include <memory>
 
+/// Register ChimeraTK::Boolean type with Qt
+Q_DECLARE_METATYPE(ChimeraTK::Boolean)
+
 /// Qt objects with signals and slots cannot be template classes.
 /// As we need a container for the user-type templated RegisterAccessors,
 /// this class is used as a non-templated base class a Qt-compatible interface.

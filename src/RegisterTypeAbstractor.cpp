@@ -43,7 +43,7 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
         returnValue = std::make_shared<RegisterTypeAbstractorRawImpl<decltype(arg), USER_DATA_TYPE>>(
             accessor, dataDescriptor.rawDataType());
       };
-      callForType(dataDescriptor.rawDataType(), rawAccessorCreatorLambda);
+      callForTypeNoVoid(dataDescriptor.rawDataType(), rawAccessorCreatorLambda);
       return returnValue;
     }
   }
