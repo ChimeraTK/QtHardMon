@@ -4,7 +4,7 @@ PROJECT(QtHardMon)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 01)
 set(${PROJECT_NAME}_MINOR_VERSION 04)
-set(${PROJECT_NAME}_PATCH_VERSION 00)
+set(${PROJECT_NAME}_PATCH_VERSION 01)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -19,7 +19,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/set_version_numbers.cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 include(cmake/add_dependency.cmake)
-add_dependency(ChimeraTK-DeviceAccess 01.04 REQUIRED)
+add_dependency(ChimeraTK-DeviceAccess 02.06 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Widgets REQUIRED)
