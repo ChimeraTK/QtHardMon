@@ -106,6 +106,15 @@ class QtHardMon : public QMainWindow {
    */
   void handleSortCheckboxClick(int state);
 
+  /*
+   * collapse all the register tree widget or 'unsort' it by rereading
+   */
+  void handleCollapseTreeButton();
+  /*
+   * expand all the register tree widget or 'unsort' it by rereading
+   */
+  void handleExpandTreeButton();
+
   /** Set all background to non modified color.
    */
 

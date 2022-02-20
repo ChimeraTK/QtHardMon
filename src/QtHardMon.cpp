@@ -102,6 +102,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   connect(ui.SortAscendingCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleSortCheckboxClick(int)));
 
+  connect(ui.collapseTreeButton, SIGNAL(clicked()), this, SLOT(handleCollapseTreeButton() ));
+  connect(ui.expandTreeButton, SIGNAL(clicked()), this, SLOT(handleExpandTreeButton()));
+
   // The oparations and options group are disabled until a dmap file is loaded
   // and a device has been opened
   ui.operationsGroupBox->setEnabled(false);
@@ -948,6 +951,13 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
     clipboard->setText(std::string(registerPath).c_str(), QClipboard::Selection);
   }
   return;
+}
+
+void QtHardMon::handleCollapseTreeButton() {
+  ui.registerTreeWidget->collapseAll();
+}
+void QtHardMon::handleExpandTreeButton() {
+  ui.registerTreeWidget->expandAll();
 }
 
 void QtHardMon::handleSortCheckboxClick(int state) {

@@ -421,6 +421,24 @@
           </property>
          </widget>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QPushButton" name="collapseTreeButton">
+            <property name="text">
+             <string>Collaps All</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="expandTreeButton">
+            <property name="text">
+             <string>Expand All</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </widget>
       <widget class="PropertiesWidget" name="propertiesWidget" native="true">
@@ -556,7 +574,7 @@
      <x>0</x>
      <y>0</y>
      <width>1102</width>
-     <height>24</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
