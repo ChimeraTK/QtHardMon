@@ -387,57 +387,74 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="SortAscendingCheckBox">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="toolTip">
-           <string>Sort module/registers in Ascending order</string>
-          </property>
-          <property name="text">
-           <string>Sort Modules/Registers</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="autoselectPreviousRegisterCheckBox">
-          <property name="toolTip">
-           <string>Automatically select the previously selected register when reopening the device.</string>
-          </property>
-          <property name="accessibleName">
-           <string/>
-          </property>
-          <property name="text">
-           <string>Autoselect previous register</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QPushButton" name="collapseTreeButton">
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
             <property name="text">
-             <string>Collaps All</string>
+             <string>Find Module</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QLineEdit" name="searchLineEdit">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QPushButton" name="expandTreeButton">
             <property name="text">
              <string>Expand All</string>
             </property>
            </widget>
           </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="collapseTreeButton">
+            <property name="text">
+             <string>Collapse All</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="autoselectPreviousRegisterCheckBox">
+            <property name="toolTip">
+             <string>Automatically select the previously selected register when reopening the device.</string>
+            </property>
+            <property name="accessibleName">
+             <string/>
+            </property>
+            <property name="text">
+             <string>Autoselect previous register</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="SortAscendingCheckBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <property name="toolTip">
+             <string>Sort module/registers in Ascending order</string>
+            </property>
+            <property name="text">
+             <string>Sort Modules/Registers</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4"/>
         </item>
        </layout>
       </widget>

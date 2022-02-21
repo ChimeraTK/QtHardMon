@@ -105,6 +105,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
   connect(ui.collapseTreeButton, SIGNAL(clicked()), this, SLOT(handleCollapseTreeButton() ));
   connect(ui.expandTreeButton, SIGNAL(clicked()), this, SLOT(handleExpandTreeButton()));
 
+  connect(ui.searchLineEdit, SIGNAL(textChanged(const QString &)), this, SLOT(hanldeSearchLineEdit(const QString &)));
+  connect(ui.searchLineEdit, SIGNAL(editingFinished()), this,  SLOT(handleSearchLineFinished()));
+
   // The oparations and options group are disabled until a dmap file is loaded
   // and a device has been opened
   ui.operationsGroupBox->setEnabled(false);
@@ -958,6 +961,24 @@ void QtHardMon::handleCollapseTreeButton() {
 }
 void QtHardMon::handleExpandTreeButton() {
   ui.registerTreeWidget->expandAll();
+}
+
+void QtHardMon::hanldeSearchLineEdit(QString const& text) {
+  // TODO: search over registers (childs),
+  // TODO: add Regexp match
+  // TODO: keyboard up/down move over matched list
+  // QStringList searchList = text.split("/");
+  QList<QTreeWidgetItem*> moduleList = ui.registerTreeWidget->findItems(text, Qt::MatchContains);
+
+  // Iterate the list until we find the right one
+  for(auto mod : moduleList) {
+       ui.registerTreeWidget->setCurrentItem(mod);
+  }
+}
+
+void QtHardMon::handleSearchLineFinished () {
+  // set focus on register list when enter pressed
+  ui.registerTreeWidget->setFocus();
 }
 
 void QtHardMon::handleSortCheckboxClick(int state) {

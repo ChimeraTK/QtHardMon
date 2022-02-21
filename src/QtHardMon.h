@@ -114,15 +114,22 @@ class QtHardMon : public QMainWindow {
    * expand all the register tree widget or 'unsort' it by rereading
    */
   void handleExpandTreeButton();
+  /*
+   * handle register search field change
+   */
+  void hanldeSearchLineEdit(const QString&);
+
+  void handleSearchLineFinished ();
 
   /** Set all background to non modified color.
    */
 
-  /*
+      /*
    * returns true if the fileName ends with the provided
    * extension else false
    */
-  bool checkExtension(QString const& fileName, QString extension);
+      bool
+      checkExtension(QString const& fileName, QString extension);
 
   void copyRegisterTreeItemNameToClipBoard();
 
