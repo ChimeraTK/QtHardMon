@@ -17,7 +17,7 @@ class PropertiesWidget : public QWidget {
 
   Ui::PropertiesWidgetForm ui;
 
-  void updateRegisterInfo(boost::shared_ptr<ChimeraTK::RegisterInfo> const& registerInfo);
+  void updateRegisterInfo(const ChimeraTK::RegisterInfo& registerInfo);
 
   /// Clear the red cells of the data display widget after writing
   void clearDataWidgetBackground();
@@ -28,7 +28,7 @@ class PropertiesWidget : public QWidget {
   void setAddress(int bar, int address, int sizeInBytes);
   // other internal methods to avoid screens of unstructured code...
   void setShape(unsigned int nDimensions, unsigned int nChannels, unsigned int nElements);
-  void setType(ChimeraTK::RegisterInfo::DataDescriptor const& dataDescriptor);
+  void setType(ChimeraTK::DataDescriptor const& dataDescriptor);
 
   void setOneDWidgetsVisible(bool visible);
   void setTwoDWidgetsVisible(bool visible);

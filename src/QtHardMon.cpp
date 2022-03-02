@@ -355,16 +355,16 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   // cast.
   DeviceElementQTreeItem* selectedItem = static_cast<DeviceElementQTreeItem*>(registerItem);
   ui.propertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo());
-  if(selectedItem->getRegisterInfo()) {
+  if(selectedItem->getRegisterInfo().isValid()) {
     // there is valid register information. Create an accessor
     std::shared_ptr<RegisterTypeAbstractor> abstractAccessor;
     try {
-      abstractAccessor = createAbstractAccessor(*(selectedItem->getRegisterInfo()), currentDevice_);
+      abstractAccessor = createAbstractAccessor(selectedItem->getRegisterInfo(), currentDevice_);
     }
     catch(std::exception& e) {
       showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
           QString("Could not get register accessor for ") +
-              static_cast<std::string>(selectedItem->getRegisterInfo()->getRegisterName()).c_str() + ".",
+              static_cast<std::string>(selectedItem->getRegisterInfo().getRegisterName()).c_str() + ".",
           QString("Info: An exception was thrown:\n") + e.what());
       return;
     }
@@ -380,12 +380,13 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   }
 
   // set state of read/write buttons according to the register's capabilities
-  if(selectedItem->getRegisterInfo()) {
-    ui.readButton->setEnabled(selectedItem->getRegisterInfo()->isReadable());
-    ui.writeButton->setEnabled(selectedItem->getRegisterInfo()->isWriteable() || accessorWritable);
-    if (selectedItem->getRegisterInfo()->isWriteable() != accessorWritable) {
+  if(selectedItem->getRegisterInfo().isValid()) {
+    ui.readButton->setEnabled(selectedItem->getRegisterInfo().isReadable());
+    ui.writeButton->setEnabled(selectedItem->getRegisterInfo().isWriteable() || accessorWritable);
+    if(selectedItem->getRegisterInfo().isWriteable() != accessorWritable) {
       ui.writeButton->setText(tr("Write (dummy register)"));
-    } else {
+    }
+    else {
       ui.writeButton->setText(tr("Write"));
     }
   }
@@ -897,25 +898,28 @@ void QtHardMon::populateRegisterTree(QListWidgetItem* deviceItem) {
   }
   ui.registerTreeWidget->clear();
 
-  const ChimeraTK::RegisterCatalogue registerCatalogue = currentDevice_.getRegisterCatalogue();
+  std::cout << "populateRegisterTree" << std::endl;
+
+  auto registerCatalogue = currentDevice_.getRegisterCatalogue();
+
+  std::cout << "currentDevice_ = " << currentDevice_.readDeviceInfo() << std::endl;
+  std::cout << "registerCatalogue has regs: " << registerCatalogue.getNumberOfRegisters() << std::endl;
+
   // get the registerMap and fill the RegisterTreeWidget
-  for(RegisterCatalogue::const_iterator registerIter = currentDevice_.getRegisterCatalogue().begin();
-      registerIter != currentDevice_.getRegisterCatalogue().end();
-      ++registerIter) {
+  for(const auto& reg : registerCatalogue) {
+    std::cout << "reg: " << reg.getRegisterName() << std::endl;
     // parentNode can be null if there is no parent, i.e. the register is
     // directly in the treeWidget
     auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(
-        registerCatalogue.getRegister(registerIter->getRegisterName()), ui.registerTreeWidget);
+        registerCatalogue.getRegister(reg.getRegisterName()), ui.registerTreeWidget);
     if(parentNode) {
-      new DeviceElementQTreeItem(parentNode,
-          registerIter->getRegisterName().getComponents().back().c_str(),
-          registerCatalogue.getRegister(registerIter->getRegisterName()));
+      new DeviceElementQTreeItem(parentNode, reg.getRegisterName().getComponents().back().c_str(),
+          registerCatalogue.getRegister(reg.getRegisterName()));
     }
     else {
       // no parent node. Directly add to the tree widget.
-      new DeviceElementQTreeItem(ui.registerTreeWidget,
-          registerIter->getRegisterName().getComponents().back().c_str(),
-          registerCatalogue.getRegister(registerIter->getRegisterName()));
+      new DeviceElementQTreeItem(ui.registerTreeWidget, reg.getRegisterName().getComponents().back().c_str(),
+          registerCatalogue.getRegister(reg.getRegisterName()));
     }
   }
   ui.registerTreeWidget->expandAll();

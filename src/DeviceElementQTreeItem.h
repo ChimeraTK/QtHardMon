@@ -8,22 +8,22 @@
 
 class DeviceElementQTreeItem : public QTreeWidgetItem {
  public:
-  DeviceElementQTreeItem(
-      QTreeWidget* parent, QString const& name, boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo = nullptr);
+  DeviceElementQTreeItem(QTreeWidget* parent, QString const& name,
+      const ChimeraTK::RegisterInfo& registerInfo = ChimeraTK::RegisterInfo{nullptr});
 
-  DeviceElementQTreeItem(
-      QTreeWidgetItem* parent, QString const& name, boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo = nullptr);
+  DeviceElementQTreeItem(QTreeWidgetItem* parent, QString const& name,
+      const ChimeraTK::RegisterInfo& registerInfo = ChimeraTK::RegisterInfo{nullptr});
 
   bool operator<(const QTreeWidgetItem& rhs) const;
 
-  boost::shared_ptr<ChimeraTK::RegisterInfo> getRegisterInfo();
+  const ChimeraTK::RegisterInfo& getRegisterInfo();
 
   // Returns the path of the object. Also works for tree items without register
   // info because the partial register path is obtained from the tree structure.
   ChimeraTK::RegisterPath getRegisterPath();
 
  protected:
-  boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo_;
+  ChimeraTK::RegisterInfo registerInfo_;
 };
 
 #endif // DEVICEELEMENTQTREEITEM_H

@@ -13,14 +13,12 @@ QTreeWidgetItem* getParentNodeFromTreeWidgetItem(std::string const& nodeName, QT
 class RegisterTreeUtilities {
  public:
   /// @attention Can return nullptr of the register path has no hierarchy.
-  static QTreeWidgetItem* getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
-      QTreeWidget* treeWidget);
+  static QTreeWidgetItem* getDeepestBranchNode(const ChimeraTK::RegisterInfo& registerInfo, QTreeWidget* treeWidget);
 
-  static QTreeWidgetItem* getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
-      QTreeWidgetItem* parentModuleItem,
-      unsigned int depth = 0);
+  static QTreeWidgetItem* getDeepestBranchNode(
+      const ChimeraTK::RegisterInfo& registerInfo, QTreeWidgetItem* parentModuleItem, unsigned int depth = 0);
 
-  static std::string getRegisterName(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo);
+  static std::string getRegisterName(const ChimeraTK::RegisterInfo& registerInfo);
 };
 
 #endif // REGISTERTREEUTILITIES_H

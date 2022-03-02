@@ -1,11 +1,11 @@
 #include "DeviceElementQTreeItem.h"
 
 DeviceElementQTreeItem::DeviceElementQTreeItem(
-    QTreeWidget* parent, const QString& text, boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
+    QTreeWidget* parent, const QString& text, const ChimeraTK::RegisterInfo& registerInfo)
 : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType), registerInfo_(registerInfo) {}
 
 DeviceElementQTreeItem::DeviceElementQTreeItem(
-    QTreeWidgetItem* parent, const QString& text, boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo)
+    QTreeWidgetItem* parent, const QString& text, const ChimeraTK::RegisterInfo& registerInfo)
 : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType), registerInfo_(registerInfo) {}
 
 bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
@@ -31,7 +31,7 @@ bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
   }
 }
 
-boost::shared_ptr<ChimeraTK::RegisterInfo> DeviceElementQTreeItem::getRegisterInfo() {
+const ChimeraTK::RegisterInfo& DeviceElementQTreeItem::getRegisterInfo() {
   return registerInfo_;
 }
 

@@ -53,7 +53,7 @@ std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::Regist
     ChimeraTK::Device& device) {
   auto dataDescriptor = registerInfo.getDataDescriptor();
   switch(dataDescriptor.fundamentalType()) {
-    case ChimeraTK::RegisterInfo::FundamentalType::numeric:
+    case ChimeraTK::DataDescriptor::FundamentalType::numeric:
       if(dataDescriptor.isIntegral()) {
         if(dataDescriptor.isSigned()) {
           return createTypedAccessor<int32_t>(registerInfo, device);
@@ -66,15 +66,15 @@ std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::Regist
         return createTypedAccessor<double>(registerInfo, device);
       }
       break;
-    case ChimeraTK::RegisterInfo::FundamentalType::string:
+    case ChimeraTK::DataDescriptor::FundamentalType::string:
       return createTypedAccessor<std::string>(registerInfo, device);
       break;
-    case ChimeraTK::RegisterInfo::FundamentalType::boolean:
+    case ChimeraTK::DataDescriptor::FundamentalType::boolean:
       return createTypedAccessor<uint32_t>(registerInfo, device);
       break;
-    case ChimeraTK::RegisterInfo::FundamentalType::nodata:
+    case ChimeraTK::DataDescriptor::FundamentalType::nodata:
       // fall into default. Nothing to display
-    case ChimeraTK::RegisterInfo::FundamentalType::undefined:
+    case ChimeraTK::DataDescriptor::FundamentalType::undefined:
       // fall into default, just mentioned for completeness
     default:
       return nullptr;
