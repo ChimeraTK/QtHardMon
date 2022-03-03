@@ -24,9 +24,9 @@ QTreeWidgetItem* getNodeFromTreeWidgetItem(std::string const& nodeName, QTreeWid
   return nullptr;
 }
 
-QTreeWidgetItem* RegisterTreeUtilities::getDeepestBranchNode(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo,
-    QTreeWidget* treeWidget) {
-  std::vector<std::string> registerPathComponents = registerInfo->getRegisterName().getComponents();
+QTreeWidgetItem* RegisterTreeUtilities::getDeepestBranchNode(
+    const ChimeraTK::RegisterInfo& registerInfo, QTreeWidget* treeWidget) {
+  std::vector<std::string> registerPathComponents = registerInfo.getRegisterName().getComponents();
   std::string moduleName = registerPathComponents.front();
 
   if(registerPathComponents.size() < 2 || moduleName.empty()) {
@@ -48,13 +48,13 @@ QTreeWidgetItem* RegisterTreeUtilities::getDeepestBranchNode(boost::shared_ptr<C
   return getDeepestBranchNode(registerInfo, moduleItem);
 }
 
-std::string RegisterTreeUtilities::getRegisterName(boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo) {
-  return registerInfo->getRegisterName().getComponents().back();
+std::string RegisterTreeUtilities::getRegisterName(const ChimeraTK::RegisterInfo& registerInfo) {
+  return registerInfo.getRegisterName().getComponents().back();
 }
 
 QTreeWidgetItem* RegisterTreeUtilities::getDeepestBranchNode(
-    boost::shared_ptr<ChimeraTK::RegisterInfo> registerInfo, QTreeWidgetItem* parentModuleItem, unsigned int depth) {
-  std::vector<std::string> registerPathComponents = registerInfo->getRegisterName().getComponents();
+    const ChimeraTK::RegisterInfo& registerInfo, QTreeWidgetItem* parentModuleItem, unsigned int depth) {
+  std::vector<std::string> registerPathComponents = registerInfo.getRegisterName().getComponents();
   if(registerPathComponents.size() > depth + 2) {
     QTreeWidgetItem* moduleItem = nullptr;
 

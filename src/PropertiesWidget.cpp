@@ -1,5 +1,5 @@
 #include "PropertiesWidget.h"
-#include <ChimeraTK/RegisterInfoMap.h>
+#include <ChimeraTK/NumericAddressedRegisterCatalogue.h>
 
 PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent) {
   ui.setupUi(this);
@@ -30,29 +30,29 @@ void PropertiesWidget::setTwoDWidgetsVisible(bool visible) {
   ui.channelWidget->setVisible(visible);
 }
 
-void PropertiesWidget::updateRegisterInfo(boost::shared_ptr<ChimeraTK::RegisterInfo> const& registerInfo) {
+void PropertiesWidget::updateRegisterInfo(const ChimeraTK::RegisterInfo& registerInfo) {
   // There are node elements ("modules") which don't have register information
-  if(!registerInfo) {
+  if(!registerInfo.isValid()) {
     clearFields();
     return;
   }
 
   setEnabled(true);
-  ui.registerPathDisplay->setText(static_cast<const std::string&>(registerInfo->getRegisterName()).c_str());
+  ui.registerPathDisplay->setText(static_cast<const std::string&>(registerInfo.getRegisterName()).c_str());
   setShape(
-      registerInfo->getNumberOfDimensions(), registerInfo->getNumberOfChannels(), registerInfo->getNumberOfElements());
-  setType(registerInfo->getDataDescriptor());
+      registerInfo.getNumberOfDimensions(), registerInfo.getNumberOfChannels(), registerInfo.getNumberOfElements());
+  setType(registerInfo.getDataDescriptor());
 
   // Try to cast to the old, numeric addressed registerInfo.
-  auto numericAddressedInfo = boost::dynamic_pointer_cast<ChimeraTK::RegisterInfoMap::RegisterInfo>(registerInfo);
+  auto numericAddressedInfo = dynamic_cast<const ChimeraTK::NumericAddressedRegisterInfo*>(&registerInfo.getImpl());
   // If the cast succeeded fill the numeric addressed and fixed point fields.
   // This info only exists for this type of registers.
   if(numericAddressedInfo) {
-    setAddress(numericAddressedInfo->bar, numericAddressedInfo->address, numericAddressedInfo->nBytes);
-    setFixedPointInfo(numericAddressedInfo->width,
-        numericAddressedInfo->nFractionalBits,
-        numericAddressedInfo->signedFlag,
-        registerInfo->getNumberOfDimensions());
+    setAddress(numericAddressedInfo->bar, numericAddressedInfo->address,
+        numericAddressedInfo->nElements * numericAddressedInfo->elementPitchBits / 8);
+    setFixedPointInfo(numericAddressedInfo->channels.front().width,
+        numericAddressedInfo->channels.front().nFractionalBits, numericAddressedInfo->channels.front().signedFlag,
+        registerInfo.getNumberOfDimensions());
   }
   else {
     ui.numericalAddressGroupBox->hide();
@@ -95,9 +95,9 @@ void PropertiesWidget::setShape(unsigned int nDimensions, unsigned int nChannels
   }
 }
 
-void PropertiesWidget::setType(ChimeraTK::RegisterInfo::DataDescriptor const& dataDescriptor) {
+void PropertiesWidget::setType(ChimeraTK::DataDescriptor const& dataDescriptor) {
   switch(dataDescriptor.fundamentalType()) {
-    case ChimeraTK::RegisterInfo::FundamentalType::numeric: {
+    case ChimeraTK::DataDescriptor::FundamentalType::numeric: {
       std::string signedString;
       if(dataDescriptor.isSigned()) {
         signedString = "Signed";
@@ -112,16 +112,16 @@ void PropertiesWidget::setType(ChimeraTK::RegisterInfo::DataDescriptor const& da
         ui.dataTypeDisplay->setText((signedString + " non-integer").c_str());
       }
     } break;
-    case ChimeraTK::RegisterInfo::FundamentalType::string:
+    case ChimeraTK::DataDescriptor::FundamentalType::string:
       ui.dataTypeDisplay->setText("String");
       break;
-    case ChimeraTK::RegisterInfo::FundamentalType::boolean:
+    case ChimeraTK::DataDescriptor::FundamentalType::boolean:
       ui.dataTypeDisplay->setText("Boolean");
       break;
-    case ChimeraTK::RegisterInfo::FundamentalType::nodata:
+    case ChimeraTK::DataDescriptor::FundamentalType::nodata:
       ui.dataTypeDisplay->setText("No Data");
       break;
-    case ChimeraTK::RegisterInfo::FundamentalType::undefined:
+    case ChimeraTK::DataDescriptor::FundamentalType::undefined:
       // fall into default, just mentioned for completeness
     default:
       ui.dataTypeDisplay->setText("Undefined");
