@@ -834,13 +834,14 @@ ChimeraTK::DeviceInfoMap::DeviceInfo const& QtHardMon::DeviceListItem::getDevice
   return _deviceMapElement;
 }
 
-void QtHardMon::registerClicked(QTreeWidgetItem* /*registerItem*/) {
-  // Do not execute the read if the corresponding flag is off
-  // registerSelected method.
+void QtHardMon::registerClicked(QTreeWidgetItem* registerItem) {
+  // Do not execute the read if the corresponding flag in the preferences is off,
+  // or if the register is write-only
 
   PreferencesProvider& preferencesProvider = PreferencesProviderSingleton::Instance();
+  DeviceElementQTreeItem* selectedItem = static_cast<DeviceElementQTreeItem*>(registerItem);
 
-  if(!preferencesProvider.getValue<bool>("readOnClick")) {
+  if(!preferencesProvider.getValue<bool>("readOnClick") || !selectedItem->getRegisterInfo().isReadable()) {
     return;
   }
 
