@@ -463,7 +463,7 @@ void QtHardMon::write() {
         QString("Info: An exception was thrown:\n") + e.what() + QString("\n\nThe device has been closed."));
   }
 
-  if(ui.readAfterWriteCheckBox->isChecked()) {
+  if(ui.readAfterWriteCheckBox->isChecked() && currentAccessorModel_->isReadable()) {
     read();
   }
   else {
