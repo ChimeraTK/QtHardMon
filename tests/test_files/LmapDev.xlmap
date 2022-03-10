@@ -3,6 +3,13 @@
         <targetDevice>NUMDEV</targetDevice>
         <targetRegister>BOARD.WORD_FIRMWARE</targetRegister>
     </redirectedRegister>
+    <redirectedRegister name="SingleWord_WO">
+        <targetDevice>NUMDEV</targetDevice>
+        <targetRegister>BOARD.WORD_FIRMWARE</targetRegister>
+        <plugin name="math">
+          <parameter name="formula">x + 1</parameter>
+        </plugin>
+    </redirectedRegister>
     <redirectedRegister name="FullArea">
         <targetDevice>NUMDEV</targetDevice>
         <targetRegister>MODULE1.TEST_AREA</targetRegister>

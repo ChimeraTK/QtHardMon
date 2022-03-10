@@ -14,6 +14,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
   QVariant data(const QModelIndex& modelIndex, int role = Qt::DisplayRole) const override;
   bool setData(const QModelIndex& modelIndex, const QVariant& value, int role = Qt::EditRole) override;
   Qt::ItemFlags flags(const QModelIndex& modelIndex) const override;
+  bool isReadable();
 
  public slots:
   void setChannelNumber(unsigned int channelNumber);

@@ -5,14 +5,20 @@ using namespace ChimeraTK;
 
 #include "PreferencesProvider.h"
 
-RegisterAccessorModel::RegisterAccessorModel(QObject* parent,
-    std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor)
-  : QAbstractTableModel(parent), _abstractAccessor(abstractAccessor), _channelNumber(0), _cookedHexColumnIndex(-1), _rawColumnIndex(-1),
-  _rawHexColumnIndex(-1), _nColumns(1) {
-
+RegisterAccessorModel::RegisterAccessorModel(
+    QObject* parent, std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor)
+: QAbstractTableModel(parent), _abstractAccessor(abstractAccessor), _channelNumber(0), _cookedHexColumnIndex(-1),
+  _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1) {
   _isModified.resize(_abstractAccessor->nChannels());
   for(auto& channelModifiedFlags : _isModified) {
     channelModifiedFlags.resize(_abstractAccessor->nElements());
+    // Set all entries to modified to flag the 0s of a write-only register (indicate that
+    // these are not the values on the device).
+    // The (automatic) read for normal registers will clear it, so there is no behaviour change
+    // for readable registers.
+    for(auto modifiedFlag : channelModifiedFlags) {
+      modifiedFlag = true;
+    }
   }
   // show hexadecimal representation for integer data
   // notice: DataType::isIntegral can only be true if the data type is not none.
@@ -111,6 +117,10 @@ void RegisterAccessorModel::read() {
   _abstractAccessor->read();
   clearModifiedFlags();
   emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
+}
+
+bool RegisterAccessorModel::isReadable() {
+  return _abstractAccessor->isReadable();
 }
 
 void RegisterAccessorModel::write() {

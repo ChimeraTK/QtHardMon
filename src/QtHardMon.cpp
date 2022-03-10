@@ -372,7 +372,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
     // QtHardMon. In this case we don't have an accessor (pointer is null) or a
     // data model.
     if(abstractAccessor) {
-      accessorWritable = abstractAccessor->writable();
+      accessorWritable = abstractAccessor->isWritable();
       // create a data model if we have an accessor.
       currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
       ui.propertiesWidget->ui.valuesTableView->setModel(currentAccessorModel_);
@@ -402,7 +402,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
 
   // Only call autoread for registers (which have a valid accessor model).
   // Don't call it for modules (where  currentAccessorModel_ == nullptr)
-  if(preferencesProvider.getValue<bool>("autoRead") && currentAccessorModel_) {
+  if(preferencesProvider.getValue<bool>("autoRead") && currentAccessorModel_ && currentAccessorModel_->isReadable()) {
     read();
   }
 }

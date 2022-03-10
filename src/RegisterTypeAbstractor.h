@@ -29,7 +29,8 @@ class RegisterTypeAbstractor {
   virtual void read() = 0;
   virtual void write() = 0;
 
-  virtual bool writable() = 0;
+  virtual bool isWritable() = 0;
+  virtual bool isReadable() = 0;
 
   virtual ~RegisterTypeAbstractor() = default;
 };
