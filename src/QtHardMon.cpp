@@ -102,11 +102,11 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   connect(ui.SortAscendingCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleSortCheckboxClick(int)));
 
-  connect(ui.collapseTreeButton, SIGNAL(clicked()), this, SLOT(handleCollapseTreeButton() ));
+  connect(ui.collapseTreeButton, SIGNAL(clicked()), this, SLOT(handleCollapseTreeButton()));
   connect(ui.expandTreeButton, SIGNAL(clicked()), this, SLOT(handleExpandTreeButton()));
 
-  connect(ui.searchLineEdit, SIGNAL(textChanged(const QString &)), this, SLOT(hanldeSearchLineEdit(const QString &)));
-  connect(ui.searchLineEdit, SIGNAL(editingFinished()), this,  SLOT(handleSearchLineFinished()));
+  connect(ui.searchLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(hanldeSearchLineEdit(const QString&)));
+  connect(ui.searchLineEdit, SIGNAL(editingFinished()), this, SLOT(handleSearchLineFinished()));
 
   // The oparations and options group are disabled until a dmap file is loaded
   // and a device has been opened
@@ -413,7 +413,8 @@ void QtHardMon::read() {
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
         QString("No register selected.                 ") +
-        QString("Please select a valid register. (Have you selected a module?)"), "");
+            QString("Please select a valid register. (Have you selected a module?)"),
+        "");
     return;
   }
   try {
@@ -442,7 +443,8 @@ void QtHardMon::write() {
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
         QString("No register selected.                 \n") +
-        QString("Please select a valid register. (Have you selected a module?)"), "");
+            QString("Please select a valid register. (Have you selected a module?)"),
+        "");
     return;
   }
 
@@ -564,8 +566,7 @@ void QtHardMon::loadConfig(QString const& configFileName) {
   if(!configReader.getBadLines().isEmpty()) {
     QString infoText;
     for(QStringList::const_iterator badLinesIter = configReader.getBadLines().begin();
-        badLinesIter != configReader.getBadLines().end();
-        ++badLinesIter) {
+        badLinesIter != configReader.getBadLines().end(); ++badLinesIter) {
       infoText += *badLinesIter;
       infoText += "\n";
     }
@@ -787,7 +788,8 @@ void QtHardMon::writeConfig(QString const& fileName) {
   // exception
   catch(std::ifstream::failure& e) {
     showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
-        QString("Could not write config file ") + fileName + ".", QString("Info: An exception was thrown:\n") + e.what());
+        QString("Could not write config file ") + fileName + ".",
+        QString("Info: An exception was thrown:\n") + e.what());
 
     // rethrow the exception so the calling code knows that writing failed.
     throw;
@@ -812,8 +814,8 @@ void QtHardMon::unckeckShowPlotWindow() {
 // The constructor itself is empty. It just calls the construtor of the mother
 // class and the copy
 // constructors of the data members
-QtHardMon::DeviceListItem::DeviceListItem(ChimeraTK::DeviceInfoMap::DeviceInfo const& device_map_emlement,
-    QListWidget* parent_)
+QtHardMon::DeviceListItem::DeviceListItem(
+    ChimeraTK::DeviceInfoMap::DeviceInfo const& device_map_emlement, QListWidget* parent_)
 : QListWidgetItem(parent_, DeviceListItemType), _deviceMapElement(device_map_emlement)
 
 {}
@@ -976,11 +978,11 @@ void QtHardMon::hanldeSearchLineEdit(QString const& text) {
 
   // Iterate the list until we find the right one
   for(auto mod : moduleList) {
-       ui.registerTreeWidget->setCurrentItem(mod);
+    ui.registerTreeWidget->setCurrentItem(mod);
   }
 }
 
-void QtHardMon::handleSearchLineFinished () {
+void QtHardMon::handleSearchLineFinished() {
   // set focus on register list when enter pressed
   ui.registerTreeWidget->setFocus();
 }
