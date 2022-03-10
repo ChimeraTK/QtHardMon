@@ -16,9 +16,11 @@ class RegisterAccessorModel : public QAbstractTableModel {
   Qt::ItemFlags flags(const QModelIndex& modelIndex) const override;
   bool isReadable();
 
- public slots:
   void setChannelNumber(unsigned int channelNumber);
-  void read();
+
+  // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
+  // Otherwise there is the risk of a GUI freeze.
+  void read(bool allowBlockingRead);
   void write();
 
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;

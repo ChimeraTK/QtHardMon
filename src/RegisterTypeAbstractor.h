@@ -26,7 +26,9 @@ class RegisterTypeAbstractor {
   virtual bool isIntegral() const = 0;
   virtual ChimeraTK::DataType rawDataType() const = 0;
 
-  virtual void read() = 0;
+  // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
+  // Otherwise there is the risk of a GUI freeze.
+  virtual void read(bool allowBlockingRead) = 0;
   virtual void write() = 0;
 
   virtual bool isWritable() = 0;

@@ -35,7 +35,7 @@ class RegisterTypeAbstractorRawImpl : public RegisterTypeAbstractorImpl<RAW_DATA
   /// without raw access
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& data) override;
   /// Override to update the cached cooked data after reading
-  void read() override;
+  void read(bool allowBlockingRead) override;
 
   /// Override because this is for the cooked type while the base implementation
   /// would return for the raw type.
@@ -128,9 +128,14 @@ QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::rawData
 
 // read and then update the cached cooked data
 template<class RAW_DATA_TYPE, class COOKED_DATA_TYPE>
-void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::read() {
+void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::read(bool allowBlockingRead) {
   if(!_accessor.isReadable()) return;
-  _accessor.read();
+  // Implementation for wait_for_new_data:
+  // - call readLatest() to get the last received value. If nothing has been received yet call a blocking read.
+  // Also works without wait_for_new_data because readLatest() always returns true in this case.
+  if(!_accessor.readLatest() && allowBlockingRead) {
+    _accessor.read();
+  }
   updateCachedCookedData();
 }
 

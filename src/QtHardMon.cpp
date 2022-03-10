@@ -46,8 +46,8 @@ using namespace ChimeraTK;
 #define NO_MODULE_NAME_STRING "[No Module Name]"
 
 QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
-: QMainWindow(parent_, flags), ui(), dmapFileName_(), configFileName_(), insideReadOrWrite_(0),
-  currentAccessorModel_(nullptr), _currentDeviceListItem(nullptr), _plotWindow(nullptr) {
+: QMainWindow(parent_, flags), ui(), dmapFileName_(), configFileName_(), currentAccessorModel_(nullptr),
+  _currentDeviceListItem(nullptr), _plotWindow(nullptr) {
   PreferencesProvider& preferencesProvider = PreferencesProviderSingleton::Instance();
   ui.setupUi(this);
 
@@ -407,8 +407,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   }
 }
 
-void QtHardMon::read() {
-  ++insideReadOrWrite_;
+void QtHardMon::read(bool allowBlockingRead) {
   // if no register is selected the accessor model is nullptr.
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
@@ -418,7 +417,7 @@ void QtHardMon::read() {
     return;
   }
   try {
-    currentAccessorModel_->read();
+    currentAccessorModel_->read(allowBlockingRead);
   }
   catch(std::exception& e) {
     closeDevice();
@@ -434,11 +433,9 @@ void QtHardMon::read() {
   if(_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked()) {
     _plotWindow->plot();
   }
-  --insideReadOrWrite_;
 }
 
 void QtHardMon::write() {
-  ++insideReadOrWrite_;
   // if no register is selected the accessor model is nullptr.
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
@@ -469,8 +466,6 @@ void QtHardMon::write() {
   else {
     ui.propertiesWidget->clearDataWidgetBackground();
   }
-
-  --insideReadOrWrite_;
 }
 
 void QtHardMon::preferences() {

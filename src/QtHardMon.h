@@ -119,23 +119,24 @@ class QtHardMon : public QMainWindow {
    */
   void hanldeSearchLineEdit(const QString&);
 
-  void handleSearchLineFinished ();
+  void handleSearchLineFinished();
 
   /** Set all background to non modified color.
    */
 
-      /*
+  /*
    * returns true if the fileName ends with the provided
    * extension else false
    */
-      bool
-      checkExtension(QString const& fileName, QString extension);
+  bool checkExtension(QString const& fileName, QString extension);
 
   void copyRegisterTreeItemNameToClipBoard();
 
  public slots:
-  void read();  ///< Read register from device.
-  void write(); ///< Read register to device.
+  // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
+  // Otherwise there is the risk of a GUI freeze.
+  void read(bool allowBlockingRead = false); ///< Read register from device.
+  void write();                              ///< Read register to device.
 
  public:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
@@ -150,8 +151,6 @@ class QtHardMon : public QMainWindow {
   ChimeraTK::Device currentDevice_;             ///< The instance of the device which is being accessed.
   QString dmapFileName_;                        ///< The file name of the last opened dmap file
   QString configFileName_;                      ///< Name of the config file (last saved or read)
-  int insideReadOrWrite_;                       ///< Counter flag to indicate if the read or write
-                                                /// function is being executed
   RegisterAccessorModel* currentAccessorModel_; ///< The accessor model for the current register.
   CustomDelegates customDelegate_;              ///< The delegate for the values table view
 
