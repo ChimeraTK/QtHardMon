@@ -2,8 +2,8 @@
 #include "RegisterTypeAbstractorRawImpl.h"
 
 template<class USER_DATA_TYPE>
-std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterInfo const& registerInfo,
-    ChimeraTK::Device& device) {
+std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(
+    ChimeraTK::RegisterInfo const& registerInfo, ChimeraTK::Device& device) {
   // Limit the number of elements in the accessor. Add 1 to be able to diplay
   // accessors with maxwords elements, and use the last element to show
   // truncated indicator in the model.
@@ -16,14 +16,22 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
       ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> accessor;
       // if there is an unknown raw data type create a normal, cooked accessor
 
-      if (not registerInfo.isWriteable()) {
+      ChimeraTK::AccessModeFlags flags; // empty set of flags
+      if(registerInfo.getSupportedAccessModes().has(ChimeraTK::AccessMode::wait_for_new_data)) {
+        flags.add(ChimeraTK::AccessMode::wait_for_new_data);
+      }
+      if(not registerInfo.isWriteable()) {
         try {
-          accessor.replace(device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements));
-        } catch (...) { }
+          accessor.replace(device.getTwoDRegisterAccessor<USER_DATA_TYPE>(
+              registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, flags));
+        }
+        catch(...) {
+        }
       }
 
-      if (not accessor.isInitialised())
-          accessor.replace(device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(), nElements));
+      if(not accessor.isInitialised())
+        accessor.replace(
+            device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(), nElements, 0, flags));
 
       return std::make_shared<RegisterTypeAbstractorImpl<USER_DATA_TYPE>>(accessor, dataDescriptor.rawDataType());
     }
@@ -31,14 +39,21 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
       std::shared_ptr<RegisterTypeAbstractor> returnValue;
       auto rawAccessorCreatorLambda = [&](auto arg) {
         ChimeraTK::TwoDRegisterAccessor<decltype(arg)> accessor;
-        if (not registerInfo.isWriteable()) {
+        // NumeicAddressedBackend cannot create accessors with both raw and wait_for_new_data.
+        // As the update rate in the GUI is limited and the update time is the determined by the timeout,
+        // the reading is not being synchronous anyway, we go for raw data as this gives a visible benefit for the user.
+        if(not registerInfo.isWriteable()) {
           try {
-            accessor.replace(device.getTwoDRegisterAccessor<decltype (arg)>(registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, {ChimeraTK::AccessMode::raw}));
-          } catch (...) { }
+            accessor.replace(device.getTwoDRegisterAccessor<decltype(arg)>(
+                registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, {ChimeraTK::AccessMode::raw}));
+          }
+          catch(...) {
+          }
         }
 
-        if (not accessor.isInitialised()) {
-          accessor.replace(device.getTwoDRegisterAccessor<decltype (arg)>(registerInfo.getRegisterName(), nElements, 0, {ChimeraTK::AccessMode::raw}));
+        if(not accessor.isInitialised()) {
+          accessor.replace(device.getTwoDRegisterAccessor<decltype(arg)>(
+              registerInfo.getRegisterName(), nElements, 0, {ChimeraTK::AccessMode::raw}));
         }
         returnValue = std::make_shared<RegisterTypeAbstractorRawImpl<decltype(arg), USER_DATA_TYPE>>(
             accessor, dataDescriptor.rawDataType());
@@ -49,8 +64,8 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(ChimeraTK::RegisterI
   }
 }
 
-std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(ChimeraTK::RegisterInfo const& registerInfo,
-    ChimeraTK::Device& device) {
+std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(
+    ChimeraTK::RegisterInfo const& registerInfo, ChimeraTK::Device& device) {
   auto dataDescriptor = registerInfo.getDataDescriptor();
   switch(dataDescriptor.fundamentalType()) {
     case ChimeraTK::DataDescriptor::FundamentalType::numeric:

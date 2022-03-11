@@ -1,0 +1,22 @@
+<logicalNameMap>
+    <redirectedRegister name="writeableArea">
+        <targetDevice>SHARED_RAW_DEVICE</targetDevice>
+        <targetRegister>MODULE1.TEST_AREA</targetRegister>
+    </redirectedRegister>
+    <redirectedRegister name="pushedArea">
+        <targetDevice>SHARED_RAW_DEVICE</targetDevice>
+        <targetRegister>MODULE1.TEST_AREA_PUSH</targetRegister>
+        <!-- use the math plugin to get rid of the raw flag for QtHardMon -->
+        <plugin name="forceReadOnly"/>
+        <plugin name="math">
+           <parameter name="formula">return [x*1.];</parameter>
+        </plugin>
+    </redirectedRegister>
+    <redirectedRegister name="trigger">
+        <targetDevice>SHARED_RAW_DEVICE</targetDevice>
+        <targetRegister>DUMMY_INTERRUPT_2_3</targetRegister>
+        <plugin name="typeHintModifier">
+           <parameter name="type">integer</parameter>
+        </plugin>
+    </redirectedRegister>
+</logicalNameMap>

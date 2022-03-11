@@ -1,0 +1,2 @@
+SHARED_RAW_DEVICE (sharedMemoryDummy?map=NumDev.map)
+SHARED_DEVICE (logicalNameMap?map=push.xlmap)

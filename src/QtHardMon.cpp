@@ -317,6 +317,7 @@ void QtHardMon::openDevice(std::string const& deviceIdentifier) {
 
     ui.openClosedLabel->setText("Device is open.");
     ui.openCloseButton->setText("Close");
+    currentDevice_.activateAsyncRead();
   }
   catch(std::exception& e) {
     showMessageBox(QMessageBox::Warning, QString("QtHardMon : Warning"),
