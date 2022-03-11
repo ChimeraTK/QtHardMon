@@ -1028,8 +1028,20 @@ void QtHardMon::handleContinuousReadChanged(int state) {
     ui.operationsGroupBox->setEnabled(false);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(QTableView::NoEditTriggers);
     std::cout << "Starting thread" << std::endl;
+    auto continuousReadLambda = [&]() {
+      while(true) {
+        std::cout << "reading" << std::endl;
+        read(true); // read with allowed blocking for asynchronous accessors
+        std::cout << "sleeping" << std::endl;
+        boost::this_thread::sleep_for(boost::chrono::seconds(1));
+      }
+    };
+    _continuousReadThread = boost::thread(continuousReadLambda);
   }
   else {
+    currentAccessorModel_->interrupt();
+    _continuousReadThread.interrupt();
+    _continuousReadThread.join();
     std::cout << "Stopping thread" << std::endl;
     ui.operationsGroupBox->setEnabled(true);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(_defaultTableViewEditTriggers);

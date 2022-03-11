@@ -33,6 +33,7 @@ class RegisterTypeAbstractor {
 
   virtual bool isWritable() = 0;
   virtual bool isReadable() = 0;
+  virtual void interrupt() = 0;
 
   virtual ~RegisterTypeAbstractor() = default;
 };

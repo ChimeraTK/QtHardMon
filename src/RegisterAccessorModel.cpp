@@ -175,3 +175,7 @@ QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientat
   }
   return QVariant();
 }
+
+void RegisterAccessorModel::interrupt() {
+  _abstractAccessor->interrupt();
+}

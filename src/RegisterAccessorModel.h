@@ -23,6 +23,8 @@ class RegisterAccessorModel : public QAbstractTableModel {
   void read(bool allowBlockingRead);
   void write();
 
+  void interrupt();
+
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
  protected:

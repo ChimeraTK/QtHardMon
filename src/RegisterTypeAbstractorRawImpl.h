@@ -41,6 +41,8 @@ class RegisterTypeAbstractorRawImpl : public RegisterTypeAbstractorImpl<RAW_DATA
   /// would return for the raw type.
   bool isIntegral() const override;
 
+  void interrupt() override;
+
  protected:
   /// Cached data for painting. If exceptions occur during data conversion this
   /// does not happen every time when painting.
@@ -185,6 +187,13 @@ void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::updateCache
     }
   }
   _cachedCookedDataValid = true;
+}
+
+template<class RAW_DATA_TYPE, class COOKED_DATA_TYPE>
+void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::interrupt() {
+  if(_accessor.getAccessModeFlags().has(ChimeraTK::AccessMode::wait_for_new_data)) {
+    _accessor.getHighLevelImplElement()->interrupt();
+  }
 }
 
 #endif // REGISTER_TYPE_ABSTRACTOR_RAW_IMPL_H

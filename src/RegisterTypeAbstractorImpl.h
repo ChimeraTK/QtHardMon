@@ -29,6 +29,7 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
 
   bool isWritable() override { return _accessor.isWriteable(); }
   bool isReadable() override { return _accessor.isReadable(); }
+  void interrupt() override;
 
  protected:
   ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> _accessor;
@@ -168,6 +169,12 @@ bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setRawData(
 
   // Not useful for this kind of abstractor without raw data. Just return false.
   return false;
+}
+template<class USER_DATA_TYPE>
+void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::interrupt() {
+  if(_accessor.getAccessModeFlags().has(ChimeraTK::AccessMode::wait_for_new_data)) {
+    _accessor.getHighLevelImplElement()->interrupt();
+  }
 }
 
 /*****************************************************************************************************/
