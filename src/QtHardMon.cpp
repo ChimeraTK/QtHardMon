@@ -108,6 +108,8 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
   connect(ui.searchLineEdit, SIGNAL(textChanged(const QString&)), this, SLOT(hanldeSearchLineEdit(const QString&)));
   connect(ui.searchLineEdit, SIGNAL(editingFinished()), this, SLOT(handleSearchLineFinished()));
 
+  connect(ui.continuousReadCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleContinuousReadChanged(int)));
+
   // The oparations and options group are disabled until a dmap file is loaded
   // and a device has been opened
   ui.operationsGroupBox->setEnabled(false);
@@ -116,13 +118,14 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
   ui.devicePropertiesGroupBox->setEnabled(false);
 
   // The following widgets are diabled because they are not implemented yet
-  ui.continuousReadCheckBox->setEnabled(false);
   ui.writeToFileButton->setEnabled(false);
   ui.readFromFileButton->setEnabled(false);
 
   // customize table display
   //  customDelegate_.setDoubleSpinBoxPrecision(_floatPrecision);
   ui.propertiesWidget->ui.valuesTableView->setItemDelegate(&customDelegate_);
+  // Store the default edit triggers. We turn editing off when the continuous readout thread starts, and have to restore this when the thread stops.
+  _defaultTableViewEditTriggers = ui.propertiesWidget->ui.valuesTableView->editTriggers();
 
   _plotWindow = new PlotWindow(this);
 
@@ -134,6 +137,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   // also the plot window dfunctions are only enabled when a device is opened.
   _plotWindow->setEnabled(false);
+
+  // enabling the continuous read thread is only allowed with a valid register
+  ui.continuousReadCheckBox->setEnabled(false);
 
   // Turn off automatic stretching of the device and content column.
   // It can only be done with the splitter handle.
@@ -327,6 +333,7 @@ void QtHardMon::openDevice(std::string const& deviceIdentifier) {
 }
 
 void QtHardMon::closeDevice() {
+  ui.continuousReadCheckBox->setChecked(false); // stops the thread
   if(currentDevice_.isOpened()) currentDevice_.close();
   ui.propertiesWidget->ui.valuesTableView->setEnabled(false);
   ui.operationsGroupBox->setEnabled(false);
@@ -339,6 +346,9 @@ void QtHardMon::closeDevice() {
 }
 
 void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem* /*previousRegisterItem */) {
+  ui.continuousReadCheckBox->setChecked(false); // stop the continuous reading thread
+  ui.continuousReadCheckBox->setEnabled(false); // prevent from starting the thread
+                                                // as long as there is no valid accessor
   // Always clear the old data model. This is needed in all use cases below.
   ui.propertiesWidget->ui.valuesTableView->setModel(nullptr);
   delete currentAccessorModel_;
@@ -377,6 +387,9 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
       // create a data model if we have an accessor.
       currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
       ui.propertiesWidget->ui.valuesTableView->setModel(currentAccessorModel_);
+      if(abstractAccessor->isReadable()) {
+        ui.continuousReadCheckBox->setEnabled(true);
+      }
     }
   }
 
@@ -1007,5 +1020,18 @@ void QtHardMon::showMessageBox(
     QMessageBox messageBox(boxType, boxTitle, boxText, QMessageBox::Ok, this);
     messageBox.setDetailedText(boxInformativeText);
     messageBox.exec();
+  }
+}
+
+void QtHardMon::handleContinuousReadChanged(int state) {
+  if(state == Qt::Checked) {
+    ui.operationsGroupBox->setEnabled(false);
+    ui.propertiesWidget->ui.valuesTableView->setEditTriggers(QTableView::NoEditTriggers);
+    std::cout << "Starting thread" << std::endl;
+  }
+  else {
+    std::cout << "Stopping thread" << std::endl;
+    ui.operationsGroupBox->setEnabled(true);
+    ui.propertiesWidget->ui.valuesTableView->setEditTriggers(_defaultTableViewEditTriggers);
   }
 }

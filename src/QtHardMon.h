@@ -132,6 +132,8 @@ class QtHardMon : public QMainWindow {
 
   void copyRegisterTreeItemNameToClipBoard();
 
+  void handleContinuousReadChanged(int state);
+
  public slots:
   // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
   // Otherwise there is the risk of a GUI freeze.
@@ -217,6 +219,9 @@ class QtHardMon : public QMainWindow {
   friend class PlotWindow;
 
   std::string extractFileNameFromPath(const std::string&);
+
+  boost::thread _continuousReadThread;
+  QTableView::EditTriggers _defaultTableViewEditTriggers;
 
  private:
   /**
