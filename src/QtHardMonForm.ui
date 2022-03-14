@@ -633,20 +633,25 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Avg. update inteval [ms]</string>
+            <string>Avg. update inteval</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLCDNumber" name="avgUpdateInterval">
-           <property name="enabled">
-            <bool>false</bool>
+          <widget class="QLabel" name="avgUpdateInterval">
+           <property name="font">
+            <font>
+             <family>DejaVu Sans Mono</family>
+            </font>
            </property>
-           <property name="smallDecimalPoint">
-            <bool>false</bool>
+           <property name="frameShape">
+            <enum>QFrame::Panel</enum>
            </property>
-           <property name="segmentStyle">
-            <enum>QLCDNumber::Filled</enum>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -859,22 +864,6 @@
     <hint type="destinationlabel">
      <x>302</x>
      <y>58</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>continuousReadCheckBox</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>displayFrequencyGroupBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>965</x>
-     <y>71</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>964</x>
-     <y>103</y>
     </hint>
    </hints>
   </connection>

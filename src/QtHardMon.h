@@ -244,6 +244,9 @@ class QtHardMon : public QMainWindow {
   /// re-select the last regsiter that was active when this device was opened,
   /// if this option is enabled
   void selectPreviousRegister();
+  void updateAvgReadInterval(QDateTime timeStamp);
+
+  std::list<qint64> _lastTimeStamps;
 };
 
 #endif // QT_HARD_MON

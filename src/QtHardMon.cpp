@@ -454,6 +454,9 @@ void QtHardMon::read() {
   if(hasNewData) {
     auto timeStamp = currentAccessorModel_->getTimeStamp();
     ui.lastReadTime->setText(timeStamp.toString(Qt::ISODateWithMs));
+    if(ui.continuousReadCheckBox->isChecked()) {
+      updateAvgReadInterval(timeStamp);
+    }
 
     // check if plotting after reading is requested
     if(_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked()) {
@@ -1040,11 +1043,19 @@ void QtHardMon::handleContinuousReadChanged(int state) {
   if(state == Qt::Checked) {
     ui.operationsGroupBox->setEnabled(false);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(QTableView::NoEditTriggers);
+    _lastTimeStamps.clear();
+    ui.avgUpdateInterval->setText("");
+    ui.avgUpdateInterval->setEnabled(true);
+    ui.avgUpdateIntervalLabel->setEnabled(true);
+    ui.displayFrequencyGroupBox->setEnabled(true);
     _continuousReadTimner.start();
   }
   else {
     _continuousReadTimner.stop();
     ui.operationsGroupBox->setEnabled(true);
+    ui.avgUpdateInterval->setEnabled(false);
+    ui.avgUpdateIntervalLabel->setEnabled(false);
+    ui.displayFrequencyGroupBox->setEnabled(false);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(_defaultTableViewEditTriggers);
   }
 }
@@ -1056,5 +1067,31 @@ void QtHardMon::handleDisplayIntervalChanged() {
   else {
     // 100 Hz is the only other option, so it's 10 ms
     _continuousReadTimner.setInterval(10);
+  }
+  _lastTimeStamps.clear();
+}
+
+void QtHardMon::updateAvgReadInterval(QDateTime timeStamp) {
+  _lastTimeStamps.push_back(timeStamp.toMSecsSinceEpoch());
+
+  size_t n = 10;                        // number of averaging points
+  if(_lastTimeStamps.size() == n + 1) { // we are calculating delta_t , so we need one more value
+    // evaluate and clear the list
+    double sumDelta_t = 0;
+    double sumSquareDelta_t = 0;
+    for(auto it = _lastTimeStamps.begin(); it != (--_lastTimeStamps.end()); /*increment in loop*/) {
+      auto t1 = *it;
+      auto t2 = *(++it);
+      auto delta_t = t2 - t1;
+      sumDelta_t += delta_t;
+      sumSquareDelta_t += delta_t * delta_t;
+    }
+    for(size_t i = 0; i < n; ++i) { // leave the last element in the list for further calculations
+      _lastTimeStamps.pop_front();
+    }
+    double variance = sqrt((sumSquareDelta_t - sumDelta_t * sumDelta_t / n) / (n - 1));
+    double mean = sumDelta_t / n;
+    std::string s = std::to_string(int(std::round(mean))) + " +- " + std::to_string(int(std::round(variance))) + " ms";
+    ui.avgUpdateInterval->setText(s.c_str());
   }
 }
