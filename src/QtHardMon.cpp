@@ -111,7 +111,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
   connect(ui.continuousReadCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleContinuousReadChanged(int)));
 
   connect(&_continuousReadTimner, SIGNAL(timeout()), this, SLOT(read()));
-  _continuousReadTimner.setInterval(1000); //FIXME: make this configurable through the preferences provider
+  connect(ui.displayFrequencyButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this,
+      SLOT(handleDisplayIntervalChanged()));
+  handleDisplayIntervalChanged(); // put settings according to GUI
 
   // The oparations and options group are disabled until a dmap file is loaded
   // and a device has been opened
@@ -426,6 +428,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
 
 void QtHardMon::read() {
   // if no register is selected the accessor model is nullptr.
+  bool hasNewData = false;
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
         QString("No register selected.                 ") +
@@ -434,7 +437,7 @@ void QtHardMon::read() {
     return;
   }
   try {
-    currentAccessorModel_->read();
+    hasNewData = currentAccessorModel_->readLatest();
   }
   catch(std::exception& e) {
     closeDevice();
@@ -446,8 +449,10 @@ void QtHardMon::read() {
         QString("Info: An exception was thrown:\n") + e.what() + QString("\n\nThe device has been closed."));
   }
 
+  //std::cout << (hasNewData ? "#" : ".") << std::flush;
+
   // check if plotting after reading is requested
-  if(_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked()) {
+  if(_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked() && hasNewData) {
     _plotWindow->plot();
   }
 }
@@ -1036,5 +1041,15 @@ void QtHardMon::handleContinuousReadChanged(int state) {
     _continuousReadTimner.stop();
     ui.operationsGroupBox->setEnabled(true);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(_defaultTableViewEditTriggers);
+  }
+}
+
+void QtHardMon::handleDisplayIntervalChanged() {
+  if(ui.displayFrequency1Hz->isChecked()) {
+    _continuousReadTimner.setInterval(1000);
+  }
+  else {
+    // 100 Hz is the only other option, so it's 10 ms
+    _continuousReadTimner.setInterval(10);
   }
 }

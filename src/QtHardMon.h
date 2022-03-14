@@ -134,6 +134,7 @@ class QtHardMon : public QMainWindow {
   void copyRegisterTreeItemNameToClipBoard();
 
   void handleContinuousReadChanged(int state);
+  void handleDisplayIntervalChanged();
 
  public slots:
   void read();  ///< Read register from device.

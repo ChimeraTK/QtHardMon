@@ -35,7 +35,7 @@ class RegisterTypeAbstractorRawImpl : public RegisterTypeAbstractorImpl<RAW_DATA
   /// without raw access
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& data) override;
   /// Override to update the cached cooked data after reading
-  void readLatest() override;
+  bool readLatest() override;
 
   /// Override because this is for the cooked type while the base implementation
   /// would return for the raw type.
@@ -130,10 +130,12 @@ QVariant RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::rawData
 
 // read and then update the cached cooked data
 template<class RAW_DATA_TYPE, class COOKED_DATA_TYPE>
-void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::readLatest() {
-  if(!_accessor.isReadable()) return;
-  _accessor.readLatest();
-  updateCachedCookedData();
+bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::readLatest() {
+  if(!_accessor.isReadable()) return false;
+  auto hasNewData = _accessor.readLatest();
+  if(hasNewData) updateCachedCookedData();
+
+  return hasNewData;
 }
 
 // Return whether the cooked data type is integral

@@ -18,7 +18,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
 
   void setChannelNumber(unsigned int channelNumber);
 
-  void read();
+  bool readLatest(); // returns whether new data is available
   void write();
 
   void interrupt();

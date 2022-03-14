@@ -113,10 +113,13 @@ void RegisterAccessorModel::setChannelNumber(unsigned int channelNumber) {
   emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
 }
 
-void RegisterAccessorModel::read() {
-  _abstractAccessor->readLatest();
-  clearModifiedFlags();
-  emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
+bool RegisterAccessorModel::readLatest() {
+  auto hasNewData = _abstractAccessor->readLatest();
+  if(hasNewData) {
+    clearModifiedFlags();
+    emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
+  }
+  return hasNewData;
 }
 
 bool RegisterAccessorModel::isReadable() {

@@ -24,7 +24,7 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
   bool isIntegral() const override;
   ChimeraTK::DataType rawDataType() const override;
 
-  void readLatest() override;
+  bool readLatest() override;
   void write() override;
 
   bool isWritable() override { return _accessor.isWriteable(); }
@@ -96,8 +96,8 @@ QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::dataAsHex(
 }
 
 template<class USER_DATA_TYPE>
-void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::readLatest() {
-  _accessor.readLatest();
+bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::readLatest() {
+  return _accessor.readLatest();
 }
 
 template<class USER_DATA_TYPE>
