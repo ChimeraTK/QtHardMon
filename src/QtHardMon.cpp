@@ -110,6 +110,9 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   connect(ui.continuousReadCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleContinuousReadChanged(int)));
 
+  connect(&_continuousReadTimner, SIGNAL(timeout()), this, SLOT(read()));
+  _continuousReadTimner.setInterval(1000); //FIXME: make this configurable through the preferences provider
+
   // The oparations and options group are disabled until a dmap file is loaded
   // and a device has been opened
   ui.operationsGroupBox->setEnabled(false);
@@ -421,7 +424,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   }
 }
 
-void QtHardMon::read(bool allowBlockingRead) {
+void QtHardMon::read() {
   // if no register is selected the accessor model is nullptr.
   if(!currentAccessorModel_) {
     showMessageBox(QMessageBox::Information, QString("QtHardMon Info"),
@@ -431,7 +434,7 @@ void QtHardMon::read(bool allowBlockingRead) {
     return;
   }
   try {
-    currentAccessorModel_->read(allowBlockingRead);
+    currentAccessorModel_->read();
   }
   catch(std::exception& e) {
     closeDevice();
@@ -1027,22 +1030,10 @@ void QtHardMon::handleContinuousReadChanged(int state) {
   if(state == Qt::Checked) {
     ui.operationsGroupBox->setEnabled(false);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(QTableView::NoEditTriggers);
-    std::cout << "Starting thread" << std::endl;
-    auto continuousReadLambda = [&]() {
-      while(true) {
-        std::cout << "reading" << std::endl;
-        read(true); // read with allowed blocking for asynchronous accessors
-        std::cout << "sleeping" << std::endl;
-        boost::this_thread::sleep_for(boost::chrono::seconds(1));
-      }
-    };
-    _continuousReadThread = boost::thread(continuousReadLambda);
+    _continuousReadTimner.start();
   }
   else {
-    currentAccessorModel_->interrupt();
-    _continuousReadThread.interrupt();
-    _continuousReadThread.join();
-    std::cout << "Stopping thread" << std::endl;
+    _continuousReadTimner.stop();
     ui.operationsGroupBox->setEnabled(true);
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(_defaultTableViewEditTriggers);
   }

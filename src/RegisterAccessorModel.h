@@ -18,9 +18,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
 
   void setChannelNumber(unsigned int channelNumber);
 
-  // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
-  // Otherwise there is the risk of a GUI freeze.
-  void read(bool allowBlockingRead);
+  void read();
   void write();
 
   void interrupt();

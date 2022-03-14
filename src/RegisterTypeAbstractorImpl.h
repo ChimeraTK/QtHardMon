@@ -24,7 +24,7 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
   bool isIntegral() const override;
   ChimeraTK::DataType rawDataType() const override;
 
-  void read(bool allowBlockingRead = false) override;
+  void readLatest() override;
   void write() override;
 
   bool isWritable() override { return _accessor.isWriteable(); }
@@ -96,13 +96,8 @@ QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::dataAsHex(
 }
 
 template<class USER_DATA_TYPE>
-void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::read(bool allowBlockingRead) {
-  // Implementation for wait_for_new_data:
-  // - call readLatest() to get the last received value. If nothing has been received yet call a blocking read.
-  // Also works without wait_for_new_data because readLatest() always returns true in this case.
-  if(!_accessor.readLatest() && allowBlockingRead) {
-    _accessor.read();
-  }
+void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::readLatest() {
+  _accessor.readLatest();
 }
 
 template<class USER_DATA_TYPE>

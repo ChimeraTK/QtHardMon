@@ -28,7 +28,7 @@ class RegisterTypeAbstractor {
 
   // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
   // Otherwise there is the risk of a GUI freeze.
-  virtual void read(bool allowBlockingRead) = 0;
+  virtual void readLatest() = 0;
   virtual void write() = 0;
 
   virtual bool isWritable() = 0;

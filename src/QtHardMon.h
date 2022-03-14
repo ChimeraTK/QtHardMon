@@ -9,6 +9,7 @@
 #include <QIcon>
 #include <QMessageBox>
 #include <QStyledItemDelegate>
+#include <QTimer>
 #include <qclipboard.h>
 
 #ifndef Q_MOC_RUN
@@ -135,10 +136,8 @@ class QtHardMon : public QMainWindow {
   void handleContinuousReadChanged(int state);
 
  public slots:
-  // allowBlockingRead must only be true when called from a separate thread (continuous read thread).
-  // Otherwise there is the risk of a GUI freeze.
-  void read(bool allowBlockingRead = false); ///< Read register from device.
-  void write();                              ///< Read register to device.
+  void read();  ///< Read register from device.
+  void write(); ///< Read register to device.
 
  public:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
@@ -221,7 +220,7 @@ class QtHardMon : public QMainWindow {
   std::string extractFileNameFromPath(const std::string&);
 
   // use a boost thread because the sleep and the blocking accessor reads are interruptible
-  boost::thread _continuousReadThread;
+  QTimer _continuousReadTimner{this};
   QTableView::EditTriggers _defaultTableViewEditTriggers;
 
  private:
