@@ -4,6 +4,7 @@
 #include "RegisterTypeAbstractor.h"
 #include <ChimeraTK/Device.h>
 #include <QAbstractTableModel>
+#include <QDateTime>
 
 class RegisterAccessorModel : public QAbstractTableModel {
   Q_OBJECT
@@ -20,6 +21,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
 
   bool readLatest(); // returns whether new data is available
   void write();
+  QDateTime getTimeStamp();
 
   void interrupt();
 

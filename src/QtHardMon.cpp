@@ -357,6 +357,7 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   // Always clear the old data model. This is needed in all use cases below.
   ui.propertiesWidget->ui.valuesTableView->setModel(nullptr);
   delete currentAccessorModel_;
+  ui.lastReadTime->setText("");
   currentAccessorModel_ = nullptr;
   bool accessorWritable = false;
 
@@ -450,10 +451,14 @@ void QtHardMon::read() {
   }
 
   //std::cout << (hasNewData ? "#" : ".") << std::flush;
+  if(hasNewData) {
+    auto timeStamp = currentAccessorModel_->getTimeStamp();
+    ui.lastReadTime->setText(timeStamp.toString(Qt::ISODateWithMs));
 
-  // check if plotting after reading is requested
-  if(_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked() && hasNewData) {
-    _plotWindow->plot();
+    // check if plotting after reading is requested
+    if(_plotWindow->isVisible() && _plotWindow->plotAfterReadIsChecked()) {
+      _plotWindow->plot();
+    }
   }
 }
 

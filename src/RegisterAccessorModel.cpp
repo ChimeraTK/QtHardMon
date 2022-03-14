@@ -182,3 +182,11 @@ QVariant RegisterAccessorModel::headerData(int section, Qt::Orientation orientat
 void RegisterAccessorModel::interrupt() {
   _abstractAccessor->interrupt();
 }
+
+QDateTime RegisterAccessorModel::getTimeStamp() {
+  auto timeStamp = _abstractAccessor->getVersionNumber().getTime();
+  auto timeStampIn_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timeStamp.time_since_epoch()).count();
+  QDateTime retVal;
+  retVal.setMSecsSinceEpoch(timeStampIn_ms);
+  return retVal;
+}

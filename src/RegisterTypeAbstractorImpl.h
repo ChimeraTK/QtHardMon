@@ -30,6 +30,7 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
   bool isWritable() override { return _accessor.isWriteable(); }
   bool isReadable() override { return _accessor.isReadable(); }
   void interrupt() override;
+  ChimeraTK::VersionNumber getVersionNumber() override { return _accessor.getVersionNumber(); }
 
  protected:
   ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> _accessor;
