@@ -23,6 +23,7 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
 
   bool isIntegral() const override;
   ChimeraTK::DataType rawDataType() const override;
+  bool hasWaitForNewData() const override;
 
   bool readLatest() override;
   void write() override;
@@ -114,6 +115,11 @@ bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::isIntegral() const {
 template<class USER_DATA_TYPE>
 ChimeraTK::DataType RegisterTypeAbstractorImpl<USER_DATA_TYPE>::rawDataType() const {
   return _rawDataType;
+}
+
+template<class USER_DATA_TYPE>
+bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::hasWaitForNewData() const {
+  return _accessor.getAccessModeFlags().has(ChimeraTK::AccessMode::wait_for_new_data);
 }
 
 template<class USER_DATA_TYPE>

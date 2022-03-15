@@ -246,6 +246,8 @@ class QtHardMon : public QMainWindow {
   void selectPreviousRegister();
   void updateAvgReadInterval(QDateTime timeStamp);
 
+  void setContinuousReadLabels(bool hasWaitForNewData);
+
   std::list<qint64> _lastTimeStamps;
 };
 

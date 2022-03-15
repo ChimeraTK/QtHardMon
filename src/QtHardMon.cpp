@@ -409,6 +409,8 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
     else {
       ui.writeButton->setText(tr("Write"));
     }
+    setContinuousReadLabels(
+        selectedItem->getRegisterInfo().getSupportedAccessModes().has(AccessMode::wait_for_new_data));
   }
   else {
     ui.readButton->setEnabled(false);
@@ -454,7 +456,7 @@ void QtHardMon::read() {
   if(hasNewData) {
     auto timeStamp = currentAccessorModel_->getTimeStamp();
     ui.lastReadTime->setText(timeStamp.toString(Qt::ISODateWithMs));
-    if(ui.continuousReadCheckBox->isChecked()) {
+    if(ui.continuousReadCheckBox->isChecked() && currentAccessorModel_->hasWaitForNewData()) {
       updateAvgReadInterval(timeStamp);
     }
 
@@ -1045,8 +1047,10 @@ void QtHardMon::handleContinuousReadChanged(int state) {
     ui.propertiesWidget->ui.valuesTableView->setEditTriggers(QTableView::NoEditTriggers);
     _lastTimeStamps.clear();
     ui.avgUpdateInterval->setText("");
-    ui.avgUpdateInterval->setEnabled(true);
-    ui.avgUpdateIntervalLabel->setEnabled(true);
+    if(currentAccessorModel_->hasWaitForNewData()) {
+      ui.avgUpdateInterval->setEnabled(true);
+      ui.avgUpdateIntervalLabel->setEnabled(true);
+    }
     ui.displayFrequencyGroupBox->setEnabled(true);
     _continuousReadTimner.start();
   }
@@ -1093,5 +1097,18 @@ void QtHardMon::updateAvgReadInterval(QDateTime timeStamp) {
     double mean = sumDelta_t / n;
     std::string s = std::to_string(int(std::round(mean))) + " +- " + std::to_string(int(std::round(variance))) + " ms";
     ui.avgUpdateInterval->setText(s.c_str());
+  }
+}
+
+void QtHardMon::setContinuousReadLabels(bool hasWaitForNewData) {
+  if(hasWaitForNewData) {
+    ui.continuousReadGroupBox->setTitle("Continuous Read");
+    ui.displayFrequencyGroupBox->setTitle("Display Freuqency");
+    ui.lastReadTimeLabel->setText("Last update time");
+  }
+  else {
+    ui.continuousReadGroupBox->setTitle("Continuous Poll");
+    ui.displayFrequencyGroupBox->setTitle("Poll Freuqency");
+    ui.lastReadTimeLabel->setText("Last poll time");
   }
 }

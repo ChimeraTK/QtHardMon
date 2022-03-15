@@ -10,6 +10,7 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent) {
 void PropertiesWidget::clearFields() {
   ui.registerPathDisplay->setText("");
   ui.dimensionDisplay->setText("");
+  ui.wait_for_new_dataDisplay->setText("");
   // no need to update channels or elements. They are hidden as info of 1D and
   // 2D
   ui.numericalAddressGroupBox->hide();
@@ -42,6 +43,8 @@ void PropertiesWidget::updateRegisterInfo(const ChimeraTK::RegisterInfo& registe
   setShape(
       registerInfo.getNumberOfDimensions(), registerInfo.getNumberOfChannels(), registerInfo.getNumberOfElements());
   setType(registerInfo.getDataDescriptor());
+  ui.wait_for_new_dataDisplay->setText(
+      registerInfo.getSupportedAccessModes().has(ChimeraTK::AccessMode::wait_for_new_data) ? "yes" : "no");
 
   // Try to cast to the old, numeric addressed registerInfo.
   auto numericAddressedInfo = dynamic_cast<const ChimeraTK::NumericAddressedRegisterInfo*>(&registerInfo.getImpl());

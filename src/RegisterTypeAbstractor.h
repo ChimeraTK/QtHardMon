@@ -32,6 +32,7 @@ class RegisterTypeAbstractor {
   virtual bool isWritable() = 0;
   virtual bool isReadable() = 0;
   virtual void interrupt() = 0;
+  virtual bool hasWaitForNewData() const = 0;
 
   virtual ChimeraTK::VersionNumber getVersionNumber() = 0;
 

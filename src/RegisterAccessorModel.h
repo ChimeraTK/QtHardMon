@@ -24,6 +24,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
   QDateTime getTimeStamp();
 
   void interrupt();
+  bool hasWaitForNewData();
 
   QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 

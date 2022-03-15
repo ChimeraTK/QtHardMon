@@ -190,3 +190,7 @@ QDateTime RegisterAccessorModel::getTimeStamp() {
   retVal.setMSecsSinceEpoch(timeStampIn_ms);
   return retVal;
 }
+
+bool RegisterAccessorModel::hasWaitForNewData() {
+  return _abstractAccessor->hasWaitForNewData();
+}

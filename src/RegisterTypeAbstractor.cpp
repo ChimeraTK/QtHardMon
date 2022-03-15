@@ -11,56 +11,59 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(
       registerInfo.getNumberOfElements());
 
   auto dataDescriptor = registerInfo.getDataDescriptor();
-  switch(dataDescriptor.rawDataType()) {
-    case ChimeraTK::DataType::none: {
-      ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> accessor;
-      // if there is an unknown raw data type create a normal, cooked accessor
+  if((dataDescriptor.rawDataType() == ChimeraTK::DataType::none) ||
+      registerInfo.getSupportedAccessModes().has(ChimeraTK::AccessMode::wait_for_new_data)) {
+    // We cannot request an accessor which has  raw and wait_for_new_data ath the same time.
+    // If the register supports wait_for_new_data and don't use raw to be able to debug interrupt behaviour
 
-      ChimeraTK::AccessModeFlags flags; // empty set of flags
-      if(registerInfo.getSupportedAccessModes().has(ChimeraTK::AccessMode::wait_for_new_data)) {
-        flags.add(ChimeraTK::AccessMode::wait_for_new_data);
+    ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> accessor;
+    // if there is an unknown raw data type create a normal, cooked accessor
+
+    ChimeraTK::AccessModeFlags flags; // empty set of flags
+    if(registerInfo.getSupportedAccessModes().has(ChimeraTK::AccessMode::wait_for_new_data)) {
+      flags.add(ChimeraTK::AccessMode::wait_for_new_data);
+    }
+    if(not registerInfo.isWriteable()) {
+      try {
+        accessor.replace(device.getTwoDRegisterAccessor<USER_DATA_TYPE>(
+            registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, flags));
       }
+      catch(...) {
+      }
+    }
+
+    if(not accessor.isInitialised())
+      accessor.replace(
+          device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(), nElements, 0, flags));
+    // Always use raw data type "none". For this cooked accessors we can't use it anyway (event if it's not none in
+    // the catalogue if wait_for_new data is there)
+    return std::make_shared<RegisterTypeAbstractorImpl<USER_DATA_TYPE>>(accessor, ChimeraTK::DataType::none);
+  }
+  else { // Accessor has a valid raw type and no wait_for_new_data. Use a raw accessor.
+    std::shared_ptr<RegisterTypeAbstractor> returnValue;
+    auto rawAccessorCreatorLambda = [&](auto arg) {
+      ChimeraTK::TwoDRegisterAccessor<decltype(arg)> accessor;
+      // NumeicAddressedBackend cannot create accessors with both raw and wait_for_new_data.
+      // As the update rate in the GUI is limited and the update time is the determined by the timeout,
+      // the reading is not being synchronous anyway, we go for raw data as this gives a visible benefit for the user.
       if(not registerInfo.isWriteable()) {
         try {
-          accessor.replace(device.getTwoDRegisterAccessor<USER_DATA_TYPE>(
-              registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, flags));
+          accessor.replace(device.getTwoDRegisterAccessor<decltype(arg)>(
+              registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, {ChimeraTK::AccessMode::raw}));
         }
         catch(...) {
         }
       }
 
-      if(not accessor.isInitialised())
-        accessor.replace(
-            device.getTwoDRegisterAccessor<USER_DATA_TYPE>(registerInfo.getRegisterName(), nElements, 0, flags));
-
-      return std::make_shared<RegisterTypeAbstractorImpl<USER_DATA_TYPE>>(accessor, dataDescriptor.rawDataType());
-    }
-    default: {
-      std::shared_ptr<RegisterTypeAbstractor> returnValue;
-      auto rawAccessorCreatorLambda = [&](auto arg) {
-        ChimeraTK::TwoDRegisterAccessor<decltype(arg)> accessor;
-        // NumeicAddressedBackend cannot create accessors with both raw and wait_for_new_data.
-        // As the update rate in the GUI is limited and the update time is the determined by the timeout,
-        // the reading is not being synchronous anyway, we go for raw data as this gives a visible benefit for the user.
-        if(not registerInfo.isWriteable()) {
-          try {
-            accessor.replace(device.getTwoDRegisterAccessor<decltype(arg)>(
-                registerInfo.getRegisterName() / ".DUMMY_WRITEABLE", nElements, 0, {ChimeraTK::AccessMode::raw}));
-          }
-          catch(...) {
-          }
-        }
-
-        if(not accessor.isInitialised()) {
-          accessor.replace(device.getTwoDRegisterAccessor<decltype(arg)>(
-              registerInfo.getRegisterName(), nElements, 0, {ChimeraTK::AccessMode::raw}));
-        }
-        returnValue = std::make_shared<RegisterTypeAbstractorRawImpl<decltype(arg), USER_DATA_TYPE>>(
-            accessor, dataDescriptor.rawDataType());
-      };
-      callForTypeNoVoid(dataDescriptor.rawDataType(), rawAccessorCreatorLambda);
-      return returnValue;
-    }
+      if(not accessor.isInitialised()) {
+        accessor.replace(device.getTwoDRegisterAccessor<decltype(arg)>(
+            registerInfo.getRegisterName(), nElements, 0, {ChimeraTK::AccessMode::raw}));
+      }
+      returnValue = std::make_shared<RegisterTypeAbstractorRawImpl<decltype(arg), USER_DATA_TYPE>>(
+          accessor, dataDescriptor.rawDataType());
+    };
+    callForTypeNoVoid(dataDescriptor.rawDataType(), rawAccessorCreatorLambda);
+    return returnValue;
   }
 }
 
