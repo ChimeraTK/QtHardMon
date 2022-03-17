@@ -16,6 +16,7 @@
 #include <ChimeraTK/BackendFactory.h>
 #include <ChimeraTK/DMapFileParser.h>
 #include <ChimeraTK/Exception.h>
+#include <ChimeraTK/NumericAddressedRegisterCatalogue.h>
 
 #include "Exceptions.h"
 #include <QDebug>
@@ -452,7 +453,6 @@ void QtHardMon::read() {
         QString("Info: An exception was thrown:\n") + e.what() + QString("\n\nThe device has been closed."));
   }
 
-  //std::cout << (hasNewData ? "#" : ".") << std::flush;
   if(hasNewData) {
     auto timeStamp = currentAccessorModel_->getTimeStamp();
     ui.lastReadTime->setText(timeStamp.toString(Qt::ISODateWithMs));
@@ -928,16 +928,10 @@ void QtHardMon::populateRegisterTree(QListWidgetItem* deviceItem) {
   }
   ui.registerTreeWidget->clear();
 
-  std::cout << "populateRegisterTree" << std::endl;
-
   auto registerCatalogue = currentDevice_.getRegisterCatalogue();
-
-  std::cout << "currentDevice_ = " << currentDevice_.readDeviceInfo() << std::endl;
-  std::cout << "registerCatalogue has regs: " << registerCatalogue.getNumberOfRegisters() << std::endl;
 
   // get the registerMap and fill the RegisterTreeWidget
   for(const auto& reg : registerCatalogue) {
-    std::cout << "reg: " << reg.getRegisterName() << std::endl;
     // parentNode can be null if there is no parent, i.e. the register is
     // directly in the treeWidget
     auto parentNode = RegisterTreeUtilities::getDeepestBranchNode(
@@ -952,6 +946,29 @@ void QtHardMon::populateRegisterTree(QListWidgetItem* deviceItem) {
           registerCatalogue.getRegister(reg.getRegisterName()));
     }
   }
+
+  // Check if DUMMY_WRITEABLE accessors are there to simulate interrupts in numeric addressed backends
+  // Try to cast to NumericAddressed catalogue. This contains information about the available interrupts.
+  auto numericAddressedCatalogue =
+      dynamic_cast<ChimeraTK::NumericAddressedRegisterCatalogue const*>(&registerCatalogue.getImpl());
+  if(numericAddressedCatalogue) {
+    for(auto interruptBlock : numericAddressedCatalogue->getListOfInterrupts()) {
+      for(auto interrupt : interruptBlock.second) {
+        try {
+          std::string dummyInterruptName =
+              "DUMMY_INTERRUPT_" + std::to_string(interruptBlock.first) + "_" + std::to_string(interrupt);
+          auto registerInfo = registerCatalogue.getRegister(dummyInterruptName);
+          // The previous command is throwing if the registern does not exist.
+          // For this register there is no parent node. Directly add to the tree widget.
+          new DeviceElementQTreeItem(ui.registerTreeWidget, dummyInterruptName.c_str(), registerInfo);
+        }
+        catch(ChimeraTK::logic_error&) {
+          // Nothing to do. Seems it's not a dummy
+        }
+      }
+    }
+  }
+
   ui.registerTreeWidget->expandAll();
 
   // Do NOT select a register. This is intentional!

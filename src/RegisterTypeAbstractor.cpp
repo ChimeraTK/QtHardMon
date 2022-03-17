@@ -12,9 +12,12 @@ std::shared_ptr<RegisterTypeAbstractor> createTypedAccessor(
 
   auto dataDescriptor = registerInfo.getDataDescriptor();
   if((dataDescriptor.rawDataType() == ChimeraTK::DataType::none) ||
+      (dataDescriptor.rawDataType() == ChimeraTK::DataType::Void) ||
       registerInfo.getSupportedAccessModes().has(ChimeraTK::AccessMode::wait_for_new_data)) {
     // We cannot request an accessor which has  raw and wait_for_new_data ath the same time.
     // If the register supports wait_for_new_data and don't use raw to be able to debug interrupt behaviour
+    // Also for data type void there is no sense for a raw accessor. User type int should have
+    // been requested (but we don't check that here).
 
     ChimeraTK::TwoDRegisterAccessor<USER_DATA_TYPE> accessor;
     // if there is an unknown raw data type create a normal, cooked accessor
@@ -91,7 +94,10 @@ std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(
       return createTypedAccessor<uint32_t>(registerInfo, device);
       break;
     case ChimeraTK::DataDescriptor::FundamentalType::nodata:
-      // fall into default. Nothing to display
+      // The accessor might be writeable, and even if there is not data the update time is displayed.
+      // Create an int accessor (it's always a 2d accessor which cannot be void).
+      return createTypedAccessor<int32_t>(registerInfo, device);
+      break;
     case ChimeraTK::DataDescriptor::FundamentalType::undefined:
       // fall into default, just mentioned for completeness
     default:
