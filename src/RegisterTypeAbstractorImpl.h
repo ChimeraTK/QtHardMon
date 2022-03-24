@@ -26,6 +26,7 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
   bool hasWaitForNewData() const override;
 
   bool readLatest() override;
+  void read() override;
   void write() override;
 
   bool isWritable() override { return _accessor.isWriteable(); }
@@ -100,6 +101,11 @@ QVariant RegisterTypeAbstractorImpl<USER_DATA_TYPE>::dataAsHex(
 template<class USER_DATA_TYPE>
 bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::readLatest() {
   return _accessor.readLatest();
+}
+
+template<class USER_DATA_TYPE>
+void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::read() {
+  _accessor.read();
 }
 
 template<class USER_DATA_TYPE>

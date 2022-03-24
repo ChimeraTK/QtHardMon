@@ -19,7 +19,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
 
   void setChannelNumber(unsigned int channelNumber);
 
-  bool readLatest(); // returns whether new data is available
+  bool read(bool doBlockingRead); // returns whether new data is available (always true when blocking)
   void write();
   QDateTime getTimeStamp();
 

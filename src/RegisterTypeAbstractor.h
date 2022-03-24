@@ -27,6 +27,7 @@ class RegisterTypeAbstractor {
   virtual ChimeraTK::DataType rawDataType() const = 0;
 
   virtual bool readLatest() = 0;
+  virtual void read() = 0;
   virtual void write() = 0;
 
   virtual bool isWritable() = 0;

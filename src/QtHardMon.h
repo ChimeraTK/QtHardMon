@@ -137,8 +137,9 @@ class QtHardMon : public QMainWindow {
   void handleDisplayIntervalChanged();
 
  public slots:
-  void read();  ///< Read register from device.
-  void write(); ///< Read register to device.
+  void read();       ///< Read register from device.
+  void readLatest(); ///< Non-blocking read for the continuous read loop.
+  void write();      ///< Read register to device.
 
  public:
   Ui::QtHardMonForm ui; ///< The GUI form which hold all the widgets.
@@ -155,6 +156,8 @@ class QtHardMon : public QMainWindow {
   QString configFileName_;                      ///< Name of the config file (last saved or read)
   RegisterAccessorModel* currentAccessorModel_; ///< The accessor model for the current register.
   CustomDelegates customDelegate_;              ///< The delegate for the values table view
+
+  void readImpl(bool doBlockingRead);
 
   /**
    *  Write the config to the given file name.

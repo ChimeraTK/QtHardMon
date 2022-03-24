@@ -111,7 +111,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   connect(ui.continuousReadCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleContinuousReadChanged(int)));
 
-  connect(&_continuousReadTimner, SIGNAL(timeout()), this, SLOT(read()));
+  connect(&_continuousReadTimner, SIGNAL(timeout()), this, SLOT(readLatest()));
   connect(ui.displayFrequencyButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this,
       SLOT(handleDisplayIntervalChanged()));
   handleDisplayIntervalChanged(); // put settings according to GUI
@@ -431,6 +431,14 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
 }
 
 void QtHardMon::read() {
+  readImpl(/*doBlockingRead=*/true);
+}
+
+void QtHardMon::readLatest() {
+  readImpl(/*doBlockingRead=*/false);
+}
+
+void QtHardMon::readImpl(bool doBlockingRead) {
   // if no register is selected the accessor model is nullptr.
   bool hasNewData = false;
   if(!currentAccessorModel_) {
@@ -441,7 +449,7 @@ void QtHardMon::read() {
     return;
   }
   try {
-    hasNewData = currentAccessorModel_->readLatest();
+    hasNewData = currentAccessorModel_->read(doBlockingRead);
   }
   catch(std::exception& e) {
     closeDevice();

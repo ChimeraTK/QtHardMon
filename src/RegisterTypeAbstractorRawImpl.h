@@ -36,6 +36,8 @@ class RegisterTypeAbstractorRawImpl : public RegisterTypeAbstractorImpl<RAW_DATA
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& data) override;
   /// Override to update the cached cooked data after reading
   bool readLatest() override;
+  /// Override to update the cached cooked data after reading
+  void read() override;
 
   /// Override because this is for the cooked type while the base implementation
   /// would return for the raw type.
@@ -136,6 +138,12 @@ bool RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::readLatest(
   if(hasNewData) updateCachedCookedData();
 
   return hasNewData;
+}
+
+template<class RAW_DATA_TYPE, class COOKED_DATA_TYPE>
+void RegisterTypeAbstractorRawImpl<RAW_DATA_TYPE, COOKED_DATA_TYPE>::read() {
+  _accessor.read();
+  updateCachedCookedData();
 }
 
 // Return whether the cooked data type is integral
