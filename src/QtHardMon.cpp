@@ -79,7 +79,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   connect(ui.loadBoardsButton, SIGNAL(clicked()), this, SLOT(loadBoards()));
 
-  connect(ui.readButton, SIGNAL(clicked()), this, SLOT(read()));
+  connect(ui.readButton, SIGNAL(clicked()), this, SLOT(readLatest()));
 
   connect(ui.writeButton, SIGNAL(clicked()), this, SLOT(write()));
 
@@ -426,6 +426,8 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   // Only call autoread for registers (which have a valid accessor model).
   // Don't call it for modules (where  currentAccessorModel_ == nullptr)
   if(preferencesProvider.getValue<bool>("autoRead") && currentAccessorModel_ && currentAccessorModel_->isReadable()) {
+    // It is allowed to call a blocking read here even with wait_for_new_data because we just created the accessor
+    // and we have the guaratee that we are getting an initial value. Otherwise the GUI would freeze
     read();
   }
 }
@@ -501,7 +503,10 @@ void QtHardMon::write() {
   }
 
   if(ui.readAfterWriteCheckBox->isChecked() && currentAccessorModel_->isReadable()) {
-    read();
+    // We must not call a blocking read here because the implementaion does not have to send data in
+    // wait_for_new_data mode after being written, and a blocking read() blocks the GUI.
+    // Without wait_for_new_data the implementations are identical (guaranteed by the spec).
+    readLatest();
   }
   else {
     ui.propertiesWidget->clearDataWidgetBackground();
@@ -880,7 +885,8 @@ void QtHardMon::registerClicked(QTreeWidgetItem* registerItem) {
     return;
   }
 
-  read();
+  // Don't do a blocking read here. It will freeze the GUI.
+  readLatest();
 }
 
 void QtHardMon::channelSelected(int channelNumber) {
