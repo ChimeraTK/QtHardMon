@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 PROJECT(QtHardMon)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 01)
-set(${PROJECT_NAME}_MINOR_VERSION 05)
+set(${PROJECT_NAME}_MINOR_VERSION 06)
 set(${PROJECT_NAME}_PATCH_VERSION 00)
 
 # Find includes in corresponding build directories
@@ -19,7 +19,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/set_version_numbers.cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 include(cmake/add_dependency.cmake)
-add_dependency(ChimeraTK-DeviceAccess 02.06 REQUIRED)
+add_dependency(ChimeraTK-DeviceAccess 03.00 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Widgets REQUIRED)
