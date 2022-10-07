@@ -1,0 +1,14 @@
+diff --git a/device/src/MetadataCatalogue.cc b/device/src/MetadataCatalogue.cc
+index 251ad5a8..caa23e44 100644
+--- a/device/src/MetadataCatalogue.cc
++++ b/device/src/MetadataCatalogue.cc
+@@ -5,6 +5,8 @@
+ 
+ #include "Exception.h"
+ 
++#include <stdexcept>
++
+ namespace ChimeraTK {
+ 
+   /*******************************************************************************************************************/
+

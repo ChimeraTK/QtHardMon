@@ -1,0 +1,73 @@
+app-id: de.desy.ChimeraTK.QtHardMon
+runtime: org.kde.Platform
+runtime-version: '5.15-22.08'
+sdk: org.kde.Sdk
+command: QtHardMon
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --share=network
+  - --filesystem=host
+
+modules:
+  - name: boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app --with-libraries=all
+      - ./b2 -j $FLATPAK_BUILDER_N_JOBS install
+    sources:
+      - type: archive
+        url: https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2
+        sha256: 8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc
+  - name: exprtk
+    buildsystem: cmake
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/exprtk-interface
+        tag: 01.03.00
+        commit: 6ad7b8e6b3c751b7ffddf37429c4e37e0c27de0b
+  - name: cppext
+    buildsystem: cmake
+    config-opts:
+      - -DSUPPRESS_AUTO_DOC_BUILD=ON
+      - -DBUILD_TESTS=OFF
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/cppext
+        tag: 01.04.01
+        commit: e3884943767f2bc2aa1459be6793eeb2ff9d0d04
+
+  - name : libxml++
+    buildsystem: meson
+    sources:
+     - type: archive
+       url: https://download.gnome.org/sources/libxml++/5.0/libxml%2B%2B-5.0.2.tar.xz
+       sha256: 7c17cc3e5a2214314dee5a1354f4b436f266ded6185232a0534f352a76240d5a
+
+  - name: DeviceAccess
+    buildsystem: cmake
+    config-opts:
+      - -DSUPPRESS_AUTO_DOC_BUILD=ON
+      - -DBUILD_TESTS=OFF
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/DeviceAccess
+        tag: 03.03.00
+        commit: db8e8283419f7c99c0fc0f1788e584d133949cc4
+      - type: patch
+        path: patches/bump-xmlpp-requirement.patch
+      - type: patch
+        path: patches/fix-include-stdexcept.patch
+      - type: patch
+        path: patches/fix-const-cast.patch
+
+  - name: QtHardMon
+    buildsystem: cmake
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/QtHardMon
+        tag: 01.06.00
+        commit: 26e6fbe8211e469d4b336a804e24a8d9dce93107
+
+
