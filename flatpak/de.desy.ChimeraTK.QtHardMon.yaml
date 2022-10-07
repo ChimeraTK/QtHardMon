@@ -1,0 +1,78 @@
+app-id: de.desy.ChimeraTK.QtHardMon
+runtime: org.kde.Platform
+runtime-version: '5.15-23.08'
+sdk: org.kde.Sdk
+command: QtHardMon
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --share=network
+  - --filesystem=host
+
+modules:
+  - name: boost
+    buildsystem: simple
+    build-commands:
+      - ./bootstrap.sh --prefix=/app --with-libraries=all
+      - ./b2 -j $FLATPAK_BUILDER_N_JOBS install
+    sources:
+      - type: archive
+        url: https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.tar.bz2
+        sha256: 7009fe1faa1697476bdc7027703a2badb84e849b7b0baad5086b087b971f8617
+  - name: exprtk
+    buildsystem: cmake
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/exprtk-interface
+        tag: 01.04.01
+        commit: 46c7c80be1ae83bed5e7e7fa335acf2cbb8c0774
+  - name: cppext
+    buildsystem: cmake
+    config-opts:
+      - -DSUPPRESS_AUTO_DOC_BUILD=ON
+      - -DBUILD_TESTS=OFF
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/cppext
+        tag: 01.05.02
+        commit: 5ffe5e12a3ac6caafe59adaa7a5a9299ff44e5b9
+
+  - name : libxml++
+    buildsystem: meson
+    sources:
+     - type: archive
+       url: https://download.gnome.org/sources/libxml++/5.0/libxml%2B%2B-5.0.4.tar.xz
+       sha256: 42891b7863d2ccf4d7bf029f06fe3a52a4376c94bbba91f8945e48520ffae82f
+
+  - name: nlohman-json
+    buildsystem: cmake
+    config-opts:
+      - -DJSON_BuildTests=Off
+    sources:
+     - type: archive
+       url: https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+       sha256: d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
+
+  - name: DeviceAccess
+    buildsystem: cmake
+    config-opts:
+      - -DSUPPRESS_AUTO_DOC_BUILD=ON
+      - -DBUILD_TESTS=OFF
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/DeviceAccess
+        tag: 03.15.02
+        commit: 5e7b5cf2f27dc299a81cf88fb91123413e6fbc86
+      - type: patch
+        path: patches/0001-Bump-libxml-requirement.patch
+
+  - name: QtHardMon
+    buildsystem: cmake
+    sources:
+      - type: git
+        url: https://github.com/ChimeraTK/QtHardMon
+        tag: 01.07.01
+        commit: 60f966178b985009b4512c8ad21c0a9882d63c0a
+
+

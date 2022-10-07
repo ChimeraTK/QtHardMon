@@ -1,0 +1,25 @@
+From a3b0b63617690611e42dfc34fbf81fed1503b016 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 10 Jul 2024 16:36:30 +0200
+Subject: [PATCH] Bump libxml++ requirement
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 635c419..211206b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,7 +37,7 @@ FIND_PACKAGE(exprtk 01.04 REQUIRED)
+ FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
+ 
+ FIND_PACKAGE(PkgConfig REQUIRED)
+-set(LIBXML++_VERSION "libxml++-2.6")
++set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+ 
+ # The PCIe backend can only be built on Linux, so we define a variable here that
+-- 
+2.45.2
+
