@@ -28,8 +28,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
+file(GLOB app_headers ${CMAKE_SOURCE_DIR}/src/*.h)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
-add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
+add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources} ${app_headers})
 
 if(QWT_FOUND)
   target_compile_definitions(${PROJECT_NAME}_STATIC PUBLIC USE_QWT=true)
