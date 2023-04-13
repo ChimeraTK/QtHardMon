@@ -56,10 +56,6 @@ configure_file(cmake/QtHardMon.qrc.in
   "${PROJECT_BINARY_DIR}/QtHardMon.qrc" @ONLY)
 
 ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp ${PROJECT_BINARY_DIR}/QtHardMon.qrc)
-
-#The static library as well as its auto-generated headers are needed to compile main
-ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
-
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui Boost::system Boost::filesystem ChimeraTK::ChimeraTK-DeviceAccess ${QWT_TARGET})
 
 #The use of the QWT plotting library is optional
