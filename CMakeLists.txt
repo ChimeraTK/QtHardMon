@@ -18,15 +18,14 @@ include(${CMAKE_SOURCE_DIR}/cmake/set_version_numbers.cmake)
 ## Load custom modules, i.e. FindDOOCS.cmake
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-include(cmake/add_dependency.cmake)
-add_dependency(ChimeraTK-DeviceAccess 03.00 REQUIRED)
+find_package(ChimeraTK-DeviceAccess 03.09 REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qwt 6)
 
-FIND_PACKAGE(Boost COMPONENTS REQUIRED system filesystem)
+find_package(Boost COMPONENTS REQUIRED system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Network_INCLUDE_DIRS})
@@ -44,7 +43,8 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
 add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core  Qt5::Network Qt5::Widgets Qt5::Gui ${ChimeraTK-DeviceAccess_LIBRARIES} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Network Qt5::Widgets Qt5::Gui
+                                             ChimeraTK::ChimeraTK-DeviceAccess ${Boost_LIBRARIES})
 
 #CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
 #To make the headers generated from the ui files of the library available to the executable and the test,
@@ -75,8 +75,8 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
   ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
 endif()
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}  ${ChimeraTK-DeviceAccess_LIBRARIES} ${QWT_LIBRARY})
-set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${ChimeraTK-DeviceAccess_LINKER_FLAGS}")
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}
+                                      ChimeraTK::ChimeraTK-DeviceAccess ${QWT_LIBRARY})
 
 include(cmake/enable_code_coverage_report.cmake)
 include(cmake/enable_doxygen_documentation.cmake)

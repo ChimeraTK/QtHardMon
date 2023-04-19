@@ -1,5 +1,5 @@
 ## Setting up Boost Unit Test Framework.
-add_dependency(Boost 1.46 system unit_test_framework REQUIRED)
+find_package(Boost 1.46 COMPONENTS system unit_test_framework REQUIRED)
 
 ## If there are any common tests' functionalities, they are compiled into separate library and later linked against each executable.
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
