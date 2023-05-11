@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 PROJECT(QtHardMon)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 01)
-set(${PROJECT_NAME}_MINOR_VERSION 06)
+set(${PROJECT_NAME}_MINOR_VERSION 07)
 set(${PROJECT_NAME}_PATCH_VERSION 00)
 
 # Find includes in corresponding build directories
@@ -16,7 +16,7 @@ set(CMAKE_AUTORCC ON)
 ## Load custom modules, i.e. FindDOOCS.cmake
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
-find_package(ChimeraTK-DeviceAccess 03.09 REQUIRED)
+find_package(ChimeraTK-DeviceAccess 03.10 REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets Gui)
 
 find_package(PkgConfig REQUIRED)
