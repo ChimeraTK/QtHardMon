@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16)
 
 PROJECT(QtHardMon)
 
@@ -13,38 +13,33 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-## Set additional version-specific variables
-include(${CMAKE_SOURCE_DIR}/cmake/set_version_numbers.cmake)
 ## Load custom modules, i.e. FindDOOCS.cmake
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 find_package(ChimeraTK-DeviceAccess 03.09 REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qwt 6)
+find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets Gui)
 
-find_package(Boost COMPONENTS REQUIRED system filesystem)
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${Qt5Core_INCLUDE_DIRS})
-include_directories(${Qt5Network_INCLUDE_DIRS})
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(QWT IMPORTED_TARGET Qt5Qwt6)
+find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 include(${CMAKE_SOURCE_DIR}/cmake/set_default_build_to_release.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
 
-# setting this manually here. You might have to adapt the standard version in future. Having it in set_default_flags.cmake is giving too much trouble in other projects.
-if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-
 include_directories(${CMAKE_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_SOURCE_DIR}/src app_sources)
+file(GLOB app_headers ${CMAKE_SOURCE_DIR}/src/*.h)
 list(REMOVE_ITEM app_sources ${CMAKE_SOURCE_DIR}/src/main.cpp)
-add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Network Qt5::Widgets Qt5::Gui
-                                             ChimeraTK::ChimeraTK-DeviceAccess ${Boost_LIBRARIES})
+add_library(${PROJECT_NAME}_STATIC STATIC ${app_sources} ${app_headers})
+
+if(QWT_FOUND)
+  target_compile_definitions(${PROJECT_NAME}_STATIC PUBLIC USE_QWT=true)
+  set(QWT_TARGET "PkgConfig::QWT")
+else()
+  SET(QWT_TARGET "")
+  message("QWT not found, plotting is disabled in this build.")
+endif()
+target_link_libraries(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Network Qt5::Widgets Qt5::Gui ChimeraTK::ChimeraTK-DeviceAccess Boost::system Boost::filesystem ${QWT_TARGET})
 
 #CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
 #To make the headers generated from the ui files of the library available to the executable and the test,
@@ -60,23 +55,10 @@ configure_file(cmake/QtHardMonVersion.h.in
 configure_file(cmake/QtHardMon.qrc.in
   "${PROJECT_BINARY_DIR}/QtHardMon.qrc" @ONLY)
 
-#The use of the QWT plotting library is optional
-if(QWT_FOUND)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_QWT=true")
-  INCLUDE_DIRECTORIES( SYSTEM ${QWT_INCLUDE_DIR} )
-else(QWT_FOUND)
-  SET( QWT_LIBRARY "")
-  message("QWT not found, plotting is disabled in this build.")
-endif(QWT_FOUND)
-
 ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp ${PROJECT_BINARY_DIR}/QtHardMon.qrc)
-#The static library as well as its auto-generated headers are needed to compile main
-if(NOT ${CMAKE_VERSION} VERSION_LESS "3.7")
-  ADD_DEPENDENCIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC ${PROJECT_NAME}_STATIC_autogen)
-endif()
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui Boost::system Boost::filesystem ChimeraTK::ChimeraTK-DeviceAccess ${QWT_TARGET})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ${Boost_LIBRARIES}
-                                      ChimeraTK::ChimeraTK-DeviceAccess ${QWT_LIBRARY})
+#The use of the QWT plotting library is optional
 
 include(cmake/enable_code_coverage_report.cmake)
 include(cmake/enable_doxygen_documentation.cmake)
