@@ -3,17 +3,18 @@ cmake_minimum_required(VERSION 3.16)
 PROJECT(QtHardMon)
 
 set(${PROJECT_NAME}_MAJOR_VERSION 01)
-set(${PROJECT_NAME}_MINOR_VERSION 06)
+set(${PROJECT_NAME}_MINOR_VERSION 07)
 set(${PROJECT_NAME}_PATCH_VERSION 00)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 # Instruct CMake to run moc, rcc and uic automatically when needed.
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-## Load custom modules, i.e. FindDOOCS.cmake
+# # Load custom modules, i.e. FindDOOCS.cmake
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 find_package(ChimeraTK-DeviceAccess 03.09 REQUIRED)
@@ -39,38 +40,39 @@ else()
   SET(QWT_TARGET "")
   message("QWT not found, plotting is disabled in this build.")
 endif()
+
 target_link_libraries(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Network Qt5::Widgets Qt5::Gui ChimeraTK::ChimeraTK-DeviceAccess Boost::system Boost::filesystem ${QWT_TARGET})
 
-#CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
-#To make the headers generated from the ui files of the library available to the executable and the test,
-#we have to include it explicitly.
-#Note: from cmake 3.9.6 this is configurable, but we want to support all version.
-#CMake before 3.7 puts the generated files to the build folder, which wer also include at a different place.
+# CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
+# To make the headers generated from the ui files of the library available to the executable and the test,
+# we have to include it explicitly.
+# Note: from cmake 3.9.6 this is configurable, but we want to support all version.
+# CMake before 3.7 puts the generated files to the build folder, which wer also include at a different place.
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_STATIC_autogen/include)
 
-#configure a header file which contains the version information for use in C++
+# configure a header file which contains the version information for use in C++
 configure_file(cmake/QtHardMonVersion.h.in
   "${PROJECT_BINARY_DIR}/QtHardMonVersion.h" @ONLY)
-#configure the resource file which contains the path to the images
+
+# configure the resource file which contains the path to the images
 configure_file(cmake/QtHardMon.qrc.in
   "${PROJECT_BINARY_DIR}/QtHardMon.qrc" @ONLY)
 
 ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp ${PROJECT_BINARY_DIR}/QtHardMon.qrc)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui Boost::system Boost::filesystem ChimeraTK::ChimeraTK-DeviceAccess ${QWT_TARGET})
 
-#The use of the QWT plotting library is optional
-
+# The use of the QWT plotting library is optional
 include(cmake/enable_code_coverage_report.cmake)
 include(cmake/enable_doxygen_documentation.cmake)
 
-#FIXME: the user guide should be build from source, but we need dependencies defined,
+# FIXME: the user guide should be build from source, but we need dependencies defined,
 # fix the date to the writing date (not compilation date) and put the version
 # guide has been written for (it most probably is outdated)
 INSTALL(FILES doc/user_guide/QtHardMon_user_guide.pdf DESTINATION share/doc/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin
-  )
+)
 
 enable_testing()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
