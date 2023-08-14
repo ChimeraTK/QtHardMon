@@ -633,7 +633,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Avg. update inteval</string>
+            <string>Avg. update interval</string>
            </property>
           </widget>
          </item>
