@@ -1,14 +1,17 @@
 #include "RegisterAccessorModel.h"
+
 #include <ChimeraTK/SupportedUserTypes.h>
+
 #include <QBrush>
 using namespace ChimeraTK;
 
 #include "PreferencesProvider.h"
 
-RegisterAccessorModel::RegisterAccessorModel(
-    QObject* parent, std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor)
-: QAbstractTableModel(parent), _abstractAccessor(abstractAccessor), _channelNumber(0), _cookedHexColumnIndex(-1),
-  _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1) {
+RegisterAccessorModel::RegisterAccessorModel(QObject* parent,
+    std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor,
+    std::shared_ptr<RegisterTypeAbstractor> const& dummyWriteableAccessor)
+: QAbstractTableModel(parent), _abstractAccessor(abstractAccessor), _dummyWritableAccessor(dummyWriteableAccessor),
+  _channelNumber(0), _cookedHexColumnIndex(-1), _rawColumnIndex(-1), _rawHexColumnIndex(-1), _nColumns(1) {
   _isModified.resize(_abstractAccessor->nChannels());
   for(auto& channelModifiedFlags : _isModified) {
     channelModifiedFlags.resize(_abstractAccessor->nElements());
@@ -134,7 +137,14 @@ bool RegisterAccessorModel::isReadable() {
 }
 
 void RegisterAccessorModel::write() {
-  _abstractAccessor->write();
+  if(_dummyWritableAccessor) {
+    _dummyWritableAccessor->setFromOther(*_abstractAccessor);
+    _dummyWritableAccessor->write();
+  }
+  else {
+    _abstractAccessor->write();
+  }
+
   clearModifiedFlags();
   // emit a data changed to clear the red background colours
   emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1));
