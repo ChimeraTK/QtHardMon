@@ -23,6 +23,8 @@ class RegisterTypeAbstractor {
   virtual QVariant rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const = 0;
   virtual bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& value) = 0;
 
+  virtual void setFromOther(RegisterTypeAbstractor const& other) = 0;
+
   virtual bool isIntegral() const = 0;
   virtual ChimeraTK::DataType rawDataType() const = 0;
 

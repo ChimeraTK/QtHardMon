@@ -21,6 +21,8 @@ class RegisterTypeAbstractorImpl : public RegisterTypeAbstractor {
   QVariant rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const override;
   bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& data) override;
 
+  void setFromOther(RegisterTypeAbstractor const& other) override;
+
   bool isIntegral() const override;
   ChimeraTK::DataType rawDataType() const override;
   bool hasWaitForNewData() const override;
@@ -138,6 +140,14 @@ bool RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setData(
   }
   else {
     return false;
+  }
+}
+
+template<class USER_DATA_TYPE>
+void RegisterTypeAbstractorImpl<USER_DATA_TYPE>::setFromOther(RegisterTypeAbstractor const& other) {
+  auto const& otherImpl = dynamic_cast<RegisterTypeAbstractorImpl<USER_DATA_TYPE> const&>(other);
+  for(unsigned int channel = 0; channel < _accessor.getNChannels(); channel++) {
+    _accessor[channel] = otherImpl._accessor[channel];
   }
 }
 
