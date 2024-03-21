@@ -9,7 +9,8 @@
 class RegisterAccessorModel : public QAbstractTableModel {
   Q_OBJECT
  public:
-  RegisterAccessorModel(QObject* parent, std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor);
+  RegisterAccessorModel(QObject* parent, std::shared_ptr<RegisterTypeAbstractor> const& abstractAccessor,
+      std::shared_ptr<RegisterTypeAbstractor> const& dummyWriteableAccessor = {nullptr});
   int rowCount(const QModelIndex& modelIndex = QModelIndex()) const override;
   int columnCount(const QModelIndex& modelIndex = QModelIndex()) const override;
   QVariant data(const QModelIndex& modelIndex, int role = Qt::DisplayRole) const override;
@@ -30,6 +31,7 @@ class RegisterAccessorModel : public QAbstractTableModel {
 
  protected:
   std::shared_ptr<RegisterTypeAbstractor> _abstractAccessor;
+  std::shared_ptr<RegisterTypeAbstractor> _dummyWritableAccessor;
   std::vector<std::vector<bool>> _isModified; // remember if a row has been modified per channel
 
   void clearModifiedFlags(); // clear the modified flags

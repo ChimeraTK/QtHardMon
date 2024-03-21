@@ -3,8 +3,9 @@
 
 #include <ChimeraTK/Device.h>
 #include <ChimeraTK/SupportedUserTypes.h>
-#include <QVariant>
+
 #include <memory>
+#include <QVariant>
 
 /// Register ChimeraTK::Boolean type with Qt
 Q_DECLARE_METATYPE(ChimeraTK::Boolean)
@@ -23,6 +24,8 @@ class RegisterTypeAbstractor {
   virtual QVariant rawDataAsHex(unsigned int channelIndex, unsigned int elementIndex) const = 0;
   virtual bool setRawData(unsigned int channelIndex, unsigned int elementIndex, const QVariant& value) = 0;
 
+  virtual void setFromOther(RegisterTypeAbstractor const& other) = 0;
+
   virtual bool isIntegral() const = 0;
   virtual ChimeraTK::DataType rawDataType() const = 0;
 
@@ -40,9 +43,9 @@ class RegisterTypeAbstractor {
   virtual ~RegisterTypeAbstractor() = default;
 };
 
-///@attention This function can return a nullptr in case the data type is
+///@attention This function can return a nullptr as first pair element in case the data type is
 /// undefined (or noData)
-std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(
+std::pair<std::shared_ptr<RegisterTypeAbstractor>, std::shared_ptr<RegisterTypeAbstractor>> createAbstractAccessors(
     ChimeraTK::RegisterInfo const& registerInfo, ChimeraTK::Device& device);
 
 #endif // REGISTER_TYPE_ABSTRACTOR_H
