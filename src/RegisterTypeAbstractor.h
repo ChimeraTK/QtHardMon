@@ -43,11 +43,8 @@ class RegisterTypeAbstractor {
   virtual ~RegisterTypeAbstractor() = default;
 };
 
-///@attention This function can return a nullptr in case the data type is
+///@attention This function can return a nullptr as first pair element in case the data type is
 /// undefined (or noData)
-std::shared_ptr<RegisterTypeAbstractor> createAbstractAccessor(
-    ChimeraTK::RegisterInfo const& registerInfo, ChimeraTK::Device& device);
-
 std::pair<std::shared_ptr<RegisterTypeAbstractor>, std::shared_ptr<RegisterTypeAbstractor>> createAbstractAccessors(
     ChimeraTK::RegisterInfo const& registerInfo, ChimeraTK::Device& device);
 

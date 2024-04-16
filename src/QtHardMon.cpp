@@ -389,8 +389,6 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
       return;
     }
 
-    // get accessor and dummyAccessor - just for better code understanding.
-
     // If the data type is undefined or "noData" there is nothing to display for
     // QtHardMon. In this case we don't have an accessor (pointer is null) or a
     // data model.
