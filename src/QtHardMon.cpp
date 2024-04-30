@@ -1,26 +1,25 @@
 #include "QtHardMon.h"
+
 #include "ConfigFileReaderWriter.h"
+#include "Exceptions.h"
 #include "QtHardMonVersion.h"
 #include "ui_PreferencesForm.h"
-#include <QHostInfo>
-
-#include <fstream>
-#include <iostream>
-#include <limits>
-#include <sstream>
-
-#include <QDockWidget>
-#include <QFileDialog>
-#include <qaction.h>
 
 #include <ChimeraTK/BackendFactory.h>
 #include <ChimeraTK/DMapFileParser.h>
 #include <ChimeraTK/Exception.h>
 #include <ChimeraTK/NumericAddressedRegisterCatalogue.h>
 
-#include "Exceptions.h"
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <qaction.h>
 #include <QDebug>
+#include <QDockWidget>
+#include <QFileDialog>
+#include <QHostInfo>
 #include <QTextStream>
+#include <sstream>
 using namespace ChimeraTK;
 
 #include "DeviceElementQTreeItem.h"
@@ -130,7 +129,8 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
   // customize table display
   //  customDelegate_.setDoubleSpinBoxPrecision(_floatPrecision);
   ui.propertiesWidget->ui.valuesTableView->setItemDelegate(&customDelegate_);
-  // Store the default edit triggers. We turn editing off when the continuous readout thread starts, and have to restore this when the thread stops.
+  // Store the default edit triggers. We turn editing off when the continuous readout thread starts, and have to restore
+  // this when the thread stops.
   _defaultTableViewEditTriggers = ui.propertiesWidget->ui.valuesTableView->editTriggers();
 
   _plotWindow = new PlotWindow(this);
@@ -360,7 +360,9 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   delete currentAccessorModel_;
   ui.lastReadTime->setText("");
   currentAccessorModel_ = nullptr;
-  bool accessorWritable = false;
+
+  std::shared_ptr<RegisterTypeAbstractor> abstractAccessor;
+  std::shared_ptr<RegisterTypeAbstractor> abstractDummyWriteAccessor;
 
   // There is a case when a device entry is clicked in the device list, the slot
   // is called with a NULL registerItem
@@ -375,9 +377,9 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   ui.propertiesWidget->updateRegisterInfo(selectedItem->getRegisterInfo());
   if(selectedItem->getRegisterInfo().isValid()) {
     // there is valid register information. Create an accessor
-    std::shared_ptr<RegisterTypeAbstractor> abstractAccessor;
     try {
-      abstractAccessor = createAbstractAccessor(selectedItem->getRegisterInfo(), currentDevice_);
+      std::tie(abstractAccessor, abstractDummyWriteAccessor) =
+          createAbstractAccessors(selectedItem->getRegisterInfo(), currentDevice_);
     }
     catch(std::exception& e) {
       showMessageBox(QMessageBox::Critical, QString("QtHardMon : Error"),
@@ -386,13 +388,13 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
           QString("Info: An exception was thrown:\n") + e.what());
       return;
     }
+
     // If the data type is undefined or "noData" there is nothing to display for
     // QtHardMon. In this case we don't have an accessor (pointer is null) or a
     // data model.
     if(abstractAccessor) {
-      accessorWritable = abstractAccessor->isWritable();
       // create a data model if we have an accessor.
-      currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor);
+      currentAccessorModel_ = new RegisterAccessorModel(this, abstractAccessor, abstractDummyWriteAccessor);
       ui.propertiesWidget->ui.valuesTableView->setModel(currentAccessorModel_);
       if(abstractAccessor->isReadable()) {
         ui.continuousReadCheckBox->setEnabled(true);
@@ -403,8 +405,8 @@ void QtHardMon::registerSelected(QTreeWidgetItem* registerItem, QTreeWidgetItem*
   // set state of read/write buttons according to the register's capabilities
   if(selectedItem->getRegisterInfo().isValid()) {
     ui.readButton->setEnabled(selectedItem->getRegisterInfo().isReadable());
-    ui.writeButton->setEnabled(selectedItem->getRegisterInfo().isWriteable() || accessorWritable);
-    if(selectedItem->getRegisterInfo().isWriteable() != accessorWritable) {
+    ui.writeButton->setEnabled(selectedItem->getRegisterInfo().isWriteable() || abstractDummyWriteAccessor);
+    if(abstractDummyWriteAccessor) {
       ui.writeButton->setText(tr("Write (dummy register)"));
     }
     else {
@@ -1020,7 +1022,6 @@ void QtHardMon::copyRegisterTreeItemNameToClipBoard() {
     clipboard->setText(std::string(registerPath).c_str());
     clipboard->setText(std::string(registerPath).c_str(), QClipboard::Selection);
   }
-  return;
 }
 
 void QtHardMon::handleCollapseTreeButton() {
