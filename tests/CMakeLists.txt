@@ -16,7 +16,7 @@ foreach( testExecutableSrcFile ${testExecutables})
   #NAME_WE means the base name without path and (longest) extension
   get_filename_component(executableName ${testExecutableSrcFile} NAME_WE)
   add_executable(${executableName} ${testExecutableSrcFile})
-  target_link_libraries(${executableName} Boost::system Boost::unit_test_framework ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui ChimeraTK::ChimeraTK-DeviceAccess ${PROJECT_NAME}_TEST_LIBRARY)
+  target_link_libraries(${executableName} Boost::system Boost::unit_test_framework ${PROJECT_NAME}_STATIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui ChimeraTK::ChimeraTK-DeviceAccess ${PROJECT_NAME}_TEST_LIBRARY)
   add_test(${executableName} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${executableName})
 endforeach(testExecutableSrcFile)
 
