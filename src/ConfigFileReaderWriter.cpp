@@ -1,6 +1,7 @@
 #include "ConfigFileReaderWriter.h"
 #include <QString>
 #include <QStringList>
+#include <QRegularExpression>
 
 #include <fstream>
 
@@ -34,7 +35,7 @@ void ConfigFileReaderWriter::read(std::string const& fileName) {
     QString qLineString(lineString.c_str());
     // split at one ore more whitespace characters as separator
     // This will also remove whitespace characters in front of the first token
-    QStringList tokens = qLineString.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    QStringList tokens = qLineString.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
 
     // debug output
     //    std::cout << "line is ";

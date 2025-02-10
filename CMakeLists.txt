@@ -18,7 +18,7 @@ set(CMAKE_AUTORCC ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 find_package(ChimeraTK-DeviceAccess 03.10 REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets Gui)
+find_package(Qt5 5.10 REQUIRED COMPONENTS Core Network Widgets Gui)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(QWT IMPORTED_TARGET Qt5Qwt6)

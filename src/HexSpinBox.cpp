@@ -11,7 +11,7 @@
 HexSpinBox::HexSpinBox(QWidget* parent_) : QSpinBox(parent_), _validator(nullptr) {
   // right now the hex spin box accepts [1,7] characters
   QString regex("[0-9A-Fa-f]{1,8}");
-  _validator = new QRegExpValidator(QRegExp(regex), this);
+  _validator = new QRegularExpressionValidator(QRegularExpression(regex), this);
 }
 
 HexSpinBox::~HexSpinBox() {

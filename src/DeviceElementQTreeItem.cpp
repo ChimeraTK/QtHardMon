@@ -9,12 +9,12 @@ DeviceElementQTreeItem::DeviceElementQTreeItem(
 : QTreeWidgetItem(parent, QStringList(text), QTreeWidgetItem::UserType), registerInfo_(registerInfo) {}
 
 bool DeviceElementQTreeItem::operator<(const QTreeWidgetItem& rhs) const {
-  QRegExp checkForNumAtEnd("[0-9]+$");
+  QRegularExpression checkForNumAtEnd("[0-9]+$");
 
   QString lhsName = this->text(0);
   QString rhsName = rhs.text(0);
-  int lhsIndex = checkForNumAtEnd.indexIn(lhsName);
-  int rhsIndex = checkForNumAtEnd.indexIn(rhsName);
+  int lhsIndex = lhsName.indexOf(checkForNumAtEnd);
+  int rhsIndex = rhsName.indexOf(checkForNumAtEnd);
   QString lhsNameTextPart = lhsName.mid(0, lhsIndex);
   QString rhsNameTextPart = rhsName.mid(0, rhsIndex);
 

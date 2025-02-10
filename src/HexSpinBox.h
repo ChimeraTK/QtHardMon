@@ -41,7 +41,7 @@ Q_DECLARE_METATYPE(HexData)
  */
 class HexSpinBox : public QSpinBox {
   Q_OBJECT
-  QRegExpValidator* _validator;
+  QRegularExpressionValidator* _validator;
 
  public:
   /**
