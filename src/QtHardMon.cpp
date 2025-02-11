@@ -924,7 +924,7 @@ void QtHardMon::parseArgument(QString const& fileName) {
 }
 
 bool QtHardMon::checkExtension(QString const& fileName, QString extension) {
-  QStringRef extensionOfProvidedFile(&fileName, (fileName.size() - extension.size()), extension.size());
+  auto extensionOfProvidedFile = QStringView(fileName).mid(fileName.size() - extension.size(), extension.size());
   bool areStringsEqual = (extension.compare(extensionOfProvidedFile) == 0);
   return areStringsEqual;
 }

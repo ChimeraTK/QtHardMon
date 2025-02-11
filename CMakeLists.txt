@@ -18,10 +18,11 @@ set(CMAKE_AUTORCC ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 find_package(ChimeraTK-DeviceAccess 03.10 REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets Gui)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network Widgets Gui)
+find_package(Qt${QT_VERSION_MAJOR} 5.10 REQUIRED COMPONENTS Core Network Widgets Gui)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(QWT IMPORTED_TARGET Qt5Qwt6)
+pkg_check_modules(QWT IMPORTED_TARGET Qt${QT_VERSION_MAJOR}Qwt6)
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 include(${CMAKE_SOURCE_DIR}/cmake/set_default_build_to_release.cmake)
@@ -41,7 +42,7 @@ else()
   message("QWT not found, plotting is disabled in this build.")
 endif()
 
-target_link_libraries(${PROJECT_NAME}_STATIC Qt5::Core Qt5::Network Qt5::Widgets Qt5::Gui ChimeraTK::ChimeraTK-DeviceAccess Boost::system Boost::filesystem ${QWT_TARGET})
+target_link_libraries(${PROJECT_NAME}_STATIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui ChimeraTK::ChimeraTK-DeviceAccess Boost::system Boost::filesystem ${QWT_TARGET})
 
 # CMAKE from version 3.7 puts auto-generated objects in a target-specific directory and adds the include path only to this target.
 # To make the headers generated from the ui files of the library available to the executable and the test,
@@ -59,7 +60,7 @@ configure_file(cmake/QtHardMon.qrc.in
   "${PROJECT_BINARY_DIR}/QtHardMon.qrc" @ONLY)
 
 ADD_EXECUTABLE(${PROJECT_NAME} src/main.cpp ${PROJECT_BINARY_DIR}/QtHardMon.qrc)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt5::Core Qt5::Widgets Qt5::Gui Boost::system Boost::filesystem ChimeraTK::ChimeraTK-DeviceAccess ${QWT_TARGET})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_STATIC Qt${QT_VERSION_MAJOR}Core Qt${QT_VERSION_MAJOR}Widgets Qt${QT_VERSION_MAJOR}Gui Boost::system Boost::filesystem ChimeraTK::ChimeraTK-DeviceAccess ${QWT_TARGET})
 
 # The use of the QWT plotting library is optional
 include(cmake/enable_code_coverage_report.cmake)
