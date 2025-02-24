@@ -1,7 +1,11 @@
-#ifndef QTHARDMON_PLOT_WINDOW_H
-#define QTHARDMON_PLOT_WINDOW_H
+// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include "ui_PlotWindowForm.h"
+#include <QtCharts/QtCharts>
+
 #include <QRectF>
 #include <QStack>
 
@@ -25,9 +29,9 @@ class PlotWindow : public QWidget {
 
  public:
   /** The constructor */
-  PlotWindow(QtHardMon* hardMon);
+  explicit PlotWindow(QtHardMon* hardMon);
   /* The destructor. Need not be virtual because we have no virtual functions */
-  virtual ~PlotWindow();
+  ~PlotWindow() override = default;
 
   /** Function to query the status of the plot after read checkbox. */
   bool plotAfterReadIsChecked();
@@ -35,7 +39,7 @@ class PlotWindow : public QWidget {
  protected:
   /** Reimplemented to emit the plotWindowClosed signal
    */
-  virtual void closeEvent(QCloseEvent* event_);
+  void closeEvent(QCloseEvent* event_) override;
 
  public slots:
   /** Slot which performs the actual plotting.
@@ -66,14 +70,9 @@ class PlotWindow : public QWidget {
   // This  class should'nt need copying
   Q_DISABLE_COPY(PlotWindow) // Easy way to get around -Weffc++ warning:
                              // class QtHardMon’ has pointer data members -
-                             // but does not overide copy constructor and
+                             // but does not override copy constructor and
                              // assignment operator
-#if(USE_QWT)
-  QwtPlot* _qwtPlot;
-  QwtPlotZoomer* _zoomer;
-  QwtPlotCurve* _curve1;
-  QwtPointSeriesData* _myData;
-#endif
-};
 
-#endif // QTHARDMON_PLOT_WINDOW_H
+  QChart* _chart;
+  QLineSeries* _series;
+};
