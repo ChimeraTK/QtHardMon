@@ -1,71 +1,43 @@
-#include "PlotWindow.h"
-#include <QLabel>
+// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-#include <QGridLayout>
-#include <QMessageBox>
+#include "PlotWindow.h"
 
 #include "PreferencesProvider.h"
 #include "QtHardMon.h"
+#include <QtCharts/qlineseries.h>
+#include <QtCharts/QtCharts>
 
-// the plotting library is optional
-#if(USE_QWT)
-#  include <qwt_plot.h>
-#  include <qwt_plot_canvas.h>
-#  include <qwt_plot_curve.h>
-#  include <qwt_plot_zoomer.h>
-#  include <qwt_scale_map.h>
-#endif
-
-#include <iostream>
+#include <QGridLayout>
+#include <QLabel>
+#include <QMessageBox>
 
 PlotWindow::PlotWindow(QtHardMon* hardMon)
-: QWidget(hardMon, Qt::Window), _plotWindowForm(), _hardMon(hardMon), _plotFrameLayout(NULL)
-#if(USE_QWT)
-  ,
-  _qwtPlot(NULL), _zoomer(NULL), _curve1(NULL), _myData(NULL)
-#endif
-{
+: QWidget(hardMon, Qt::Window), _plotWindowForm(), _hardMon(hardMon), _plotFrameLayout(nullptr), _chart(new QChart),
+  _series(new QLineSeries) {
   _plotWindowForm.setupUi(this);
   setWindowIcon(QIcon(":/ChimeraTK_Logo_whitebg.png"));
-
-  // a layout for the plotFrame
-  _plotFrameLayout = new QGridLayout(_plotWindowForm.plotFrame);
-
-#if(USE_QWT)
 
   // disable the GUI elements which are not implemented yet
   _plotWindowForm.accumulatePlotsLabel->setEnabled(false);
   _plotWindowForm.accumulatePlotsSpinBox->setEnabled(false);
   _plotWindowForm.plotToNewWindowCheckBox->setEnabled(false);
 
-  _qwtPlot = new QwtPlot(_plotWindowForm.plotFrame);
-  _myData = new QwtPointSeriesData;
-  _curve1 = new QwtPlotCurve("Curve 1");
-  _curve1->attach(_qwtPlot);
+  // a layout for the plotFrame
+  _plotFrameLayout = new QGridLayout(_plotWindowForm.plotFrame);
 
-  _plotFrameLayout->addWidget(_qwtPlot);
+  // For some reason, if color is set to 0,0,0 it will ignore it and show the default blue
+  _series->setColor(QColor::fromRgb(1, 0, 0));
+  _chart->layout()->setContentsMargins(0, 0, 0, 0);
+  _chart->legend()->setVisible(false);
 
+  auto* view = new QChartView(_chart);
+  view->setRenderHint(QPainter::RenderHint::Antialiasing, false);
+  view->setRubberBand(QChartView::RubberBand::RectangleRubberBand);
+
+  _plotFrameLayout->addWidget(view);
   connect(_plotWindowForm.plotButton, SIGNAL(clicked()), this, SLOT(plot()));
-
-#else // USE_QWT
-
-  // Without QWT plotting is not possible. Show a warning instead and disable
-  // all functionality.
-  QLabel* noQwtLabel = new QLabel("QtHardMon has been compiled without QWT.\n "
-                                  "Plotting is disabled in this build.",
-      _plotWindowForm.plotFrame);
-  _plotFrameLayout->addWidget(noQwtLabel);
-
-  _plotWindowForm.plotButton->setEnabled(false);
-  _plotWindowForm.accumulatePlotsLabel->setEnabled(false);
-  _plotWindowForm.accumulatePlotsSpinBox->setEnabled(false);
-  _plotWindowForm.plotToNewWindowCheckBox->setEnabled(false);
-  _plotWindowForm.plotAfterReadCheckBox->setEnabled(false);
-
-#endif // USE_QWT
 }
-
-PlotWindow::~PlotWindow() {}
 
 void PlotWindow::closeEvent(QCloseEvent* event_) {
   QWidget::closeEvent(event_);
@@ -73,7 +45,6 @@ void PlotWindow::closeEvent(QCloseEvent* event_) {
 }
 
 void PlotWindow::plot() {
-#if(USE_QWT)
   QVector<QPointF> samples;
 
   PreferencesProvider& preferencesProvider = PreferencesProviderSingleton::Instance();
@@ -85,7 +56,7 @@ void PlotWindow::plot() {
   }
 
   // We use the data model here. It automatically always gives the cooked data
-  // and the right size. In addition, if the coversion to double fails, we get
+  // and the right size. In addition, if the conversion to double fails, we get
   // this information and don't display.
   //@todo Get the data type and show a message why data cannot be plotted
   // note: In rowCount we can use an invalid model index.
@@ -106,24 +77,13 @@ void PlotWindow::plot() {
     samples.push_back(QPointF(row, value));
   }
 
-  _myData->setSamples(samples);
-
-  _curve1->setData(_myData);
-
-  _qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
-  _qwtPlot->setAxisAutoScale(QwtPlot::xBottom);
-  _qwtPlot->setAxisFont(QwtPlot::yLeft, this->font());
-  _qwtPlot->setAxisFont(QwtPlot::xBottom, this->font());
-
-  _qwtPlot->replot();
-
-  if(_zoomer) delete _zoomer;
-
-  _zoomer = new QwtPlotZoomer(_qwtPlot->canvas());
-  _zoomer->setMousePattern(QwtEventPattern::MouseSelect2, Qt::RightButton, Qt::ControlModifier);
-  _zoomer->setMousePattern(QwtEventPattern::MouseSelect3, Qt::RightButton);
-
-#endif // USE_QWT
+  _series->replace(samples);
+  _chart->removeSeries(_series);
+  _chart->addSeries(_series);
+  _chart->createDefaultAxes();
+  for(auto* axis : _chart->axes()) {
+    axis->setLabelsFont(this->font());
+  }
 }
 
 bool PlotWindow::plotAfterReadIsChecked() {
