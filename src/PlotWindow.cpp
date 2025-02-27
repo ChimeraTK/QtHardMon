@@ -12,6 +12,21 @@
 #include <QLabel>
 #include <QMessageBox>
 
+class PlotView : public QChartView {
+ public:
+  using QChartView::QChartView;
+
+ protected:
+  void mouseReleaseEvent(QMouseEvent* mouseEvent) override {
+    if(mouseEvent->button() == Qt::RightButton) {
+      chart()->zoomReset();
+    }
+    else {
+      QChartView::mouseReleaseEvent(mouseEvent);
+    }
+  }
+};
+
 PlotWindow::PlotWindow(QtHardMon* hardMon)
 : QWidget(hardMon, Qt::Window), _plotWindowForm(), _hardMon(hardMon), _plotFrameLayout(nullptr), _chart(new QChart),
   _series(new QLineSeries) {
@@ -31,7 +46,7 @@ PlotWindow::PlotWindow(QtHardMon* hardMon)
   _chart->layout()->setContentsMargins(0, 0, 0, 0);
   _chart->legend()->setVisible(false);
 
-  auto* view = new QChartView(_chart);
+  auto* view = new PlotView(_chart);
   view->setRenderHint(QPainter::RenderHint::Antialiasing, false);
   view->setRubberBand(QChartView::RubberBand::RectangleRubberBand);
 
