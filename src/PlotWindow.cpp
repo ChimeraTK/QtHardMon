@@ -20,11 +20,40 @@ class PlotView : public QChartView {
   void mouseReleaseEvent(QMouseEvent* mouseEvent) override {
     if(mouseEvent->button() == Qt::RightButton) {
       chart()->zoomReset();
+      mouseEvent->accept();
     }
     else {
       QChartView::mouseReleaseEvent(mouseEvent);
     }
   }
+
+  void mousePressEvent(QMouseEvent* event) override {
+    if(event->button() == Qt::MiddleButton && chart()->isZoomed()) {
+      QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
+      _lastMousePos = event->pos();
+      event->accept();
+    }
+
+    QChartView::mousePressEvent(event);
+  }
+
+  void mouseMoveEvent(QMouseEvent* event) override {
+    // pan the chart with a middle mouse drag
+    if(event->buttons() & Qt::MiddleButton && chart()->isZoomed()) {
+      auto dPos = event->pos() - _lastMousePos;
+      chart()->scroll(-dPos.x(), dPos.y());
+
+      _lastMousePos = event->pos();
+      event->accept();
+
+      QApplication::restoreOverrideCursor();
+    }
+
+    QChartView::mouseMoveEvent(event);
+  }
+
+ private:
+  QPointF _lastMousePos;
 };
 
 PlotWindow::PlotWindow(QtHardMon* hardMon)
