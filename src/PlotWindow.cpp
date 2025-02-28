@@ -96,7 +96,12 @@ void PlotWindow::plot() {
   _chart->removeSeries(_series);
   _chart->addSeries(_series);
   _chart->createDefaultAxes();
+
   for(auto* axis : _chart->axes()) {
+    auto* valueAxis = dynamic_cast<QValueAxis*>(axis);
+    auto buffer = (valueAxis->max() - valueAxis->min()) * 0.05;
+
+    valueAxis->setRange(valueAxis->min() - buffer, valueAxis->max() + buffer);
     axis->setLabelsFont(this->font());
   }
 }
