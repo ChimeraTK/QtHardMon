@@ -519,6 +519,9 @@
            <property name="text">
             <string>Read</string>
            </property>
+           <property name="shortcut">
+            <string>F5</string>
+           </property>
           </widget>
          </item>
          <item>
