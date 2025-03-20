@@ -110,7 +110,7 @@ QtHardMon::QtHardMon(bool noPrompts, QWidget* parent_, Qt::WindowFlags flags)
 
   connect(ui.continuousReadCheckBox, SIGNAL(stateChanged(int)), this, SLOT(handleContinuousReadChanged(int)));
 
-  connect(&_continuousReadTimner, SIGNAL(timeout()), this, SLOT(readLatest()));
+  connect(&_continuousReadTimer, SIGNAL(timeout()), this, SLOT(readLatest()));
   connect(ui.displayFrequencyButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this,
       SLOT(handleDisplayIntervalChanged()));
   handleDisplayIntervalChanged(); // put settings according to GUI
@@ -1088,10 +1088,10 @@ void QtHardMon::handleContinuousReadChanged(int state) {
       ui.avgUpdateIntervalLabel->setEnabled(true);
     }
     ui.displayFrequencyGroupBox->setEnabled(true);
-    _continuousReadTimner.start();
+    _continuousReadTimer.start();
   }
   else {
-    _continuousReadTimner.stop();
+    _continuousReadTimer.stop();
     ui.operationsGroupBox->setEnabled(true);
     ui.avgUpdateInterval->setEnabled(false);
     ui.avgUpdateIntervalLabel->setEnabled(false);
@@ -1102,11 +1102,11 @@ void QtHardMon::handleContinuousReadChanged(int state) {
 
 void QtHardMon::handleDisplayIntervalChanged() {
   if(ui.displayFrequency1Hz->isChecked()) {
-    _continuousReadTimner.setInterval(1000);
+    _continuousReadTimer.setInterval(1000);
   }
   else {
     // 100 Hz is the only other option, so it's 10 ms
-    _continuousReadTimner.setInterval(10);
+    _continuousReadTimer.setInterval(10);
   }
   _lastTimeStamps.clear();
 }
