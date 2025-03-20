@@ -881,9 +881,11 @@ void QtHardMon::registerClicked(QTreeWidgetItem* registerItem) {
   // or if the register is write-only
 
   PreferencesProvider& preferencesProvider = PreferencesProviderSingleton::Instance();
-  DeviceElementQTreeItem* selectedItem = static_cast<DeviceElementQTreeItem*>(registerItem);
+  auto* selectedItem = dynamic_cast<DeviceElementQTreeItem*>(registerItem);
+  assert(selectedItem != nullptr);
 
-  if(!preferencesProvider.getValue<bool>("readOnClick") || !selectedItem->getRegisterInfo().isReadable()) {
+  if(!preferencesProvider.getValue<bool>("readOnClick") || !selectedItem->getRegisterInfo().isValid() ||
+      !selectedItem->getRegisterInfo().isReadable()) {
     return;
   }
 
