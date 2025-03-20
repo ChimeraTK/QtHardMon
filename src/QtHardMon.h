@@ -224,7 +224,7 @@ class QtHardMon : public QMainWindow {
   std::string extractFileNameFromPath(const std::string&);
 
   // use a boost thread because the sleep and the blocking accessor reads are interruptible
-  QTimer _continuousReadTimner{this};
+  QTimer _continuousReadTimer{this};
   QTableView::EditTriggers _defaultTableViewEditTriggers;
 
  private:
