@@ -131,10 +131,11 @@ void PropertiesWidget::setType(ChimeraTK::DataDescriptor const& dataDescriptor) 
   }
 }
 
-void PropertiesWidget::setAddress(int bar, int address, int sizeInBytes) {
+void PropertiesWidget::setAddress(int bar, uint64_t address, int sizeInBytes) {
   ui.numericalAddressGroupBox->show();
   ui.barDisplay->setText(QString::number(bar));
   ui.addressDisplay->setText(QString::number(address));
+  ui.addressDisplay->setToolTip(QString::number(address, 16));
   ui.sizeDisplay->setText(QString::number(sizeInBytes));
 }
 
